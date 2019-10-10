@@ -7,13 +7,14 @@
 
 // Mehrnoosh:
 #define H 4
-#define LEVEL 15 // # levels
+#define LEVEL 24 // # levels
 #define Z 4     // # slots per bucket
-#define U 0.5 // utilization
+#define U 0.25 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define BK_EVICTION 0   // 1/0 flag to enable/disable background eviction
+#define EMPTY_TOP 0   // # top empty levels
 
 
 
@@ -29,6 +30,7 @@ void oram_init();
 void test_init();
 void print_path(long long int label);
 void background_eviction();
+void count_tree();
 
 
 void test_read_write();

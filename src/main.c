@@ -50,7 +50,12 @@ int main(int argc, char * argv[])
 	printf("PATH: %lld\n",  PATH);
 	printf("BLOCK: %lld\n", BLOCK);
 	printf("NODE: %lld\n", NODE);
-	printf("OV TRESHOLD: %d\n", OV_TRESHOLD);
+	printf("Z: %d\n", Z);
+	printf("U: %f\n", U);
+	printf("OV_TRESHOLD: %d\n", OV_TRESHOLD);
+	printf("STASH_SIZE: %d\n", STASH_SIZE);
+	printf("BK_EVICTION: %d\n", BK_EVICTION);
+	printf("EMPTY_TOP: %d\n", EMPTY_TOP);
 	oram_alloc();
 	// printf("before oram init\n");
 	oram_init();
