@@ -128,7 +128,7 @@ long long int assign_a_path(long long int addr){
 
   while(true)
   {
-    printf("while true: addr: %lld\n", addr);
+    // printf("while true: addr: %lld\n", addr);
     // while (label == RL)
       
     

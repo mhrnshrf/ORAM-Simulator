@@ -9,7 +9,7 @@
 #define H 4
 #define LEVEL 24 // # levels
 #define Z 4     // # slots per bucket
-#define U 0.25 // utilization
+#define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
