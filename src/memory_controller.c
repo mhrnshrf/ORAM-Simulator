@@ -24,35 +24,105 @@
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
   bool isReal;       // real 1 , dummy 0
-  long long int addr;         // address of block e.g. A, B
-  long long int label;      // path label e.g. 0 (=> L0)
+  int addr;         // address of block e.g. A, B
+  int label;      // path label e.g. 0 (=> L0)
 }Slot;
 
+// typedef struct Bucket{
+//   Slot *slot;
+// }Bucket;
+
 typedef struct Bucket{
-  Slot *slot;
+  Slot slot[Z];
 }Bucket;
 
 typedef struct Entry{
-  long long int addr;         // address of block e.g. A, B
-  long long int label;      // path label e.g. 0 (=> L0)
+  int addr;         // address of block e.g. A, B
+  int label;      // path label e.g. 0 (=> L0)
 }Entry;
 
 
-Bucket *GlobTree;
-Entry *PosMap;
-Slot *Stash;
+// Bucket *GlobTree;
+// Entry *PosMap;
+// Slot *Stash;
+
+Bucket GlobTree[NODE];
+Entry PosMap[BLOCK];
+Slot Stash[STASH_SIZE];
 
 int stashctr = 0; // # blocks in stash ~ stash occupancy
-long long int bkctr = 0;  // # background eviction invoked
-long long int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
-long long int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
+int bkctr = 0;  // # background eviction invoked
+int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
+int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 
+
+// void oram_alloc(){
+
+//   GlobTree = (Bucket *)malloc(NODE * sizeof(Bucket));  // ??? has problem
+//   for (int i = 0 ; i < NODE; i++) 
+//   {
+//     Slot* s = (Slot *)malloc(Z*sizeof(Slot));
+//     GlobTree[i].slot = s;
+//     int l = calc_level(i);  
+//     for (int k = 0; k < LZ[l]; ++k)
+//     {
+//       GlobTree[i].slot[k].addr = -1;
+//       GlobTree[i].slot[k].label = -1;
+//       GlobTree[i].slot[k].isReal = false;
+//       GlobTree[i].slot[k].isData = false;
+//     }
+//   }
+
+//   PosMap =  (Entry *)malloc(BLOCK * sizeof(Entry));
+//   Stash = (Slot *)malloc(STASH_SIZE * sizeof(Slot));
+
+//   for (int i = 0; i < STASH_SIZE; i++)
+//   {
+//     Stash[i].isReal = false;
+//   }  
+// }
+
+
+void oram_alloc(){
+
+  for (int i = 0 ; i < NODE; i++) 
+  {
+    int l = calc_level(i);  
+    for (int k = 0; k < LZ[l]; ++k)
+    {
+      GlobTree[i].slot[k].addr = -1;
+      GlobTree[i].slot[k].label = -1;
+      GlobTree[i].slot[k].isReal = false;
+      GlobTree[i].slot[k].isData = false;
+    }
+  }
+
+  for (int i = 0; i < STASH_SIZE; i++)
+  {
+    Stash[i].isReal = false;
+  }  
+}
+
+void oram_init(){
+  // printf("entering oram init\n");
+  for(int i = 0; i < BLOCK; i++)
+  {
+    
+    PosMap[i].addr = i;
+    PosMap[i].label =  assign_a_path(i);
+    // printf("oram init loop i: %d addr:%d   label:%d\n", i, PosMap[i].addr, PosMap[i].label);
+    // if (i == 90)
+    // {
+    //   /* code */
+    // }
+  }
+}
 
 void count_level(){
   for (int l = 0; l < LEVEL; l++)
   {
-    long long int counter = 0;
-    long long int index = calc_index(0, l);
+    int counter = 0;
+    int index = calc_index(0, l);
     for (int i = 0; i < pow(2, l); i++)
     {
       for (int j = 0; j < LZ[l]; j++)
@@ -64,7 +134,7 @@ void count_level(){
       }
       
     }   
-    // printf("%d      %lld\n", l, counter);
+    // printf("%d      %d\n", l, counter);
     printf("%f\n", counter/(LZ[l]*pow(2,l)));
   }
   
@@ -72,25 +142,25 @@ void count_level(){
 
 // read trace file in fill in the trace array 
 void init_trace(){
-  for (long long int i = 0; i < TRACE_SIZE; i++)
+  for (int i = 0; i < TRACE_SIZE; i++)
   {
     FILE *fp;
     char c[100];
     fp = fopen("trace.txt","r");
     fscanf(fp,"%[^\n]", c);
 
-    long long int i = 0;
+    int i = 0;
     while (fgets(c, 100, fp) != NULL)
     {
       // printf("%s", c);
-      long long int addr;
-      sscanf(c, "%lld", &addr);
+      int addr;
+      sscanf(c, "%d", &addr);
       if (addr > pow(2,24) -1)
       {
         c[0] = '0';
         c[1] = '0';
         c[2] = '0';
-        sscanf(c, "%lld", &addr);
+        sscanf(c, "%d", &addr);
       }
       trace[i] = addr;
       i++;
@@ -108,36 +178,6 @@ void init_trace(){
 }
 
 // allocate memory for global oram tree and position map
-void oram_alloc(){
-
-  // printf("in to alloc\n");
-  GlobTree = (Bucket *)malloc(NODE * sizeof(Bucket));  // ??? has problem
-  for (int i = 0 ; i < NODE; i++) 
-  {
-    // GlobTree[i] = malloc(sizeof(Bucket));
-    // printf("%d: glob loop\n", i);
-    Slot* s = (Slot *)malloc(Z*sizeof(Slot));
-    GlobTree[i].slot = s;
-    int l = calc_level(i);  
-    for (int k = 0; k < LZ[l]; ++k)
-    {
-      // printf("%d: slot loop\n", k);
-      GlobTree[i].slot[k].addr = -1;
-      // printf("after addr assign \n");
-      GlobTree[i].slot[k].label = -1;
-      GlobTree[i].slot[k].isReal = false;
-      GlobTree[i].slot[k].isData = false;
-    }
-  }
-
-  PosMap =  (Entry *)malloc(BLOCK * sizeof(Entry));
-  Stash = (Slot *)malloc(STASH_SIZE * sizeof(Slot));
-
-  for (int i = 0; i < STASH_SIZE; i++)
-  {
-    Stash[i].isReal = false;
-  }  
-}
 
 // print glob tree structure
 void print_tree(){
@@ -158,7 +198,7 @@ void print_tree(){
         printf("   ");
         for (int j = 0; j < LZ[curr]; j++)
         {
-         printf("%lld:%lld, ", GlobTree[i].slot[j].addr, GlobTree[i].slot[j].label);
+         printf("%d:%d, ", GlobTree[i].slot[j].addr, GlobTree[i].slot[j].label);
         }
         printf("   ");
         
@@ -170,42 +210,29 @@ void print_tree(){
 }
 
 
+
 // initialize the oram tree by assigning a random path to each addr of address space
-void oram_init(){
-  // printf("entering oram init\n");
-  for(long long int i = 0; i < BLOCK; i++)
-  {
-    
-    PosMap[i].addr = i;
-    PosMap[i].label =  assign_a_path(i);
-    // printf("oram init loop i: %lld addr:%lld   label:%lld\n", i, PosMap[i].addr, PosMap[i].label);
-    // if (i == 90)
-    // {
-    //   /* code */
-    // }
-  }
-}
 
 // assign a random path to a data block
-long long int assign_a_path(long long int addr){
-  long long int label = label = rand() % PATH;
+int assign_a_path(int addr){
+  int label = label = rand() % PATH;
   
 
   while(true)
   {
-    // printf("while true: addr: %lld\n", addr);
+    // printf("while true: addr: %d\n", addr);
     // while (label == RL)
       
     
     for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
     {
       // printf("in begining of assign path i: %d\n", i);
-      // printf("assign path: label: %lld\n", label);
-      long long int index = calc_index(label, i);
+      // printf("assign path: label: %d\n", label);
+      int index = calc_index(label, i);
       for(int j = 0; j < LZ[i]; j++)
       {
         // printf("assign path: level: %d,   slot: %d\n", i, j);
-        // printf("assign path: index: %lld\n\n", index);
+        // printf("assign path: index: %d\n\n", index);
         if(!GlobTree[index].slot[j].isReal)
         {
           GlobTree[index].slot[j].addr = addr;
@@ -215,8 +242,8 @@ long long int assign_a_path(long long int addr){
           // if (addr == 90)
           // {
           //     /* code */
-          //     printf("assign path: %lld\n", label);
-          //     printf("assign path: 90 locate in level:%d  slot:%d  index:%lld\n", i, j, index);
+          //     printf("assign path: %d\n", label);
+          //     printf("assign path: 90 locate in level:%d  slot:%d  index:%d\n", i, j, index);
           // }
           return label;
         }
@@ -229,20 +256,20 @@ long long int assign_a_path(long long int addr){
 void test_init(){
   FILE *fp;
   fp = fopen("check.txt","w");
-  long long int addr = PosMap[1].addr;
-  long long int label = PosMap[1].label;
-  fprintf(fp,"PosMap: %lld, %lld\n", addr, label);
-  // printf("oram test: label: %lld\n", label);
+  int addr = PosMap[1].addr;
+  int label = PosMap[1].label;
+  fprintf(fp,"PosMap: %d, %d\n", addr, label);
+  // printf("oram test: label: %d\n", label);
 
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
-    long long int index = calc_index(label, i);
-    // printf("oram test: index: %lld\n", index);
+    int index = calc_index(label, i);
+    // printf("oram test: index: %d\n", index);
     for(int j = 0; j < LZ[i]; j++)
     {
       if(GlobTree[index].slot[j].addr == addr)
       {
-        fprintf(fp,"GlobTree: %lld, %lld\n", GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
+        fprintf(fp,"GlobTree: %d, %d\n", GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
         fclose(fp);
         return;
       }
@@ -255,30 +282,30 @@ void test_init(){
 
 void test_read_write(){
 
-  for(long long int i = 0; i < TRACE_SIZE; i++)
+  for(int i = 0; i < TRACE_SIZE; i++)
   {
-    // long long int addr = i;
-    long long int addr = rand() % BLOCK;
-    long long int label = lookup_posmap(addr);
+    // int addr = i;
+    int addr = rand() % BLOCK;
+    int label = lookup_posmap(addr);
 
 
     // if (i % 1000000 == 0)
     // {
-    //   printf("%lld :\n", i);
+    //   printf("%d :\n", i);
     //   count_level();
     //   printf("\n");
-    //   printf("bk evict rate: %f    i: %lld\n", (double)bkctr/i,i);
+    //   printf("bk evict rate: %f    i: %d\n", (double)bkctr/i,i);
     //   printf("\n");
     //   printf("\n");
     // }
     
 
-    // long long int addr = trace[i];
-    // printf("test rw: addr: %lld\n", addr);
-    // long long int label = rand() % PATH;
+    // int addr = trace[i];
+    // printf("test rw: addr: %d\n", addr);
+    // int label = rand() % PATH;
 
     // if (stashctr > OV_TRESHOLD)
-      // printf("i: %lld  path: %lld stashctr: %d\n", i, label, stashctr);
+      // printf("i: %d  path: %d stashctr: %d\n", i, label, stashctr);
 
     stash_dist[stashctr]++;
 
@@ -329,8 +356,8 @@ void test_read_write(){
     // if (i > 5000 && bkctr != 0)
     // {
     //   /* code */
-    //   printf("bk evict #: %lld\n", bkctr);
-    //   printf("bk evict rate: %f @ i: %lld\n", (double)bkctr/i, i);
+    //   printf("bk evict #: %d\n", bkctr);
+    //   printf("bk evict rate: %f @ i: %d\n", (double)bkctr/i, i);
     // }
        
 
@@ -338,9 +365,9 @@ void test_read_write(){
 
   // for (int i = 0; i < STASH_SIZE+1; i++)
   // {
-  //   printf("%lld\n",stash_dist[i]);
+  //   printf("%d\n",stash_dist[i]);
   // }
-  // printf("bk evict #: %lld\n", bkctr);
+  // printf("bk evict #: %d\n", bkctr);
   printf("bk evict rate: %f\n", (double)bkctr/TRACE_SIZE);
   
 
@@ -348,9 +375,9 @@ void test_read_write(){
 
 void count_tree(){
   
-  long long int sum = 0;
+  int sum = 0;
 
-  for (long long int i = 0; i < NODE; i++)
+  for (int i = 0; i < NODE; i++)
   {
     for (int j = 0; j < LZ[i]; j++)
     {
@@ -361,16 +388,16 @@ void count_tree(){
     }
   }
 
-  printf("count tree: counted block: %lld,  BLOCK: %lld ~> they match? %s \n", sum, BLOCK, (sum == BLOCK)?"yes!":"no!");
+  printf("count tree: counted block: %d,  BLOCK: %d ~> they match? %s \n", sum, BLOCK, (sum == BLOCK)?"yes!":"no!");
   
 }
 
-void read_path(long long int label){
+void read_path(int label){
 
     for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
     {
-      long long int index = calc_index(label, i);
-      // printf("read path: level: %d  index: %lld \n", i, index);
+      int index = calc_index(label, i);
+      // printf("read path: level: %d  index: %d \n", i, index);
       for(int j = 0; j < LZ[i]; j++)
       {
 
@@ -378,7 +405,7 @@ void read_path(long long int label){
         {
           // if (GlobTree[index].slot[j].addr == 90)
           // {
-          //   printf("read path: %lld  when 90 is brought to stash\n", label);
+          //   printf("read path: %d  when 90 is brought to stash\n", label);
           // }
           
           if(add_to_stash(GlobTree[index].slot[j]))
@@ -401,11 +428,11 @@ void read_path(long long int label){
 }
 
 
-void write_path(long long int label){
+void write_path(int label){
   
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
-    long long int index = calc_index(label, i);
+    int index = calc_index(label, i);
     for(int j = 0; j < LZ[i]; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
@@ -431,13 +458,13 @@ void write_path(long long int label){
   
 }
 
-void print_path(long long int label){
+void print_path(int label){
   for(int i = LEVEL-1; i >= 0; i--)
   {
-    long long int index = calc_index(label, i);
+    int index = calc_index(label, i);
     for(int j = 0; j < LZ[i]; j++)
     {
-      printf("LOG: path: %lld level:%d  slot: %d  addr:%lld  label: %lld\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
+      printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
     }
   }
 }
@@ -448,7 +475,7 @@ void print_stash(){
   {
     if (Stash[i].isReal)
     {
-     printf("Stash[%d]:  %lld:%lld\n", i, Stash[i].addr, Stash[i].label);
+     printf("Stash[%d]:  %d:%d\n", i, Stash[i].addr, Stash[i].label);
     }
     // else
     // {
@@ -468,7 +495,7 @@ void background_eviction(){
     if(i == 0 )
       bkctr++;
     // printf("background eviction: before stashctr: %d \n", stashctr);
-    long long int label = rand() % PATH;
+    int label = rand() % PATH;
     read_path(label);
     write_path(label);
     // printf("background eviction: after stashctr: %d \n", stashctr);
@@ -476,10 +503,10 @@ void background_eviction(){
   }
 }
 
-void remap_block(long long int addr){
-  long long int index = get_posmap(addr);
-  long long int label = rand() % PATH;
-  // printf("remap block: block %lld mapped to label: %lld\n", addr, label);
+void remap_block(int addr){
+  int index = get_posmap(addr);
+  int label = rand() % PATH;
+  // printf("remap block: block %d mapped to label: %d\n", addr, label);
 
   if (index == -1)
   {
@@ -494,7 +521,7 @@ void remap_block(long long int addr){
   // if (addr == 90)
   // {
   //   /* code */
-  //   printf("renew label: Stash[8]: %lld, %lld\n", Stash[8].addr, Stash[8].label);
+  //   printf("renew label: Stash[8]: %d, %d\n", Stash[8].addr, Stash[8].label);
   // }
 
   if (index == -1)
@@ -520,7 +547,7 @@ bool add_to_stash(Slot s){
       Stash[i].isData = true;
       // if (s.addr == 90)
       // {
-      //   printf("add to stash: index stash for 90: %d, addr:%lld  label:%lld\n", i, Stash[i].addr, Stash[i].label);
+      //   printf("add to stash: index stash for 90: %d, addr:%d  label:%d\n", i, Stash[i].addr, Stash[i].label);
       // }
       
       
@@ -545,9 +572,9 @@ void remove_from_stash(int index){
 }
 
 // lookup pos map for the label of a block via its addr
-long long int lookup_posmap(long long int addr){
+int lookup_posmap(int addr){
   
-  for(long long int i = 0; i< BLOCK; i++)
+  for(int i = 0; i< BLOCK; i++)
   {
     if(PosMap[i].addr == addr){
       return PosMap[i].label;
@@ -558,8 +585,8 @@ long long int lookup_posmap(long long int addr){
 }
 
 // get the index of a block in pos map
-long long int get_posmap(long long addr){
-  for(long long int i = 0; i< BLOCK; i++)
+int get_posmap(long long addr){
+  for(int i = 0; i< BLOCK; i++)
   {
     if(PosMap[i].addr == addr){
       return i;
@@ -569,7 +596,7 @@ long long int get_posmap(long long addr){
 }
 
 // get stash index of a block
-int get_stash(long long int addr){
+int get_stash(int addr){
   for(int k= 0; k < STASH_SIZE; k++)
   {
     if (Stash[k].addr == addr)
@@ -585,22 +612,22 @@ int get_stash(long long int addr){
   Utility Functions
 ************************/
 
-int calc_level(long long int index){   
-  long long int i = -1;
+int calc_level(int index){   
+  int i = -1;
     // printf("in oram calc\n");
     
-    long long int sum = 0;
+    int sum = 0;
     while(index >= sum)
     {
       i++;
       sum += pow(2,i);
-      // printf("in while i: %lld \n", i);
+      // printf("in while i: %d \n", i);
     }
     return i;
 }
 
 
-long long int  calc_index(long long int label,  int l){
+int  calc_index(int label,  int l){
   int sum = 0;
   int index = -1;
   for(int i = 0; i < l; i++)

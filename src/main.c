@@ -47,10 +47,10 @@ int main(int argc, char * argv[])
 
 //   Mehrnoosh:
 	printf("LEVEL: %d\n",  LEVEL);
-	printf("PATH: %lld\n",  PATH);
-	printf("NODE: %lld\n", NODE);
-	printf("SLOT: %lld\n", SLOT);
-	printf("BLOCK: %lld\n", BLOCK);
+	printf("PATH: %d\n",  PATH);
+	printf("NODE: %d\n", NODE);
+	printf("SLOT: %d\n", SLOT);
+	printf("BLOCK: %d\n", BLOCK);
 	printf("Z: %d\n", Z);
 	printf("U: %f\n", U);
 	printf("OV_TRESHOLD: %d\n", OV_TRESHOLD);

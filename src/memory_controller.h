@@ -28,11 +28,18 @@
 #define Z3 4   // # slots per bucket upto L3
 
 
-static const long long int PATH = pow(2,LEVEL-1);  // # paths
-static const long long int  NODE = pow(2,LEVEL)-1;  // # nodes
-static const long long int  SLOT = Z1*(pow(2,L1+1)-1) + Z2*(pow(2,L2+1)-pow(2,L1+1)) + Z3*(pow(2,L3+1)-pow(2,L2+1)) + Z*(pow(2,LEVEL)-pow(2,L3+1));  // # free slots
-static const long long int  BLOCK = floor(U*(Z1*(pow(2,L1+1)-1) + Z2*(pow(2,L2+1)-pow(2,L1+1)) + Z3*(pow(2,L3+1)-pow(2,L2+1)) + Z*(pow(2,LEVEL)-pow(2,L3+1))));  // # valid blocks
+// static const int PATH = pow(2,LEVEL-1);  // # paths
+// static const int  NODE = pow(2,LEVEL)-1;  // # nodes
+// static const int  SLOT = Z1*(pow(2,L1+1)-1) + Z2*(pow(2,L2+1)-pow(2,L1+1)) + Z3*(pow(2,L3+1)-pow(2,L2+1)) + Z*(pow(2,LEVEL)-pow(2,L3+1));  // # free slots
+// static const int  BLOCK = floor(U*(Z1*(pow(2,L1+1)-1) + Z2*(pow(2,L2+1)-pow(2,L1+1)) + Z3*(pow(2,L3+1)-pow(2,L2+1)) + Z*(pow(2,LEVEL)-pow(2,L3+1))));  // # valid blocks
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};
+
+enum{
+  PATH = (int)pow(2,LEVEL-1),  // # paths
+  NODE = (int)pow(2,LEVEL)-1,  // # nodes
+  SLOT = Z1*((int)pow(2,L1+1)-1) + Z2*((int)pow(2,L2+1)-(int)pow(2,L1+1)) + Z3*((int)pow(2,L3+1)-(int)pow(2,L2+1)) + Z*((int)pow(2,LEVEL)-(int)pow(2,L3+1)),  // # free slots
+  BLOCK = (int)floor(U*(Z1*((int)pow(2,L1+1)-1) + Z2*((int)pow(2,L2+1)-(int)pow(2,L1+1)) + Z3*((int)pow(2,L3+1)-(int)pow(2,L2+1)) + Z*((int)pow(2,LEVEL)-(int)pow(2,L3+1)))),  // # valid blocks 
+};
 
 #include <stdbool.h>
 typedef struct Slot Slot;
@@ -40,30 +47,30 @@ typedef struct Slot Slot;
 void oram_alloc();
 void oram_init();
 void test_init();
-void print_path(long long int label);
+void print_path(int label);
 void background_eviction();
 void count_tree();
 void init_trace();
 
 
 void test_read_write();
-void read_path(long long int label);
-void write_path(long long int label);
-void remap_block(long long int addr);
+void read_path(int label);
+void write_path(int label);
+void remap_block(int addr);
 bool add_to_stash(Slot s);
 void remove_from_stash(int index);
-long long int lookup_posmap(long long int addr);
-long long int get_posmap(long long addr);
-int get_stash(long long int addr);
+int lookup_posmap(int addr);
+int get_posmap(long long addr);
+int get_stash(int addr);
 
-long long int  calc_index(long long int label, int l);
+int  calc_index(int label, int l);
 
-int calc_level(long long int index);
+int calc_level(int index);
 
 void print_tree();
 void print_stash();
 
-long long int assign_a_path(long long int addr);
+int assign_a_path(int addr);
 
 
 // Mehrnoosh.
