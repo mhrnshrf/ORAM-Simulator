@@ -48,20 +48,37 @@ int main(int argc, char * argv[])
 //   Mehrnoosh:
 	printf("LEVEL: %d\n",  LEVEL);
 	printf("PATH: %lld\n",  PATH);
-	printf("BLOCK: %lld\n", BLOCK);
 	printf("NODE: %lld\n", NODE);
+	printf("SLOT: %lld\n", SLOT);
+	printf("BLOCK: %lld\n", BLOCK);
 	printf("Z: %d\n", Z);
 	printf("U: %f\n", U);
 	printf("OV_TRESHOLD: %d\n", OV_TRESHOLD);
 	printf("STASH_SIZE: %d\n", STASH_SIZE);
 	printf("BK_EVICTION: %d\n", BK_EVICTION);
 	printf("EMPTY_TOP: %d\n", EMPTY_TOP);
-	oram_alloc();
-	// printf("before oram init\n");
-	oram_init();
-	test_init();
+	printf("TRACE_SIZE: %d\n", TRACE_SIZE);
+	printf("LZ: ");
+	int length = 0;
+	for (int i = 0; i < LEVEL; i++)
+	{
+		printf("%d ", LZ[i]);
+		length += LZ[i];
+	}
+	printf("\n = %d ~> path length\n", length);
+	printf("L1: %d   Z1:%d\n", L1, Z1);
+	printf("L2: %d   Z2:%d\n", L2, Z2);
+	printf("L3: %d   Z3:%d\n", L3, Z3);
+
+	// init_trace();
+	// printf("after init trace\n");
 	
-	printf("testing read write \n");
+	oram_alloc();
+	printf("after oram alloc\n");
+	oram_init();
+	// test_init();
+	
+	printf("testing read write... \n");
 	test_read_write();
 	// print_tree();
 	// printf("after print\n");

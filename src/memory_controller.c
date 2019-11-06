@@ -42,9 +42,70 @@ Bucket *GlobTree;
 Entry *PosMap;
 Slot *Stash;
 
-int stashctr = 0;
-long long int stash_dist[STASH_SIZE+1] = {0};
+int stashctr = 0; // # blocks in stash ~ stash occupancy
+long long int bkctr = 0;  // # background eviction invoked
+long long int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
+long long int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 
+
+void count_level(){
+  for (int l = 0; l < LEVEL; l++)
+  {
+    long long int counter = 0;
+    long long int index = calc_index(0, l);
+    for (int i = 0; i < pow(2, l); i++)
+    {
+      for (int j = 0; j < LZ[l]; j++)
+      {
+        if (GlobTree[index+i].slot[j].isReal)
+        {
+          counter++;
+        }        
+      }
+      
+    }   
+    // printf("%d      %lld\n", l, counter);
+    printf("%f\n", counter/(LZ[l]*pow(2,l)));
+  }
+  
+}
+
+// read trace file in fill in the trace array 
+void init_trace(){
+  for (long long int i = 0; i < TRACE_SIZE; i++)
+  {
+    FILE *fp;
+    char c[100];
+    fp = fopen("trace.txt","r");
+    fscanf(fp,"%[^\n]", c);
+
+    long long int i = 0;
+    while (fgets(c, 100, fp) != NULL)
+    {
+      // printf("%s", c);
+      long long int addr;
+      sscanf(c, "%lld", &addr);
+      if (addr > pow(2,24) -1)
+      {
+        c[0] = '0';
+        c[1] = '0';
+        c[2] = '0';
+        sscanf(c, "%lld", &addr);
+      }
+      trace[i] = addr;
+      i++;
+      if (i == TRACE_SIZE)
+      {
+        break;
+      }
+      
+    }
+    fclose(fp);
+    
+  }
+  
+
+}
 
 // allocate memory for global oram tree and position map
 void oram_alloc(){
@@ -56,8 +117,9 @@ void oram_alloc(){
     // GlobTree[i] = malloc(sizeof(Bucket));
     // printf("%d: glob loop\n", i);
     Slot* s = (Slot *)malloc(Z*sizeof(Slot));
-    GlobTree[i].slot = s;   
-    for (int k = 0; k < Z; ++k)
+    GlobTree[i].slot = s;
+    int l = calc_level(i);  
+    for (int k = 0; k < LZ[l]; ++k)
     {
       // printf("%d: slot loop\n", k);
       GlobTree[i].slot[k].addr = -1;
@@ -93,10 +155,13 @@ void print_tree(){
 
         }
 
-         printf("   %lld:%lld, ", GlobTree[i].slot[0].addr, GlobTree[i].slot[0].label);
-         printf("%lld:%lld, ", GlobTree[i].slot[1].addr, GlobTree[i].slot[1].label);
-         printf("%lld:%lld, ", GlobTree[i].slot[2].addr, GlobTree[i].slot[2].label);
-         printf("%lld:%lld   ", GlobTree[i].slot[3].addr, GlobTree[i].slot[3].label);
+        printf("   ");
+        for (int j = 0; j < LZ[curr]; j++)
+        {
+         printf("%lld:%lld, ", GlobTree[i].slot[j].addr, GlobTree[i].slot[j].label);
+        }
+        printf("   ");
+        
 
         prev = curr;
 
@@ -137,7 +202,7 @@ long long int assign_a_path(long long int addr){
       // printf("in begining of assign path i: %d\n", i);
       // printf("assign path: label: %lld\n", label);
       long long int index = calc_index(label, i);
-      for(int j = 0; j < Z; j++)
+      for(int j = 0; j < LZ[i]; j++)
       {
         // printf("assign path: level: %d,   slot: %d\n", i, j);
         // printf("assign path: index: %lld\n\n", index);
@@ -173,7 +238,7 @@ void test_init(){
   {
     long long int index = calc_index(label, i);
     // printf("oram test: index: %lld\n", index);
-    for(int j = 0; j < Z; j++)
+    for(int j = 0; j < LZ[i]; j++)
     {
       if(GlobTree[index].slot[j].addr == addr)
       {
@@ -190,13 +255,26 @@ void test_init(){
 
 void test_read_write(){
 
-  for(long long int i = 0; i < BLOCK; i++)
+  for(long long int i = 0; i < TRACE_SIZE; i++)
   {
     // long long int addr = i;
-
     long long int addr = rand() % BLOCK;
     long long int label = lookup_posmap(addr);
 
+
+    // if (i % 1000000 == 0)
+    // {
+    //   printf("%lld :\n", i);
+    //   count_level();
+    //   printf("\n");
+    //   printf("bk evict rate: %f    i: %lld\n", (double)bkctr/i,i);
+    //   printf("\n");
+    //   printf("\n");
+    // }
+    
+
+    // long long int addr = trace[i];
+    // printf("test rw: addr: %lld\n", addr);
     // long long int label = rand() % PATH;
 
     // if (stashctr > OV_TRESHOLD)
@@ -240,21 +318,30 @@ void test_read_write(){
     if (BK_EVICTION)
     {
       background_eviction();
+      
     } 
 
-    if (i == pow(2,15))
-    {
-      /* code */
-      break;
-    }
+    // if (i == pow(2,15))
+    // {
+    //   /* code */
+    //   break;
+    // }
+    // if (i > 5000 && bkctr != 0)
+    // {
+    //   /* code */
+    //   printf("bk evict #: %lld\n", bkctr);
+    //   printf("bk evict rate: %f @ i: %lld\n", (double)bkctr/i, i);
+    // }
        
 
   }
 
-for (int i = 0; i < STASH_SIZE+1; i++)
-{
-  printf("%lld\n",stash_dist[i]);
-}
+  // for (int i = 0; i < STASH_SIZE+1; i++)
+  // {
+  //   printf("%lld\n",stash_dist[i]);
+  // }
+  // printf("bk evict #: %lld\n", bkctr);
+  printf("bk evict rate: %f\n", (double)bkctr/TRACE_SIZE);
   
 
 }
@@ -265,7 +352,7 @@ void count_tree(){
 
   for (long long int i = 0; i < NODE; i++)
   {
-    for (int j = 0; j < Z; j++)
+    for (int j = 0; j < LZ[i]; j++)
     {
       if(GlobTree[i].slot[j].isReal)
       {
@@ -284,7 +371,7 @@ void read_path(long long int label){
     {
       long long int index = calc_index(label, i);
       // printf("read path: level: %d  index: %lld \n", i, index);
-      for(int j = 0; j < Z; j++)
+      for(int j = 0; j < LZ[i]; j++)
       {
 
         if(GlobTree[index].slot[j].isReal)
@@ -319,7 +406,7 @@ void write_path(long long int label){
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
     long long int index = calc_index(label, i);
-    for(int j = 0; j < Z; j++)
+    for(int j = 0; j < LZ[i]; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
       {
@@ -348,7 +435,7 @@ void print_path(long long int label){
   for(int i = LEVEL-1; i >= 0; i--)
   {
     long long int index = calc_index(label, i);
-    for(int j = 0; j < Z; j++)
+    for(int j = 0; j < LZ[i]; j++)
     {
       printf("LOG: path: %lld level:%d  slot: %d  addr:%lld  label: %lld\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
     }
@@ -375,13 +462,17 @@ void print_stash(){
 }
 
 void background_eviction(){
+  int i = 0;
   while(stashctr >= OV_TRESHOLD)
   {
+    if(i == 0 )
+      bkctr++;
     // printf("background eviction: before stashctr: %d \n", stashctr);
     long long int label = rand() % PATH;
     read_path(label);
     write_path(label);
     // printf("background eviction: after stashctr: %d \n", stashctr);
+    i++;
   }
 }
 

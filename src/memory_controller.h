@@ -6,21 +6,33 @@
 #define MAX_NUM_BANKS 32
 
 // Mehrnoosh:
+#include <math.h>
+
 #define H 4
 #define LEVEL 24 // # levels
 #define Z 4     // # slots per bucket
-#define U 0.50 // utilization
+#define U 0.80 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
+#define TRACE_SIZE 500000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
-#define BK_EVICTION 0   // 1/0 flag to enable/disable background eviction
-#define EMPTY_TOP 0   // # top empty levels
+#define BK_EVICTION 1   // 1/0 flag to enable/disable background eviction
+#define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP, Z1 = 0
 
+#define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
+#define L2 10   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L3 11   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+
+#define Z1 4   // # slots per bucket upto L1
+#define Z2 4   // # slots per bucket upto L2
+#define Z3 4   // # slots per bucket upto L3
 
 
 static const long long int PATH = pow(2,LEVEL-1);  // # paths
 static const long long int  NODE = pow(2,LEVEL)-1;  // # nodes
-static const long long int  BLOCK = floor(Z*U*(pow(2,LEVEL)-1));  // # valid blocks
+static const long long int  SLOT = Z1*(pow(2,L1+1)-1) + Z2*(pow(2,L2+1)-pow(2,L1+1)) + Z3*(pow(2,L3+1)-pow(2,L2+1)) + Z*(pow(2,LEVEL)-pow(2,L3+1));  // # free slots
+static const long long int  BLOCK = floor(U*(Z1*(pow(2,L1+1)-1) + Z2*(pow(2,L2+1)-pow(2,L1+1)) + Z3*(pow(2,L3+1)-pow(2,L2+1)) + Z*(pow(2,LEVEL)-pow(2,L3+1))));  // # valid blocks
+static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};
 
 #include <stdbool.h>
 typedef struct Slot Slot;
@@ -31,6 +43,7 @@ void test_init();
 void print_path(long long int label);
 void background_eviction();
 void count_tree();
+void init_trace();
 
 
 void test_read_write();
