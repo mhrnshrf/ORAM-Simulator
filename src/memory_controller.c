@@ -15,6 +15,7 @@
 /////////////// Mehrnoosh:
 #include <stdbool.h>
 #include <math.h>
+#include <sys/time.h>
 
 
 
@@ -54,6 +55,12 @@ int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
 int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
 int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
+int candidate[Z] = {-1};    // keep index of candidates in stash for write back to a specific node
+
+struct timeval start, end, mid;
+long int timeavg = 0;
+long int timeavg_mid = 0;
+long int duration = 0;
 
 
 // void oram_alloc(){
@@ -279,14 +286,23 @@ void test_init(){
   
 }
 
+void reset_candidate(){
+  for (int i = 0; i < Z; i++)
+  {
+    candidate[i] = -1;
+  }
+}
+
 
 void test_read_write(){
 
   for(int i = 0; i < TRACE_SIZE; i++)
   {
-    // int addr = i;
+    
+    gettimeofday(&start, NULL);
+
     int addr = rand() % BLOCK;
-    int label = lookup_posmap(addr);
+    int label = PosMap[addr].label;
 
 
     // if (i % 1000000 == 0)
@@ -332,9 +348,15 @@ void test_read_write(){
     // print_stash();
     // print_path(label);
 
+
     remap_block(addr);
     // printf("after remap block...\n");
     // print_stash();
+
+    gettimeofday(&mid, NULL);
+    duration =  ((mid.tv_sec * 1000000 + mid.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+    timeavg_mid = (timeavg_mid*i + duration)/(i+1);
+    printf("mid: %f ms\n", (double)timeavg_mid/1000);
     
     write_path(label);
 
@@ -359,7 +381,12 @@ void test_read_write(){
     //   printf("bk evict #: %d\n", bkctr);
     //   printf("bk evict rate: %f @ i: %d\n", (double)bkctr/i, i);
     // }
-       
+    
+    gettimeofday(&end, NULL);
+    duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+    timeavg = (timeavg*i + duration)/(i+1);
+    printf("end: %f ms\n", (double)timeavg/1000);
+
 
   }
 
@@ -428,31 +455,51 @@ void read_path(int label){
 }
 
 
+void pick_candidate(int index, int label, int i){
+  int c = 0;
+  for(int k= 0; k < STASH_SIZE; k++)
+  {
+    if (Stash[k].isReal)
+    {
+      if(Stash[k].label == label || index == calc_index(Stash[k].label, i))
+      {
+        candidate[c] = k;
+        c++; 
+        if (c == Z)
+        {
+          return;
+        }
+      }
+    }
+  }
+}
+
 void write_path(int label){
   
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
     int index = calc_index(label, i);
+    reset_candidate();
+    pick_candidate(index, label, i);
+
     for(int j = 0; j < LZ[i]; j++)
     {
-      if (!GlobTree[index].slot[j].isReal)
+      if (candidate[j] == -1)
       {
-        for(int k= 0; k < STASH_SIZE; k++)
-        {
-          if (Stash[k].isReal)
-          {
-            if(Stash[k].label == label || index == calc_index(Stash[k].label, i))
-            {
-              GlobTree[index].slot[j].addr = Stash[k].addr;
-              GlobTree[index].slot[j].label = Stash[k].label;
-              GlobTree[index].slot[j].isReal = true;
-              GlobTree[index].slot[j].isData = true;
-              remove_from_stash(k);
-              break;
-            }
-          }
-        }
+        break;
       }
+
+      GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
+      GlobTree[index].slot[j].label = Stash[candidate[j]].label;
+      GlobTree[index].slot[j].isReal = true;
+      GlobTree[index].slot[j].isData = true;
+      remove_from_stash(candidate[j]);
+
+      if (stashctr == 0)
+      {
+        return;
+      }
+      
     }
   }
   
@@ -504,19 +551,19 @@ void background_eviction(){
 }
 
 void remap_block(int addr){
-  int index = get_posmap(addr);
+  // int index = PosMap[addr];
   int label = rand() % PATH;
   // printf("remap block: block %d mapped to label: %d\n", addr, label);
 
-  if (index == -1)
-  {
-    printf("ERROR: block index not found in pos map!\n");
-    return;
-  }
+  // if (index == -1)
+  // {
+  //   printf("ERROR: block index not found in pos map!\n");
+  //   return;
+  // }
   
-  PosMap[index].label = label;   // $$$ remember to exclude current path later on
+  PosMap[addr].label = label;   // $$$ remember to exclude current path later on
 
-  index = get_stash(addr);
+  int index = get_stash(addr);
 
   // if (addr == 90)
   // {
@@ -571,7 +618,7 @@ void remove_from_stash(int index){
 
 }
 
-// lookup pos map for the label of a block via its addr
+// lookup pos map for the label of a block via its addr ~~~~~~~~> tp be omitted!!!!!!!!!!
 int lookup_posmap(int addr){
   
   for(int i = 0; i< BLOCK; i++)
@@ -581,19 +628,18 @@ int lookup_posmap(int addr){
     }
   }
   return -1;
-
 }
 
-// get the index of a block in pos map
-int get_posmap(long long addr){
-  for(int i = 0; i< BLOCK; i++)
-  {
-    if(PosMap[i].addr == addr){
-      return i;
-    }
-  }
-  return -1;
-}
+// // get the index of a block in pos map  ~~~~> not needed!!!!!! to be omitted later!
+// int get_posmap(int addr){
+//   for(int i = 0; i< BLOCK; i++)
+//   {
+//     if(PosMap[i].addr == addr){
+//       return i;
+//     }
+//   }
+//   return -1;
+// }
 
 // get stash index of a block
 int get_stash(int addr){
