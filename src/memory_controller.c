@@ -48,7 +48,7 @@ typedef struct Entry{
 // Slot *Stash;
 
 Bucket GlobTree[NODE];
-Entry PosMap[BLOCK];
+int PosMap[BLOCK];
 Slot Stash[STASH_SIZE];
 
 int stashctr = 0; // # blocks in stash ~ stash occupancy
@@ -61,6 +61,7 @@ struct timeval start, end, mid;
 long int timeavg = 0;
 long int timeavg_mid = 0;
 long int duration = 0;
+long int timesum = 0;
 
 
 // void oram_alloc(){
@@ -115,8 +116,8 @@ void oram_init(){
   for(int i = 0; i < BLOCK; i++)
   {
     
-    PosMap[i].addr = i;
-    PosMap[i].label =  assign_a_path(i);
+    // PosMap[i].addr = i;
+    PosMap[i] =  assign_a_path(i);
     // printf("oram init loop i: %d addr:%d   label:%d\n", i, PosMap[i].addr, PosMap[i].label);
     // if (i == 90)
     // {
@@ -263,8 +264,8 @@ int assign_a_path(int addr){
 void test_init(){
   FILE *fp;
   fp = fopen("check.txt","w");
-  int addr = PosMap[1].addr;
-  int label = PosMap[1].label;
+  int addr = 1;
+  int label = PosMap[1];
   fprintf(fp,"PosMap: %d, %d\n", addr, label);
   // printf("oram test: label: %d\n", label);
 
@@ -295,14 +296,18 @@ void reset_candidate(){
 
 
 void test_read_write(){
+  gettimeofday(&start, NULL);
 
   for(int i = 0; i < TRACE_SIZE; i++)
   {
     
-    gettimeofday(&start, NULL);
 
     int addr = rand() % BLOCK;
-    int label = PosMap[addr].label;
+    int label = PosMap[addr];
+
+    if(duration/1000000 > 1800 ){
+      printf("i: %d   bk evict rate: %f\n", i, (double)bkctr/i);
+    }
 
 
     // if (i % 1000000 == 0)
@@ -353,10 +358,10 @@ void test_read_write(){
     // printf("after remap block...\n");
     // print_stash();
 
-    gettimeofday(&mid, NULL);
-    duration =  ((mid.tv_sec * 1000000 + mid.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-    timeavg_mid = (timeavg_mid*i + duration)/(i+1);
-    printf("mid: %f ms\n", (double)timeavg_mid/1000);
+    // gettimeofday(&mid, NULL);
+    // duration =  ((mid.tv_sec * 1000000 + mid.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+    // timeavg_mid = (timeavg_mid*i + duration)/(i+1);
+    // printf("mid: %f ms\n", (double)timeavg_mid/1000);
     
     write_path(label);
 
@@ -384,8 +389,9 @@ void test_read_write(){
     
     gettimeofday(&end, NULL);
     duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-    timeavg = (timeavg*i + duration)/(i+1);
-    printf("end: %f ms\n", (double)timeavg/1000);
+    // timesum = duration/1000000;
+    // timeavg = (timeavg*i + duration)/(i+1);
+    // printf("end: %f ms\n", (double)timeavg/1000);
 
 
   }
@@ -561,7 +567,7 @@ void remap_block(int addr){
   //   return;
   // }
   
-  PosMap[addr].label = label;   // $$$ remember to exclude current path later on
+  PosMap[addr] = label;   // $$$ remember to exclude current path later on
 
   int index = get_stash(addr);
 
@@ -618,17 +624,17 @@ void remove_from_stash(int index){
 
 }
 
-// lookup pos map for the label of a block via its addr ~~~~~~~~> tp be omitted!!!!!!!!!!
-int lookup_posmap(int addr){
+// // lookup pos map for the label of a block via its addr ~~~~~~~~> tp be omitted!!!!!!!!!!
+// int lookup_posmap(int addr){
   
-  for(int i = 0; i< BLOCK; i++)
-  {
-    if(PosMap[i].addr == addr){
-      return PosMap[i].label;
-    }
-  }
-  return -1;
-}
+//   for(int i = 0; i< BLOCK; i++)
+//   {
+//     if(PosMap[i].addr == addr){
+//       return PosMap[i].label;
+//     }
+//   }
+//   return -1;
+// }
 
 // // get the index of a block in pos map  ~~~~> not needed!!!!!! to be omitted later!
 // int get_posmap(int addr){

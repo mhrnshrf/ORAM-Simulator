@@ -14,7 +14,7 @@
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
-#define TRACE_SIZE 1000000 // # addr read from trace file
+#define TRACE_SIZE 10000000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define BK_EVICTION 1   // 1/0 flag to enable/disable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP, Z1 = 0
@@ -37,8 +37,8 @@ static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3]
 enum{
   PATH = (long long int)pow(2,LEVEL-1),  // # paths
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes
-  SLOT = Z1*((int)pow(2,L1+1)-1) + Z2*((int)pow(2,L2+1)-(int)pow(2,L1+1)) + Z3*((int)pow(2,L3+1)-(int)pow(2,L2+1)) + Z*((int)pow(2,LEVEL)-(int)pow(2,L3+1)),  // # free slots
-  BLOCK = (int)floor(U*(Z1*((int)pow(2,L1+1)-1) + Z2*((int)pow(2,L2+1)-(int)pow(2,L1+1)) + Z3*((int)pow(2,L3+1)-(int)pow(2,L2+1)) + Z*((int)pow(2,LEVEL)-(int)pow(2,L3+1)))),  // # valid blocks 
+  SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots
+  BLOCK = (long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)))),  // # valid blocks 
 };
 
 #include <stdbool.h>
@@ -59,7 +59,7 @@ void write_path(int label);
 void remap_block(int addr);
 bool add_to_stash(Slot s);
 void remove_from_stash(int index);
-int lookup_posmap(int addr);
+// int lookup_posmap(int addr);
 // int get_posmap(int addr);      // not needed!
 int get_stash(int addr);
 
