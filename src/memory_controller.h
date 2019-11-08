@@ -11,10 +11,10 @@
 #define H 4
 #define LEVEL 24 // # levels
 #define Z 4     // # slots per bucket
-#define U 0.50 // utilization
+#define U 0.80 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
-#define TRACE_SIZE 10000000 // # addr read from trace file
+#define TRACE_SIZE 20000000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define BK_EVICTION 1   // 1/0 flag to enable/disable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP, Z1 = 0

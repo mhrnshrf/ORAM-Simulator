@@ -305,20 +305,20 @@ void test_read_write(){
     int addr = rand() % BLOCK;
     int label = PosMap[addr];
 
-    if(duration/1000000 > 1800 ){
-      printf("i: %d   bk evict rate: %f\n", i, (double)bkctr/i);
-    }
-
-
-    // if (i % 1000000 == 0)
-    // {
-    //   printf("%d :\n", i);
-    //   count_level();
-    //   printf("\n");
-    //   printf("bk evict rate: %f    i: %d\n", (double)bkctr/i,i);
-    //   printf("\n");
-    //   printf("\n");
+    // if(duration/1000000 > 1800 ){
+    //   printf("i: %d   bk evict rate: %f\n", i, (double)bkctr/i);
     // }
+
+
+    if (i % 2000000 == 0)
+    {
+      printf("%d :\n", i);
+      count_level();
+      printf("\n");
+      printf("bk evict rate: %f\n", (double)bkctr/i);
+      printf("\n");
+      printf("\n");
+    }
     
 
     // int addr = trace[i];
@@ -392,6 +392,7 @@ void test_read_write(){
     // timesum = duration/1000000;
     // timeavg = (timeavg*i + duration)/(i+1);
     // printf("end: %f ms\n", (double)timeavg/1000);
+    fflush(stdout);
 
 
   }
