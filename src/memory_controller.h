@@ -8,14 +8,17 @@
 // Mehrnoosh:
 #include <math.h>
 
-#define H 4
+#define H 3     // degree of recursion including data access
+#define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
 #define Z 4     // # slots per bucket
-#define U 0.80 // utilization
+#define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
+#define PLB_SIZE 1024     // size of plb (# entry)
 #define TRACE_SIZE 20000000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
+
 #define BK_EVICTION 1   // 1/0 flag to enable/disable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP, Z1 = 0
 

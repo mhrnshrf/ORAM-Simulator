@@ -50,6 +50,7 @@ typedef struct Entry{
 Bucket GlobTree[NODE];
 int PosMap[BLOCK];
 Slot Stash[STASH_SIZE];
+int PLB[PLB_SIZE] = {-1};
 
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
@@ -375,17 +376,7 @@ void test_read_write(){
       
     } 
 
-    // if (i == pow(2,15))
-    // {
-    //   /* code */
-    //   break;
-    // }
-    // if (i > 5000 && bkctr != 0)
-    // {
-    //   /* code */
-    //   printf("bk evict #: %d\n", bkctr);
-    //   printf("bk evict rate: %f @ i: %d\n", (double)bkctr/i, i);
-    // }
+
     
     gettimeofday(&end, NULL);
     duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
@@ -625,28 +616,6 @@ void remove_from_stash(int index){
 
 }
 
-// // lookup pos map for the label of a block via its addr ~~~~~~~~> tp be omitted!!!!!!!!!!
-// int lookup_posmap(int addr){
-  
-//   for(int i = 0; i< BLOCK; i++)
-//   {
-//     if(PosMap[i].addr == addr){
-//       return PosMap[i].label;
-//     }
-//   }
-//   return -1;
-// }
-
-// // get the index of a block in pos map  ~~~~> not needed!!!!!! to be omitted later!
-// int get_posmap(int addr){
-//   for(int i = 0; i< BLOCK; i++)
-//   {
-//     if(PosMap[i].addr == addr){
-//       return i;
-//     }
-//   }
-//   return -1;
-// }
 
 // get stash index of a block
 int get_stash(int addr){
@@ -695,21 +664,18 @@ int  calc_index(int label,  int l){
 
 
 
-
-////////// Mehrnoosh.
-
-
-
-////////////// Mehrnoosh:
 /***********************
   Freecursive ORAM
 ************************/
 
-long long int get_path(){
-    long long int L = (long long int) pow(2, LEVEL-1); 
-    long long int path_l = rand() % L ; 
-    return path_l;
-} 
+void plb_lookup() {
+
+}
+
+void posmap_access (){
+   
+}
+  
 
 /*
 // Issue an ORAM read 
@@ -758,6 +724,7 @@ request_t * oram_insert_read (long long int physical_address,
   return new_node;
 }
  */
+
   ////////////// Mehrnoosh.
 
 
