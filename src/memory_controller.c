@@ -16,6 +16,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <sys/time.h>
+#include <string.h> 
 
 
 
@@ -47,13 +48,14 @@ typedef struct Entry{
 // Entry *PosMap;
 // Slot *Stash;
 
-Bucket GlobTree[NODE];
-int PosMap[BLOCK];
-Slot Stash[STASH_SIZE];
-int PLB[PLB_SIZE] = {-1};
+Bucket GlobTree[NODE];      // global oram tree
+int PosMap[BLOCK];          // position map
+Slot Stash[STASH_SIZE];     // stash
+int PLB[PLB_SIZE] = {-1};   // posmap lookaside buffer
 
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
+int oramctr = 0;  // # oram accesses
 int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
 int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 int candidate[Z] = {-1};    // keep index of candidates in stash for write back to a specific node
@@ -435,7 +437,6 @@ void read_path(int label){
           
           if(add_to_stash(GlobTree[index].slot[j]))
           {
-            stashctr++;
             GlobTree[index].slot[j].isReal = false;
             GlobTree[index].slot[j].addr = -1;
             GlobTree[index].slot[j].label = -1;
@@ -533,6 +534,7 @@ void print_stash(){
 
 }
 
+// issue dummy access (read path + write path) until stash occupancy drops a threshold
 void background_eviction(){
   int i = 0;
   while(stashctr >= OV_TRESHOLD)
@@ -548,6 +550,7 @@ void background_eviction(){
   }
 }
 
+// assign the block a new label and update in posmap and stash 
 void remap_block(int addr){
   // int index = PosMap[addr];
   int label = rand() % PATH;
@@ -590,12 +593,8 @@ bool add_to_stash(Slot s){
       Stash[i].label = s.label;
       Stash[i].isReal = true;
       Stash[i].isData = true;
-      // if (s.addr == 90)
-      // {
-      //   printf("add to stash: index stash for 90: %d, addr:%d  label:%d\n", i, Stash[i].addr, Stash[i].label);
-      // }
       
-      
+      stashctr++;
       return true;
     }
   }
@@ -603,6 +602,7 @@ bool add_to_stash(Slot s){
 }
 
 
+// remove from stash given the item index in the stash
 void remove_from_stash(int index){
   stashctr--;
   for(int k= 0; k < STASH_SIZE; k++)
@@ -629,6 +629,36 @@ int get_stash(int addr){
   return -1;
 }
 
+// read the path, remap the block, write back the path
+void oram_access(int addr){
+  oramctr++;
+
+  int label = PosMap[addr];
+      if (label == -1)
+    {
+      printf("ERROR: block label not found in pos map!\n");
+      return;
+    }
+    
+    read_path(label);
+    
+    remap_block(addr);
+
+    write_path(label);
+}
+
+
+void test_oram(){
+  for(int i = 0; i < TRACE_SIZE; i++)
+  {
+    int addr = rand() % BLOCK;
+    freecursive_access(addr);
+    printf("oram/freecursvie access ratio: %d\n", oramctr/(i+1));
+    
+
+  }
+
+}
 
 /***********************
   Utility Functions
@@ -661,6 +691,26 @@ int  calc_index(int label,  int l){
   return index;
 }
 
+int concat(int a, int b) { 
+  
+    char s1[20]; 
+    char s2[20]; 
+  
+    // Convert both the integers to string 
+    sprintf(s1, "%d", a); 
+    sprintf(s2, "%d", b); 
+  
+    // Concatenate both strings 
+    strcat(s1, s2); 
+  
+    // Convert the concatenated string 
+    // to integer 
+    int c = atoi(s1); 
+  
+    // return the formed integer 
+    return c; 
+} 
+
 
 
 
@@ -668,35 +718,17 @@ int  calc_index(int label,  int l){
   Freecursive ORAM
 ************************/
 
-void plb_lookup() {
-
-}
-
-void posmap_access (){
-   
-}
+void freecursive_access(int addr){
   
-
-/*
-// Issue an ORAM read 
-request_t * oram_insert_read (long long int physical_address,
-    long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc) 
-{
-
-
   // Freecursive 4.2.4 ORAM access algorithm
+  
   // STEP 1   PLB lookup:  
   int i_saved = -1;
-  for (int i = 0; i <= H-2; ++i)
+  for (int i = 0; i <= H-2; i++)
   {
     // reading form PLB if miss then proceed to access ORAM tree
-    int retval = readFromCache(PLB, physical_address); // $$$ change addr each iteration
-    if ( retval == -1)
-    {
-      printf("%s\n",  "ERROR READING FROM PLB");
-    }
-    else if (retval == 1 )  // PLB hit
+    int tag = concat(i, addr/pow(X,i));
+    if (PLB[tag % PLB_SIZE] == addr)  // PLB hit
     {
       i_saved = i;
       break;
@@ -706,26 +738,42 @@ request_t * oram_insert_read (long long int physical_address,
       i_saved = H-1;
     }
   }
-  // $$$ PosMap lookup
 
-  // STEP 2  PosMap block access:
+// STEP 2  PosMap block access:
   while(i_saved >= 1)
   {
-    insert_read(physical_address, arrival_time, thread_id, instruction_id, instruction_pc); // $$$ change passing addr
-    // $$$ add to PLB
-    // $$$ readrmv to stash
-    // $$$ append to stash
+    int tag = concat(i_saved, addr/pow(X,i_saved));
+    oram_access(tag);
+    int victim = PLB[tag % PLB_SIZE];
+    if( victim != -1)
+    {
+      Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+
+      bool added = add_to_stash(s);
+
+      if(!added){
+       printf("ERROR: stash overflow! \n"); 
+       return;
+      }
+    }
+
+    PLB[tag % PLB_SIZE] = tag;
+    int index = get_stash(tag);
+    if (index != -1)
+    {
+      remove_from_stash(index);
+    }
+    
     i_saved--;
   }
 
-  // STEP 3   Data block access:
-  request_t * new_node = insert_read(physical_address, arrival_time, thread_id, instruction_id, instruction_pc); // $$$ change passing addr
+// STEP 3   Data block access:
+  oram_access(addr);
 
-  return new_node;
 }
- */
 
-  ////////////// Mehrnoosh.
+
+////////////// Mehrnoosh.
 
 
 

@@ -8,7 +8,7 @@
 // Mehrnoosh:
 #include <math.h>
 
-#define H 3     // degree of recursion including data access
+#define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
 #define Z 4     // # slots per bucket
@@ -62,8 +62,8 @@ void write_path(int label);
 void remap_block(int addr);
 bool add_to_stash(Slot s);
 void remove_from_stash(int index);
-// int lookup_posmap(int addr);
-// int get_posmap(int addr);      // not needed!
+void test_oram();
+void freecursive_access(int addr);
 int get_stash(int addr);
 
 int  calc_index(int label, int l);
