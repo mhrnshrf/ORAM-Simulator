@@ -59,12 +59,17 @@ int oramctr = 0;  // # oram accesses
 int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
 int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 int candidate[Z] = {-1};    // keep index of candidates in stash for write back to a specific node
+int intended = -1;         // index of intended block in stash
+bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
 
 struct timeval start, end, mid;
 long int timeavg = 0;
 long int timeavg_mid = 0;
 long int duration = 0;
 long int timesum = 0;
+
+void pinOn() {pinFlag = true;}    // turn the pin flag on
+void pinOff() {pinFlag = false;}  // turn the pin flag off
 
 
 // void oram_alloc(){
@@ -374,8 +379,7 @@ void test_read_write(){
     
     if (BK_EVICTION)
     {
-      background_eviction();
-      
+      background_eviction(); 
     } 
 
 
@@ -430,10 +434,6 @@ void read_path(int label){
 
         if(GlobTree[index].slot[j].isReal)
         {
-          // if (GlobTree[index].slot[j].addr == 90)
-          // {
-          //   printf("read path: %d  when 90 is brought to stash\n", label);
-          // }
           
           if(add_to_stash(GlobTree[index].slot[j]))
           {
@@ -443,7 +443,7 @@ void read_path(int label){
           }
           else
           {
-            printf("ERROR: stash overflow! \n");
+            printf("ERROR: read: stash overflow!  @ %d\n", stashctr);
             // printf("stashctr:%d,      addr: %d  @ label: %d \n", stashctr, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
             return;
           }
@@ -460,7 +460,7 @@ void pick_candidate(int index, int label, int i){
   {
     if (Stash[k].isReal)
     {
-      if(Stash[k].label == label || index == calc_index(Stash[k].label, i))
+      if((Stash[k].label == label || index == calc_index(Stash[k].label, i)) && (!pinFlag || k != intended))
       {
         candidate[c] = k;
         c++; 
@@ -552,33 +552,21 @@ void background_eviction(){
 
 // assign the block a new label and update in posmap and stash 
 void remap_block(int addr){
-  // int index = PosMap[addr];
-  int label = rand() % PATH;
-  // printf("remap block: block %d mapped to label: %d\n", addr, label);
 
-  // if (index == -1)
-  // {
-  //   printf("ERROR: block index not found in pos map!\n");
-  //   return;
-  // }
-  
+  int label = rand() % PATH;
+
   PosMap[addr] = label;   // $$$ remember to exclude current path later on
 
   int index = get_stash(addr);
 
-  // if (addr == 90)
-  // {
-  //   /* code */
-  //   printf("renew label: Stash[8]: %d, %d\n", Stash[8].addr, Stash[8].label);
-  // }
 
   if (index == -1)
   {
-    printf("ERROR: block index not found in stash!\n");
+    printf("ERROR: remap: block not found in stash!\n");
     return;
   }
 
-  
+  intended = index;
 
   Stash[index].label = label;
 }
@@ -648,6 +636,11 @@ void oram_access(int addr){
     remap_block(addr);
 
     write_path(label);
+
+    if (BK_EVICTION)
+    {
+      background_eviction(); 
+    }
 }
 
 
@@ -656,7 +649,12 @@ void test_oram(){
   {
     int addr = rand() % BLOCK;
     freecursive_access(addr);
-    printf("oram/freecursvie access ratio: %f\n", (float)oramctr/(i+1));
+    // printf("oram/freecursvie access ratio: %f\n", (float)oramctr/(i+1));
+    if (i % 100 == 0)
+    {
+     printf("bk evict rate: %f\n", (double)bkctr/i); 
+    }
+    
     
 
   }
@@ -721,9 +719,9 @@ int concat(int a, int b) {
   Freecursive ORAM
 ************************/
 
+// Freecursive 4.2.4 ORAM access algorithm
 void freecursive_access(int addr){
   
-  // Freecursive 4.2.4 ORAM access algorithm
   
   // STEP 1   PLB lookup:  
   int i_saved = -1;
@@ -746,27 +744,30 @@ void freecursive_access(int addr){
   while(i_saved >= 1)
   {
     int tag = concat(i_saved, addr/pow(X,i_saved));
-    // printf("tag: %d addr:%d\n", tag, addr);
+    pinOn();
     oram_access(tag);
+    pinOff();
     int victim = PLB[tag % PLB_SIZE];
     if( victim != -1)
     {
       Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
 
-      // bool added = add_to_stash(s);
+      bool added = add_to_stash(s);
 
-      // if(!added){
-      //  printf("ERROR: stash overflow! \n"); 
-      //  return;
-      // }
+      if(!added){
+       printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
+       return;
+      }
     }
 
     PLB[tag % PLB_SIZE] = tag;
-    // int index = get_stash(tag);
-    // if (index != -1)
-    // {
-    //   remove_from_stash(index);
-    // }
+    int index = get_stash(tag);
+    if (index == -1)
+    {
+      printf("ERROR: freecursive: block not found in stash!\n");
+      return;
+    }
+    remove_from_stash(index);
     
     i_saved--;
   }
