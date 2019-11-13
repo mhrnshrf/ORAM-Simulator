@@ -444,7 +444,7 @@ void read_path(int label){
           else
           {
             printf("ERROR: stash overflow! \n");
-            printf("stashctr:%d \n", stashctr);
+            // printf("stashctr:%d,      addr: %d  @ label: %d \n", stashctr, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
             return;
           }
         }
@@ -597,7 +597,9 @@ bool add_to_stash(Slot s){
       stashctr++;
       return true;
     }
+    
   }
+  // printf("add to stash: addr: %d \n", s.addr);
   return false;
 }
 
@@ -605,14 +607,15 @@ bool add_to_stash(Slot s){
 // remove from stash given the item index in the stash
 void remove_from_stash(int index){
   stashctr--;
-  for(int k= 0; k < STASH_SIZE; k++)
-  {
-    if(index == k)
-    {
-      Stash[k].isReal = false;
-      return;
-    }
-  }
+  Stash[index].isReal = false;
+  // for(int k= 0; k < STASH_SIZE; k++)
+  // {
+  //   if(index == k)
+  //   {
+  //     Stash[k].isReal = false;
+  //     return;
+  //   }
+  // }
 
 }
 
@@ -634,7 +637,7 @@ void oram_access(int addr){
   oramctr++;
 
   int label = PosMap[addr];
-      if (label == -1)
+    if (label == -1)
     {
       printf("ERROR: block label not found in pos map!\n");
       return;
@@ -653,7 +656,7 @@ void test_oram(){
   {
     int addr = rand() % BLOCK;
     freecursive_access(addr);
-    printf("oram/freecursvie access ratio: %d\n", oramctr/(i+1));
+    printf("oram/freecursvie access ratio: %f\n", (float)oramctr/(i+1));
     
 
   }
@@ -743,26 +746,27 @@ void freecursive_access(int addr){
   while(i_saved >= 1)
   {
     int tag = concat(i_saved, addr/pow(X,i_saved));
+    // printf("tag: %d addr:%d\n", tag, addr);
     oram_access(tag);
     int victim = PLB[tag % PLB_SIZE];
     if( victim != -1)
     {
       Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
 
-      bool added = add_to_stash(s);
+      // bool added = add_to_stash(s);
 
-      if(!added){
-       printf("ERROR: stash overflow! \n"); 
-       return;
-      }
+      // if(!added){
+      //  printf("ERROR: stash overflow! \n"); 
+      //  return;
+      // }
     }
 
     PLB[tag % PLB_SIZE] = tag;
-    int index = get_stash(tag);
-    if (index != -1)
-    {
-      remove_from_stash(index);
-    }
+    // int index = get_stash(tag);
+    // if (index != -1)
+    // {
+    //   remove_from_stash(index);
+    // }
     
     i_saved--;
   }
