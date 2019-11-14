@@ -444,6 +444,7 @@ void read_path(int label){
           else
           {
             printf("ERROR: read: stash overflow!  @ %d\n", stashctr);
+            // print_stash();
             // printf("stashctr:%d,      addr: %d  @ label: %d \n", stashctr, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
             return;
           }
@@ -620,6 +621,19 @@ int get_stash(int addr){
   return -1;
 }
 
+
+// check whether a block exist in stash
+bool stash_contain(int addr){
+  for(int k= 0; k < STASH_SIZE; k++)
+  {
+    if (Stash[k].addr == addr)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 // read the path, remap the block, write back the path
 void oram_access(int addr){
   oramctr++;
@@ -648,12 +662,14 @@ void test_oram(){
   for(int i = 0; i < TRACE_SIZE; i++)
   {
     int addr = rand() % BLOCK;
+    // printf("i: %d\n", i);
     freecursive_access(addr);
     // printf("oram/freecursvie access ratio: %f\n", (float)oramctr/(i+1));
     if (i % 100 == 0)
     {
      printf("bk evict rate: %f\n", (double)bkctr/i); 
     }
+    // print_stash();
     
     
 
@@ -722,6 +738,12 @@ int concat(int a, int b) {
 // Freecursive 4.2.4 ORAM access algorithm
 void freecursive_access(int addr){
   
+  // check if the block is already in the stash
+  if (stash_contain(addr))
+  {
+    return;
+  }
+  
   
   // STEP 1   PLB lookup:  
   int i_saved = -1;
@@ -744,13 +766,32 @@ void freecursive_access(int addr){
   while(i_saved >= 1)
   {
     int tag = concat(i_saved, addr/pow(X,i_saved));
-    pinOn();
-    oram_access(tag);
-    pinOff();
+
+    // if (tag == 0)
+    // {
+    //   /* code */
+    //   printf("tag: %d   i: %d\n", tag, i_saved);
+    // }
+    
+
+    if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
+    {
+      pinOn();
+      oram_access(tag);
+      pinOff();
+    }
+
     int victim = PLB[tag % PLB_SIZE];
     if( victim != -1)
     {
       Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+
+      if (victim == 0)
+      {
+        /* code */
+       printf("freecursive: victim: %d\n", s.addr);
+      }
+       
 
       bool added = add_to_stash(s);
 

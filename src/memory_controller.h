@@ -14,12 +14,12 @@
 #define Z 4     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
-#define STASH_SIZE 600     // size of stash
+#define STASH_SIZE 200     // size of stash
 #define PLB_SIZE 1024     // size of plb (# entry)
 #define TRACE_SIZE 20000000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 
-#define BK_EVICTION 1   // 1/0 flag to enable/disable background eviction
+#define BK_EVICTION 0   // 1/0 flag to enable/disable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP, Z1 = 0
 
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
@@ -65,6 +65,7 @@ void remove_from_stash(int index);
 void test_oram();
 void freecursive_access(int addr);
 int get_stash(int addr);
+bool stash_contain(int addr);
 
 int  calc_index(int label, int l);
 
