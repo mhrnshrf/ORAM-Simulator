@@ -97,6 +97,59 @@ void pinOff() {pinFlag = false;}  // turn the pin flag off
   }  
 }*/
 
+/***********************
+  Utility Functions
+************************/
+
+int calc_level(int index){   
+  int i = -1;
+    // printf("in oram calc\n");
+    
+    int sum = 0;
+    while(index >= sum)
+    {
+      i++;
+      sum += pow(2,i);
+      // printf("in while i: %d \n", i);
+    }
+    return i;
+}
+
+
+int  calc_index(int label,  int l){
+  int sum = 0;
+  int index = -1;
+  for(int i = 0; i < l; i++)
+    sum += pow(2,i);
+
+  // int a = pow(2,LEVEL-1)/pow(2,l);
+  index = sum + floor(label/pow(2,(LEVEL-l-1)));
+
+  return index;
+}
+
+int concat(int a, int b) { 
+  
+    char s1[20]; 
+    char s2[20]; 
+  
+    // Convert both the integers to string 
+    sprintf(s1, "%d", a); 
+    sprintf(s2, "%d", b); 
+  
+    // Concatenate both strings 
+    strcat(s1, s2); 
+  
+    // Convert the concatenated string 
+    // to integer 
+    int c = atoi(s1); 
+  
+    // return the formed integer 
+    return c; 
+} 
+
+/********************************/
+
 void oram_alloc(){
 
   for (int i = 0 ; i < NODE; i++) 
@@ -346,7 +399,7 @@ void test_read_write(){
     if (label == -1)
     {
       printf("ERROR: block label not found in pos map!\n");
-      return;
+      exit(1);
     }
     
     // printf("before read path...\n");
@@ -423,10 +476,11 @@ void count_tree(){
 
 void read_path(int label){
 
+    printf("read path: label %d \n", label);
+
     for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
     {
       int index = calc_index(label, i);
-      // printf("read path: level: %d  index: %d \n", i, index);
       for(int j = 0; j < LZ[i]; j++)
       {
 
@@ -566,6 +620,8 @@ void remap_block(int addr){
 
   int label = rand() % PATH;
 
+  int temp = PosMap[addr];
+
   PosMap[addr] = label;   // $$$ remember to exclude current path later on
 
   int index = get_stash(addr);
@@ -573,8 +629,9 @@ void remap_block(int addr){
 
   if (index == -1)
   {
-    printf("ERROR: remap: block not found in stash!\n");
-    return;
+    printf("ERROR: remap: block %d not found in stash!\n", addr);
+    printf("~~~> supposed to be on %d path\n", temp);
+    exit(1);
   }
 
   intended = index;
@@ -584,10 +641,15 @@ void remap_block(int addr){
 
 bool add_to_stash(Slot s){
   
+  
   for(int i = 0; i < STASH_SIZE; i++ )
   {
     if(!Stash[i].isReal)
     {
+      if (s.addr == 31138)
+      {
+        printf("%d is added to stash!\n", s.addr);
+      }
       Stash[i].addr = s.addr;
       Stash[i].label = s.label;
       Stash[i].isReal = true;
@@ -607,6 +669,10 @@ bool add_to_stash(Slot s){
 void remove_from_stash(int index){
   stashctr--;
   Stash[index].isReal = false;
+  if (Stash[index].addr == 31138)
+  {
+    printf("%d is removed from stash!\n", Stash[index].addr);
+  }
   // for(int k= 0; k < STASH_SIZE; k++)
   // {
   //   if(index == k)
@@ -652,7 +718,7 @@ void oram_access(int addr){
     if (label == -1)
     {
       printf("ERROR: block label not found in pos map!\n");
-      return;
+      exit(1);
     }
     
     read_path(label);
@@ -668,79 +734,6 @@ void oram_access(int addr){
 }
 
 
-void test_oram(){
-  for(int i = 0; i < TRACE_SIZE; i++)
-  {
-    int addr = rand() % BLOCK;
-    // print_plb();
-    // printf("i: %d\n", i);
-    freecursive_access(addr);
-    printf("oram/freecursvie access ratio: %f\n", (float)oramctr/(i+1));
-    if (i % 100 == 0)
-    {
-     printf("bk evict rate: %f\n", (double)bkctr/i); 
-    }
-    
-    
-
-  }
-
-}
-
-/***********************
-  Utility Functions
-************************/
-
-int calc_level(int index){   
-  int i = -1;
-    // printf("in oram calc\n");
-    
-    int sum = 0;
-    while(index >= sum)
-    {
-      i++;
-      sum += pow(2,i);
-      // printf("in while i: %d \n", i);
-    }
-    return i;
-}
-
-
-int  calc_index(int label,  int l){
-  int sum = 0;
-  int index = -1;
-  for(int i = 0; i < l; i++)
-    sum += pow(2,i);
-
-  // int a = pow(2,LEVEL-1)/pow(2,l);
-  index = sum + floor(label/pow(2,(LEVEL-l-1)));
-
-  return index;
-}
-
-int concat(int a, int b) { 
-  
-    char s1[20]; 
-    char s2[20]; 
-  
-    // Convert both the integers to string 
-    sprintf(s1, "%d", a); 
-    sprintf(s2, "%d", b); 
-  
-    // Concatenate both strings 
-    strcat(s1, s2); 
-  
-    // Convert the concatenated string 
-    // to integer 
-    int c = atoi(s1); 
-  
-    // return the formed integer 
-    return c; 
-} 
-
-
-
-
 /***********************
   Freecursive ORAM
 ************************/
@@ -748,16 +741,16 @@ int concat(int a, int b) {
 // Freecursive 4.2.4 ORAM access algorithm
 void freecursive_access(int addr){
   
-  // check if the block is already in the stash
-  if (stash_contain(addr))
+  
+  if (stash_contain(addr))      // check if the block is already in the stash
   {
     return;
   }
   
   
-  // STEP 1   PLB lookup:  
+   
 
-  int i_saved = -1;
+  int i_saved = -1;  // STEP 1   PLB lookup 
   for (int i = 0; i <= H-2; i++)
   {
     // reading form PLB if miss then proceed to access ORAM tree
@@ -773,22 +766,17 @@ void freecursive_access(int addr){
     }
   }
 
-// STEP 2  PosMap block access:
 
-  while(i_saved >= 1)
+
+  while(i_saved >= 1)   // STEP 2  PosMap block access
   {
     int tag = concat(i_saved, addr/pow(X,i_saved));
-
-    if (tag == 0)
-    {
-      /* code */
-      printf("tag: %d   i: %d\n", tag, i_saved);
-    }
     
 
     if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
     {
       pinOn();
+      // printf("posmap access: %d\n", tag);
       oram_access(tag);
       pinOff();
     }
@@ -809,7 +797,6 @@ void freecursive_access(int addr){
         if(!added){
         printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
         exit(1);
-        return;
         }
         
       }
@@ -823,17 +810,52 @@ void freecursive_access(int addr){
     if (index == -1)
     {
       printf("ERROR: freecursive: block not found in stash!\n");
-      return;
+      exit(1);
     }
+    if (tag == 31138)
+    {
+      printf("remove issued from freecursive!\n");
+    }
+    
     remove_from_stash(index);
     
     i_saved--;
   }
 
-// STEP 3   Data block access:
-  oram_access(addr);
+
+  // printf("data access: %d\n", addr);
+  oram_access(addr);  // STEP 3   Data block access
 
 }
+
+
+void test_oram(){
+  for(int i = 0; i < TRACE_SIZE; i++)
+  {
+    int addr = rand() % BLOCK;
+    // print_plb();
+    // printf("i: %d\n", i);
+    
+    freecursive_access(addr);
+    
+    // printf("oram/freecursvie access ratio: %f\n", (float)oramctr/(i+1));
+
+    // if (i % 100 == 0)
+    // {
+    //  printf("bk evict rate: %f\n", (double)bkctr/i); 
+    // }
+    
+    
+
+  }
+
+}
+
+
+
+
+
+
 
 
 ////////////// Mehrnoosh.
