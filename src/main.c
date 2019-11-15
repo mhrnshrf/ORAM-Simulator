@@ -74,11 +74,16 @@ int main(int argc, char * argv[])
 	// printf("after init trace\n");
 	
 	oram_alloc();
+
 	printf("after alloc\n");
+	
 	oram_init();
 	
 	printf("after init\n");
+	
 	test_oram();
+	
+	printf("after test\n");
 	// print_tree();
 	// printf("after print\n");
 //   Mehrnoosh.

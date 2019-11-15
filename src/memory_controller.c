@@ -619,7 +619,6 @@ void remap_block(int addr){
 
   int label = rand() % PATH;
 
-  int temp = PosMap[addr];
 
   PosMap[addr] = label;   // $$$ remember to exclude current path later on
 
@@ -629,7 +628,6 @@ void remap_block(int addr){
   if (index == -1)
   {
     printf("ERROR: remap: block %d not found in stash!\n", addr);
-    printf("~~~> supposed to be on %d path\n", temp);
     exit(1);
   }
 
@@ -645,10 +643,7 @@ bool add_to_stash(Slot s){
   {
     if(!Stash[i].isReal)
     {
-      if (s.addr == 11055308)
-      {
-        printf("%d is added to stash[%d]!\n", s.addr, i);
-      }
+
       Stash[i].addr = s.addr;
       Stash[i].label = s.label;
       Stash[i].isReal = true;
@@ -668,10 +663,6 @@ bool add_to_stash(Slot s){
 void remove_from_stash(int index){
   stashctr--;
   Stash[index].isReal = false;
-  if (Stash[index].addr == 31138)
-  {
-    printf("%d is removed from stash!\n", Stash[index].addr);
-  }
   // for(int k= 0; k < STASH_SIZE; k++)
   // {
   //   if(index == k)
@@ -778,10 +769,7 @@ void freecursive_access(int addr){
   {
     int tag = concat(i_saved, addr/pow(X,i_saved));
 
-    if (tag == 11055308)
-    {
-      printf("tag: %d   i: %d   PLB[%d]: %d\n", tag, i_saved, tag % PLB_SIZE, PLB[tag % PLB_SIZE]);
-    }
+   
     
 
     if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
@@ -823,11 +811,6 @@ void freecursive_access(int addr){
       printf("ERROR: freecursive: block not found in stash!\n");
       exit(1);
     }
-    if (tag == 11055308)
-    {
-      printf("remove issued from freecursive!\n");
-      printf("PLB[%d] = %d\n", tag % PLB_SIZE, tag);
-    }
     
     remove_from_stash(index);
     
@@ -845,16 +828,16 @@ void test_oram(){
   for(int i = 0; i < TRACE_SIZE; i++)
   {
     int addr = rand() % BLOCK;
-    // print_plb();
     // printf("i: %d\n", i);
     
     freecursive_access(addr);
     
-    // printf("oram/freecursvie access ratio: %f\n", (float)oramctr/(i+1));
 
-    // if (i % 100 == 0)
+    // if (i % 100000 == 0)
     // {
-    //  printf("bk evict rate: %f\n", (double)bkctr/i); 
+    //   // print_plb();
+    //   printf("i: %d oram/freecursvie access ratio: %f\n", i, (float)oramctr/(i+1));
+    //   printf("bk evict rate: %f\n", (double)bkctr/i); 
     // }
     
     

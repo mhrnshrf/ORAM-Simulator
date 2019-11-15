@@ -16,7 +16,7 @@
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
 #define PLB_SIZE 1024     // size of plb (# entry)
-#define TRACE_SIZE 20000000 // # addr read from trace file
+#define TRACE_SIZE 1000000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 
 #define BK_EVICTION 0   // 1/0 flag to enable/disable background eviction
