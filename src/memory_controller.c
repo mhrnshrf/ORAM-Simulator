@@ -71,6 +71,8 @@ long int timesum = 0;
 void pinOn() {pinFlag = true;}    // turn the pin flag on
 void pinOff() {pinFlag = false;}  // turn the pin flag off
 
+// allocate memory for global oram tree and position map
+
 /*void oram_alloc(){
 
   GlobTree = (Bucket *)malloc(NODE * sizeof(Bucket));  // ??? has problem
@@ -130,8 +132,8 @@ int  calc_index(int label,  int l){
 
 int concat(int a, int b) { 
   
-    char s1[20]; 
-    char s2[20]; 
+    char s1[32]; 
+    char s2[32]; 
   
     // Convert both the integers to string 
     sprintf(s1, "%d", a); 
@@ -170,6 +172,7 @@ void oram_alloc(){
   }  
 }
 
+// initialize the oram tree by assigning a random path to each addr of address space
 void oram_init(){
   // printf("entering oram init\n");
   for(int i = 0; i < BLOCK; i++)
@@ -244,7 +247,6 @@ void init_trace(){
 
 }
 
-// allocate memory for global oram tree and position map
 
 // print glob tree structure
 void print_tree(){
@@ -276,9 +278,6 @@ void print_tree(){
     printf("\n");
 }
 
-
-
-// initialize the oram tree by assigning a random path to each addr of address space
 
 // assign a random path to a data block
 int assign_a_path(int addr){
@@ -476,7 +475,7 @@ void count_tree(){
 
 void read_path(int label){
 
-    printf("read path: label %d \n", label);
+    // printf("read path: label %d \n", label);
 
     for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
     {
@@ -646,9 +645,9 @@ bool add_to_stash(Slot s){
   {
     if(!Stash[i].isReal)
     {
-      if (s.addr == 31138)
+      if (s.addr == 11055308)
       {
-        printf("%d is added to stash!\n", s.addr);
+        printf("%d is added to stash[%d]!\n", s.addr, i);
       }
       Stash[i].addr = s.addr;
       Stash[i].label = s.label;
@@ -755,14 +754,21 @@ void freecursive_access(int addr){
   {
     // reading form PLB if miss then proceed to access ORAM tree
     int tag = concat(i, addr/pow(X,i));
-    if (PLB[tag % PLB_SIZE] == addr)  // PLB hit
+    
+    if (PLB[tag % PLB_SIZE] == tag)  // PLB hit
     {
-      i_saved = i;
+      if (i == 0)   // if the intended block is originally a posmap block itself terminate!
+      {
+        return;
+      }
+      
+      i_saved = i-1;
+      // printf("hit!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    %d\n", i);
       break;
     }
     else if(i == H-2)  // PLB miss (retval == 0) & it's last iteration
     {
-      i_saved = H-1;
+      i_saved = H-2;
     }
   }
 
@@ -771,6 +777,11 @@ void freecursive_access(int addr){
   while(i_saved >= 1)   // STEP 2  PosMap block access
   {
     int tag = concat(i_saved, addr/pow(X,i_saved));
+
+    if (tag == 11055308)
+    {
+      printf("tag: %d   i: %d   PLB[%d]: %d\n", tag, i_saved, tag % PLB_SIZE, PLB[tag % PLB_SIZE]);
+    }
     
 
     if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
@@ -812,9 +823,10 @@ void freecursive_access(int addr){
       printf("ERROR: freecursive: block not found in stash!\n");
       exit(1);
     }
-    if (tag == 31138)
+    if (tag == 11055308)
     {
       printf("remove issued from freecursive!\n");
+      printf("PLB[%d] = %d\n", tag % PLB_SIZE, tag);
     }
     
     remove_from_stash(index);
