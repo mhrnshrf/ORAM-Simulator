@@ -58,6 +58,7 @@ int PLB[PLB_SIZE] = {[0 ... PLB_SIZE-1] -1};   // posmap lookaside buffer
 
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
+int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
 int oramctr = 0;  // # oram accesses
 int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
 int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
@@ -805,7 +806,8 @@ void invoke_oram(long long int physical_address,
     long long int arrival_time, int thread_id,
     int instruction_id, long long int instruction_pc) {
     
-    
+  invokectr++;
+  
   orig_addr = physical_address;
   orig_cycle = arrival_time; 
   orig_thread = thread_id; 

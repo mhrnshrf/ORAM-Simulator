@@ -394,7 +394,7 @@ int main(int argc, char * argv[])
 
 			gettimeofday(&end, NULL);
 			duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-			totaltime += duration;
+			totaltime += duration/1000;
 			
 			// Mehrnoosh.
 		  }
@@ -417,7 +417,7 @@ int main(int argc, char * argv[])
 
 				gettimeofday(&end, NULL);
 				duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-				totaltime += duration;
+				totaltime += duration/1000;
 			}
 			// Mehrnoosh.
 
@@ -580,8 +580,9 @@ int main(int argc, char * argv[])
 
 
 // Mehrnoosh:
-
-printf("LOG: total time: %ld us\n", totaltime);
+printf("............... ORAM Stats ...............\n");
+printf("total time: %ld ms\n", totaltime);
+printf("bk evict rate: %f\n", (double)bkctr/invokectr);
 
 
 // Mehrnoosh.
