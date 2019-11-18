@@ -20,8 +20,11 @@
 
 
 
-// extern Cache *PLB;
-
+long long int orig_addr;
+long long int orig_cycle; 
+int orig_thread; 
+int orig_instr; 
+long long int orig_pc;
 
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
@@ -174,17 +177,12 @@ void oram_alloc(){
 
 // initialize the oram tree by assigning a random path to each addr of address space
 void oram_init(){
-  // printf("entering oram init\n");
   for(int i = 0; i < BLOCK; i++)
   {
     
     // PosMap[i].addr = i;
     PosMap[i] =  assign_a_path(i);
-    // printf("oram init loop i: %d addr:%d   label:%d\n", i, PosMap[i].addr, PosMap[i].label);
-    // if (i == 90)
-    // {
-    //   /* code */
-    // }
+
   }
 }
 
@@ -204,7 +202,6 @@ void count_level(){
       }
       
     }   
-    // printf("%d      %d\n", l, counter);
     printf("%f\n", counter/(LZ[l]*pow(2,l)));
   }
   
@@ -254,7 +251,6 @@ void print_tree(){
     int curr = 0;
     for(int i = 0; i < NODE; i++ )
     {
-        // printf("%d: in oram for loop\n", i);
         curr = calc_level(i);
         if(curr != prev)
         {
@@ -292,25 +288,15 @@ int assign_a_path(int addr){
     
     for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
     {
-      // printf("in begining of assign path i: %d\n", i);
-      // printf("assign path: label: %d\n", label);
       int index = calc_index(label, i);
       for(int j = 0; j < LZ[i]; j++)
       {
-        // printf("assign path: level: %d,   slot: %d\n", i, j);
-        // printf("assign path: index: %d\n\n", index);
         if(!GlobTree[index].slot[j].isReal)
         {
           GlobTree[index].slot[j].addr = addr;
           GlobTree[index].slot[j].label = label;
           GlobTree[index].slot[j].isReal = true;
           GlobTree[index].slot[j].isData = true;
-          // if (addr == 90)
-          // {
-          //     /* code */
-          //     printf("assign path: %d\n", label);
-          //     printf("assign path: 90 locate in level:%d  slot:%d  index:%d\n", i, j, index);
-          // }
           return label;
         }
       }
@@ -325,12 +311,10 @@ void test_init(){
   int addr = 1;
   int label = PosMap[1];
   fprintf(fp,"PosMap: %d, %d\n", addr, label);
-  // printf("oram test: label: %d\n", label);
 
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
     int index = calc_index(label, i);
-    // printf("oram test: index: %d\n", index);
     for(int j = 0; j < LZ[i]; j++)
     {
       if(GlobTree[index].slot[j].addr == addr)
@@ -352,6 +336,241 @@ void reset_candidate(){
   }
 }
 
+void count_tree(){
+  
+  int sum = 0;
+
+  for (int i = 0; i < NODE; i++)
+  {
+    for (int j = 0; j < LZ[i]; j++)
+    {
+      if(GlobTree[i].slot[j].isReal)
+      {
+        sum++;
+      }
+    }
+  }
+
+  printf("count tree: counted block: %d,  BLOCK: %d ~> they match? %s \n", sum, BLOCK, (sum == BLOCK)?"yes!":"no!");
+  
+}
+
+void read_path(int label){
+
+    for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
+    {
+      int index = calc_index(label, i);
+      for(int j = 0; j < LZ[i]; j++)
+      {
+        insert_read(GlobTree[index].slot[j].addr, orig_cycle, orig_thread, orig_instr, orig_pc);
+
+        if(GlobTree[index].slot[j].isReal)
+        {
+          
+          if(add_to_stash(GlobTree[index].slot[j]))
+          {
+            GlobTree[index].slot[j].isReal = false;
+            GlobTree[index].slot[j].addr = -1;
+            GlobTree[index].slot[j].label = -1;
+          }
+          else
+          {
+            printf("ERROR: read: stash overflow!  @ %d\n", stashctr);
+            exit(1);
+          }
+        }
+      }
+    }
+
+}
+
+
+void pick_candidate(int index, int label, int i){
+  int c = 0;
+  for(int k= 0; k < STASH_SIZE; k++)
+  {
+    if (Stash[k].isReal)
+    {
+      if((Stash[k].label == label || index == calc_index(Stash[k].label, i)) && (!pinFlag || k != intended))
+      {
+        candidate[c] = k;
+        c++; 
+        if (c == Z)
+        {
+          return;
+        }
+      }
+    }
+  }
+}
+
+void write_path(int label){
+  
+  for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
+  {
+    int index = calc_index(label, i);
+    reset_candidate();
+    pick_candidate(index, label, i);
+
+    for(int j = 0; j < LZ[i]; j++)
+    {
+      if (candidate[j] == -1)
+      {
+        for (int h = 0; h < LZ[i] - j; h++)
+        {
+          insert_write (0, orig_cycle, orig_thread, orig_instr);
+        }
+        break;
+      }
+      insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
+      GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
+      GlobTree[index].slot[j].label = Stash[candidate[j]].label;
+      GlobTree[index].slot[j].isReal = true;
+      GlobTree[index].slot[j].isData = true;
+      remove_from_stash(candidate[j]);
+
+      if (stashctr == 0)
+      {
+        return;
+      }
+      
+    }
+  }
+  
+}
+
+void print_path(int label){
+  for(int i = LEVEL-1; i >= 0; i--)
+  {
+    int index = calc_index(label, i);
+    for(int j = 0; j < LZ[i]; j++)
+    {
+      printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
+    }
+  }
+}
+
+void print_stash(){
+  printf("print stash\n");
+  for(int i = 0; i < STASH_SIZE; i++ )
+  {
+    if (Stash[i].isReal)
+    {
+     printf("Stash[%d]:  %d:%d\n", i, Stash[i].addr, Stash[i].label);
+    }
+  }
+
+}
+
+void print_plb(){
+  for (int i = 0; i < PLB_SIZE; i++)
+  {
+    if (PLB[i] != -1)
+    {
+     printf("PLB[%d]:  %d\n", i, PLB[i]);
+    }
+  }
+  
+}
+
+// issue dummy access (read path + write path) until stash occupancy drops a threshold
+void background_eviction(){
+  int i = 0;
+  while(stashctr >= OV_TRESHOLD)
+  {
+    if(i == 0 )
+      bkctr++;
+    int label = rand() % PATH;
+    read_path(label);
+    write_path(label);
+    i++;
+  }
+}
+
+// assign the block a new label and update in posmap and stash 
+void remap_block(int addr){
+
+  int label = rand() % PATH;
+
+
+  PosMap[addr] = label;   // $$$ remember to exclude current path later on
+
+  int index = get_stash(addr);
+
+
+  if (index == -1)
+  {
+    printf("ERROR: remap: block %d not found in stash!\n", addr);
+    exit(1);
+  }
+
+  intended = index;
+
+  Stash[index].label = label;
+}
+
+bool add_to_stash(Slot s){
+  
+  
+  for(int i = 0; i < STASH_SIZE; i++ )
+  {
+    if(!Stash[i].isReal)
+    {
+
+      Stash[i].addr = s.addr;
+      Stash[i].label = s.label;
+      Stash[i].isReal = true;
+      Stash[i].isData = true;
+      
+      stashctr++;
+      return true;
+    }
+    
+  }
+  return false;
+}
+
+
+// remove from stash given the item index in the stash
+void remove_from_stash(int index){
+  stashctr--;
+  Stash[index].isReal = false;
+  // for(int k= 0; k < STASH_SIZE; k++)
+  // {
+  //   if(index == k)
+  //   {
+  //     Stash[k].isReal = false;
+  //     return;
+  //   }
+  // }
+
+}
+
+
+// get stash index of a block
+int get_stash(int addr){
+  for(int k= 0; k < STASH_SIZE; k++)
+  {
+    if (Stash[k].addr == addr && Stash[k].isReal)
+    {
+      return k;
+    }
+  }
+  return -1;
+}
+
+
+// check whether a block exist in stash
+bool stash_contain(int addr){
+  for(int k= 0; k < STASH_SIZE; k++)
+  {
+    if (Stash[k].addr == addr && Stash[k].isReal)
+    {
+      return true;
+    }
+  }
+  return false;
+}
 
 void test_read_write(){
   gettimeofday(&start, NULL);
@@ -362,10 +581,6 @@ void test_read_write(){
 
     int addr = rand() % BLOCK;
     int label = PosMap[addr];
-
-    // if(duration/1000000 > 1800 ){
-    //   printf("i: %d   bk evict rate: %f\n", i, (double)bkctr/i);
-    // }
 
 
     if (i % 2000000 == 0)
@@ -454,252 +669,6 @@ void test_read_write(){
 
 }
 
-void count_tree(){
-  
-  int sum = 0;
-
-  for (int i = 0; i < NODE; i++)
-  {
-    for (int j = 0; j < LZ[i]; j++)
-    {
-      if(GlobTree[i].slot[j].isReal)
-      {
-        sum++;
-      }
-    }
-  }
-
-  printf("count tree: counted block: %d,  BLOCK: %d ~> they match? %s \n", sum, BLOCK, (sum == BLOCK)?"yes!":"no!");
-  
-}
-
-void read_path(int label){
-
-    // printf("read path: label %d \n", label);
-
-    for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
-    {
-      int index = calc_index(label, i);
-      for(int j = 0; j < LZ[i]; j++)
-      {
-
-        if(GlobTree[index].slot[j].isReal)
-        {
-          
-          if(add_to_stash(GlobTree[index].slot[j]))
-          {
-            GlobTree[index].slot[j].isReal = false;
-            GlobTree[index].slot[j].addr = -1;
-            GlobTree[index].slot[j].label = -1;
-          }
-          else
-          {
-            printf("ERROR: read: stash overflow!  @ %d\n", stashctr);
-            exit(1);
-            // print_stash();
-            // printf("stashctr:%d,      addr: %d  @ label: %d \n", stashctr, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
-            return;
-          }
-        }
-      }
-    }
-
-}
-
-
-void pick_candidate(int index, int label, int i){
-  int c = 0;
-  for(int k= 0; k < STASH_SIZE; k++)
-  {
-    if (Stash[k].isReal)
-    {
-      if((Stash[k].label == label || index == calc_index(Stash[k].label, i)) && (!pinFlag || k != intended))
-      {
-        candidate[c] = k;
-        c++; 
-        if (c == Z)
-        {
-          return;
-        }
-      }
-    }
-  }
-}
-
-void write_path(int label){
-  
-  for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
-  {
-    int index = calc_index(label, i);
-    reset_candidate();
-    pick_candidate(index, label, i);
-
-    for(int j = 0; j < LZ[i]; j++)
-    {
-      if (candidate[j] == -1)
-      {
-        break;
-      }
-
-      GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
-      GlobTree[index].slot[j].label = Stash[candidate[j]].label;
-      GlobTree[index].slot[j].isReal = true;
-      GlobTree[index].slot[j].isData = true;
-      remove_from_stash(candidate[j]);
-
-      if (stashctr == 0)
-      {
-        return;
-      }
-      
-    }
-  }
-  
-}
-
-void print_path(int label){
-  for(int i = LEVEL-1; i >= 0; i--)
-  {
-    int index = calc_index(label, i);
-    for(int j = 0; j < LZ[i]; j++)
-    {
-      printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
-    }
-  }
-}
-
-void print_stash(){
-  printf("print stash\n");
-  for(int i = 0; i < STASH_SIZE; i++ )
-  {
-    if (Stash[i].isReal)
-    {
-     printf("Stash[%d]:  %d:%d\n", i, Stash[i].addr, Stash[i].label);
-    }
-    // else
-    // {
-    //  printf("Stash[%d]: dummy\n", i);
-      
-    // }
-    
-    
-  }
-
-}
-
-void print_plb(){
-  for (int i = 0; i < PLB_SIZE; i++)
-  {
-    if (PLB[i] != -1)
-    {
-     printf("PLB[%d]:  %d\n", i, PLB[i]);
-    }
-  }
-  
-}
-
-// issue dummy access (read path + write path) until stash occupancy drops a threshold
-void background_eviction(){
-  int i = 0;
-  while(stashctr >= OV_TRESHOLD)
-  {
-    if(i == 0 )
-      bkctr++;
-    // printf("background eviction: before stashctr: %d \n", stashctr);
-    int label = rand() % PATH;
-    read_path(label);
-    write_path(label);
-    // printf("background eviction: after stashctr: %d \n", stashctr);
-    i++;
-  }
-}
-
-// assign the block a new label and update in posmap and stash 
-void remap_block(int addr){
-
-  int label = rand() % PATH;
-
-
-  PosMap[addr] = label;   // $$$ remember to exclude current path later on
-
-  int index = get_stash(addr);
-
-
-  if (index == -1)
-  {
-    printf("ERROR: remap: block %d not found in stash!\n", addr);
-    exit(1);
-  }
-
-  intended = index;
-
-  Stash[index].label = label;
-}
-
-bool add_to_stash(Slot s){
-  
-  
-  for(int i = 0; i < STASH_SIZE; i++ )
-  {
-    if(!Stash[i].isReal)
-    {
-
-      Stash[i].addr = s.addr;
-      Stash[i].label = s.label;
-      Stash[i].isReal = true;
-      Stash[i].isData = true;
-      
-      stashctr++;
-      return true;
-    }
-    
-  }
-  // printf("add to stash: addr: %d \n", s.addr);
-  return false;
-}
-
-
-// remove from stash given the item index in the stash
-void remove_from_stash(int index){
-  stashctr--;
-  Stash[index].isReal = false;
-  // for(int k= 0; k < STASH_SIZE; k++)
-  // {
-  //   if(index == k)
-  //   {
-  //     Stash[k].isReal = false;
-  //     return;
-  //   }
-  // }
-
-}
-
-
-// get stash index of a block
-int get_stash(int addr){
-  for(int k= 0; k < STASH_SIZE; k++)
-  {
-    if (Stash[k].addr == addr && Stash[k].isReal)
-    {
-      return k;
-    }
-  }
-  return -1;
-}
-
-
-// check whether a block exist in stash
-bool stash_contain(int addr){
-  for(int k= 0; k < STASH_SIZE; k++)
-  {
-    if (Stash[k].addr == addr && Stash[k].isReal)
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
 // read the path, remap the block, write back the path
 void oram_access(int addr){
   oramctr++;
@@ -723,11 +692,6 @@ void oram_access(int addr){
     }
 }
 
-
-/***********************
-  Freecursive ORAM
-************************/
-
 // Freecursive 4.2.4 ORAM access algorithm
 void freecursive_access(int addr){
   
@@ -737,9 +701,6 @@ void freecursive_access(int addr){
     return;
   }
   
-  
-   
-
   int i_saved = -1;  // STEP 1   PLB lookup 
   for (int i = 0; i <= H-2; i++)
   {
@@ -754,7 +715,6 @@ void freecursive_access(int addr){
       }
       
       i_saved = i-1;
-      // printf("hit!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    %d\n", i);
       break;
     }
     else if(i == H-2)  // PLB miss (retval == 0) & it's last iteration
@@ -775,7 +735,6 @@ void freecursive_access(int addr){
     if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
     {
       pinOn();
-      // printf("posmap access: %d\n", tag);
       oram_access(tag);
       pinOff();
     }
@@ -817,24 +776,20 @@ void freecursive_access(int addr){
     i_saved--;
   }
 
-
-  // printf("data access: %d\n", addr);
   oram_access(addr);  // STEP 3   Data block access
-
 }
-
 
 void test_oram(){
   for(int i = 0; i < TRACE_SIZE; i++)
   {
     int addr = rand() % BLOCK;
-    // printf("i: %d\n", i);
     
     freecursive_access(addr);
     
 
     // if (i % 100000 == 0)
     // {
+    //    printf("i: %d\n", i);
     //   // print_plb();
     //   printf("i: %d oram/freecursvie access ratio: %f\n", i, (float)oramctr/(i+1));
     //   printf("bk evict rate: %f\n", (double)bkctr/i); 
@@ -846,14 +801,50 @@ void test_oram(){
 
 }
 
+void invoke_oram(long long int physical_address,
+    long long int arrival_time, int thread_id,
+    int instruction_id, long long int instruction_pc) {
+    
+    
+  orig_addr = physical_address;
+  orig_cycle = arrival_time; 
+  orig_thread = thread_id; 
+  orig_instr = instruction_id; 
+  orig_pc = instruction_pc;
 
-
-
-
-
-
+  int addr = (int)(physical_address & 0x0000000001FFFFFF);
+  freecursive_access(addr);
+}
 
 ////////////// Mehrnoosh.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

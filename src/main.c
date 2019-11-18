@@ -37,6 +37,11 @@ long long int *time_done;
 long long int total_time_done;
 float core_power=0;
 
+// Mehrnoosh:
+#include <sys/time.h>
+
+// Mehrnoosh.
+
 int main(int argc, char * argv[])
 {
   
@@ -46,6 +51,8 @@ int main(int argc, char * argv[])
   printf("---------------------------------------------\n");
 
 //   Mehrnoosh:
+
+
 	printf("LEVEL: %d\n",  LEVEL);
 	printf("PATH: %d\n",  PATH);
 	printf("NODE: %d\n", NODE);
@@ -81,11 +88,11 @@ int main(int argc, char * argv[])
 	
 	printf("after init\n");
 	
-	test_oram();
+	// test_oram();
 	
-	printf("after test\n");
-	// print_tree();
-	// printf("after print\n");
+	struct timeval start, end;
+	long int duration = 0;
+	long int totaltime = 0;
 //   Mehrnoosh.
   
   int numc=0;
@@ -378,7 +385,18 @@ int main(int argc, char * argv[])
 			ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+lat+PIPELINEDEPTH;
 		  }
 		  else {
-			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
+			// Mehrnoosh:
+
+			// insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
+			gettimeofday(&start, NULL);
+
+			invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
+
+			gettimeofday(&end, NULL);
+			duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+			totaltime += duration;
+			
+			// Mehrnoosh.
 		  }
 	      }
 	      else {  /* This must be a 'W'.  We are confirming that while reading the trace. */
@@ -390,7 +408,19 @@ int main(int argc, char * argv[])
 		      /* Also, add this to the write queue. */
 
 		      if(!write_exists_in_write_queue(addr[numc]))
-			insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
+			// Mehrnoosh:
+			{
+				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
+				gettimeofday(&start, NULL);
+
+				invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
+
+				gettimeofday(&end, NULL);
+				duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+				totaltime += duration;
+			}
+			// Mehrnoosh.
+
 
 		      for(int c=0; c<NUM_CHANNELS; c++){
 			if(write_queue_length[c] == WQ_CAPACITY)
@@ -547,6 +577,14 @@ int main(int argc, char * argv[])
 	  printf("Total system power = %f W # Sum of the previous three lines\n", 10 + core_power + total_system_power/1000);
 	  printf("Energy Delay product (EDP) = %2.9f J.s\n", (10 + core_power + total_system_power/1000)*(float)((double)CYCLE_VAL/(double)3200000000) * (float)((double)CYCLE_VAL/(double)3200000000));
 	}
+
+
+// Mehrnoosh:
+
+printf("LOG: total time: %ld us\n", totaltime);
+
+
+// Mehrnoosh.
 
   return 0;
 }
