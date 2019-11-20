@@ -39,6 +39,7 @@ float core_power=0;
 
 // Mehrnoosh:
 #include <sys/time.h>
+#include <time.h>
 
 // Mehrnoosh.
 
@@ -90,9 +91,8 @@ int main(int argc, char * argv[])
 	
 	// test_oram();
 	
-	struct timeval start, end;
-	long int duration = 0;
-	long int totaltime = 0;
+	 clock_t start, end;
+     double cpu_time_used = 0;
 //   Mehrnoosh.
   
   int numc=0;
@@ -388,13 +388,13 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 
 			// insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
-			gettimeofday(&start, NULL);
+			start = clock();
 
 			invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
-			gettimeofday(&end, NULL);
-			duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-			totaltime += duration/1000;
+			end = clock();
+			cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
+
 			
 			// Mehrnoosh.
 		  }
@@ -411,13 +411,12 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 			{
 				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
-				gettimeofday(&start, NULL);
+				start = clock();
 
 				invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
 
-				gettimeofday(&end, NULL);
-				duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-				totaltime += duration/1000;
+				end = clock();
+				cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
 			}
 			// Mehrnoosh.
 
@@ -580,9 +579,16 @@ int main(int argc, char * argv[])
 
 
 // Mehrnoosh:
-printf("............... ORAM Stats ...............\n");
-printf("total time: %ld ms\n", totaltime);
+printf("\n............... ORAM Stats ...............\n");
+printf("total time: %f s\n", cpu_time_used);
 printf("bk evict rate: %f\n", (double)bkctr/invokectr);
+printf("\n");
+// printf("stash dist:\n");
+
+// for (int i = 0; i < STASH_SIZE+1; i++)
+// {
+// 	printf("%d\n",stash_dist[i]);
+// }
 
 
 // Mehrnoosh.

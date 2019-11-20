@@ -6,8 +6,7 @@
 #define MAX_NUM_BANKS 32
 
 // Mehrnoosh:
-extern int invokectr; // # blocks in stash ~ stash occupancy
-extern int bkctr; 
+
 
 #include <math.h>
 
@@ -23,7 +22,7 @@ extern int bkctr;
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 
 #define BK_EVICTION 1   // 1/0 flag to enable/disable background eviction
-#define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP, Z1 = 0
+#define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0
 
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 10   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
@@ -32,6 +31,11 @@ extern int bkctr;
 #define Z1 4   // # slots per bucket upto L1
 #define Z2 4   // # slots per bucket upto L2
 #define Z3 4   // # slots per bucket upto L3
+
+
+extern int invokectr; 
+extern int bkctr; 
+extern int stash_dist[STASH_SIZE+1];
 
 
 // static const int PATH = pow(2,LEVEL-1);  // # paths

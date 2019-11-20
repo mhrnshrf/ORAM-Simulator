@@ -388,11 +388,13 @@ void read_path(int label){
 
 void pick_candidate(int index, int label, int i){
   int c = 0;
+  int mask = label>>(LEVEL-1-i);
   for(int k= 0; k < STASH_SIZE; k++)
   {
     if (Stash[k].isReal)
     {
-      if((Stash[k].label == label || index == calc_index(Stash[k].label, i)) && (!pinFlag || k != intended))
+      int target = Stash[k].label>>(LEVEL-1-i);
+      if(/* (Stash[k].label == label || index == calc_index(Stash[k].label, i)) */ (((target)^mask) == 0) && (!pinFlag || k != intended))
       {
         candidate[c] = k;
         c++; 
@@ -409,6 +411,20 @@ void write_path(int label){
   
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
+
+    if (stashctr == 0)
+    {
+      for (int h = i; h >= EMPTY_TOP; h--)
+      {
+        for (int g = 0; g < LZ[h]; g++)
+        {
+          insert_write (0, orig_cycle, orig_thread, orig_instr);
+        }
+        
+      }
+      return;
+    }
+    
     int index = calc_index(label, i);
     reset_candidate();
     pick_candidate(index, label, i);
@@ -429,11 +445,6 @@ void write_path(int label){
       GlobTree[index].slot[j].isReal = true;
       GlobTree[index].slot[j].isData = true;
       remove_from_stash(candidate[j]);
-
-      if (stashctr == 0)
-      {
-        return;
-      }
       
     }
   }
@@ -673,6 +684,7 @@ void test_read_write(){
 // read the path, remap the block, write back the path
 void oram_access(int addr){
   oramctr++;
+  stash_dist[stashctr]++;
 
   int label = PosMap[addr];
     if (label == -1)
