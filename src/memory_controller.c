@@ -411,41 +411,57 @@ void write_path(int label){
   
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
+    // if (stashctr == 0)
+    // {
+    //   for (int h = i; h >= EMPTY_TOP; h--)
+    //   {
+    //     for (int g = 0; g < LZ[h]; g++)
+    //     {
+    //       insert_write (0, orig_cycle, orig_thread, orig_instr);
+    //     }
+        
+    //   }
+    //   return;
+    // }
 
     if (stashctr == 0)
     {
-      for (int h = i; h >= EMPTY_TOP; h--)
+      for (int g = 0; g < LZ[i]; g++)
       {
-        for (int g = 0; g < LZ[h]; g++)
-        {
-          insert_write (0, orig_cycle, orig_thread, orig_instr);
-        }
-        
+        insert_write (0, orig_cycle, orig_thread, orig_instr);
       }
-      return;
     }
-    
-    int index = calc_index(label, i);
-    reset_candidate();
-    pick_candidate(index, label, i);
-
-    for(int j = 0; j < LZ[i]; j++)
+    else
     {
-      if (candidate[j] == -1)
+      int index = calc_index(label, i);
+      reset_candidate();
+      pick_candidate(index, label, i);
+
+      for(int j = 0; j < LZ[i]; j++)
       {
-        for (int h = 0; h < LZ[i] - j; h++)
+        // if (candidate[j] == -1)
+        // {
+        //   for (int h = 0; h < LZ[i] - j; h++)
+        //   {
+        //     insert_write (0, orig_cycle, orig_thread, orig_instr);
+        //   }
+        //   break;
+        // }
+        if (candidate[j] == -1)
         {
           insert_write (0, orig_cycle, orig_thread, orig_instr);
         }
-        break;
+        else
+        {
+          insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
+          GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
+          GlobTree[index].slot[j].label = Stash[candidate[j]].label;
+          GlobTree[index].slot[j].isReal = true;
+          GlobTree[index].slot[j].isData = true;
+          remove_from_stash(candidate[j]);
+
+        }
       }
-      insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
-      GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
-      GlobTree[index].slot[j].label = Stash[candidate[j]].label;
-      GlobTree[index].slot[j].isReal = true;
-      GlobTree[index].slot[j].isData = true;
-      remove_from_stash(candidate[j]);
-      
     }
   }
   
