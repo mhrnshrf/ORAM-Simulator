@@ -363,7 +363,10 @@ void read_path(int label){
       int index = calc_index(label, i);
       for(int j = 0; j < LZ[i]; j++)
       {
-        insert_read(GlobTree[index].slot[j].addr, orig_cycle, orig_thread, orig_instr, orig_pc);
+        if (i >= TOP_CACHE)
+        {
+          insert_read(GlobTree[index].slot[j].addr, orig_cycle, orig_thread, orig_instr, orig_pc);
+        }
 
         if(GlobTree[index].slot[j].isReal)
         {
@@ -411,24 +414,16 @@ void write_path(int label){
   
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
-    // if (stashctr == 0)
-    // {
-    //   for (int h = i; h >= EMPTY_TOP; h--)
-    //   {
-    //     for (int g = 0; g < LZ[h]; g++)
-    //     {
-    //       insert_write (0, orig_cycle, orig_thread, orig_instr);
-    //     }
-        
-    //   }
-    //   return;
-    // }
 
     if (stashctr == 0)
     {
       for (int g = 0; g < LZ[i]; g++)
       {
-        insert_write (0, orig_cycle, orig_thread, orig_instr);
+        if (i >= TOP_CACHE)
+        {
+          insert_write (0, orig_cycle, orig_thread, orig_instr);
+        }
+        
       }
     }
     else
@@ -439,21 +434,20 @@ void write_path(int label){
 
       for(int j = 0; j < LZ[i]; j++)
       {
-        // if (candidate[j] == -1)
-        // {
-        //   for (int h = 0; h < LZ[i] - j; h++)
-        //   {
-        //     insert_write (0, orig_cycle, orig_thread, orig_instr);
-        //   }
-        //   break;
-        // }
+
         if (candidate[j] == -1)
         {
-          insert_write (0, orig_cycle, orig_thread, orig_instr);
+          if (i >= TOP_CACHE)
+          {
+            insert_write (0, orig_cycle, orig_thread, orig_instr);
+          }
         }
         else
         {
-          insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
+          if (i >= TOP_CACHE)
+          {
+            insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
+          }
           GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
           GlobTree[index].slot[j].label = Stash[candidate[j]].label;
           GlobTree[index].slot[j].isReal = true;
@@ -842,7 +836,7 @@ void invoke_oram(long long int physical_address,
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  int addr = (int)(physical_address & 0x0000000001FFFFFF);
+  int addr = (int)(physical_address & (BLOCK-1));
   freecursive_access(addr);
 }
 

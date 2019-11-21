@@ -65,6 +65,7 @@ int main(int argc, char * argv[])
 	printf("STASH_SIZE: %d\n", STASH_SIZE);
 	printf("BK_EVICTION: %d\n", BK_EVICTION);
 	printf("EMPTY_TOP: %d\n", EMPTY_TOP);
+	printf("TOP_CACHE: %d\n", TOP_CACHE);
 	printf("TRACE_SIZE: %d\n", TRACE_SIZE);
 	printf("LZ: ");
 	int length = 0;
