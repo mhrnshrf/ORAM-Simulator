@@ -585,11 +585,11 @@ printf("total time: %f s\n", cpu_time_used);
 printf("bk evict rate: %f\n", (double)bkctr/invokectr);
 printf("\n");
 
-printf("stash dist:\n");
-for (int i = 0; i < STASH_SIZE+1; i++)
-{
-	printf("%d\n",stash_dist[i]);
-}
+// printf("stash dist:\n");
+// for (int i = 0; i < STASH_SIZE+1; i++)
+// {
+// 	printf("%d\n",stash_dist[i]);
+// }
 
 
 // Mehrnoosh.

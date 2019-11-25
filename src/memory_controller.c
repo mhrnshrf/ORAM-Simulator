@@ -278,7 +278,7 @@ void print_tree(){
 
 // assign a random path to a data block
 int assign_a_path(int addr){
-  int label = rand() % PATH;
+  int label = label = rand() % PATH;
   
 
   while(true)
