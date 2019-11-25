@@ -5,25 +5,25 @@
 LEVEL: 24
 PATH: 8388608
 NODE: 16777215
-SLOT: 67108860
-BLOCK: 33554430
+SLOT: 66516992
+BLOCK: 33258496
 Z: 4
 U: 0.500000
-OV_TRESHOLD: 100
-STASH_SIZE: 200
+OV_TRESHOLD: 3996
+STASH_SIZE: 4096
 BK_EVICTION: 1
-EMPTY_TOP: 0
-TOP_CACHE: 0
+EMPTY_TOP: 10
+TOP_CACHE: 10
 TRACE_SIZE: 1000000
-LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
- = 96 ~> path length
-L1: 9   Z1:4
-L2: 15   Z2:4
-L3: 18   Z3:4
+LZ: 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 3 3 3 4 4 4 4 4 
+ = 41 ~> path length
+L1: 9   Z1:0
+L2: 15   Z2:2
+L3: 18   Z3:3
 after alloc
 after init
 Initializing.
-Core 0: Input trace file input/comm1 : Addresses will have prefix 0
+Core 0: Input trace file input/face : Addresses will have prefix 0
 Reading vi file: 1Gb_x4.vi	
 16 Chips per Rank
 ----------------------------------------------------------------------------------------
@@ -93,4 +93,4 @@ WQ_CAPACITY:                    64
 ADDRESS_MAPPING:                 1
 WQ_LOOKUP_LATENCY:              10
 
---------------
+-----------
