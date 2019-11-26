@@ -37,9 +37,15 @@ long long int *time_done;
 long long int total_time_done;
 float core_power=0;
 
+
 // Mehrnoosh:
 #include <sys/time.h>
 #include <time.h>
+
+struct timeval sday, eday;
+long int period = 0;
+int periodctr = 0;
+int tracectr = 0;
 
 // Mehrnoosh.
 
@@ -306,7 +312,32 @@ int main(int argc, char * argv[])
 
 
   printf("Starting simulation.\n");
+	
   while (!expt_done) {
+
+// Mehrnoosh:
+
+	if (tracectr >= TRACE_SIZE)
+	{
+		break;
+	}
+	
+	gettimeofday(&sday, NULL);
+	if (tracectr % 10000 == 0)
+	{
+		printf("...........................Partial Stat..............................\n");
+		// printf("after %d:\n", periodctr);
+		printf("@ %d:\n", tracectr);
+		print_stats();
+		printf("total time: %f s\n", cpu_time_used);
+		printf("bk evict rate: %f\n", (double)bkctr/invokectr);
+		printf("\n");
+		printf("\n");
+		period = 0;
+		periodctr++;
+	}
+	
+// Mehrnoosh.
 
     /* For each core, retire instructions if they have finished. */
     for (numc = 0; numc < NUMCORES; numc++) {
@@ -388,8 +419,8 @@ int main(int argc, char * argv[])
 		  else {
 			// Mehrnoosh:
 
-			// insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 			start = clock();
+			// insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
 			invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
@@ -411,8 +442,8 @@ int main(int argc, char * argv[])
 		      if(!write_exists_in_write_queue(addr[numc]))
 			// Mehrnoosh:
 			{
-				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
 				start = clock();
+				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
 
 				invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
 
@@ -443,6 +474,7 @@ int main(int argc, char * argv[])
 	      /* Done consuming one line of the trace file.  Read in the next. */
 	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 	        if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+				tracectr++;
 		  if (opertype[numc] == 'R') {
 		    if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
 		      printf("Panic.  Poor trace format.\n");
@@ -504,6 +536,11 @@ int main(int argc, char * argv[])
     //}
 
     CYCLE_VAL++;  /* Advance the simulation cycle. */
+
+// Mehrnoosh:
+	gettimeofday(&eday, NULL);
+    period =  ((eday.tv_sec * 1000000 + eday.tv_usec) - (sday.tv_sec * 1000000 + sday.tv_usec))/ 1000000;
+// Mehrnoosh.
   }
 
 
