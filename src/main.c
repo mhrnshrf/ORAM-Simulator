@@ -46,6 +46,7 @@ struct timeval sday, eday;
 long int period = 0;
 int periodctr = 0;
 int tracectr = 0;
+int roundprev = 0;
 
 // Mehrnoosh.
 
@@ -323,7 +324,7 @@ int main(int argc, char * argv[])
 	}
 	
 	gettimeofday(&sday, NULL);
-	if (tracectr % 10000 == 0)
+	if ((tracectr % 10000 == 0) && tracectr != roundprev)
 	{
 		printf("...........................Partial Stat..............................\n");
 		// printf("after %d:\n", periodctr);
@@ -335,6 +336,7 @@ int main(int argc, char * argv[])
 		printf("\n");
 		period = 0;
 		periodctr++;
+		roundprev = tracectr;
 	}
 	
 // Mehrnoosh.
