@@ -542,6 +542,7 @@ int main(int argc, char * argv[])
 // Mehrnoosh:
 	gettimeofday(&eday, NULL);
     period =  ((eday.tv_sec * 1000000 + eday.tv_usec) - (sday.tv_sec * 1000000 + sday.tv_usec))/ 1000000;
+	fflush(stdout);
 // Mehrnoosh.
   }
 
