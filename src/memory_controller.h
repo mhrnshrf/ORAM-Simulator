@@ -16,22 +16,22 @@
 #define Z 4     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
-#define STASH_SIZE 200     // size of stash
+#define STASH_SIZE 4096     // size of stash
 #define PLB_SIZE 1024     // size of plb (# entry)
 #define TRACE_SIZE 10001 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 
 #define BK_EVICTION 1   // 1/0 flag to enable/disable background eviction
-#define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
+#define EMPTY_TOP 10   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 
-#define Z1 4   // # slots per bucket upto L1
-#define Z2 4   // # slots per bucket upto L2
-#define Z3 4   // # slots per bucket upto L3
+#define Z1 0   // # slots per bucket upto L1
+#define Z2 2   // # slots per bucket upto L2
+#define Z3 3   // # slots per bucket upto L3
 
 
 extern int invokectr; 
