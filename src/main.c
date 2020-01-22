@@ -59,7 +59,12 @@ int main(int argc, char * argv[])
   printf("---------------------------------------------\n");
 
 //   Mehrnoosh:
-
+	
+	// for (int i = 0; i < PATH; i+=1)//PATH/CAP_NODE)
+	// {
+	// 	printf("%d:  %d \n", i, calc_index(i,L1+1)-CAP_NODE+1);
+	// }
+	
 
 	printf("LEVEL: %d\n",  LEVEL);
 	printf("PATH: %d\n",  PATH);
@@ -97,7 +102,7 @@ int main(int argc, char * argv[])
 	
 	printf("after init\n");
 	
-	// test_oram();
+	test_oram();
 	
 	 clock_t start, end;
      double cpu_time_used = 0;
@@ -424,7 +429,7 @@ int main(int argc, char * argv[])
 			start = clock();
 			// insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
-			invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
+			//invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
 			end = clock();
 			cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -447,7 +452,7 @@ int main(int argc, char * argv[])
 				start = clock();
 				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
 
-				invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
+				//invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
 
 				end = clock();
 				cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -624,6 +629,8 @@ printf("\n............... ORAM Stats ...............\n");
 printf("total time: %f s\n", cpu_time_used);
 printf("bk evict rate: %f\n", (double)bkctr/invokectr);
 printf("\n");
+print_cap_percent();
+count_tree();
 
 // printf("stash dist:\n");
 // for (int i = 0; i < STASH_SIZE+1; i++)

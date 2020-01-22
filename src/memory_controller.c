@@ -75,6 +75,11 @@ long int timesum = 0;
 void pinOn() {pinFlag = true;}    // turn the pin flag on
 void pinOff() {pinFlag = false;}  // turn the pin flag off
 
+// after volcano
+int cap_count[CAP_NODE] = {0};
+int path_length = 0;
+int sub_cap = 0;
+
 // allocate memory for global oram tree and position map
 
 /*void oram_alloc(){
@@ -158,6 +163,17 @@ int concat(int a, int b) {
 
 void oram_alloc(){
 
+  for (int i = 0; i < LEVEL; i++)
+	{
+		path_length += LZ[i];
+	}
+
+  for (int i = CAP_LEVEL; i < LEVEL; i++)
+  {
+    sub_cap += LZ[i]*pow(2,i-(CAP_LEVEL));
+    
+  }
+  
   for (int i = 0 ; i < NODE; i++) 
   {
     int l = calc_level(i);  
@@ -187,7 +203,7 @@ void oram_init(){
   }
 }
 
-void count_level(){
+void print_count_level(){
   for (int l = 0; l < LEVEL; l++)
   {
     int counter = 0;
@@ -298,6 +314,7 @@ int assign_a_path(int addr){
           GlobTree[index].slot[j].label = label;
           GlobTree[index].slot[j].isReal = true;
           GlobTree[index].slot[j].isData = true;
+          cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]++;
           return label;
         }
       }
@@ -365,7 +382,7 @@ void read_path(int label){
       {
         if (i >= TOP_CACHE)
         {
-          insert_read(GlobTree[index].slot[j].addr, orig_cycle, orig_thread, orig_instr, orig_pc);
+          // insert_read(GlobTree[index].slot[j].addr, orig_cycle, orig_thread, orig_instr, orig_pc);
         }
 
         if(GlobTree[index].slot[j].isReal)
@@ -376,6 +393,7 @@ void read_path(int label){
             GlobTree[index].slot[j].isReal = false;
             GlobTree[index].slot[j].addr = -1;
             GlobTree[index].slot[j].label = -1;
+            cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]--;
           }
           else
           {
@@ -421,7 +439,7 @@ void write_path(int label){
       {
         if (i >= TOP_CACHE)
         {
-          insert_write (0, orig_cycle, orig_thread, orig_instr);
+          // insert_write (0, orig_cycle, orig_thread, orig_instr);
         }
         
       }
@@ -439,19 +457,20 @@ void write_path(int label){
         {
           if (i >= TOP_CACHE)
           {
-            insert_write (0, orig_cycle, orig_thread, orig_instr);
+            // insert_write (0, orig_cycle, orig_thread, orig_instr);
           }
         }
         else
         {
           if (i >= TOP_CACHE)
           {
-            insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
+            // insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
           }
           GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
           GlobTree[index].slot[j].label = Stash[candidate[j]].label;
           GlobTree[index].slot[j].isReal = true;
           GlobTree[index].slot[j].isData = true;
+          cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]++;
           remove_from_stash(candidate[j]);
 
         }
@@ -608,7 +627,7 @@ void test_read_write(){
     if (i % 2000000 == 0)
     {
       printf("%d :\n", i);
-      count_level();
+      print_count_level();
       printf("\n");
       printf("bk evict rate: %f\n", (double)bkctr/i);
       printf("\n");
@@ -803,22 +822,28 @@ void freecursive_access(int addr){
 }
 
 void test_oram(){
-  for(int i = 0; i < TRACE_SIZE; i++)
+  for(long long int i = 0; i < 320*TRACE_SIZE+1; i++)
   {
     int addr = rand() % BLOCK;
     
     freecursive_access(addr);
+    if (i % 100000 == 0 )
+    {
+      printf("\ni: %lld\n", i);
+    }
+    
     
 
-    // if (i % 100000 == 0)
-    // {
-    //    printf("i: %d\n", i);
-    //   // print_plb();
-    //   printf("i: %d oram/freecursvie access ratio: %f\n", i, (float)oramctr/(i+1));
-    //   printf("bk evict rate: %f\n", (double)bkctr/i); 
-    // }
+    if (i % 10000000 == 0)
+    {
+       printf("\ni: %lld\n", i);
+       print_count_level();
+      // print_plb();
+      // printf("i: %d oram/freecursvie access ratio: %f\n", i, (float)oramctr/(i+1));
+      // printf("bk evict rate: %f\n", (double)bkctr/i); 
+    }
     
-    
+    fflush(stdout);
 
   }
 
@@ -838,6 +863,21 @@ void invoke_oram(long long int physical_address,
 
   int addr = (int)(physical_address & (BLOCK-1));
   freecursive_access(addr);
+}
+
+// After Volcano:
+void print_cap_percent(){
+  printf("cap percent @ level: %d\n", CAP_LEVEL);
+  printf("sub cap: %d\n", sub_cap);
+  for (int i = 0; i < CAP_NODE; i++)
+  {
+    printf("%d:           %d \n",i, 100*cap_count[i]/sub_cap);
+    if (i > 10000)
+    {
+      return;
+    }
+    
+  }
 }
 
 ////////////// Mehrnoosh.
