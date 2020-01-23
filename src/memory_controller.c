@@ -827,10 +827,17 @@ void test_oram(){
     int addr = rand() % BLOCK;
     
     freecursive_access(addr);
+    
     if (i % 100000 == 0 )
     {
       printf("\ni: %lld\n", i);
     }
+
+    if (addr == 10)
+    {
+      printf("\naddr: %d\n", addr);
+    }
+    
     
     
 
