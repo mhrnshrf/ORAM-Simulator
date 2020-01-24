@@ -199,6 +199,11 @@ void oram_init(){
     
     // PosMap[i].addr = i;
     PosMap[i] =  assign_a_path(i);
+    if (i == 10)
+    {
+      printf("oram init:  Posmap[%d]: %d\n", i, PosMap[i]);
+    }
+    
 
   }
 }
@@ -406,7 +411,7 @@ void read_path(int label){
 
 }
 
-
+// at each bucket look entire stash once and pick candidates for LZ[i] number of slots that the bucket has
 void pick_candidate(int index, int label, int i){
   int c = 0;
   int mask = label>>(LEVEL-1-i);
@@ -542,6 +547,8 @@ void remap_block(int addr){
   if (index == -1)
   {
     printf("ERROR: remap: block %d not found in stash!\n", addr);
+    printf("remap:  Posmap[%d]: %d\n", addr, PosMap[addr]);
+    printf("remap:  stashctr: %d\n", stashctr);
     exit(1);
   }
 
@@ -822,12 +829,13 @@ void freecursive_access(int addr){
 }
 
 void test_oram(){
+
   for(long long int i = 0; i < 320*TRACE_SIZE+1; i++)
   {
     int addr = rand() % BLOCK;
     
     freecursive_access(addr);
-    
+
     if (i % 100000 == 0 )
     {
       printf("\ni: %lld\n", i);
