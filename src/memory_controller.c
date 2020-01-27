@@ -198,8 +198,10 @@ void oram_init(){
   {
     
     // PosMap[i].addr = i;
+
+
     PosMap[i] =  assign_a_path(i);
-    if (i == 10)
+    if (i == 0)
     {
       printf("oram init:  Posmap[%d]: %d\n", i, PosMap[i]);
     }
@@ -744,7 +746,7 @@ void oram_access(int addr){
 // Freecursive 4.2.4 ORAM access algorithm
 void freecursive_access(int addr){
   
-  
+  /*
   if (stash_contain(addr))      // check if the block is already in the stash
   {
     return;
@@ -824,7 +826,7 @@ void freecursive_access(int addr){
     
     i_saved--;
   }
-
+*/
   oram_access(addr);  // STEP 3   Data block access
 }
 
@@ -836,12 +838,12 @@ void test_oram(){
     
     freecursive_access(addr);
 
-    if (i % 100000 == 0 )
+    if (i % 1000000 == 0 )
     {
       printf("\ni: %lld\n", i);
     }
 
-    if (addr == 10)
+    if (addr == 10 || addr == 0)
     {
       printf("\naddr: %d\n", addr);
     }
@@ -851,7 +853,7 @@ void test_oram(){
 
     if (i % 10000000 == 0)
     {
-       printf("\ni: %lld\n", i);
+       printf("\n\ni: %lld\n", i);
        print_count_level();
       // print_plb();
       // printf("i: %d oram/freecursvie access ratio: %f\n", i, (float)oramctr/(i+1));
