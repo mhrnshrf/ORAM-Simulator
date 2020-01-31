@@ -65,7 +65,9 @@ int main(int argc, char * argv[])
 	// 	printf("%d:  %d \n", i, calc_index(i,L1+1)-CAP_NODE+1);
 	// }
 	
-	printf("concat:   %d\n", concat(0,1345)); // concat(4,13) will be 413
+	// printf("concat:   %d\n", concat(1,0)); 
+	// printf("digcount:   %d\n", digcount(0)); 
+
 
 	printf("LEVEL: %d\n",  LEVEL);
 	printf("PATH: %d\n",  PATH);

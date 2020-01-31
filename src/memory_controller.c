@@ -139,8 +139,26 @@ int  calc_index(int label,  int l){
   return index;
 }
 
+
+int digcount(int num)
+{
+    int count = 0;
+
+    /* Calculate total digits */
+    count = log2(num) + 1;
+    if (num == 0)
+    {
+      count = 1;
+    }
+    
+    return count;
+}
+
 int concat(int a, int b) { 
-  
+
+  int c;
+  /*
+  // decimal concat ~~~~> concat(4,13) will be 413
     char s1[32]; 
     char s2[32]; 
   
@@ -153,8 +171,10 @@ int concat(int a, int b) {
   
     // Convert the concatenated string 
     // to integer 
-    int c = atoi(s1); 
-  
+    c = atoi(s1); 
+  */
+ // binary concat ~~~~> concat(1,0) will be 2
+  c = (a<<digcount(b) )| b;
     // return the formed integer 
     return c; 
 } 
@@ -201,10 +221,10 @@ void oram_init(){
 
 
     PosMap[i] =  assign_a_path(i);
-    if (i == 0)
-    {
-      printf("oram init:  Posmap[%d]: %d\n", i, PosMap[i]);
-    }
+    // if (i == 0)
+    // {
+    //   printf("oram init:  Posmap[%d]: %d\n", i, PosMap[i]);
+    // }
     
 
   }
@@ -746,7 +766,7 @@ void oram_access(int addr){
 // Freecursive 4.2.4 ORAM access algorithm
 void freecursive_access(int addr){
   
-  /*
+
   if (stash_contain(addr))      // check if the block is already in the stash
   {
     return;
@@ -756,7 +776,8 @@ void freecursive_access(int addr){
   for (int i = 0; i <= H-2; i++)
   {
     // reading form PLB if miss then proceed to access ORAM tree
-    int tag = concat(i, addr/pow(X,i));
+    int ai = addr/pow(X,i);
+    int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
     
     if (PLB[tag % PLB_SIZE] == tag)  // PLB hit
     {
@@ -778,15 +799,21 @@ void freecursive_access(int addr){
 
   while(i_saved >= 1)   // STEP 2  PosMap block access
   {
-    int tag = concat(i_saved, addr/pow(X,i_saved));
+    int ai = addr/pow(X,i_saved);
+    int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
+
+    // if (tag == 10 )
+    // {
+    //   printf("\ntag: %d   addr: %d\n", tag, addr);
+    // }
 
    
     
 
-    if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
+    if (!stash_contain(ai)) // access oram tree iff block does not exist in the stash
     {
       pinOn();
-      oram_access(tag);
+      oram_access(ai);
       pinOff();
     }
 
@@ -826,7 +853,7 @@ void freecursive_access(int addr){
     
     i_saved--;
   }
-*/
+
   oram_access(addr);  // STEP 3   Data block access
 }
 
@@ -843,10 +870,7 @@ void test_oram(){
       printf("\ni: %lld\n", i);
     }
 
-    if (addr == 10 || addr == 0)
-    {
-      printf("\naddr: %d\n", addr);
-    }
+
     
     
     

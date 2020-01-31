@@ -92,6 +92,7 @@ void print_stash();
 int assign_a_path(int addr);
 void print_cap_percent();
 int concat(int a, int b);
+int digcount(int num);
 
 
 // Mehrnoosh.
