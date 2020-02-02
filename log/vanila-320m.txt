@@ -1658,3 +1658,67 @@ WQ_LOOKUP_LATENCY:              10
 
 ----------------------------------------------------------------------------------------
 Starting simulation.
+...........................Partial Stat..............................
+@ 10000:
+-------- Channel 0 Stats-----------
+Total Reads Serviced :          0      
+Total Writes Serviced :         0      
+Average Read Latency :          0.00000
+Average Read Queue Latency :    0.00000
+Average Write Latency :         0.00000
+Average Write Queue Latency :   0.00000
+Read Page Hit Rate :               -nan
+Write Page Hit Rate :              -nan
+------------------------------------
+total time: 0.000000 s
+bk evict rate: -nan
+
+
+...........................Partial Stat..............................
+@ 20000:
+-------- Channel 0 Stats-----------
+Total Reads Serviced :          0      
+Total Writes Serviced :         0      
+Average Read Latency :          0.00000
+Average Read Queue Latency :    0.00000
+Average Write Latency :         0.00000
+Average Write Queue Latency :   0.00000
+Read Page Hit Rate :               -nan
+Write Page Hit Rate :              -nan
+------------------------------------
+total time: 0.015625 s
+bk evict rate: -nan
+
+
+...........................Partial Stat..............................
+@ 30000:
+-------- Channel 0 Stats-----------
+Total Reads Serviced :          0      
+Total Writes Serviced :         0      
+Average Read Latency :          0.00000
+Average Read Queue Latency :    0.00000
+Average Write Latency :         0.00000
+Average Write Queue Latency :   0.00000
+Read Page Hit Rate :               -nan
+Write Page Hit Rate :              -nan
+------------------------------------
+total time: 0.031250 s
+bk evict rate: -nan
+
+
+...........................Partial Stat..............................
+@ 70000:
+-------- Channel 0 Stats-----------
+Total Reads Serviced :          0      
+Total Writes Serviced :         0      
+Average Read Latency :          0.00000
+Average Read Queue Latency :    0.00000
+Average Write Latency :         0.00000
+Average Write Queue Latency :   0.00000
+Read Page Hit Rate :               -nan
+Write Page Hit Rate :              -nan
+------------------------------------
+total time: 0.109375 s
+bk evict rate: -nan
+
+
