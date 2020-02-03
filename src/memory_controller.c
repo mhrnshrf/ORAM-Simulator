@@ -807,13 +807,17 @@ void freecursive_access(int addr){
     //   printf("\ntag: %d   addr: %d\n", tag, addr);
     // }
 
+    if (tag == addr)
+    {
+      return;
+    }
    
     
 
-    if (!stash_contain(ai)) // access oram tree iff block does not exist in the stash
+    if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
     {
       pinOn();
-      oram_access(ai);
+      oram_access(tag);
       pinOff();
     }
 
