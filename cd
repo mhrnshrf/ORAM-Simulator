@@ -1,0 +1,25 @@
+---------------------------------------------
+-- USIMM: the Utah SImulated Memory Module --
+--              Version: 1.3               --
+---------------------------------------------
+LEVEL: 24
+PATH: 8388608
+NODE: 16777215
+SLOT: 67108860
+BLOCK: 33554430
+Z: 4
+U: 0.500000
+OV_TRESHOLD: 100
+STASH_SIZE: 200
+BK_EVICTION: 1
+EMPTY_TOP: 0
+TOP_CACHE: 10
+TRACE_SIZE: 1000000
+LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
+ = 96 ~> path length
+L1: 9   Z1:4
+L2: 15   Z2:4
+L3: 18   Z3:4
+after alloc
+after init
+ERROR: freecursive: block not found in stash!

@@ -56,15 +56,23 @@ int PosMap[BLOCK];          // position map
 Slot Stash[STASH_SIZE];     // stash
 int PLB[PLB_SIZE] = {[0 ... PLB_SIZE-1] -1};   // posmap lookaside buffer
 
+int intended = -1;         // index of intended block in stash
+bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
+int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
+int candidate[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
+
+
+void pinOn() {pinFlag = true;}    // turn the pin flag on
+void pinOff() {pinFlag = false;}  // turn the pin flag off
+
+
+// profiling stats
+
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
 int oramctr = 0;  // # oram accesses
 int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
-int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
-int candidate[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
-int intended = -1;         // index of intended block in stash
-bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
 
 struct timeval start, end, mid;
 long int timeavg = 0;
@@ -72,13 +80,11 @@ long int timeavg_mid = 0;
 long int duration = 0;
 long int timesum = 0;
 
-void pinOn() {pinFlag = true;}    // turn the pin flag on
-void pinOff() {pinFlag = false;}  // turn the pin flag off
-
-// after volcano
 int cap_count[CAP_NODE] = {0};
 int path_length = 0;
 int sub_cap = 0;
+
+int plb_hit = 0;
 
 // allocate memory for global oram tree and position map
 
@@ -781,6 +787,7 @@ void freecursive_access(int addr){
     
     if (PLB[tag % PLB_SIZE] == tag)  // PLB hit
     {
+      plb_hit++;
       if (i == 0)   // if the intended block is originally a posmap block itself terminate!
       {
         return;
