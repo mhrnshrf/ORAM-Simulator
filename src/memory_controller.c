@@ -84,7 +84,8 @@ int cap_count[CAP_NODE] = {0};
 int path_length = 0;
 int sub_cap = 0;
 
-int plb_hit = 0;
+int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
+int plb_access = 0;   // # total plb access (hits + misses)
 
 // allocate memory for global oram tree and position map
 
@@ -781,13 +782,14 @@ void freecursive_access(int addr){
   int i_saved = -1;  // STEP 1   PLB lookup 
   for (int i = 0; i <= H-2; i++)
   {
+    plb_access++;
     // reading form PLB if miss then proceed to access ORAM tree
     int ai = addr/pow(X,i);
     int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
     
     if (PLB[tag % PLB_SIZE] == tag)  // PLB hit
     {
-      plb_hit++;
+      plb_hit[i]++;
       if (i == 0)   // if the intended block is originally a posmap block itself terminate!
       {
         return;
@@ -870,30 +872,35 @@ void freecursive_access(int addr){
 
 void test_oram(){
 
-  for(long long int i = 0; i < 320*TRACE_SIZE+1; i++)
+  for(long long int i = 0; i < TRACE_SIZE+1; i++)
   {
     int addr = rand() % BLOCK;
     
     freecursive_access(addr);
 
-    if (i % 1000000 == 0 )
+    // print i every 10m
+    // if (i % 1000000 == 0 )
+    // {
+    //   printf("\ni: %lld\n", i);
+    // }    
+    
+    // print motivation curve:
+    // if (i % 10000000 == 0)
+    // {
+    //    printf("\n\ni: %lld\n", i);
+    //    print_count_level();
+    // }
+
+    // print plb hit start
+    if (i % 1000000 == 0)
     {
-      printf("\ni: %lld\n", i);
+      for (int i = 0; i < H-1; i++)
+      {
+        printf("plb hit a%d:    %f\%\n",i,  100*plb_hit[i]/plb_access);
+      }
+      
     }
-
-
     
-    
-    
-
-    if (i % 10000000 == 0)
-    {
-       printf("\n\ni: %lld\n", i);
-       print_count_level();
-      // print_plb();
-      // printf("i: %d oram/freecursvie access ratio: %f\n", i, (float)oramctr/(i+1));
-      // printf("bk evict rate: %f\n", (double)bkctr/i); 
-    }
     
     fflush(stdout);
 
