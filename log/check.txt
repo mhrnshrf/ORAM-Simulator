@@ -1,2 +1,0 @@
-PosMap: 1, 9158
-GlobTree: 1, 9158

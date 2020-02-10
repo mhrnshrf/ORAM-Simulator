@@ -84,8 +84,8 @@ int cap_count[CAP_NODE] = {0};
 int path_length = 0;
 int sub_cap = 0;
 
-int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
-int plb_access = 0;   // # total plb access (hits + misses)
+long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
+long long int plb_access[H-1] = {0};   // # total plb access (hits + misses)
 
 // allocate memory for global oram tree and position map
 
@@ -782,7 +782,7 @@ void freecursive_access(int addr){
   int i_saved = -1;  // STEP 1   PLB lookup 
   for (int i = 0; i <= H-2; i++)
   {
-    plb_access++;
+    plb_access[i]++;
     // reading form PLB if miss then proceed to access ORAM tree
     int ai = addr/pow(X,i);
     int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
@@ -874,7 +874,8 @@ void test_oram(){
 
   for(long long int i = 0; i < TRACE_SIZE+1; i++)
   {
-    int addr = rand() % BLOCK;
+    //int addr = rand() % BLOCK;
+    int addr = 755498;
     
     freecursive_access(addr);
 
@@ -897,7 +898,7 @@ void test_oram(){
       printf("\ni: %lld\n", i);
       for (int i = 0; i < H-1; i++)
       {
-        printf("plb hit a%d:    %d%%\n",i,  100*plb_hit[i]/plb_access);
+        printf("plb hit a%d:    %f%%\n",i,  (float)100*plb_hit[i]/plb_access[i]);
       }
       
     }
