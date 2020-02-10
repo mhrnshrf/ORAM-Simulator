@@ -894,9 +894,10 @@ void test_oram(){
     // print plb hit start
     if (i % 1000000 == 0)
     {
+      printf("\ni: %lld\n", i);
       for (int i = 0; i < H-1; i++)
       {
-        printf("plb hit a%d:    %f\%\n",i,  100*plb_hit[i]/plb_access);
+        printf("plb hit a%d:    %d%%\n",i,  100*plb_hit[i]/plb_access);
       }
       
     }
