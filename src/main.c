@@ -94,8 +94,8 @@ int main(int argc, char * argv[])
 	printf("L2: %d   Z2:%d\n", L2, Z2);
 	printf("L3: %d   Z3:%d\n", L3, Z3);
 
-	// init_trace();
-	// printf("after init trace\n");
+	init_trace();
+	printf("after init trace\n");
 	
 	oram_alloc();
 

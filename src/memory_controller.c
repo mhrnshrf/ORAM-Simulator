@@ -874,8 +874,10 @@ void test_oram(){
 
   for(long long int i = 0; i < TRACE_SIZE+1; i++)
   {
-    //int addr = rand() % BLOCK;
-    int addr = 755498;
+    // int addr = rand() % BLOCK;
+    // int addr = 755498;
+    // int addr = i;
+    int addr = trace[i];
     
     freecursive_access(addr);
 
@@ -893,12 +895,13 @@ void test_oram(){
     // }
 
     // print plb hit start
-    if (i % 1000000 == 0)
+    if (i % 10 == 0)
     {
       printf("\ni: %lld\n", i);
       for (int i = 0; i < H-1; i++)
       {
         printf("plb hit a%d:    %f%%\n",i,  (float)100*plb_hit[i]/plb_access[i]);
+        // printf("plb hit vs. plb access:    %lld   vs.   %lld\n\n",  plb_hit[i], plb_access[i]);
       }
       
     }

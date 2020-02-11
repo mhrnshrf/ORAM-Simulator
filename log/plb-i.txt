@@ -1,0 +1,460 @@
+---------------------------------------------
+-- USIMM: the Utah SImulated Memory Module --
+--              Version: 1.3               --
+---------------------------------------------
+LEVEL: 24
+PATH: 8388608
+NODE: 16777215
+SLOT: 67108860
+BLOCK: 33554430
+Z: 4
+U: 0.500000
+OV_TRESHOLD: 100
+STASH_SIZE: 200
+BK_EVICTION: 1
+EMPTY_TOP: 0
+TOP_CACHE: 10
+TRACE_SIZE: 32000000
+LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
+ = 96 ~> path length
+L1: 9   Z1:4
+L2: 15   Z2:4
+L3: 18   Z3:4
+after alloc
+after init
+
+i: 0
+plb hit a0:    0.000000%
+plb hit vs. plb access:    0   vs.   1
+
+plb hit a1:    0.000000%
+plb hit vs. plb access:    0   vs.   1
+
+plb hit a2:    0.000000%
+plb hit vs. plb access:    0   vs.   1
+
+
+i: 1000000
+plb hit a0:    0.000200%
+plb hit vs. plb access:    2   vs.   1000001
+
+plb hit a1:    93.749893%
+plb hit vs. plb access:    937498   vs.   999999
+
+plb hit a2:    93.657700%
+plb hit vs. plb access:    58537   vs.   62501
+
+
+i: 2000000
+plb hit a0:    0.000100%
+plb hit vs. plb access:    2   vs.   2000001
+
+plb hit a1:    93.749954%
+plb hit vs. plb access:    1874998   vs.   1999999
+
+plb hit a2:    93.658447%
+plb hit vs. plb access:    117074   vs.   125001
+
+
+i: 3000000
+plb hit a0:    0.000067%
+plb hit vs. plb access:    2   vs.   3000001
+
+plb hit a1:    93.749962%
+plb hit vs. plb access:    2812498   vs.   2999999
+
+plb hit a2:    93.658699%
+plb hit vs. plb access:    175611   vs.   187501
+
+
+i: 4000000
+plb hit a0:    0.000050%
+plb hit vs. plb access:    2   vs.   4000001
+
+plb hit a1:    93.749977%
+plb hit vs. plb access:    3749998   vs.   3999999
+
+plb hit a2:    93.658424%
+plb hit vs. plb access:    234147   vs.   250001
+
+
+i: 5000000
+plb hit a0:    0.000040%
+plb hit vs. plb access:    2   vs.   5000001
+
+plb hit a1:    93.749977%
+plb hit vs. plb access:    4687498   vs.   4999999
+
+plb hit a2:    93.658257%
+plb hit vs. plb access:    292683   vs.   312501
+
+
+i: 6000000
+plb hit a0:    0.000033%
+plb hit vs. plb access:    2   vs.   6000001
+
+plb hit a1:    93.749977%
+plb hit vs. plb access:    5624998   vs.   5999999
+
+plb hit a2:    93.658417%
+plb hit vs. plb access:    351220   vs.   375001
+
+
+i: 7000000
+plb hit a0:    0.000029%
+plb hit vs. plb access:    2   vs.   7000001
+
+plb hit a1:    93.749985%
+plb hit vs. plb access:    6562498   vs.   6999999
+
+plb hit a2:    93.658531%
+plb hit vs. plb access:    409757   vs.   437501
+
+
+i: 8000000
+plb hit a0:    0.000025%
+plb hit vs. plb access:    2   vs.   8000001
+
+plb hit a1:    93.749985%
+plb hit vs. plb access:    7499998   vs.   7999999
+
+plb hit a2:    93.658409%
+plb hit vs. plb access:    468293   vs.   500001
+
+
+i: 9000000
+plb hit a0:    0.000022%
+plb hit vs. plb access:    2   vs.   9000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    8437498   vs.   8999999
+
+plb hit a2:    93.658501%
+plb hit vs. plb access:    526830   vs.   562501
+
+
+i: 10000000
+plb hit a0:    0.000020%
+plb hit vs. plb access:    2   vs.   10000001
+
+plb hit a1:    93.749985%
+plb hit vs. plb access:    9374998   vs.   9999999
+
+plb hit a2:    93.658409%
+plb hit vs. plb access:    585366   vs.   625001
+
+
+i: 11000000
+plb hit a0:    0.000018%
+plb hit vs. plb access:    2   vs.   11000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    10312498   vs.   10999999
+
+plb hit a2:    93.658485%
+plb hit vs. plb access:    643903   vs.   687501
+
+
+i: 12000000
+plb hit a0:    0.000017%
+plb hit vs. plb access:    2   vs.   12000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    11249998   vs.   11999999
+
+plb hit a2:    93.658417%
+plb hit vs. plb access:    702439   vs.   750001
+
+
+i: 13000000
+plb hit a0:    0.000015%
+plb hit vs. plb access:    2   vs.   13000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    12187498   vs.   12999999
+
+plb hit a2:    93.658470%
+plb hit vs. plb access:    760976   vs.   812501
+
+
+i: 14000000
+plb hit a0:    0.000014%
+plb hit vs. plb access:    2   vs.   14000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    13124998   vs.   13999999
+
+plb hit a2:    93.658409%
+plb hit vs. plb access:    819512   vs.   875001
+
+
+i: 15000000
+plb hit a0:    0.000013%
+plb hit vs. plb access:    2   vs.   15000001
+
+plb hit a1:    93.750000%
+plb hit vs. plb access:    14062498   vs.   14999999
+
+plb hit a2:    93.658455%
+plb hit vs. plb access:    878049   vs.   937501
+
+
+i: 16000000
+plb hit a0:    0.000012%
+plb hit vs. plb access:    2   vs.   16000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    14999998   vs.   15999999
+
+plb hit a2:    93.658401%
+plb hit vs. plb access:    936585   vs.   1000001
+
+
+i: 17000000
+plb hit a0:    0.000012%
+plb hit vs. plb access:    2   vs.   17000001
+
+plb hit a1:    93.749985%
+plb hit vs. plb access:    15937498   vs.   16999999
+
+plb hit a2:    93.658455%
+plb hit vs. plb access:    995122   vs.   1062501
+
+
+i: 18000000
+plb hit a0:    0.000011%
+plb hit vs. plb access:    2   vs.   18000001
+
+plb hit a1:    93.749985%
+plb hit vs. plb access:    16874998   vs.   17999999
+
+plb hit a2:    93.658501%
+plb hit vs. plb access:    1053659   vs.   1125001
+
+
+i: 19000000
+plb hit a0:    0.000011%
+plb hit vs. plb access:    2   vs.   19000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    17812498   vs.   18999999
+
+plb hit a2:    93.658447%
+plb hit vs. plb access:    1112195   vs.   1187501
+
+
+i: 20000000
+plb hit a0:    0.000010%
+plb hit vs. plb access:    2   vs.   20000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    18749998   vs.   19999999
+
+plb hit a2:    93.658409%
+plb hit vs. plb access:    1170731   vs.   1250001
+
+
+i: 21000000
+plb hit a0:    0.000010%
+plb hit vs. plb access:    2   vs.   21000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    19687498   vs.   20999999
+
+plb hit a2:    93.658440%
+plb hit vs. plb access:    1229268   vs.   1312501
+
+
+i: 22000000
+plb hit a0:    0.000009%
+plb hit vs. plb access:    2   vs.   22000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    20624998   vs.   21999999
+
+plb hit a2:    93.658478%
+plb hit vs. plb access:    1287805   vs.   1375001
+
+
+i: 23000000
+plb hit a0:    0.000009%
+plb hit vs. plb access:    2   vs.   23000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    21562498   vs.   22999999
+
+plb hit a2:    93.658440%
+plb hit vs. plb access:    1346341   vs.   1437501
+
+
+i: 24000000
+plb hit a0:    0.000008%
+plb hit vs. plb access:    2   vs.   24000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    22499998   vs.   23999999
+
+plb hit a2:    93.658401%
+plb hit vs. plb access:    1404877   vs.   1500001
+
+
+i: 25000000
+plb hit a0:    0.000008%
+plb hit vs. plb access:    2   vs.   25000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    23437498   vs.   24999999
+
+plb hit a2:    93.658440%
+plb hit vs. plb access:    1463414   vs.   1562501
+
+
+i: 26000000
+plb hit a0:    0.000008%
+plb hit vs. plb access:    2   vs.   26000001
+
+plb hit a1:    93.750000%
+plb hit vs. plb access:    24374998   vs.   25999999
+
+plb hit a2:    93.658470%
+plb hit vs. plb access:    1521951   vs.   1625001
+
+
+i: 27000000
+plb hit a0:    0.000007%
+plb hit vs. plb access:    2   vs.   27000001
+
+plb hit a1:    93.750000%
+plb hit vs. plb access:    25312498   vs.   26999999
+
+plb hit a2:    93.658493%
+plb hit vs. plb access:    1580488   vs.   1687501
+
+
+i: 28000000
+plb hit a0:    0.000007%
+plb hit vs. plb access:    2   vs.   28000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    26249998   vs.   27999999
+
+plb hit a2:    93.658409%
+plb hit vs. plb access:    1639023   vs.   1750001
+
+
+i: 29000000
+plb hit a0:    0.000007%
+plb hit vs. plb access:    2   vs.   29000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    27187498   vs.   28999999
+
+plb hit a2:    93.658432%
+plb hit vs. plb access:    1697560   vs.   1812501
+
+
+i: 30000000
+plb hit a0:    0.000007%
+plb hit vs. plb access:    2   vs.   30000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    28124998   vs.   29999999
+
+plb hit a2:    93.658455%
+plb hit vs. plb access:    1756097   vs.   1875001
+
+
+i: 31000000
+plb hit a0:    0.000006%
+plb hit vs. plb access:    2   vs.   31000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    29062498   vs.   30999999
+
+plb hit a2:    93.658478%
+plb hit vs. plb access:    1814634   vs.   1937501
+
+
+i: 32000000
+plb hit a0:    0.000006%
+plb hit vs. plb access:    2   vs.   32000001
+
+plb hit a1:    93.749992%
+plb hit vs. plb access:    29999998   vs.   31999999
+
+plb hit a2:    93.658401%
+plb hit vs. plb access:    1873169   vs.   2000001
+
+Initializing.
+Core 0: Input trace file input/comm2 : Addresses will have prefix 0
+Reading vi file: 1Gb_x4.vi	
+16 Chips per Rank
+----------------------------------------------------------------------------------------
+------------------------
+- SIMULATOR PARAMETERS -
+------------------------
+
+-------------
+- PROCESSOR -
+-------------
+PROCESSOR_CLK_MULTIPLIER:        4
+ROBSIZE:                       128
+MAX_FETCH:                       4
+MAX_RETIRE:                      2
+PIPELINEDEPTH:                  10
+
+---------------
+- DRAM Config -
+---------------
+NUM_CHANNELS:                    1
+NUM_RANKS:                       2
+NUM_BANKS:                       8
+NUM_ROWS:                    32768
+NUM_COLUMNS:                   128
+
+---------------
+- DRAM Timing -
+---------------
+T_RCD:                          44
+T_RP:                           44
+T_CAS:                          44
+T_RC:                          156
+T_RAS:                         112
+T_RRD:                          20
+T_FAW:                         128
+T_WR:                           48
+T_WTR:                          24
+T_RTP:                          24
+T_CCD:                          16
+T_RFC:                         352
+T_REFI:                      24960
+T_CWD:                          20
+T_RTRS:                          8
+T_PD_MIN:                       16
+T_XP:                           20
+T_XP_DLL:                       80
+T_DATA_TRANS:                   16
+
+---------------------------
+- DRAM Idd Specifications -
+---------------------------
+VDD:                        01.50
+IDD0:                       70.00
+IDD2P0:                     12.00
+IDD2P1:                     30.00
+IDD2N:                      45.00
+IDD3P:                      35.00
+IDD3N:                      45.00
+IDD4R:                      140.00
+IDD4W:                      145.00
+IDD5:                       170.00
+
+-------------------
+- DRAM Controller -
+-------------------
+WQ_CAPACITY:                    64
+ADDRESS_MAPPING:                 1
+WQ_LOOKUP_LATENCY:              10
+
+----------------------------------------------------------------------------------------
+Starting simulation.

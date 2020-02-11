@@ -1,0 +1,189 @@
+---------------------------------------------
+-- USIMM: the Utah SImulated Memory Module --
+--              Version: 1.3               --
+---------------------------------------------
+LEVEL: 24
+PATH: 8388608
+NODE: 16777215
+SLOT: 67108860
+BLOCK: 33554430
+Z: 4
+U: 0.500000
+OV_TRESHOLD: 100
+STASH_SIZE: 200
+BK_EVICTION: 1
+EMPTY_TOP: 0
+TOP_CACHE: 10
+TRACE_SIZE: 32000000
+LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
+ = 96 ~> path length
+L1: 9   Z1:4
+L2: 15   Z2:4
+L3: 18   Z3:4
+after alloc
+after init
+
+i: 0
+plb hit a0:    0.000000%
+plb hit vs. plb access:    0   vs.   1
+
+plb hit a1:    0.000000%
+plb hit vs. plb access:    0   vs.   1
+
+plb hit a2:    0.000000%
+plb hit vs. plb access:    0   vs.   1
+
+
+i: 1000000
+plb hit a0:    0.003100%
+plb hit vs. plb access:    31   vs.   1000001
+
+plb hit a1:    0.024501%
+plb hit vs. plb access:    245   vs.   999970
+
+plb hit a2:    0.382205%
+plb hit vs. plb access:    3821   vs.   999725
+
+
+i: 2000000
+plb hit a0:    0.002800%
+plb hit vs. plb access:    56   vs.   2000001
+
+plb hit a1:    0.024651%
+plb hit vs. plb access:    493   vs.   1999945
+
+plb hit a2:    0.376753%
+plb hit vs. plb access:    7533   vs.   1999452
+
+
+i: 3000000
+plb hit a0:    0.003067%
+plb hit vs. plb access:    92   vs.   3000001
+
+plb hit a1:    0.024634%
+plb hit vs. plb access:    739   vs.   2999909
+
+plb hit a2:    0.377771%
+plb hit vs. plb access:    11330   vs.   2999170
+
+
+i: 4000000
+plb hit a0:    0.002975%
+plb hit vs. plb access:    119   vs.   4000001
+
+plb hit a1:    0.024451%
+plb hit vs. plb access:    978   vs.   3999882
+
+plb hit a2:    0.377303%
+plb hit vs. plb access:    15088   vs.   3998904
+
+
+i: 5000000
+plb hit a0:    0.002880%
+plb hit vs. plb access:    144   vs.   5000001
+
+plb hit a1:    0.024961%
+plb hit vs. plb access:    1248   vs.   4999857
+
+plb hit a2:    0.377245%
+plb hit vs. plb access:    18857   vs.   4998609
+
+
+i: 6000000
+plb hit a0:    0.002850%
+plb hit vs. plb access:    171   vs.   6000001
+
+plb hit a1:    0.025551%
+plb hit vs. plb access:    1533   vs.   5999830
+
+plb hit a2:    0.378758%
+plb hit vs. plb access:    22719   vs.   5998297
+
+
+i: 7000000
+plb hit a0:    0.003014%
+plb hit vs. plb access:    211   vs.   7000001
+
+plb hit a1:    0.025715%
+plb hit vs. plb access:    1800   vs.   6999790
+
+plb hit a2:    0.378923%
+plb hit vs. plb access:    26517   vs.   6997990
+
+
+i: 8000000
+plb hit a0:    0.002975%
+plb hit vs. plb access:    238   vs.   8000001
+
+plb hit a1:    0.025463%
+plb hit vs. plb access:    2037   vs.   7999763
+
+plb hit a2:    0.379008%
+plb hit vs. plb access:    30312   vs.   7997726
+
+
+i: 9000000
+plb hit a0:    0.003011%
+plb hit vs. plb access:    271   vs.   9000001
+
+plb hit a1:    0.025379%
+plb hit vs. plb access:    2284   vs.   8999730
+
+plb hit a2:    0.379208%
+plb hit vs. plb access:    34119   vs.   8997446
+
+
+i: 10000000
+plb hit a0:    0.003120%
+plb hit vs. plb access:    312   vs.   10000001
+
+plb hit a1:    0.025231%
+plb hit vs. plb access:    2523   vs.   9999689
+
+plb hit a2:    0.379097%
+plb hit vs. plb access:    37899   vs.   9997166
+
+
+i: 11000000
+plb hit a0:    0.003118%
+plb hit vs. plb access:    343   vs.   11000001
+
+plb hit a1:    0.025374%
+plb hit vs. plb access:    2791   vs.   10999658
+
+plb hit a2:    0.379108%
+plb hit vs. plb access:    41690   vs.   10996867
+
+
+i: 12000000
+plb hit a0:    0.003142%
+plb hit vs. plb access:    377   vs.   12000001
+
+plb hit a1:    0.025401%
+plb hit vs. plb access:    3048   vs.   11999624
+
+plb hit a2:    0.378975%
+plb hit vs. plb access:    45464   vs.   11996576
+
+
+i: 13000000
+plb hit a0:    0.003131%
+plb hit vs. plb access:    407   vs.   13000001
+
+plb hit a1:    0.025278%
+plb hit vs. plb access:    3286   vs.   12999594
+
+plb hit a2:    0.379523%
+plb hit vs. plb access:    49324   vs.   12996308
+
+
+i: 14000000
+plb hit a0:    0.003143%
+plb hit vs. plb access:    440   vs.   14000001
+
+plb hit a1:    0.025129%
+plb hit vs. plb access:    3518   vs.   13999561
+
+plb hit a2:    0.379243%
+plb hit vs. plb access:    53079   vs.   13996043
+
