@@ -877,7 +877,7 @@ void test_oram(){
     // int addr = rand() % BLOCK;
     // int addr = 755498;
     // int addr = i;
-    int addr = trace[i];
+    int addr = (int)(trace[i] & (BLOCK-1));
     
     freecursive_access(addr);
 
