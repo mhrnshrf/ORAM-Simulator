@@ -35,6 +35,8 @@
 
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
+#define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
+
 
 extern int invokectr; 
 extern int bkctr; 
@@ -66,8 +68,6 @@ void background_eviction();
 void count_tree();
 void init_trace();
 void print_count_level();
-
-
 void test_read_write();
 void read_path(int label);
 void write_path(int label);
@@ -78,21 +78,16 @@ void test_oram();
 void freecursive_access(int addr);
 int get_stash(int addr);
 bool stash_contain(int addr);
-void invoke_oram(long long int physical_address,
-    long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc);
-
+void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc);
 int  calc_index(int label, int l);
-
 int calc_level(int index);
-
 void print_tree();
 void print_stash();
-
 int assign_a_path(int addr);
 void print_cap_percent();
 int concat(int a, int b);
 int digcount(int num);
+void translate_addr_subtree(int index);
 
 
 // Mehrnoosh.

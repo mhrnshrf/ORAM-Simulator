@@ -944,6 +944,19 @@ void print_cap_percent(){
   }
 }
 
+
+// translate ORAM tree index to DRAM address using subtree scheme to exploit channel parallelism
+void translate_addr_subtree(int index){
+
+int node_size = ROW_BUFF_SIZE * NUM_CHANNELS;  // size of each 2k-arry tree that forms a node
+int num_slots = node_size/CACHE_LINE_SIZE;    // # slots that subtree holds
+int num_buckets = num_slots/Z;                // # buckets per subtree given each bucket holds Z slots
+int num_levels = log_base2(num_buckets);      // # levels of each subtree ~~~> i.e. k
+
+
+
+}
+
 ////////////// Mehrnoosh.
 
 
