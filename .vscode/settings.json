@@ -1,3 +1,4 @@
 {
-    "workbench.colorTheme": "Snazzy Light"
+    "workbench.colorTheme": "Snazzy Light",
+    "C_Cpp.errorSquiggles": "Disabled"
 }

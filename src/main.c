@@ -41,12 +41,29 @@ float core_power=0;
 // Mehrnoosh:
 #include <sys/time.h>
 #include <time.h>
+#include "cache.h"
 
 struct timeval sday, eday;
 long int period = 0;
 int periodctr = 0;
 int tracectr = 0;
 int roundprev = 0;
+int hitctr = 0;
+int missctr = 0;
+
+
+// struct to keep info of one mem request that is issued from cahce rather than from trace file file
+typedef struct MemRequest{
+  bool valid;
+  int nonmemops; 
+  char opertype;
+  long long int addr;
+  long long int instrpc;
+} MemRequest;
+
+
+MemRequest evicted[16]; 	// array of evicted request for cores, each core can have one evicted at a time 16: max num of cores
+bool no_miss_occured = true;	// a flag that is set based on cache access and used to keep on reading trace file until it's cache hit
 
 // Mehrnoosh.
 
@@ -60,15 +77,6 @@ int main(int argc, char * argv[])
 
 //   Mehrnoosh:
 	
-	// for (int i = 0; i < PATH; i+=1)//PATH/CAP_NODE)
-	// {
-	// 	printf("%d:  %d \n", i, calc_index(i,L1+1)-CAP_NODE+1);
-	// }
-	
-	// printf("concat:   %d\n", concat(1,0)); 
-	// printf("digcount:   %d\n", digcount(0)); 
-
-
 	printf("LEVEL: %d\n",  LEVEL);
 	printf("PATH: %d\n",  PATH);
 	printf("NODE: %d\n", NODE);
@@ -94,21 +102,29 @@ int main(int argc, char * argv[])
 	printf("L2: %d   Z2:%d\n", L2, Z2);
 	printf("L3: %d   Z3:%d\n", L3, Z3);
 
-	init_trace();
-	printf("after init trace\n");
+	// init_trace();
+	// printf("after init trace\n");
+
+	cache_init();
 	
-	oram_alloc();
+	// oram_alloc();
 
 	printf("after alloc\n");
 	
-	oram_init();
+	// oram_init();
 	
 	printf("after init\n");
 	
-	test_oram();
+	// test_oram();
 	
 	 clock_t start, end;
      double cpu_time_used = 0;
+
+	 for (int i = 0; i < NUMCORES; i++)
+	 {
+		 evicted[i].valid = false;
+	 }
+	 
 //   Mehrnoosh.
   
   int numc=0;
@@ -430,7 +446,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 
 			start = clock();
-			// insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
+			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
 			//invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
@@ -455,7 +471,7 @@ int main(int argc, char * argv[])
 				start = clock();
 				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
 
-				//invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
+				invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
 
 				end = clock();
 				cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -483,32 +499,65 @@ int main(int argc, char * argv[])
 
 	      /* Done consuming one line of the trace file.  Read in the next. */
 	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
-	        if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
-				tracectr++;
-		  if (opertype[numc] == 'R') {
-		    if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-		      printf("Panic.  Poor trace format.\n");
-		      return -4;
-		    }
-		  }
-		  else {
-		    if (opertype[numc] == 'W') {
-		      if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
-		        printf("Panic.  Poor trace format.\n");
-		        return -3;
-		      }
-		    }
-		    else {
-		      printf("Panic.  Poor trace format.\n");
-		      return -2;
-		    }
-		  }
+// Mehrnoosh:
+		while (no_miss_occured)
+		{	
+			if (evicted[numc].valid)
+			{
+				nonmemops[numc] = evicted[numc].nonmemops;
+				opertype[numc] = evicted[numc].opertype;
+				addr[numc] = evicted[numc].addr;
+				evicted[numc].valid = false;
+				break;
+			}
+			
+
+			if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+					tracectr++;
+			if (opertype[numc] == 'R') {
+				if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
+				printf("Panic.  Poor trace format.\n");
+				return -4;
+				}
+			}
+			else {
+				if (opertype[numc] == 'W') {
+					if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
+						printf("Panic.  Poor trace format.\n");
+						return -3;
+					}
+				}
+				else {
+				printf("Panic.  Poor trace format.\n");
+				return -2;
+				}
+			}
+				if (cache_access(addr[numc], opertype[numc]) == HIT)
+				{
+					hitctr++;
+				}
+				else // miss occured
+				{
+					missctr++;
+					no_miss_occured = false;
+					int victim = cache_fill(addr[numc], opertype[numc]);
+					if ( victim != -1)
+					{
+						evicted[numc].valid = true;
+						evicted[numc].nonmemops = nonmemops[numc]+1;
+						evicted[numc].opertype = 'W';
+						evicted[numc].addr = victim;
+					}
+				}
+			}
+			else {
+			printf("Panic.  Poor trace format.\n");
+			return -1;
+			}
 		}
-		else {
-		  printf("Panic.  Poor trace format.\n");
-		  return -1;
-		}
-	      }
+// Mehrnoosh.
+		
+	    }
 	      else {
 	        if (ROB[numc].inflight == 0) {
 	          num_done++;
@@ -632,6 +681,9 @@ printf("\n............... ORAM Stats ...............\n");
 printf("total time: %f s\n", cpu_time_used);
 printf("bk evict rate: %f\n", (double)bkctr/invokectr);
 printf("\n");
+printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
+printf("miss ctr: %d\n", missctr);
+printf("trace ctr: %d\n", tracectr);
 // print_cap_percent();
 // count_tree();
 
