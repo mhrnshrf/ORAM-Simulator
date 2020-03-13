@@ -1,6 +1,7 @@
 //  Mehrnoosh:
 
 #include "cache.h"
+#include <stdio.h>
 
 
 
@@ -9,9 +10,9 @@ char LRU[NUM_SET][NUM_WAY];                  // a array to keep track of lru for
 
 // invalidate all cahce blocks upon init
 void cache_init(){
-    for (int i = 0; i < NUM_SET; i++)
+    for (unsigned int i = 0; i < NUM_SET; i++)
     {
-        for (int j = 0; j < NUM_WAY; j++)
+        for (unsigned int j = 0; j < NUM_WAY; j++)
         {
             LLC[i][j].valid = false;
             LLC[i][j].dirty = false;
@@ -22,7 +23,7 @@ void cache_init(){
     }
 }
 
-void update_LRU(int index, int way){
+void update_LRU(unsigned int index, unsigned int way){
     if (LRU[index][way] == 255)
     {
         LRU[index][way] = 0;
@@ -33,13 +34,14 @@ void update_LRU(int index, int way){
     } 
 }
 
-void reset_LRU(int index, int way){
+void reset_LRU(unsigned int index, unsigned int way){
     LRU[index][way] = 1;
+
 }
 
 
-int find_spot(int index){
-    for (int j = 0; j < NUM_WAY; j++)
+unsigned int find_spot(unsigned int index){
+    for (unsigned int j = 0; j < NUM_WAY; j++)
     {
         if (!LLC[index][j].valid)
         {
@@ -51,11 +53,11 @@ int find_spot(int index){
 
 
 // find the cacheline with the least recently used
-int find_victim(int index) {
-    int victim = -1;
-    for (int j = 0; j < NUM_WAY; j++)
+unsigned int find_victim(unsigned int index) {
+    unsigned int victim = -1;
+    for (unsigned int j = 0; j < NUM_WAY; j++)
     {
-        int min = 256;
+        unsigned int min = 256;
         if (LRU[index][j] < min)
         {
             victim = j;
@@ -67,25 +69,25 @@ int find_victim(int index) {
 
 
 
-int get_index(int addr){
-    int index = addr << TAG_WIDTH;
+unsigned int get_index(unsigned int addr){
+    unsigned int index = addr << TAG_WIDTH;
     index = index >> (TAG_WIDTH+OFFSET_WIDTH);
     return index;
 
 }
 
-int get_tag(int addr){
-    int tag = addr >> (INDEX_WIDTH+OFFSET_WIDTH);
+unsigned int get_tag(unsigned int addr){
+    unsigned int tag = addr >> (INDEX_WIDTH+OFFSET_WIDTH);
     return tag;
 }
 
 
 // return true on hit and false on miss
-bool cache_access(int addr, char type){
-    int index = get_index(addr);
-    int tag = get_tag(addr);
+bool cache_access(unsigned int addr, char type){
+    unsigned int index = get_index(addr);
+    unsigned int tag = get_tag(addr);
 
-    for (int j = 0; j < NUM_WAY; j++)
+    for (unsigned int j = 0; j < NUM_WAY; j++)
     {
         // hit
         if (LLC[index][j].tag == tag && LLC[index][j].valid)
@@ -104,17 +106,17 @@ bool cache_access(int addr, char type){
 
 
 // try to fill the cache with new data, it may lead to eviction ~~~> is called when miss happens
-int cache_fill(int addr,  char type){
-    int index = get_index(addr);
-    int tag = get_tag(addr);
+unsigned int cache_fill(unsigned int addr,  char type){
+    unsigned int index = get_index(addr);
+    unsigned int tag = get_tag(addr);
 
-    int victim = -1;
+    unsigned int victim = -1;
    
     // miss only
-    int way = find_spot(index);
+    unsigned int way = find_spot(index);
 
     // miss & evict
-    if (way != -1)
+    if (way == -1)
     {
         way = find_victim(index);
         if (LLC[index][way].dirty)
@@ -131,7 +133,7 @@ int cache_fill(int addr,  char type){
     }
     LLC[index][way].valid = true;
     LLC[index][way].tag = tag;
-    LLC[index][way].tag = addr;
+    LLC[index][way].addr = addr;
     reset_LRU(index, way);  
 
     return victim;  

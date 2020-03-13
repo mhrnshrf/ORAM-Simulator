@@ -1,4 +1,7 @@
 {
     "workbench.colorTheme": "Snazzy Light",
-    "C_Cpp.errorSquiggles": "Disabled"
+    "C_Cpp.errorSquiggles": "Disabled",
+    "files.associations": {
+        "cache.h": "c"
+    }
 }

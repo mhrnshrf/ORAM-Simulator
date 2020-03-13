@@ -63,7 +63,7 @@ typedef struct MemRequest{
 
 
 MemRequest evicted[16]; 	// array of evicted request for cores, each core can have one evicted at a time 16: max num of cores
-bool no_miss_occured = true;	// a flag that is set based on cache access and used to keep on reading trace file until it's cache hit
+bool no_miss_occured;	// a flag that is set based on cache access and used to keep on reading trace file until it's cache hit
 
 // Mehrnoosh.
 
@@ -342,6 +342,8 @@ int main(int argc, char * argv[])
 
 // Mehrnoosh:
 
+	no_miss_occured = true;
+
 	if (tracectr >= TRACE_SIZE)
 	{
 		break;
@@ -352,6 +354,7 @@ int main(int argc, char * argv[])
 	{
 		printf("...........................Partial Stat..............................\n");
 		// printf("after %d:\n", periodctr);
+		printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
 		printf("@ %d:\n", tracectr);
 		print_stats();
 		printf("total time: %f s\n", cpu_time_used);
@@ -469,9 +472,9 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 			{
 				start = clock();
-				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
+				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
 
-				invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
+				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
 
 				end = clock();
 				cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -498,10 +501,11 @@ int main(int argc, char * argv[])
 	      num_fetch++;
 
 	      /* Done consuming one line of the trace file.  Read in the next. */
-	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 // Mehrnoosh:
-		while (no_miss_occured)
-		{	
+		while (no_miss_occured && !expt_done)
+		{
+	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+			// printf("while no miss occured: %d  \n", no_miss_occured);
 			if (evicted[numc].valid)
 			{
 				nonmemops[numc] = evicted[numc].nonmemops;
@@ -514,24 +518,24 @@ int main(int argc, char * argv[])
 
 			if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
 					tracectr++;
-			if (opertype[numc] == 'R') {
-				if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-				printf("Panic.  Poor trace format.\n");
-				return -4;
-				}
-			}
-			else {
-				if (opertype[numc] == 'W') {
-					if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
-						printf("Panic.  Poor trace format.\n");
-						return -3;
+				if (opertype[numc] == 'R') {
+					if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
+					printf("Panic.  Poor trace format.\n");
+					return -4;
 					}
 				}
 				else {
-				printf("Panic.  Poor trace format.\n");
-				return -2;
+					if (opertype[numc] == 'W') {
+						if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
+							printf("Panic.  Poor trace format.\n");
+							return -3;
+						}
+					}
+					else {
+					printf("Panic.  Poor trace format.\n");
+					return -2;
+					}
 				}
-			}
 				if (cache_access(addr[numc], opertype[numc]) == HIT)
 				{
 					hitctr++;
@@ -539,7 +543,6 @@ int main(int argc, char * argv[])
 				else // miss occured
 				{
 					missctr++;
-					no_miss_occured = false;
 					int victim = cache_fill(addr[numc], opertype[numc]);
 					if ( victim != -1)
 					{
@@ -548,14 +551,15 @@ int main(int argc, char * argv[])
 						evicted[numc].opertype = 'W';
 						evicted[numc].addr = victim;
 					}
+
+					no_miss_occured = false;
+
 				}
 			}
 			else {
-			printf("Panic.  Poor trace format.\n");
-			return -1;
+				printf("Panic.  Poor trace format.\n");
+				return -1;
 			}
-		}
-// Mehrnoosh.
 		
 	    }
 	      else {
@@ -566,6 +570,9 @@ int main(int argc, char * argv[])
 	        ROB[numc].tracedone=1;
 	        break;  /* Break out of the while loop fetching instructions. */
 	      }
+
+		}
+// Mehrnoosh.
 	      
 	  }  /* Done consuming the next rd or wr. */
 
@@ -681,9 +688,12 @@ printf("\n............... ORAM Stats ...............\n");
 printf("total time: %f s\n", cpu_time_used);
 printf("bk evict rate: %f\n", (double)bkctr/invokectr);
 printf("\n");
-printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
+printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("miss ctr: %d\n", missctr);
 printf("trace ctr: %d\n", tracectr);
+int test = 1073610688;
+printf("addr %d ~~~> index: %d\n", test, get_index(test));
+printf("addr %d ~~~> tag: %d\n", test, get_tag(test));
 // print_cap_percent();
 // count_tree();
 
