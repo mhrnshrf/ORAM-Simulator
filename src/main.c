@@ -50,6 +50,7 @@ int tracectr = 0;
 int roundprev = 0;
 int hitctr = 0;
 int missctr = 0;
+int evictctr = 0;
 
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
@@ -350,21 +351,21 @@ int main(int argc, char * argv[])
 	}
 	
 	gettimeofday(&sday, NULL);
-	if ((tracectr % 10000 == 0) && tracectr != roundprev)
-	{
-		printf("...........................Partial Stat..............................\n");
-		// printf("after %d:\n", periodctr);
-		printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
-		printf("@ %d:\n", tracectr);
-		print_stats();
-		printf("total time: %f s\n", cpu_time_used);
-		printf("bk evict rate: %f\n", (double)bkctr/invokectr);
-		printf("\n");
-		printf("\n");
-		period = 0;
-		periodctr++;
-		roundprev = tracectr;
-	}
+	// if ((tracectr % 10000 == 0) && tracectr != roundprev)
+	// {
+	// 	printf("...........................Partial Stat..............................\n");
+	// 	// printf("after %d:\n", periodctr);
+	// 	printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
+	// 	printf("@ %d:\n", tracectr);
+	// 	print_stats();
+	// 	printf("total time: %f s\n", cpu_time_used);
+	// 	printf("bk evict rate: %f\n", (double)bkctr/invokectr);
+	// 	printf("\n");
+	// 	printf("\n");
+	// 	period = 0;
+	// 	periodctr++;
+	// 	roundprev = tracectr;
+	// }
 	
 // Mehrnoosh.
 
@@ -546,6 +547,7 @@ int main(int argc, char * argv[])
 					int victim = cache_fill(addr[numc], opertype[numc]);
 					if ( victim != -1)
 					{
+						evictctr++;
 						evicted[numc].valid = true;
 						evicted[numc].nonmemops = nonmemops[numc]+1;
 						evicted[numc].opertype = 'W';
@@ -688,12 +690,11 @@ printf("\n............... ORAM Stats ...............\n");
 printf("total time: %f s\n", cpu_time_used);
 printf("bk evict rate: %f\n", (double)bkctr/invokectr);
 printf("\n");
-printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("miss ctr: %d\n", missctr);
 printf("trace ctr: %d\n", tracectr);
-int test = 1073610688;
-printf("addr %d ~~~> index: %d\n", test, get_index(test));
-printf("addr %d ~~~> tag: %d\n", test, get_tag(test));
+printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+printf("evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
+
 // print_cap_percent();
 // count_tree();
 
