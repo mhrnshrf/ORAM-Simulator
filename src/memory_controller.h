@@ -78,7 +78,7 @@ void test_oram();
 void freecursive_access(int addr);
 int get_stash(int addr);
 bool stash_contain(int addr);
-void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc);
+void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type);
 int  calc_index(int label, int l);
 int calc_level(int index);
 void print_tree();

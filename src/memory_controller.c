@@ -916,7 +916,7 @@ void test_oram(){
 
 void invoke_oram(long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc) {
+    int instruction_id, long long int instruction_pc, char type) {
     
   invokectr++;
   

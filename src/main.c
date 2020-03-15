@@ -51,6 +51,7 @@ int roundprev = 0;
 int hitctr = 0;
 int missctr = 0;
 int evictctr = 0;
+int evictifctr = 0;
 
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
@@ -452,7 +453,7 @@ int main(int argc, char * argv[])
 			start = clock();
 			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
-			//invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
+			//invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
 
 			end = clock();
 			cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -475,7 +476,7 @@ int main(int argc, char * argv[])
 				start = clock();
 				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
 
-				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0);
+				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
 				end = clock();
 				cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -513,6 +514,7 @@ int main(int argc, char * argv[])
 				opertype[numc] = evicted[numc].opertype;
 				addr[numc] = evicted[numc].addr;
 				evicted[numc].valid = false;
+				evictifctr++;
 				break;
 			}
 			
@@ -692,6 +694,8 @@ printf("bk evict rate: %f\n", (double)bkctr/invokectr);
 printf("\n");
 printf("miss ctr: %d\n", missctr);
 printf("trace ctr: %d\n", tracectr);
+printf("evict    ctr: %d\n", evictctr);
+printf("evict if ctr: %d\n", evictifctr);
 printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
 
