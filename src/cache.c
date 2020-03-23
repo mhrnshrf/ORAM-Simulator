@@ -40,7 +40,7 @@ void reset_LRU(unsigned int index, unsigned int way){
 }
 
 
-unsigned int find_spot(unsigned int index){
+int find_spot(unsigned int index){
     for (unsigned int j = 0; j < NUM_WAY; j++)
     {
         if (!LLC[index][j].valid)
@@ -53,8 +53,8 @@ unsigned int find_spot(unsigned int index){
 
 
 // find the cacheline with the least recently used
-unsigned int find_victim(unsigned int index) {
-    unsigned int victim = -1;
+int find_victim(unsigned int index) {
+    int victim = -1;
     for (unsigned int j = 0; j < NUM_WAY; j++)
     {
         unsigned int min = 256;
@@ -106,14 +106,14 @@ bool cache_access(unsigned int addr, char type){
 
 
 // try to fill the cache with new data, it may lead to eviction ~~~> is called when miss happens
-unsigned int cache_fill(unsigned int addr,  char type){
+int cache_fill(unsigned int addr,  char type){
     unsigned int index = get_index(addr);
     unsigned int tag = get_tag(addr);
 
-    unsigned int victim = -1;
+    int victim = -1;
    
     // miss only
-    unsigned int way = find_spot(index);
+    int way = find_spot(index);
 
     // miss & evict
     if (way == -1)

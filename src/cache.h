@@ -33,7 +33,7 @@ typedef struct Cacheline{
 
 void cache_init();
 bool cache_access(unsigned int addr, char type);
-unsigned int cache_fill(unsigned int addr,  char type);
+int cache_fill(unsigned int addr,  char type);
 unsigned int get_tag(unsigned int addr);
 unsigned int get_index(unsigned int addr);
 

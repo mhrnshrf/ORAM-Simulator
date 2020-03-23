@@ -61,6 +61,7 @@ int intended = -1;         // index of intended block in stash
 bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
 int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 int candidate[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
+bool write_cache_hit = false;
 
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on
@@ -568,6 +569,8 @@ void remap_block(int addr){
 
   int label = rand() % PATH;
 
+  int prevlabel = PosMap[addr];
+
 
   PosMap[addr] = label;   // $$$ remember to exclude current path later on
 
@@ -577,8 +580,10 @@ void remap_block(int addr){
   if (index == -1)
   {
     printf("ERROR: remap: block %d not found in stash!\n", addr);
+    printf("remap:  previous Posmap[%d]: %d\n", addr, prevlabel);
     printf("remap:  Posmap[%d]: %d\n", addr, PosMap[addr]);
     printf("remap:  stashctr: %d\n", stashctr);
+    printf("remap:  PLB[%d]: %d\n", addr%PLB_SIZE, PLB[addr%PLB_SIZE]);
     exit(1);
   }
 
@@ -772,102 +777,113 @@ void oram_access(int addr){
 }
 
 // Freecursive 4.2.4 ORAM access algorithm
-void freecursive_access(int addr){
+void freecursive_access(int addr, char type){
   
 
   if (stash_contain(addr))      // check if the block is already in the stash
   {
     return;
   }
-  
-  int i_saved = -1;  // STEP 1   PLB lookup 
-  for (int i = 0; i <= H-2; i++)
+
+
+  // if write bypass feature is on and there is write req hit in the cache
+  if (WRITE_BYPASS && write_cache_hit && type == 'W')
   {
-    plb_access[i]++;
-    // reading form PLB if miss then proceed to access ORAM tree
-    int ai = addr/pow(X,i);
-    int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
-    
-    if (PLB[tag % PLB_SIZE] == tag)  // PLB hit
-    {
-      plb_hit[i]++;
-      if (i == 0)   // if the intended block is originally a posmap block itself terminate!
-      {
-        return;
-      }
-      
-      i_saved = i-1;
-      break;
-    }
-    else if(i == H-2)  // PLB miss (retval == 0) & it's last iteration
-    {
-      i_saved = H-2;
-    }
-  }
-
-
-
-  while(i_saved >= 1)   // STEP 2  PosMap block access
-  {
-    int ai = addr/pow(X,i_saved);
-    int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
-
-    // if (tag == 10 )
-    // {
-    //   printf("\ntag: %d   addr: %d\n", tag, addr);
-    // }
-
-    if (tag == addr)
+    write_cache_hit = false;
+    // if the intended block is in plb return now & skip the oram access
+    if (PLB[addr%PLB_SIZE] == addr)
     {
       return;
     }
-   
     
-
-    if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
+  }
+  else
+  {
+    int i_saved = -1;  // STEP 1   PLB lookup 
+    for (int i = 0; i <= H-2; i++)
     {
-      pinOn();
-      oram_access(tag);
-      pinOff();
-    }
-
-    int victim = PLB[tag % PLB_SIZE];
-    if( victim != -1)
-    {
-      Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+      plb_access[i]++;
+      // reading form PLB if miss then proceed to access ORAM tree
+      int ai = addr/pow(X,i);
+      int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
       
-      if (stash_contain(s.addr))
+      if (PLB[tag % PLB_SIZE] == tag)  // PLB hit
       {
-        printf("ERROR: freecursive: block %d already in stash!\n", s.addr);
-        exit(1);
-      }
-      else
-      {
-        bool added = add_to_stash(s);
-        if(!added){
-        printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
-        exit(1);
+        plb_hit[i]++;
+        if (i == 0)   // if the intended block is originally a posmap block itself terminate!
+        {
+          return;
         }
         
+        i_saved = i-1;
+        break;
+      }
+      else if(i == H-2)  // PLB miss (retval == 0) & it's last iteration
+      {
+        i_saved = H-2;
+      }
+    }
+
+    while(i_saved >= 1)   // STEP 2  PosMap block access
+    {
+      int ai = addr/pow(X,i_saved);
+      int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
+
+
+      if (tag == addr)
+      {
+        return;
+      }
+    
+      
+
+      if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
+      {
+        pinOn();
+        oram_access(tag);
+        pinOff();
+      }
+
+      int victim = PLB[tag % PLB_SIZE];
+      if( victim != -1)
+      {
+        Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+        
+        if (stash_contain(s.addr))
+        {
+          printf("ERROR: freecursive: block %d already in stash!\n", s.addr);
+          exit(1);
+        }
+        else
+        {
+          bool added = add_to_stash(s);
+          if(!added){
+          printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
+          exit(1);
+          }
+          
+        }
+        
+        
+
+      }
+
+      PLB[tag % PLB_SIZE] = tag;
+      int index = get_stash(tag);
+      if (index == -1)
+      {
+        printf("ERROR: freecursive: block not found in stash!\n");
+        exit(1);
       }
       
+      remove_from_stash(index);
       
-
+      i_saved--;
     }
 
-    PLB[tag % PLB_SIZE] = tag;
-    int index = get_stash(tag);
-    if (index == -1)
-    {
-      printf("ERROR: freecursive: block not found in stash!\n");
-      exit(1);
-    }
-    
-    remove_from_stash(index);
-    
-    i_saved--;
   }
 
+  // printf("freecursuve: b4 last oram access (data): %d\n", addr);
   oram_access(addr);  // STEP 3   Data block access
 }
 
@@ -880,7 +896,7 @@ void test_oram(){
     // int addr = i;
     int addr = (int)(trace[i] & (BLOCK-1));
     
-    freecursive_access(addr);
+    freecursive_access(addr, 'R');
 
     // print i every 10m
     // if (i % 1000000 == 0 )
@@ -926,8 +942,10 @@ void invoke_oram(long long int physical_address,
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
+  // printf("invoke oram: physical addr: %lld\n", physical_address);
   int addr = (int)(physical_address & (BLOCK-1));
-  freecursive_access(addr);
+  // printf("invoke oram: b4 freecursive call addr: %d\n", addr);
+  freecursive_access(addr, type);
 }
 
 // After Volcano:

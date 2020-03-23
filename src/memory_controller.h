@@ -18,10 +18,10 @@
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
 #define PLB_SIZE 1024     // size of plb (# entry)
-#define TRACE_SIZE 150000 // # addr read from trace file
+#define TRACE_SIZE 32000000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 
-#define BK_EVICTION 1   // 1/0 flag to enable/disable background eviction
+#define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 
@@ -37,10 +37,16 @@
 
 #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 
+// new ideas
+#define WRITE_BYPASS 1  // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
+
+#include <stdbool.h>
 
 extern int invokectr; 
 extern int bkctr; 
 extern int stash_dist[STASH_SIZE+1];
+extern int oramctr; 
+extern bool write_cache_hit;   // flag to be effective if write bypass is enabled
 
 
 // static const int PATH = pow(2,LEVEL-1);  // # paths
@@ -57,7 +63,6 @@ enum{
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1)
 };
 
-#include <stdbool.h>
 typedef struct Slot Slot;
 
 void oram_alloc();
@@ -75,7 +80,7 @@ void remap_block(int addr);
 bool add_to_stash(Slot s);
 void remove_from_stash(int index);
 void test_oram();
-void freecursive_access(int addr);
+void freecursive_access(int addr, char type);
 int get_stash(int addr);
 bool stash_contain(int addr);
 void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type);

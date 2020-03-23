@@ -66,6 +66,7 @@ typedef struct MemRequest{
 
 MemRequest evicted[16]; 	// array of evicted request for cores, each core can have one evicted at a time 16: max num of cores
 bool no_miss_occured;	// a flag that is set based on cache access and used to keep on reading trace file until it's cache hit
+bool eviction_writeback[16] = {0}; // a flag that says next request is gonna be eviction writeback
 
 // Mehrnoosh.
 
@@ -91,6 +92,7 @@ int main(int argc, char * argv[])
 	printf("BK_EVICTION: %d\n", BK_EVICTION);
 	printf("EMPTY_TOP: %d\n", EMPTY_TOP);
 	printf("TOP_CACHE: %d\n", TOP_CACHE);
+	printf("WRITE_BYPASS: %d\n", WRITE_BYPASS);
 	printf("TRACE_SIZE: %d\n", TRACE_SIZE);
 	printf("LZ: ");
 	int length = 0;
@@ -109,11 +111,11 @@ int main(int argc, char * argv[])
 
 	cache_init();
 	
-	// oram_alloc();
+	oram_alloc();
 
 	printf("after alloc\n");
 	
-	// oram_init();
+	oram_init();
 	
 	printf("after init\n");
 	
@@ -453,7 +455,7 @@ int main(int argc, char * argv[])
 			start = clock();
 			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
-			//invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
+			invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
 
 			end = clock();
 			cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -474,9 +476,15 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 			{
 				start = clock();
+				if (eviction_writeback[numc])
+				{
+					write_cache_hit = true;
+					eviction_writeback[numc] = false;
+				}
+				
 				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
 
-				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
+				invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
 				end = clock();
 				cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -514,7 +522,9 @@ int main(int argc, char * argv[])
 				opertype[numc] = evicted[numc].opertype;
 				addr[numc] = evicted[numc].addr;
 				evicted[numc].valid = false;
+				eviction_writeback[numc] = true;
 				evictifctr++;
+				// printf("main: evicted if addr: %lld\n", addr[numc]);
 				break;
 			}
 			
@@ -696,6 +706,7 @@ printf("miss ctr: %d\n", missctr);
 printf("trace ctr: %d\n", tracectr);
 printf("evict    ctr: %d\n", evictctr);
 printf("evict if ctr: %d\n", evictifctr);
+printf("oram ctr: %d\n", oramctr);
 printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
 
