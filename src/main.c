@@ -107,7 +107,13 @@ int main(int argc, char * argv[])
 	printf("L3: %d   Z3:%d\n", L3, Z3);
 
 	// init_trace();
-	// printf("after init trace\n");
+
+	printf("red : blue\n");
+	for (int i = 0; i < 15; i++)
+	{
+		printf("%d : %d\n", i, index_to_addr(i));
+	}
+	
 
 	cache_init();
 	
@@ -348,7 +354,7 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE)
+	if (tracectr >= TRACE_SIZE*2)
 	{
 		break;
 	}
@@ -515,7 +521,7 @@ int main(int argc, char * argv[])
 		while (no_miss_occured && !expt_done)
 		{
 	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
-			// printf("while no miss occured: %d  \n", no_miss_occured);
+			printf("while readline trace ctr: %d  \n", tracectr);
 			if (evicted[numc].valid)
 			{
 				nonmemops[numc] = evicted[numc].nonmemops;

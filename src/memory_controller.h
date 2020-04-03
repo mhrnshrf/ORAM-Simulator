@@ -38,7 +38,10 @@
 #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 
 // new ideas
-#define WRITE_BYPASS 1  // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
+#define WRITE_BYPASS 0  // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
+
+#define NUM_CHANNELS_SUBTREE 1
+#define CACHE_LINE_SIZE 64
 
 #include <stdbool.h>
 
@@ -61,7 +64,14 @@ enum{
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots
   BLOCK = (long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)))),  // # valid blocks 
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1)
+  // TRACE_SIZE = (long long int)100000000,
+  SUBTREE_SIZE = (int) ROW_BUFF_SIZE * NUM_CHANNELS_SUBTREE,  // size of each 2k-arry tree that forms a node in bytes
+  SUBTREE_SLOT = (int) (SUBTREE_SIZE/CACHE_LINE_SIZE),    // # slots that subtree holds
+  SUBTREE_BUCKET = (unsigned int) (SUBTREE_SLOT/Z),                // # buckets per subtree given each bucket holds Z slots
+  SUBTREE_LEVEL = (unsigned int) (log(SUBTREE_BUCKET)/log(2)),      // # levels of each subtree ~~~> i.e. k
 };
+
+
 
 typedef struct Slot Slot;
 
@@ -92,7 +102,7 @@ int assign_a_path(int addr);
 void print_cap_percent();
 int concat(int a, int b);
 int digcount(int num);
-void translate_addr_subtree(int index);
+int index_to_addr(int index);
 
 
 // Mehrnoosh.

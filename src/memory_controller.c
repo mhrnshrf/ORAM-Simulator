@@ -965,17 +965,42 @@ void print_cap_percent(){
 
 
 // translate ORAM tree index to DRAM address using subtree scheme to exploit channel parallelism
-void translate_addr_subtree(int index){
+int index_to_addr(int index){
+  int level = floor(log_base2(index));
+  int sublevel = floor(level/SUBTREE_LEVEL);
+  int inner_sublevel = level - sublevel*SUBTREE_LEVEL;
+  int head_of_curr_level = pow(2, level) - 1;
+  int horiz_distance_index_from_head = index - head_of_curr_level;
+  int num_sublevel_passed = floor ((horiz_distance_index_from_head)/pow(2, inner_sublevel));
+  int term1 = pow(2, (level - inner_sublevel)) - 1;
+  int term2 = num_sublevel_passed * SUBTREE_BUCKET;    // ??? maybe should substitute with # slots
+  int root_of_curr_subtree = term1 + term2;
+  int head_of_curr_sublevel = pow(2, sublevel) - 1;
+  int distance_from_root_subtree = head_of_curr_sublevel + horiz_distance_index_from_head -  num_sublevel_passed * pow(2, sublevel);
+  int addr = root_of_curr_subtree + distance_from_root_subtree;
+  if (index == 10)
+  {
 
-int node_size = ROW_BUFF_SIZE * NUM_CHANNELS;  // size of each 2k-arry tree that forms a node
-int num_slots = node_size/CACHE_LINE_SIZE;    // # slots that subtree holds
-int num_buckets = num_slots/Z;                // # buckets per subtree given each bucket holds Z slots
-int num_levels = log_base2(num_buckets);      // # levels of each subtree ~~~> i.e. k
-
-
-
+    printf("head_of_curr_sublevel: %d\n", head_of_curr_sublevel);
+    printf("horiz_distance_index_from_head: %d\n", horiz_distance_index_from_head);
+    printf("num_sublevel_passed: %d\n", num_sublevel_passed);
+    printf("distance_from_root_subtree: %d\n", distance_from_root_subtree);
+    printf("root_of_curr_subtree: %d\n", root_of_curr_subtree);
+    printf("term1: %d\n", term1);
+    printf("term2: %d\n", term2);
+  }
+  
+  return addr;
 }
 
+
+
+
+
+
+// int addr_to_index(int addr){
+
+// }
 ////////////// Mehrnoosh.
 
 
