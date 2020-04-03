@@ -40,8 +40,8 @@
 // new ideas
 #define WRITE_BYPASS 0  // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 
-#define NUM_CHANNELS_SUBTREE 1
-#define CACHE_LINE_SIZE 64
+#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
+#define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 #include <stdbool.h>
 
@@ -67,8 +67,8 @@ enum{
   // TRACE_SIZE = (long long int)100000000,
   SUBTREE_SIZE = (int) ROW_BUFF_SIZE * NUM_CHANNELS_SUBTREE,  // size of each 2k-arry tree that forms a node in bytes
   SUBTREE_SLOT = (int) (SUBTREE_SIZE/CACHE_LINE_SIZE),    // # slots that subtree holds
-  SUBTREE_BUCKET = (unsigned int) (SUBTREE_SLOT/Z),                // # buckets per subtree given each bucket holds Z slots
-  SUBTREE_LEVEL = (unsigned int) (log(SUBTREE_BUCKET)/log(2)),      // # levels of each subtree ~~~> i.e. k
+  SUBTREE_BUCKET = (unsigned int) (SUBTREE_SLOT/Z) - 1 ,                // # buckets per subtree given each bucket holds Z slots
+  SUBTREE_LEVEL = (unsigned int) ceil(log(SUBTREE_BUCKET)/log(2)),      // # levels of each subtree ~~~> i.e. k
 };
 
 

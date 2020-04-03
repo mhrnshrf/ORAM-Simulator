@@ -106,6 +106,11 @@ int main(int argc, char * argv[])
 	printf("L2: %d   Z2:%d\n", L2, Z2);
 	printf("L3: %d   Z3:%d\n", L3, Z3);
 
+	printf("\nSUBTREE_SIZE: %d\n", SUBTREE_SIZE);
+	printf("SUBTREE_SLOT: %d\n", SUBTREE_SLOT);
+	printf("SUBTREE_BUCKET: %d\n", SUBTREE_BUCKET);
+	printf("SUBTREE_LEVEL: %d\n\n", SUBTREE_LEVEL);
+
 	// init_trace();
 
 	printf("red : blue\n");

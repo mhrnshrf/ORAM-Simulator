@@ -121,18 +121,22 @@ long long int plb_access[H-1] = {0};   // # total plb access (hits + misses)
   Utility Functions
 ************************/
 
-int calc_level(int index){   
-  int i = -1;
-    // printf("in oram calc\n");
+int calc_level(int index){  
+  // // previous method:
+
+  // int i = -1;
+  //   // printf("in oram calc\n");
     
-    int sum = 0;
-    while(index >= sum)
-    {
-      i++;
-      sum += pow(2,i);
-      // printf("in while i: %d \n", i);
-    }
-    return i;
+  //   int sum = 0;
+  //   while(index >= sum)
+  //   {
+  //     i++;
+  //     sum += pow(2,i);
+  //     // printf("in while i: %d \n", i);
+  //   }
+  //   return i;
+
+  return floor(log_base2(index+1));
 }
 
 
@@ -966,7 +970,7 @@ void print_cap_percent(){
 
 // translate ORAM tree index to DRAM address using subtree scheme to exploit channel parallelism
 int index_to_addr(int index){
-  int level = floor(log_base2(index));
+  int level = floor(log_base2(index+1));
   int sublevel = floor(level/SUBTREE_LEVEL);
   int inner_sublevel = level - sublevel*SUBTREE_LEVEL;
   int head_of_curr_level = pow(2, level) - 1;
@@ -975,20 +979,25 @@ int index_to_addr(int index){
   int term1 = pow(2, (level - inner_sublevel)) - 1;
   int term2 = num_sublevel_passed * SUBTREE_BUCKET;    // ??? maybe should substitute with # slots
   int root_of_curr_subtree = term1 + term2;
-  int head_of_curr_sublevel = pow(2, sublevel) - 1;
-  int distance_from_root_subtree = head_of_curr_sublevel + horiz_distance_index_from_head -  num_sublevel_passed * pow(2, sublevel);
+  int head_of_curr_sublevel = pow(2, inner_sublevel) - 1;
+  int distance_from_root_subtree = head_of_curr_sublevel + horiz_distance_index_from_head -  num_sublevel_passed * pow(2, inner_sublevel);
   int addr = root_of_curr_subtree + distance_from_root_subtree;
-  if (index == 10)
-  {
+  // if (index == 4)
+  // {
 
-    printf("head_of_curr_sublevel: %d\n", head_of_curr_sublevel);
-    printf("horiz_distance_index_from_head: %d\n", horiz_distance_index_from_head);
-    printf("num_sublevel_passed: %d\n", num_sublevel_passed);
-    printf("distance_from_root_subtree: %d\n", distance_from_root_subtree);
-    printf("root_of_curr_subtree: %d\n", root_of_curr_subtree);
-    printf("term1: %d\n", term1);
-    printf("term2: %d\n", term2);
-  }
+  //   printf("\nlevel: %d\n", level);
+  //   printf("sublevel: %d\n", sublevel);
+  //   printf("inner_sublevel: %d\n", inner_sublevel);
+  //   printf("head_of_curr_level: %d\n", head_of_curr_level);
+  //   printf("horiz_distance_index_from_head: %d\n", horiz_distance_index_from_head);
+  //   printf("num_sublevel_passed: %d\n", num_sublevel_passed);
+  //   printf("term1: %d\n", term1);
+  //   printf("term2: %d\n", term2);
+  //   printf("root_of_curr_subtree: %d\n", root_of_curr_subtree);
+  //   printf("head_of_curr_sublevel: %d\n", head_of_curr_sublevel);
+  //   printf("distance_from_root_subtree: %d\n\n", distance_from_root_subtree);
+
+  // }
   
   return addr;
 }
