@@ -68,6 +68,11 @@ MemRequest evicted[16]; 	// array of evicted request for cores, each core can ha
 bool no_miss_occured;	// a flag that is set based on cache access and used to keep on reading trace file until it's cache hit
 bool eviction_writeback[16] = {0}; // a flag that says next request is gonna be eviction writeback
 
+// int global_array[BLOCK];
+#define SUBARRAY_TEST 15
+int subtree_array[SUBARRAY_TEST] = {0};
+
+
 // Mehrnoosh.
 
 int main(int argc, char * argv[])
@@ -113,10 +118,44 @@ int main(int argc, char * argv[])
 
 	// init_trace();
 
-	printf("red : blue\n");
+	int iterator = 0;
+	int addr_sofar = 0;
+
+	for (int i = 0; i < floor(log_base2(SUBARRAY_TEST+1))/SUBTREE_LEVEL; i++)
+	{
+		// printf("floor: %f\n", floor(log_base2(SUBARRAY_TEST+1))/SUBTREE_LEVEL);
+		
+		for (int j = 0; j < pow(2,i*SUBTREE_LEVEL); j++)
+		{
+			for (int k = 0; k < pow(2,SUBTREE_LEVEL)- 1; k++)
+			{
+				/* code */
+				subtree_array[iterator] = addr_sofar + k;
+				// printf("%d:  %d \n", iterator, subtree_array[iterator]);
+
+				iterator++;
+			}
+			addr_sofar = subtree_array[iterator-1] + 1 ;
+			// printf("%d\n", subtree_array[iterator-1]);
+			
+		}
+	}
+
+	// for (int i = 0; i < SUBARRAY_TEST; i++)
+	// {
+	// 	printf("%d:  %d \n", i, subtree_array[i]);
+	// }
+	
+	
+	printf("\nred : blue\n");
 	for (int i = 0; i < 15; i++)
 	{
-		printf("%d : %d\n", i, index_to_addr(i));
+		for (int j = 0; j < Z; j++)
+		{
+			printf("%d slot%d: %d\n", i, j, index_to_addr(i, j));
+		}
+		
+		
 	}
 	
 
@@ -526,7 +565,7 @@ int main(int argc, char * argv[])
 		while (no_miss_occured && !expt_done)
 		{
 	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
-			printf("while readline trace ctr: %d  \n", tracectr);
+			// printf("while readline trace ctr: %d  \n", tracectr);
 			if (evicted[numc].valid)
 			{
 				nonmemops[numc] = evicted[numc].nonmemops;

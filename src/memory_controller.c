@@ -969,7 +969,7 @@ void print_cap_percent(){
 
 
 // translate ORAM tree index to DRAM address using subtree scheme to exploit channel parallelism
-int index_to_addr(int index){
+int index_to_addr(int index, int slot){
   int level = floor(log_base2(index+1));
   int sublevel = floor(level/SUBTREE_LEVEL);
   int inner_sublevel = level - sublevel*SUBTREE_LEVEL;
@@ -982,6 +982,8 @@ int index_to_addr(int index){
   int head_of_curr_sublevel = pow(2, inner_sublevel) - 1;
   int distance_from_root_subtree = head_of_curr_sublevel + horiz_distance_index_from_head -  num_sublevel_passed * pow(2, inner_sublevel);
   int addr = root_of_curr_subtree + distance_from_root_subtree;
+  addr = addr*Z + slot;
+  
   // if (index == 4)
   // {
 
