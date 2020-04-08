@@ -422,7 +422,7 @@ void read_path(int label){
       {
         if (i >= TOP_CACHE)
         {
-          // insert_read(GlobTree[index].slot[j].addr, orig_cycle, orig_thread, orig_instr, orig_pc);
+          insert_read(index_to_addr(index, j), orig_cycle, orig_thread, orig_instr, orig_pc);
         }
 
         if(GlobTree[index].slot[j].isReal)
@@ -472,6 +472,7 @@ void write_path(int label){
   
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
+    int index = calc_index(label, i);
 
     if (stashctr == 0)
     {
@@ -479,7 +480,7 @@ void write_path(int label){
       {
         if (i >= TOP_CACHE)
         {
-          // insert_write (0, orig_cycle, orig_thread, orig_instr);
+          insert_write (index_to_addr(index, g), orig_cycle, orig_thread, orig_instr);
         }
         
       }
@@ -497,7 +498,7 @@ void write_path(int label){
         {
           if (i >= TOP_CACHE)
           {
-            // insert_write (0, orig_cycle, orig_thread, orig_instr);
+            insert_write (index_to_addr(index, j), orig_cycle, orig_thread, orig_instr);
           }
         }
         else
@@ -505,6 +506,7 @@ void write_path(int label){
           if (i >= TOP_CACHE)
           {
             // insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
+            insert_write (index_to_addr(index, j), orig_cycle, orig_thread, orig_instr);
           }
           GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
           GlobTree[index].slot[j].label = Stash[candidate[j]].label;
@@ -983,7 +985,7 @@ int index_to_addr(int index, int slot){
   int distance_from_root_subtree = head_of_curr_sublevel + horiz_distance_index_from_head -  num_sublevel_passed * pow(2, inner_sublevel);
   int addr = root_of_curr_subtree + distance_from_root_subtree;
   addr = addr*Z + slot;
-  
+
   // if (index == 4)
   // {
 

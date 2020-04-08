@@ -147,16 +147,14 @@ int main(int argc, char * argv[])
 	// }
 	
 	
-	printf("\nred : blue\n");
-	for (int i = 0; i < 15; i++)
-	{
-		for (int j = 0; j < Z; j++)
-		{
-			printf("%d slot%d: %d\n", i, j, index_to_addr(i, j));
-		}
-		
-		
-	}
+	// printf("\nred : blue\n");
+	// for (int i = 0; i < 15; i++)
+	// {
+	// 	for (int j = 0; j < Z; j++)
+	// 	{
+	// 		printf("%d slot%d: %d\n", i, j, index_to_addr(i, j));
+	// 	}
+	// }
 	
 
 	cache_init();
@@ -398,7 +396,7 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE*2)
+	if (tracectr >= TRACE_SIZE)
 	{
 		break;
 	}
@@ -503,7 +501,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 
 			start = clock();
-			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
+			// insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
 
 			invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
 
@@ -532,7 +530,7 @@ int main(int argc, char * argv[])
 					eviction_writeback[numc] = false;
 				}
 				
-				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
+				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
 
 				invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
@@ -562,70 +560,115 @@ int main(int argc, char * argv[])
 
 	      /* Done consuming one line of the trace file.  Read in the next. */
 // Mehrnoosh:
-		while (no_miss_occured && !expt_done)
+		// cache enabled:
+		if (CACHE_ENABLE)
 		{
-	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
-			// printf("while readline trace ctr: %d  \n", tracectr);
-			if (evicted[numc].valid)
+			while (no_miss_occured && !expt_done)
 			{
-				nonmemops[numc] = evicted[numc].nonmemops;
-				opertype[numc] = evicted[numc].opertype;
-				addr[numc] = evicted[numc].addr;
-				evicted[numc].valid = false;
-				eviction_writeback[numc] = true;
-				evictifctr++;
-				// printf("main: evicted if addr: %lld\n", addr[numc]);
-				break;
-			}
-			
-
-			if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
-					tracectr++;
-				if (opertype[numc] == 'R') {
-					if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-					printf("Panic.  Poor trace format.\n");
-					return -4;
-					}
+			if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+				// printf("while readline trace ctr: %d  \n", tracectr);
+				if (evicted[numc].valid)
+				{
+					nonmemops[numc] = evicted[numc].nonmemops;
+					opertype[numc] = evicted[numc].opertype;
+					addr[numc] = evicted[numc].addr;
+					evicted[numc].valid = false;
+					eviction_writeback[numc] = true;
+					evictifctr++;
+					// printf("main: evicted if addr: %lld\n", addr[numc]);
+					break;
 				}
-				else {
-					if (opertype[numc] == 'W') {
-						if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
-							printf("Panic.  Poor trace format.\n");
-							return -3;
+				
+
+				if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+						tracectr++;
+					if (opertype[numc] == 'R') {
+						if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
+						printf("Panic.  Poor trace format.\n");
+						return -4;
 						}
 					}
 					else {
-					printf("Panic.  Poor trace format.\n");
-					return -2;
+						if (opertype[numc] == 'W') {
+							if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
+								printf("Panic.  Poor trace format.\n");
+								return -3;
+							}
+						}
+						else {
+						printf("Panic.  Poor trace format.\n");
+						return -2;
+						}
 					}
-				}
-				if (cache_access(addr[numc], opertype[numc]) == HIT)
-				{
-					hitctr++;
-				}
-				else // miss occured
-				{
-					missctr++;
-					int victim = cache_fill(addr[numc], opertype[numc]);
-					if ( victim != -1)
+					if (cache_access(addr[numc], opertype[numc]) == HIT)
 					{
-						evictctr++;
-						evicted[numc].valid = true;
-						evicted[numc].nonmemops = nonmemops[numc]+1;
-						evicted[numc].opertype = 'W';
-						evicted[numc].addr = victim;
+						hitctr++;
 					}
+					else // miss occured
+					{
+						missctr++;
+						int victim = cache_fill(addr[numc], opertype[numc]);
+						if ( victim != -1)
+						{
+							evictctr++;
+							evicted[numc].valid = true;
+							evicted[numc].nonmemops = nonmemops[numc]+1;
+							evicted[numc].opertype = 'W';
+							evicted[numc].addr = victim;
+						}
 
-					no_miss_occured = false;
+						no_miss_occured = false;
 
+					}
 				}
+				else {
+					printf("Panic.  Poor trace format.\n");
+					return -1;
+				}
+			
 			}
 			else {
-				printf("Panic.  Poor trace format.\n");
-				return -1;
+				if (ROB[numc].inflight == 0) {
+				num_done++;
+				if (!time_done[numc]) time_done[numc] = CYCLE_VAL;
+				}
+				ROB[numc].tracedone=1;
+				break;  /* Break out of the while loop fetching instructions. */
 			}
-		
-	    }
+
+			}
+		}
+		// cache disbaled:
+		else	
+		{
+		  /* Done consuming one line of the trace file.  Read in the next. */
+	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+	        if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+				tracectr++;
+		  if (opertype[numc] == 'R') {
+		    if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
+		      printf("Panic.  Poor trace format.\n");
+		      return -4;
+		    }
+		  }
+		  else {
+		    if (opertype[numc] == 'W') {
+		      if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
+		        printf("Panic.  Poor trace format.\n");
+		        return -3;
+		      }
+		    }
+		    else {
+		      printf("Panic.  Poor trace format.\n");
+		      return -2;
+		    }
+		  }
+		}
+		else {
+		  printf("Panic.  Poor trace format.\n");
+		  return -1;
+		}
+	      }
 	      else {
 	        if (ROB[numc].inflight == 0) {
 	          num_done++;
@@ -634,8 +677,9 @@ int main(int argc, char * argv[])
 	        ROB[numc].tracedone=1;
 	        break;  /* Break out of the while loop fetching instructions. */
 	      }
-
 		}
+
+
 // Mehrnoosh.
 	      
 	  }  /* Done consuming the next rd or wr. */

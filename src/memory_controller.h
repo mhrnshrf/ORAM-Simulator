@@ -18,7 +18,7 @@
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
 #define PLB_SIZE 1024     // size of plb (# entry)
-#define TRACE_SIZE 32000000 // # addr read from trace file
+#define TRACE_SIZE 10000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
@@ -40,7 +40,9 @@
 // new ideas
 #define WRITE_BYPASS 0  // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 
-#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
+#define CACHE_ENABLE 0  // 0/1 flag to diable/enable having cache
+
+#define NUM_CHANNELS_SUBTREE 2  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 #include <stdbool.h>
