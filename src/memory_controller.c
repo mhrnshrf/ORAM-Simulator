@@ -68,8 +68,17 @@ void pinOn() {pinFlag = true;}    // turn the pin flag on
 void pinOff() {pinFlag = false;}  // turn the pin flag off
 
 
-// profiling stats
+// rho
+typedef struct RhoBucket{
+  Slot slot[RHO_Z];
+}RhoBucket;
 
+RhoBucket RhoTree[RHO_NODE];      // rho tree
+int TagArray[RHO_BLOCK];          // rho postion map
+Slot Rho_Stash[STASH_SIZE];       // rho stash
+
+
+// profiling stats
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
@@ -422,7 +431,8 @@ void read_path(int label){
       {
         if (i >= TOP_CACHE)
         {
-          insert_read(index_to_addr(index, j), orig_cycle, orig_thread, orig_instr, orig_pc);
+          int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z+j);
+          insert_read(addr, orig_cycle, orig_thread, orig_instr, orig_pc);
         }
 
         if(GlobTree[index].slot[j].isReal)
@@ -473,6 +483,7 @@ void write_path(int label){
   for(int i = LEVEL-1; i >= EMPTY_TOP; i--)
   {
     int index = calc_index(label, i);
+    int addr = 0;
 
     if (stashctr == 0)
     {
@@ -480,7 +491,8 @@ void write_path(int label){
       {
         if (i >= TOP_CACHE)
         {
-          insert_write (index_to_addr(index, g), orig_cycle, orig_thread, orig_instr);
+          addr = SUBTREE_ENABLE ? index_to_addr(index, g):(index*Z+g);
+          insert_write (addr, orig_cycle, orig_thread, orig_instr);
         }
         
       }
@@ -498,7 +510,8 @@ void write_path(int label){
         {
           if (i >= TOP_CACHE)
           {
-            insert_write (index_to_addr(index, j), orig_cycle, orig_thread, orig_instr);
+            addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z+j);
+            insert_write (addr, orig_cycle, orig_thread, orig_instr);
           }
         }
         else
@@ -506,7 +519,8 @@ void write_path(int label){
           if (i >= TOP_CACHE)
           {
             // insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
-            insert_write (index_to_addr(index, j), orig_cycle, orig_thread, orig_instr);
+            addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z+j);
+            insert_write (addr, orig_cycle, orig_thread, orig_instr);
           }
           GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
           GlobTree[index].slot[j].label = Stash[candidate[j]].label;

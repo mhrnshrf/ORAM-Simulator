@@ -97,7 +97,6 @@ int main(int argc, char * argv[])
 	printf("BK_EVICTION: %d\n", BK_EVICTION);
 	printf("EMPTY_TOP: %d\n", EMPTY_TOP);
 	printf("TOP_CACHE: %d\n", TOP_CACHE);
-	printf("WRITE_BYPASS: %d\n", WRITE_BYPASS);
 	printf("TRACE_SIZE: %d\n", TRACE_SIZE);
 	printf("LZ: ");
 	int length = 0;
@@ -111,35 +110,47 @@ int main(int argc, char * argv[])
 	printf("L2: %d   Z2:%d\n", L2, Z2);
 	printf("L3: %d   Z3:%d\n", L3, Z3);
 
-	printf("\nSUBTREE_SIZE: %d\n", SUBTREE_SIZE);
+	printf("\nCACHE_ENABLE: %d\n", CACHE_ENABLE);
+	printf("WRITE_BYPASS: %d\n", WRITE_BYPASS);
+
+	printf("\nSUBTREE_ENABLE: %d\n", SUBTREE_ENABLE);
+	printf("SUBTREE_SIZE: %d\n", SUBTREE_SIZE);
 	printf("SUBTREE_SLOT: %d\n", SUBTREE_SLOT);
 	printf("SUBTREE_BUCKET: %d\n", SUBTREE_BUCKET);
 	printf("SUBTREE_LEVEL: %d\n\n", SUBTREE_LEVEL);
 
+	printf("RHO_LEVEL: %d\n", RHO_LEVEL);
+	printf("RHO_Z: %d\n", RHO_Z);
+	printf("RHO_PATH: %d\n", RHO_PATH);
+	printf("RHO_NODE: %d\n", RHO_NODE);
+	printf("RHO_SLOT: %d\n", RHO_SLOT);
+	printf("RHO_BLOCK: %d\n",RHO_BLOCK);
+ 
+
 	// init_trace();
 
-	int iterator = 0;
-	int addr_sofar = 0;
+	// int iterator = 0;
+	// int addr_sofar = 0;
 
-	for (int i = 0; i < floor(log_base2(SUBARRAY_TEST+1))/SUBTREE_LEVEL; i++)
-	{
-		// printf("floor: %f\n", floor(log_base2(SUBARRAY_TEST+1))/SUBTREE_LEVEL);
+	// for (int i = 0; i < floor(log_base2(SUBARRAY_TEST+1))/SUBTREE_LEVEL; i++)
+	// {
+	// 	// printf("floor: %f\n", floor(log_base2(SUBARRAY_TEST+1))/SUBTREE_LEVEL);
 		
-		for (int j = 0; j < pow(2,i*SUBTREE_LEVEL); j++)
-		{
-			for (int k = 0; k < pow(2,SUBTREE_LEVEL)- 1; k++)
-			{
-				/* code */
-				subtree_array[iterator] = addr_sofar + k;
-				// printf("%d:  %d \n", iterator, subtree_array[iterator]);
+	// 	for (int j = 0; j < pow(2,i*SUBTREE_LEVEL); j++)
+	// 	{
+	// 		for (int k = 0; k < pow(2,SUBTREE_LEVEL)- 1; k++)
+	// 		{
+	// 			/* code */
+	// 			subtree_array[iterator] = addr_sofar + k;
+	// 			// printf("%d:  %d \n", iterator, subtree_array[iterator]);
 
-				iterator++;
-			}
-			addr_sofar = subtree_array[iterator-1] + 1 ;
-			// printf("%d\n", subtree_array[iterator-1]);
+	// 			iterator++;
+	// 		}
+	// 		addr_sofar = subtree_array[iterator-1] + 1 ;
+	// 		// printf("%d\n", subtree_array[iterator-1]);
 			
-		}
-	}
+	// 	}
+	// }
 
 	// for (int i = 0; i < SUBARRAY_TEST; i++)
 	// {
@@ -152,7 +163,8 @@ int main(int argc, char * argv[])
 	// {
 	// 	for (int j = 0; j < Z; j++)
 	// 	{
-	// 		printf("%d slot%d: %d\n", i, j, index_to_addr(i, j));
+    //         int addr = SUBTREE_ENABLE ? index_to_addr(i, j) : (i+j);
+	// 		printf("%d slot%d: %d\n", i, j, addr);
 	// 	}
 	// }
 	

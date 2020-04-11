@@ -42,8 +42,25 @@
 
 #define CACHE_ENABLE 0  // 0/1 flag to diable/enable having cache
 
+#define SUBTREE_ENABLE 1  // 0/1 flag to diable/enable having subtree adddressing scheme
+
 #define NUM_CHANNELS_SUBTREE 2  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
+
+
+// rho
+#define RHO_Z 2  // # slots per bucket in rho
+#define RHO_LEVEL 17    // # levels in rho
+
+#define RHO_L1 7  // upto L1 level buckts have specific Z1 number of slots   (inclusive)
+#define RHO_L2 7   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define RHO_L3 7   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+
+#define RHO_Z1 2   // # slots per bucket upto L1
+#define RHO_Z2 2   // # slots per bucket upto L2
+#define RHO_Z3 2   // # slots per bucket upto L3
+
+
 
 #include <stdbool.h>
 
@@ -61,16 +78,22 @@ extern bool write_cache_hit;   // flag to be effective if write bypass is enable
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};
 
 enum{
-  PATH = (long long int)pow(2,LEVEL-1),  // # paths
-  NODE = (long long int)pow(2,LEVEL)-1,  // # nodes
-  SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots
-  BLOCK = (long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)))),  // # valid blocks 
-  CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1)
-  // TRACE_SIZE = (long long int)100000000,
+  // main tree
+  PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
+  NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
+  SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
+  BLOCK = (long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)))),  // # valid blocks in oram tree
+  CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
+  // subtree scheme
   SUBTREE_SIZE = (int) ROW_BUFF_SIZE * NUM_CHANNELS_SUBTREE,  // size of each 2k-arry tree that forms a node in bytes
   SUBTREE_SLOT = (int) (SUBTREE_SIZE/CACHE_LINE_SIZE),    // # slots that subtree holds
   SUBTREE_BUCKET = (unsigned int) (SUBTREE_SLOT/Z) - 1 ,                // # buckets per subtree given each bucket holds Z slots
   SUBTREE_LEVEL = (unsigned int) ceil(log(SUBTREE_BUCKET)/log(2)),      // # levels of each subtree ~~~> i.e. k
+  // rho tree
+  RHO_PATH  = (long long int)pow(2,RHO_LEVEL-1),   // # paths in rho
+  RHO_NODE = (long long int)pow(2,RHO_LEVEL)-1,    // # nodes in rho
+  RHO_SLOT = RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1)),  // # free slots in rho
+  RHO_BLOCK = (long long int)floor(U*(RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1)))),  // # valid blocks in rho
 };
 
 
