@@ -55,7 +55,7 @@ typedef struct Entry{
 Bucket GlobTree[NODE];      // global oram tree
 int PosMap[BLOCK];          // position map
 Slot Stash[STASH_SIZE];     // stash
-int PLB[PLB_SIZE] = {[0 ... PLB_SIZE-1] -1};   // posmap lookaside buffer
+int PLB[PLB_SIZE] = {[0 ... PLB_SIZE-1] = -1};   // posmap lookaside buffer
 
 int intended = -1;         // index of intended block in stash
 bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
@@ -74,8 +74,10 @@ typedef struct RhoBucket{
 }RhoBucket;
 
 RhoBucket RhoTree[RHO_NODE];      // rho tree
-int TagArray[RHO_BLOCK];          // rho postion map
-Slot Rho_Stash[STASH_SIZE];       // rho stash
+int TagArray[RHO_SET][RHO_WAY];         // rho postion map that store tags ~~~> pararell to tag array label
+int TagArrayLabel[RHO_SET][RHO_WAY];     // rho postion map that store the corresponding label~~~>  parallel to tag array
+char TagArrayLRU[RHO_SET][RHO_WAY];      // rho lru policiy for eviction ~~~>  parallel to tag array
+Slot RhoStash[RHO_STASH_SIZE];       // rho stash
 
 
 // profiling stats
@@ -1022,14 +1024,70 @@ int index_to_addr(int index, int slot){
 
 
 
+void rho_alloc(){
 
+  for (int i = 0 ; i < RHO_NODE; i++) 
+  {
+    int l = calc_level(i);  
+    for (int k = 0; k < RHO_LZ[l]; ++k)
+    {
+      RhoTree[i].slot[k].addr = -1;
+      RhoTree[i].slot[k].label = -1;
+      RhoTree[i].slot[k].isReal = false;
+      RhoTree[i].slot[k].isData = false;
+    }
+  }
 
+  for (int i = 0; i < RHO_STASH_SIZE; i++)
+  {
+    RhoStash[i].isReal = false;
+  }  
 
-// int addr_to_index(int addr){
+  for (int i = 0; i < RHO_SET; i++)
+  {
+    for (int j = 0; j < RHO_WAY; j++)
+    {
+      TagArray[i][j] = -1;
+      TagArrayLabel[i][j] = -1;
+      TagArrayLRU[i][j] = -1;
+    }
+    
+  }
+  
+}
 
+// int rho_assign_a_path(int addr){
+//   int label = label = rand() % RHO_PATH;  
+
+//   while(true)
+//   {
+//     for(int i = RHO_LEVEL-1; i >= RHO_EMPTY_TOP; i--)
+//     {
+//       int index = calc_index(label, i);
+//       for(int j = 0; j < RHO_LZ[i]; j++)
+//       {
+//         if(!RhoTree[index].slot[j].isReal)
+//         {
+//           RhoTree[index].slot[j].addr = addr;
+//           RhoTree[index].slot[j].label = label;
+//           RhoTree[index].slot[j].isReal = true;
+//           RhoTree[index].slot[j].isData = true;
+//           return label;
+//         }
+//       }
+//     }
+//   }
 // }
-////////////// Mehrnoosh.
 
+
+// // initialize the rho tree by assigning ???
+// void rho_init(){
+//   for(int i = 0; i < RHO_BLOCK; i++)
+//   {
+//     int addr = rand() % BLOCK;   // pick a random block from the whole address space to put in the rho
+//     TagArray[addr] =  assign_a_path(i);  // ???
+//   }
+// }
 
 
 
