@@ -52,6 +52,8 @@
 #define RHO_STASH_SIZE 200  // size of rho stash
 #define RHO_LEVEL 17    // # levels in rho
 #define RHO_Z 2  // # slots per bucket in rho
+#define RHO_OV_TRESHOLD   RHO_STASH_SIZE - RHO_Z*(RHO_LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
+#define RHO_BK_EVICTION 1   // 0/1 flag to disable/enable background eviction in rho
 
 #define RHO_L1 7  // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define RHO_L2 8   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
@@ -62,17 +64,24 @@
 #define RHO_Z3 2   // # slots per bucket upto L3
 
 #define RHO_EMPTY_TOP 0   // # top empty levels of rho ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
+#define RHO_TOP_CACHE 0   // # top levels that are cached in rho
 
 #define RHO_WAY 10   // # ways in each set accociative entry of rho tag array
+#define RHO_ENABLE 1   // 0/1 flag to disable/enable having rho
 
+// #define RHO 1
+// #define ORAM 0
 
 
 #include <stdbool.h>
 
 extern int invokectr; 
 extern int bkctr; 
+extern int rho_bkctr; 
 extern int stash_dist[STASH_SIZE+1];
+extern int rho_stash_dist[RHO_STASH_SIZE+1];
 extern int oramctr; 
+extern int rhoctr; 
 extern bool write_cache_hit;   // flag to be effective if write bypass is enabled
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
@@ -95,9 +104,11 @@ enum{
   RHO_NODE = (long long int)pow(2,RHO_LEVEL)-1,    // # nodes in rho
   RHO_SLOT = RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1)),  // # free slots in rho
   RHO_BLOCK = (int) ceil((20/64)*((long long int)floor(U*(RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1)))))),  // # valid blocks in rho
-  RHO_SET = (int) ceil(RHO_BLOCK/10),
+  // RHO_SET = (int) ceil(RHO_BLOCK/10),
+  RHO_SET = 1000,
 };
 
+typedef enum {ORAM, RHO} TreeType;
 
 
 typedef struct Slot Slot;
@@ -130,6 +141,11 @@ void print_cap_percent();
 int concat(int a, int b);
 int digcount(int num);
 int index_to_addr(int index, int slot);
+void rho_alloc();
+void rho_access(int addr, int label);
+int rho_lookup(int addr);
+void rho_update_tag_array(int addr, int label);
+
 
 
 // Mehrnoosh.
