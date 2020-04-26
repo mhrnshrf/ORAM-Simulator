@@ -18,7 +18,7 @@
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
 #define PLB_SIZE 1024     // size of plb (# entry)
-#define TRACE_SIZE 10000 // # addr read from trace file
+#define TRACE_SIZE 1000000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
@@ -26,8 +26,8 @@
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
-#define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+#define L2 10   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L3 11   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 
 #define Z1 4   // # slots per bucket upto L1
 #define Z2 4   // # slots per bucket upto L2
@@ -40,9 +40,9 @@
 // new ideas
 #define WRITE_BYPASS 0  // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 
-#define CACHE_ENABLE 0  // 0/1 flag to diable/enable having cache
+#define CACHE_ENABLE 1  // 0/1 flag to diable/enable having cache
 
-#define SUBTREE_ENABLE 1  // 0/1 flag to diable/enable having subtree adddressing scheme
+#define SUBTREE_ENABLE 0  // 0/1 flag to diable/enable having subtree adddressing scheme
 
 #define NUM_CHANNELS_SUBTREE 2  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
@@ -69,8 +69,6 @@
 #define RHO_WAY 10   // # ways in each set accociative entry of rho tag array
 #define RHO_ENABLE 1   // 0/1 flag to disable/enable having rho
 
-// #define RHO 1
-// #define ORAM 0
 
 
 #include <stdbool.h>
@@ -82,6 +80,7 @@ extern int stash_dist[STASH_SIZE+1];
 extern int rho_stash_dist[RHO_STASH_SIZE+1];
 extern int oramctr; 
 extern int rhoctr; 
+extern int rho_hit; 
 extern bool write_cache_hit;   // flag to be effective if write bypass is enabled
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
@@ -103,12 +102,13 @@ enum{
   RHO_PATH  = (long long int)pow(2,RHO_LEVEL-1),   // # paths in rho
   RHO_NODE = (long long int)pow(2,RHO_LEVEL)-1,    // # nodes in rho
   RHO_SLOT = RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1)),  // # free slots in rho
-  RHO_BLOCK = (int) ceil((20/64)*((long long int)floor(U*(RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1)))))),  // # valid blocks in rho
+  RHO_BLOCK = (int)((long long int)floor(U*(RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1))))),  // # valid blocks in rho
   // RHO_SET = (int) ceil(RHO_BLOCK/10),
-  RHO_SET = 1000,
+  RHO_SET = 16000,
 };
 
 typedef enum {ORAM, RHO} TreeType;
+typedef enum {REGULAR, EVICT} AccessType;
 
 
 typedef struct Slot Slot;
@@ -127,7 +127,7 @@ void write_path(int label);
 void remap_block(int addr);
 bool add_to_stash(Slot s);
 void remove_from_stash(int index);
-void test_oram();
+void test_oram(char * argv[]);
 void freecursive_access(int addr, char type);
 int get_stash(int addr);
 bool stash_contain(int addr);
@@ -145,10 +145,33 @@ void rho_alloc();
 void rho_access(int addr, int label);
 int rho_lookup(int addr);
 void rho_update_tag_array(int addr, int label);
+void rho_insert(int physical_address);
 
 
 
 // Mehrnoosh.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Moved here from main.c 
 long long int *committed; // total committed instructions in each core

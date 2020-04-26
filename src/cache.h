@@ -6,6 +6,7 @@
 #include <math.h>
 
 #define CACHE_SIZE 2097152  // in bytes ~~~> 2 MB
+// #define CACHE_SIZE 262144  // in bytes ~~~> 256 KB
 #define NUM_WAY 8           // bytes ~~~> # way per set
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits

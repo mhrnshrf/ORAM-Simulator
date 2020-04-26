@@ -117,15 +117,22 @@ int main(int argc, char * argv[])
 	printf("SUBTREE_SIZE: %d\n", SUBTREE_SIZE);
 	printf("SUBTREE_SLOT: %d\n", SUBTREE_SLOT);
 	printf("SUBTREE_BUCKET: %d\n", SUBTREE_BUCKET);
-	printf("SUBTREE_LEVEL: %d\n\n", SUBTREE_LEVEL);
+	printf("SUBTREE_LEVEL: %d\n", SUBTREE_LEVEL);
 
+	printf("\nRHO_ENABLE: %d\n", RHO_ENABLE);
 	printf("RHO_LEVEL: %d\n", RHO_LEVEL);
 	printf("RHO_Z: %d\n", RHO_Z);
 	printf("RHO_PATH: %d\n", RHO_PATH);
 	printf("RHO_NODE: %d\n", RHO_NODE);
 	printf("RHO_SLOT: %d\n", RHO_SLOT);
-	printf("RHO_BLOCK: %d\n",RHO_BLOCK);
- 
+	printf("RHO_BLOCK: %d\n", RHO_BLOCK);
+	printf("RHO_SET: %d\n", RHO_SET);
+	printf("RHO_WAY: %d\n", RHO_WAY);
+ 	printf("RHO_OV_TRESHOLD: %d\n", RHO_OV_TRESHOLD);
+	printf("RHO_STASH_SIZE: %d\n", RHO_STASH_SIZE);
+	printf("RHO_BK_EVICTION: %d\n", RHO_BK_EVICTION);
+	printf("RHO_EMPTY_TOP: %d\n", RHO_EMPTY_TOP);
+	printf("RHO_TOP_CACHE: %d\n", RHO_TOP_CACHE);
 
 	// init_trace();
 
@@ -173,13 +180,20 @@ int main(int argc, char * argv[])
 	
 	oram_alloc();
 
+	rho_alloc();
+
 	printf("after alloc\n");
 	
 	oram_init();
 	
 	printf("after init\n");
+
+	fflush(stdout);
 	
-	// test_oram();
+	test_oram(argv);
+
+
+
 	
 	 clock_t start, end;
      double cpu_time_used = 0;
@@ -414,21 +428,32 @@ int main(int argc, char * argv[])
 	}
 	
 	gettimeofday(&sday, NULL);
-	// if ((tracectr % 10000 == 0) && tracectr != roundprev)
+	// if (tracectr > 8000)
 	// {
-	// 	printf("...........................Partial Stat..............................\n");
-	// 	// printf("after %d:\n", periodctr);
-	// 	printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
+	// 	printf("...........................Debug Stat..............................\n");
 	// 	printf("@ %d:\n", tracectr);
-	// 	print_stats();
-	// 	printf("total time: %f s\n", cpu_time_used);
+	// 	printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
 	// 	printf("bk evict rate: %f\n", (double)bkctr/invokectr);
-	// 	printf("\n");
-	// 	printf("\n");
-	// 	period = 0;
-	// 	periodctr++;
-	// 	roundprev = tracectr;
+	// 	printf("\nrho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
+	// 	printf("rho hit #: %d\n", rho_hit);
+	// 	printf("rho bk evict rate: %f\n\n", (double)rho_bkctr/rho_hit);
 	// }
+	
+	if (/*(tracectr % 1000 == 0) && */ tracectr > 9000 /* && tracectr != roundprev*/ )
+	{
+		printf("\n...........................Partial Stat..............................\n");
+		printf("@ %d:\n", tracectr);
+		printf("invoke ctr %d:\n", invokectr);
+		printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
+		printf("bk evict rate: %f\n", (double)bkctr/invokectr);
+		printf("\nrho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
+		printf("rho hit #: %d\n", rho_hit);
+		printf("rho bk evict rate: %f\n\n", (double)rho_bkctr/rho_hit);
+	
+		period = 0;
+		periodctr++;
+		roundprev = tracectr;
+	}
 	
 // Mehrnoosh.
 
@@ -540,6 +565,11 @@ int main(int argc, char * argv[])
 				{
 					write_cache_hit = true;
 					eviction_writeback[numc] = false;
+					if (RHO_ENABLE)
+					{
+						rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
+					}
+					
 				}
 				
 				// insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
@@ -815,6 +845,10 @@ printf("evict if ctr: %d\n", evictifctr);
 printf("oram ctr: %d\n", oramctr);
 printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
+printf("\nrho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
+printf("invoke ctr: 	%d\n", invokectr);
+printf("rho hit #: %d\n", rho_hit);
+printf("rho bk evict rate: %f\n", (double)rho_bkctr/rho_hit);
 
 // print_cap_percent();
 // count_tree();

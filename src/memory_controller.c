@@ -21,6 +21,10 @@
 
 
 
+  int tracectr_test = 0;
+
+
+
 long long int orig_addr;
 long long int orig_cycle; 
 int orig_thread; 
@@ -91,6 +95,7 @@ int rhoctr = 0;  // # rho accesses
 int rho_stashctr = 0;  // stash occupancy distribution in rho
 int rho_bkctr = 0;  // # background eviction invoked in rho
 int rho_stash_dist[RHO_STASH_SIZE+1] = {0}; // rho stash occupancy distribution
+int rho_hit = 0;  // # hits on rho lookup
 
 struct timeval start, end, mid;
 long int timeavg = 0;
@@ -117,13 +122,13 @@ int EMPTY_TOP_VAR = EMPTY_TOP;
 int TOP_CACHE_VAR = TOP_CACHE;
 int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  
 int PATH_VAR = PATH;
+AccessType ACCESS_VAR = REGULAR;    // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 
 
 
 // to set the parameters for different funcs like path read and write according to whether oram is being accessed or rho
-void switch_tree_to(TreeType tree)
-{
-  TREE_VAR = (tree == RHO) ? RHO : ORAM;
+void switch_tree_to(TreeType tree){
+  TREE_VAR = tree;
   LEVEL_VAR = (tree == RHO) ? RHO_LEVEL: LEVEL ;
   Z_VAR = (tree == RHO) ? RHO_Z: Z;
   STASH_SIZE_VAR = (tree == RHO) ? RHO_STASH_SIZE: STASH_SIZE;
@@ -132,10 +137,14 @@ void switch_tree_to(TreeType tree)
   EMPTY_TOP_VAR = (tree == RHO) ? RHO_EMPTY_TOP: EMPTY_TOP; 
   TOP_CACHE_VAR = (tree == RHO) ? RHO_TOP_CACHE: TOP_CACHE;
   PATH_VAR = (tree == RHO) ? RHO_PATH: PATH;
-  for (int i = 0; i < Z_VAR; i++)
+  for (int i = 0; i < LEVEL_VAR; i++)
   {
     LZ_VAR[i] =  (tree == RHO) ? RHO_LZ[i] : LZ[i];
   }
+}
+
+void switch_access_to(AccessType access){
+  ACCESS_VAR = access;
 }
 
 /***********************
@@ -430,10 +439,10 @@ void read_path(int label){
         if (i >= TOP_CACHE_VAR)
         {
           int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-          insert_read(addr, orig_cycle, orig_thread, orig_instr, orig_pc);
+          // insert_read(addr, orig_cycle, orig_thread, orig_instr, orig_pc);
         }
 
-        if (RHO_ENABLE && TREE_VAR == RHO)
+        if (RHO_ENABLE && (TREE_VAR == RHO))
         {
           if(RhoTree[index].slot[j].isReal)
           {
@@ -491,7 +500,7 @@ void pick_candidate(int index, int label, int i){
     {
       int stash_label = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].label : Stash[k].label;
       int target = stash_label>>(LEVEL_VAR-1-i);
-      if(/* (Stash[k].label == label || index == calc_index(Stash[k].label, i)) */ (((target)^mask) == 0) && (!pinFlag || k != intended))
+      if(/* (Stash[k].label == label || index == calc_index(Stash[k].label, i)) */ (((target)^mask) == 0) && (!pinFlag || k != intended || (RHO_ENABLE && (TREE_VAR == RHO))))
       {
         candidate[c] = k;
         c++; 
@@ -514,12 +523,17 @@ void write_path(int label){
     int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
     if (stashctr_var == 0)
     {
+      if (RHO_ENABLE && (TREE_VAR == RHO))
+      {
+        // printf("write path: @ LEVEL: %d   stash got empty\n\n", i);
+      }
+      
       for (int g = 0; g < LZ_VAR[i]; g++)
       {
         if (i >= TOP_CACHE_VAR)
         {
           addr = SUBTREE_ENABLE ? index_to_addr(index, g):(index*Z_VAR+g);
-          insert_write (addr, orig_cycle, orig_thread, orig_instr);
+          // insert_write (addr, orig_cycle, orig_thread, orig_instr);
         }
         
       }
@@ -529,6 +543,11 @@ void write_path(int label){
       int index = calc_index(label, i);
       reset_candidate();
       pick_candidate(index, label, i);
+      // if (TREE_VAR == RHO)
+      // {
+      //   printf("write path: @ LEVEL: %d     candidate[0]: %d     candidate[1]: %d\n", i, candidate[0], candidate[1]);
+      // }
+      
 
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
@@ -538,16 +557,15 @@ void write_path(int label){
           if (i >= TOP_CACHE_VAR)
           {
             addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-            insert_write (addr, orig_cycle, orig_thread, orig_instr);
+            // insert_write (addr, orig_cycle, orig_thread, orig_instr);
           }
         }
         else
         {
           if (i >= TOP_CACHE_VAR)
           {
-            // insert_write (Stash[candidate[j]].addr, orig_cycle, orig_thread, orig_instr);
             addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-            insert_write (addr, orig_cycle, orig_thread, orig_instr);
+            // insert_write (addr, orig_cycle, orig_thread, orig_instr);
           }
 
           if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -568,6 +586,12 @@ void write_path(int label){
           }
 
           remove_from_stash(candidate[j]);
+          // if ((TREE_VAR == RHO) /*&& (tracectr_test == 7911) && (j == 1)*/)
+          // {
+          //   printf("write path: @ LEVEL %d after stash removal @ trace: %d stash is   %d   full\n", i,  tracectr_test, rho_stashctr);
+          //   // print_stash();
+          // }
+          
 
         }
       }
@@ -584,11 +608,11 @@ void print_path(int label){
     {
       if (RHO_ENABLE && (TREE_VAR == RHO))
       {
-        printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d\n", label, i,j, RhoTree[index].slot[j].addr, RhoTree[index].slot[j].label);
+        printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d real: %d\n", label, i,j, RhoTree[index].slot[j].addr, RhoTree[index].slot[j].label,  RhoTree[index].slot[j].isReal);
       }
       else
       {
-        printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label);
+        printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d real: %d\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label, GlobTree[index].slot[j].isReal);
       }
     }
   }
@@ -627,6 +651,29 @@ void print_plb(){
   
 }
 
+
+void print_path_occupancy(int label){
+  int count = 0;
+  for (int i = LEVEL_VAR -1; i >= 0; i--)
+  {
+    int index = calc_index(label, i);
+    for (int j = 0; j < LZ_VAR[j]; j++)
+    {
+      if (RHO_ENABLE && (TREE_VAR == RHO))
+      {
+        count = RhoTree[index].slot[j].isReal ? count+1 : count;
+      }
+      else
+      {
+        count = GlobTree[index].slot[j].isReal ? count+1 : count;
+      }
+    }
+    
+  }
+  printf("Path[%d]: %d real blocks\n", label, count);
+  
+}
+
 // issue dummy access (read path + write path) until stash occupancy drops a threshold
 void background_eviction(){
   int i = 0;
@@ -654,18 +701,25 @@ void background_eviction(){
 // assign the block a new label and update in posmap and stash 
 void remap_block(int addr){
 
+ 
   int label = rand() % PATH_VAR;
 
   int prevlabel = PosMap[addr];
 
   if (RHO_ENABLE && (TREE_VAR == RHO))
   {
-    rho_update_tag_array(addr, label);
+    if (ACCESS_VAR == REGULAR)
+    {
+      rho_update_tag_array(addr, label);
+    }
+    
   }
   else
   {
     PosMap[addr] = label;   // $$$ remember to exclude current path later on
   }
+  
+  
 
   int index = get_stash(addr);
 
@@ -688,6 +742,13 @@ void remap_block(int addr){
   }
 
   intended = index;
+
+  if (RHO_ENABLE && (TREE_VAR == RHO) && (ACCESS_VAR == EVICT) )
+  {
+    remove_from_stash(index);
+    return;
+  }
+  
   if (RHO_ENABLE && (TREE_VAR == RHO))
   {
     RhoStash[index].label = label;
@@ -697,8 +758,6 @@ void remap_block(int addr){
     Stash[index].label = label;
   }
   
-  
-
 }
 
 bool add_to_stash(Slot s){
@@ -1018,46 +1077,217 @@ void freecursive_access(int addr, char type){
   oram_access(addr);  // STEP 3   Data block access
 }
 
-void test_oram(){
+void test_oram(char * argv[]){
 
-  for(long long int i = 0; i < TRACE_SIZE+1; i++)
+  FILE **tif;  /* The handles to the trace input files. */
+  int MAXTRACELINESIZE = 64;
+  char newstr[MAXTRACELINESIZE];  // 64 is the max trace size line
+  int NUMCORES = 1;
+
+  int *nonmemops;
+  char *opertype;
+  long long int *addr;
+  long long int *instrpc;
+  int numc=0;
+
+  int hitctr = 0;
+  int missctr = 0;
+  int evictctr = 0;
+
+  typedef struct MemRequest{
+  bool valid;
+  int nonmemops; 
+  char opertype;
+  long long int addr;
+  long long int instrpc;
+  } MemRequest;
+
+  MemRequest evicted[16]; 	// array of evicted request for cores, each core can have one evicted at a time 16: max num of cores
+  bool no_miss_occured;	// a flag that is set based on cache access and used to keep on reading trace file until it's cache hit
+  bool eviction_writeback[16] = {0}; // a flag that says next request is gonna be eviction writeback
+
+  tif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
+  nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
+  opertype = (char *)malloc(sizeof(char)*NUMCORES);
+  addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+  instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+
+
+  for (int numc=0; numc < NUMCORES; numc++) {
+     tif[numc] = fopen(argv[numc+2], "r");
+     printf("test oram: tif:  %s \n", argv[numc+2]);
+     if (!tif[numc]) {
+       printf("Missing input trace file %d.  Quitting. \n",numc);
+       exit(1);
+     }
+  }
+
+
+  for (int i = 0; i < NUMCORES; i++)
+	{
+    evicted[i].valid = false;
+	}
+
+  while (tracectr_test < TRACE_SIZE)
   {
-    // int addr = rand() % BLOCK;
-    // int addr = 755498;
-    // int addr = i;
-    int addr = (int)(trace[i] & (BLOCK-1));
-    
-    freecursive_access(addr, 'R');
+    // printf("test oram: while trace ctr: %d  \n", tracectr_test);
+    no_miss_occured = true;
 
-    // print i every 10m
-    // if (i % 1000000 == 0 )
-    // {
-    //   printf("\ni: %lld\n", i);
-    // }    
-    
-    // print motivation curve:
-    // if (i % 10000000 == 0)
-    // {
-    //    printf("\n\ni: %lld\n", i);
-    //    print_count_level();
-    // }
+    if (CACHE_ENABLE)
+		{
+			while (no_miss_occured)
+			{
+        if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+          if (evicted[numc].valid)
+          {
+            nonmemops[numc] = evicted[numc].nonmemops;
+            opertype[numc] = evicted[numc].opertype;
+            addr[numc] = evicted[numc].addr;
+            evicted[numc].valid = false;
+            eviction_writeback[numc] = true;
+            break;
+          }
+          
 
-    // print plb hit start
-    if (i % 10 == 0)
+          if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+              tracectr_test++;
+            if (opertype[numc] == 'R') {
+              if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
+              printf("Panic.  Poor trace format.\n");
+              exit(1);
+              }
+            }
+            else {
+              if (opertype[numc] == 'W') {
+                if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
+                  printf("Panic.  Poor trace format.\n");
+                  exit(1);
+                }
+              }
+              else {
+              printf("Panic.  Poor trace format.\n");
+              exit(1);
+              }
+            }
+            if (cache_access(addr[numc], opertype[numc]) == HIT)
+            {
+              hitctr++;
+            }
+            else // miss occured
+            {
+              missctr++;
+              int victim = cache_fill(addr[numc], opertype[numc]);
+              if ( victim != -1)
+              {
+                evictctr++;
+                evicted[numc].valid = true;
+                evicted[numc].nonmemops = nonmemops[numc]+1;
+                evicted[numc].opertype = 'W';
+                evicted[numc].addr = victim;
+              }
+
+              no_miss_occured = false;
+
+            }
+          }
+          else {
+            printf("Panic.  Poor trace format.\n");
+            exit(1);
+          }
+        
+        }
+			}
+		}
+		// cache disbaled:
+		else	
+		{
+		  /* Done consuming one line of the trace file.  Read in the next. */
+	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+	        if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+				tracectr_test++;
+		  if (opertype[numc] == 'R') {
+		    if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
+		      printf("Panic.  Poor trace format.\n");
+		      exit(1);
+		    }
+		  }
+		  else {
+		    if (opertype[numc] == 'W') {
+		      if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
+		        printf("Panic.  Poor trace format.\n");
+		        exit(1);
+		      }
+		    }
+		    else {
+		      printf("Panic.  Poor trace format.\n");
+		      exit(1);
+		    }
+		  }
+		}
+		else {
+		  printf("Panic.  Poor trace format.\n");
+		  exit(1);
+		}
+	      }
+		}
+
+  if (eviction_writeback[numc])
+  {
+    write_cache_hit = true;
+    eviction_writeback[numc] = false;
+    if (RHO_ENABLE)
     {
-      printf("\ni: %lld\n", i);
-      for (int i = 0; i < H-1; i++)
+      // rho_insert(evicted[numc].addr);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
+
+      int masked_addr = (int)(evicted[numc].addr & (BLOCK-1));
+      if (rho_lookup(masked_addr) == -1)
       {
-        printf("plb hit a%d:    %f%%\n",i,  (float)100*plb_hit[i]/plb_access[i]);
-        // printf("plb hit vs. plb access:    %lld   vs.   %lld\n\n",  plb_hit[i], plb_access[i]);
+        // printf("\ntest oram: %d gonna be inserted to rho @ trace: %d\n", masked_addr, tracectr_test);
+        rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
+        /* code */
       }
       
     }
-    
-    
-    fflush(stdout);
+  }
+  
+  // for debugggggggggg to be deleted later:
+  // if (tracectr_test == 7930)
+  // {
+  //   exit(0);
+  // }
+  
+
+  invoke_oram(addr[numc], 0, numc, 0, 0, opertype[numc]);
 
   }
+
+
+  // for(long long int i = 0; i < TRACE_SIZE+1; i++)
+  // {
+  //   int addr = rand() % SLOT;
+  //   addr = (int)(addr & (BLOCK-1));
+
+  //   char type = (i % 4 == 0) ? 'W': 'R';
+
+    
+  //   invoke_oram(addr, 0, 0, 0, 0, type);
+
+  //   fflush(stdout);
+
+  // }
+
+
+  printf("\n............... Test ORAM Stats ...............\n");
+	printf("trace ctr: %d\n", tracectr_test);
+	printf("invoke ctr: 	%d\n", invokectr);
+	printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
+	printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
+	printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
+	printf("rho hit #: %d\n", rho_hit);
+	printf("rho bk evict rate: %f\n", (double)rho_bkctr/rho_hit);
+
+  exit(0);
 
 }
 
@@ -1073,23 +1303,37 @@ void invoke_oram(long long int physical_address,
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  // printf("invoke oram: physical addr: %lld\n", physical_address);
   int addr = (int)(physical_address & (BLOCK-1));
+  // printf("invoke oram: physical addr: %lld\n", addr);
   // printf("invoke oram: b4 freecursive call addr: %d\n", addr);
-  int label = rho_lookup(addr);  // ???
-  
-  if (label != -1)
+
+  if (RHO_ENABLE)
   {
-    switch_tree_to(RHO);
-    rho_access(addr, label);
-    return;
+    int label = rho_lookup(addr);  // ???
+    
+    if (label != -1)
+    {
+      // printf("invoke: rho hit on %d\n", addr);
+      // printf("invoke: b4 rho access stashctr: %d    @ %d\n", rho_stashctr, tracectr_test);
+      
+      // printf("invoke: before rho access stashctr:  %d\n", rho_stashctr);
+	    // printf("invoke: before rho access hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
+      switch_tree_to(RHO);
+      // if (tracectr_test > 10000)
+      // {
+      //   print_stash();
+      // }
+      rho_access(addr, label);
+      switch_tree_to(ORAM);
+      // printf("invoke: after rho access @ %d\n", tracectr_test);
+      return;
+    }
   }
 
-  switch_tree_to(ORAM);
   freecursive_access(addr, type);
 }
 
-// After Volcano:
+// capacity occupation analysis
 void print_cap_percent(){
   printf("cap percent @ level: %d\n", CAP_LEVEL);
   printf("sub cap: %d\n", sub_cap);
@@ -1160,8 +1404,6 @@ void rho_alloc(){
 }
 
 
-
-
 int tag_array_find_spot(unsigned int index){
     for (unsigned int j = 0; j < RHO_WAY; j++)
     {
@@ -1206,16 +1448,26 @@ void tag_array_reset_LRU(unsigned int index, unsigned int way){
 
 
 void rho_update_tag_array(int addr, int label){
-
-}
-
-
-int rho_lookup(int addr){
-  int index = addr%RHO_SET;
+  int index = addr % RHO_SET;
   for (int i = 0; i < RHO_WAY; i++)
   {
     if (TagArray[index][i] == addr)
     {
+      TagArrayLabel[index][i] = label;
+      return;
+    }
+  }
+}
+
+
+int rho_lookup(int addr){
+  
+  int index = addr % RHO_SET;
+  for (int i = 0; i < RHO_WAY; i++)
+  {
+    if (TagArray[index][i] == addr)
+    {
+      rho_hit++;
       return TagArrayLabel[index][i];
     }
   }
@@ -1228,48 +1480,101 @@ void rho_access(int addr, int label){
   rhoctr++;
   rho_stash_dist[stashctr]++;
 
-  
+  if (stash_contain(addr))      // check if the block is already in the stash
+  {
+    return;
+  }
+
+
   read_path(label);
 
   remap_block(addr);
 
   write_path(label);
 
-  if (BK_EVICTION)
+  if (RHO_BK_EVICTION)
   {
-    background_eviction(); 
-  }
+    background_eviction();  
+  } 
 
 }
 
 
 // when a block gets evicted from llc it is placed into the rho
-// void rho_insert(int addr){
-// int index = addr%RHO_SET;
+void rho_insert(int physical_address){
+int addr = (int)(physical_address & (BLOCK-1));
+int index = addr % RHO_SET;
 
-//   int victim = -1;
+  int victim = -1;
+  int victim_label = -1;
   
-//   // miss only
-//   int way = tag_array_find_spot(index);
+  int way = tag_array_find_spot(index);
 
-//   // miss & evict
-//   if (way == -1)
-//   {
-//       way = tag_array_find_victim(index);
-//       if ([index][way].dirty)
-//       {
-//           victim = TagArray[index][way];
-//       }
-//   }
+  // evict
+  if (way == -1)
+  {
+    way = tag_array_find_victim(index);
+    victim = TagArray[index][way];
+    victim_label = TagArrayLabel[index][way];
+  }
+  // insert new block info into the rho   ~~~> new block is the one got evicted from llc
+  TagArray[index][way] = addr;
+  TagArrayLabel[index][way] = rand() % RHO_PATH; 
+  tag_array_reset_LRU(index, way);
+  Slot new = {.addr = addr , .label = TagArrayLabel[index][way], .isReal = true, .isData = true};  // ??? isdata not necessarily true but doesn't matter at this point
+  switch_tree_to(RHO);
+  if (!add_to_stash(new))
+  {
+    printf("ERROR: rho insert: block %d is not added to rho stash\n", addr);
+    printf("ERROR: rho insert: rho stash ctr: %d\n", rho_stashctr);
+    exit(1);
+  }
+
+  
+
+  // if no eviction incured make a dummy rho access by reading and writing a random path to prevent stash overflow
+  if (victim == -1)
+  {
+    // rho_access(new.addr, new.label);
+    // int label = rand() % RHO_PATH;
+    int label = new.label;
+    // printf("\n\nrho insert: b4 dummy access rho stash ctr: %d    @ trace: %d\n", rho_stashctr, tracectr_test);
+    // print_path_occupancy(label);
+    read_path(label);
+    // printf("rho insert: after read path rho stash ctr: %d    @ trace: %d\n", rho_stashctr, tracectr_test);
+    // print_path_occupancy(label);
+    // print_path(label);
+    write_path(label);
+    // printf("rho insert: after dummy access rho stash ctr: %d      @ trace: %d\n", rho_stashctr, tracectr_test);
+    // print_path_occupancy(label);
+    return;
+  }
+  
+  // if the insertion incur an eviction make a rho access for the victim
+  if (victim != -1)
+  {
+    // printf("rho insert: victim: %d    victim label: %d   @ trace: %d\n", victim, victim_label, tracectr_test);
+    // print_path(victim_label);
+    // printf("rho insert: victim label: %d\n", victim_label);
+    switch_access_to(EVICT);
+    rho_access(victim, victim_label);
+    switch_access_to(REGULAR);
+
+    // add the victim to oram stash
+    PosMap[victim] = rand() % PATH;  
+    Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = true};  // ??? isdata not necessarily true but doesn't matter at this point
+    switch_tree_to(ORAM);
+    if (!add_to_stash(s))
+    {
+      printf("ERROR: rho insert: block %d is not added to oram stash\n", victim);
+      printf("ERROR: rho insert: oram stash ctr: %d\n", stashctr);
+      exit(1);
+    }
+  }
+  
 
 
-//   TagArray[index][way] = addr;
-//   // TagArrayLabel[index][way] = ; // ???
-//   tag_array_reset_LRU(index, way);  
-
-//   return victim;  
-
-// }
+}
 
 
 
