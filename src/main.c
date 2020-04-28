@@ -134,46 +134,8 @@ int main(int argc, char * argv[])
 	printf("RHO_EMPTY_TOP: %d\n", RHO_EMPTY_TOP);
 	printf("RHO_TOP_CACHE: %d\n", RHO_TOP_CACHE);
 
+	
 	// init_trace();
-
-	// int iterator = 0;
-	// int addr_sofar = 0;
-
-	// for (int i = 0; i < floor(log_base2(SUBARRAY_TEST+1))/SUBTREE_LEVEL; i++)
-	// {
-	// 	// printf("floor: %f\n", floor(log_base2(SUBARRAY_TEST+1))/SUBTREE_LEVEL);
-		
-	// 	for (int j = 0; j < pow(2,i*SUBTREE_LEVEL); j++)
-	// 	{
-	// 		for (int k = 0; k < pow(2,SUBTREE_LEVEL)- 1; k++)
-	// 		{
-	// 			/* code */
-	// 			subtree_array[iterator] = addr_sofar + k;
-	// 			// printf("%d:  %d \n", iterator, subtree_array[iterator]);
-
-	// 			iterator++;
-	// 		}
-	// 		addr_sofar = subtree_array[iterator-1] + 1 ;
-	// 		// printf("%d\n", subtree_array[iterator-1]);
-			
-	// 	}
-	// }
-
-	// for (int i = 0; i < SUBARRAY_TEST; i++)
-	// {
-	// 	printf("%d:  %d \n", i, subtree_array[i]);
-	// }
-	
-	
-	// printf("\nred : blue\n");
-	// for (int i = 0; i < 15; i++)
-	// {
-	// 	for (int j = 0; j < Z; j++)
-	// 	{
-    //         int addr = SUBTREE_ENABLE ? index_to_addr(i, j) : (i+j);
-	// 		printf("%d slot%d: %d\n", i, j, addr);
-	// 	}
-	// }
 	
 
 	cache_init();
@@ -187,6 +149,11 @@ int main(int argc, char * argv[])
 	oram_init();
 	
 	printf("after init\n");
+
+	// test_queue();
+
+
+
 
 	fflush(stdout);
 	

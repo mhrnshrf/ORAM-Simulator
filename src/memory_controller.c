@@ -54,9 +54,13 @@ typedef struct Entry{
 }Entry;
 
 
-// Bucket *GlobTree;
-// Entry *PosMap;
-// Slot *Stash;
+
+
+
+Queue *oramQ;
+
+
+
 
 Bucket GlobTree[NODE];      // global oram tree
 int PosMap[BLOCK];          // position map
@@ -126,6 +130,117 @@ int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L
 int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;    // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 
+
+Queue *ConstructQueue(int limit) {
+    Queue *queue = (Queue*) malloc(sizeof (Queue));
+    if (queue == NULL) {
+        return NULL;
+    }
+    if (limit <= 0) {
+        limit = 65535;
+    }
+    queue->limit = limit;
+    queue->size = 0;
+    queue->head = NULL;
+    queue->tail = NULL;
+
+    return queue;
+}
+
+void DestructQueue(Queue *queue) {
+    Element *pN;
+    while (!isEmpty(queue)) {
+        pN = Dequeue(queue);
+        free(pN);
+    }
+    free(queue);
+}
+
+
+bool Enqueue(Queue *pQueue, Element *item) {
+    /* Bad parameter */
+    if ((pQueue == NULL) || (item == NULL)) {
+        return false;
+    }
+    // if(pQueue->limit != 0)
+    if (pQueue->size >= pQueue->limit) {
+        return false;
+    }
+    /*the queue is empty*/
+    item->prev = NULL;
+    if (pQueue->size == 0) {
+        pQueue->head = item;
+        pQueue->tail = item;
+
+    } else {
+        /*adding item to the end of the queue*/
+        pQueue->tail->prev = item;
+        pQueue->tail = item;
+    }
+    pQueue->size++;
+    return true;
+}
+
+Element * Dequeue(Queue *pQueue) {
+    /*the queue is empty or bad param*/
+    Element *item;
+    if (isEmpty(pQueue))
+        return NULL;
+    item = pQueue->head;
+    pQueue->head = (pQueue->head)->prev;
+    pQueue->size--;
+    return item;
+}
+
+bool isEmpty(Queue* pQueue) {
+    if (pQueue == NULL) {
+        return false;
+    }
+    if (pQueue->size == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void test_queue(){
+  for (int i = 0; i < 10; i++) {
+    Element *pN = (Element*) malloc(sizeof (Element));
+    pN->addr = rand() % 500;
+    pN->cycle = i;
+    pN->thread = i;
+    pN->instr = i;
+    pN->pc = i;
+    pN->type = (rand() % 2) ? 'R' : 'W';
+    Enqueue(oramQ, pN);
+  }
+
+  while (!isEmpty(oramQ)) {
+      Element *pN = Dequeue(oramQ);
+      printf("\nDequeued: %lld	%lld	%d	%d	%lld	%c \n", pN->addr, pN->cycle, pN->thread, pN->instr, pN->pc, pN->type);
+      printf("queue size: %d\n", oramQ->size);
+      free(pN);
+  }
+  DestructQueue(oramQ);
+
+	exit(0);
+}
+
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type) {
+  Element *pN = (Element*) malloc(sizeof (Element));
+  pN->addr = addr;
+  pN->cycle = cycle; 
+  pN->thread = thread; 
+  pN->instr = instr; 
+  pN->pc = pc; 
+  pN->type = type;
+  bool added = Enqueue(oramQ, pN);
+  if (!added)
+  {
+    printf("ERROR: insert oramQ: failed to enqueue block: %lld\n", addr);
+    exit(1);
+  }
+}
 
 
 // to set the parameters for different funcs like path read and write according to whether oram is being accessed or rho
@@ -241,6 +356,8 @@ void oram_alloc(){
   {
     Stash[i].isReal = false;
   }  
+
+  oramQ = ConstructQueue(1000);
 }
 
 // initialize the oram tree by assigning a random path to each addr of address space
@@ -441,7 +558,8 @@ void read_path(int label){
         if (i >= TOP_CACHE_VAR)
         {
           int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-          insert_read(addr, orig_cycle++, orig_thread, orig_instr, orig_pc);
+          // insert_read(addr, orig_cycle, orig_thread, orig_instr, orig_pc);
+          insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
         }
 
         if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -535,7 +653,8 @@ void write_path(int label){
         if (i >= TOP_CACHE_VAR)
         {
           addr = SUBTREE_ENABLE ? index_to_addr(index, g):(index*Z_VAR+g);
-          insert_write (addr, orig_cycle++, orig_thread, orig_instr);
+          // insert_write (addr, orig_cycle, orig_thread, orig_instr);
+          insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
         }
         
       }
@@ -559,7 +678,8 @@ void write_path(int label){
           if (i >= TOP_CACHE_VAR)
           {
             addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-            insert_write (addr, orig_cycle++, orig_thread, orig_instr);
+            // insert_write (addr, orig_cycle, orig_thread, orig_instr);
+            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
           }
         }
         else
@@ -567,7 +687,8 @@ void write_path(int label){
           if (i >= TOP_CACHE_VAR)
           {
             addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-            insert_write (addr, orig_cycle++, orig_thread, orig_instr);
+            // insert_write (addr, orig_cycle, orig_thread, orig_instr);
+            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
           }
 
           if (RHO_ENABLE && (TREE_VAR == RHO))

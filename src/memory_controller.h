@@ -67,7 +67,27 @@
 
 #include <stdbool.h>
 
+typedef struct Element_t{
+  long long int addr;
+  long long int cycle; 
+  int thread; 
+  int instr; 
+  long long int pc;
+  char type;
+  struct Element_t *prev; 
+}Element;
+
+
+typedef struct Queue {
+    Element *head;
+    Element *tail;
+    int size;
+    int limit;
+} Queue;
+
+
 // extern long long int CYCLE_VAL; 
+extern Queue *oramQ;; 
 extern int invokectr; 
 extern int bkctr; 
 extern int rho_bkctr; 
@@ -141,6 +161,13 @@ void rho_access(int addr, int label);
 int rho_lookup(int addr);
 void rho_update_tag_array(int addr, int label);
 void rho_insert(int physical_address);
+Queue *ConstructQueue(int limit);
+void DestructQueue(Queue *queue);
+bool Enqueue(Queue *pQueue, Element *item);
+Element *Dequeue(Queue *pQueue);
+bool isEmpty(Queue* pQueue);
+void test_queue();
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type);
 
 
 
