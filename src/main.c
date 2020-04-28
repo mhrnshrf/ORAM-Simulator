@@ -190,7 +190,7 @@ int main(int argc, char * argv[])
 
 	fflush(stdout);
 	
-	test_oram(argv);
+	// test_oram(argv);
 
 
 
@@ -418,7 +418,7 @@ int main(int argc, char * argv[])
 	
   while (!expt_done) {
 
-// Mehrnoosh:
+	// Mehrnoosh:
 
 	no_miss_occured = true;
 
@@ -439,23 +439,23 @@ int main(int argc, char * argv[])
 	// 	printf("rho bk evict rate: %f\n\n", (double)rho_bkctr/rho_hit);
 	// }
 	
-	if (/*(tracectr % 1000 == 0) && */ tracectr > 9000 /* && tracectr != roundprev*/ )
+	if ((tracectr % 2000 == 0) /*&& tracectr > 9000 && tracectr != roundprev*/ )
 	{
 		printf("\n...........................Partial Stat..............................\n");
-		printf("@ %d:\n", tracectr);
-		printf("invoke ctr %d:\n", invokectr);
-		printf("cache hit rate: %f%%\n", (double)hitctr/(hitctr+missctr));
-		printf("bk evict rate: %f\n", (double)bkctr/invokectr);
-		printf("\nrho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
-		printf("rho hit #: %d\n", rho_hit);
-		printf("rho bk evict rate: %f\n\n", (double)rho_bkctr/rho_hit);
+		printf("@ trace: %d\n", tracectr);
+		printf("invoke ctr: 	%d\n", invokectr);
+		printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
+		printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+		printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
+		printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
+		printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
 	
-		period = 0;
-		periodctr++;
-		roundprev = tracectr;
+		// period = 0;
+		// periodctr++;
+		// roundprev = tracectr;
 	}
 	
-// Mehrnoosh.
+	// Mehrnoosh.
 
     /* For each core, retire instructions if they have finished. */
     for (numc = 0; numc < NUMCORES; numc++) {
@@ -567,7 +567,11 @@ int main(int argc, char * argv[])
 					eviction_writeback[numc] = false;
 					if (RHO_ENABLE)
 					{
-						rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
+						int masked_addr = (int)(evicted[numc].addr & (BLOCK-1));
+						if (rho_lookup(masked_addr) == -1)
+						{
+							rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
+						}
 					}
 					
 				}
@@ -751,13 +755,13 @@ int main(int argc, char * argv[])
      // printf("C%d: Inf %d : Hd %d : Tl %d : Comp %lld : type %c : addr %x : TD %d\n", numc, ROB[numc].inflight, ROB[numc].head, ROB[numc].tail, ROB[numc].comptime[ROB[numc].head], ROB[numc].optype[ROB[numc].head], ROB[numc].mem_address[ROB[numc].head], ROB[numc].tracedone);
     //}
 
-    CYCLE_VAL++;  /* Advance the simulation cycle. */
+    // CYCLE_VAL++;  /* Advance the simulation cycle. */
 
-// Mehrnoosh:
+	// Mehrnoosh:
 	gettimeofday(&eday, NULL);
     period =  ((eday.tv_sec * 1000000 + eday.tv_usec) - (sday.tv_sec * 1000000 + sday.tv_usec))/ 1000000;
 	fflush(stdout);
-// Mehrnoosh.
+	// Mehrnoosh.
   }
 
 
@@ -836,19 +840,13 @@ int main(int argc, char * argv[])
 // Mehrnoosh:
 printf("\n............... ORAM Stats ...............\n");
 printf("total time: %f s\n", cpu_time_used);
-printf("bk evict rate: %f\n", (double)bkctr/invokectr);
-printf("\n");
-printf("miss ctr: %d\n", missctr);
 printf("trace ctr: %d\n", tracectr);
-printf("evict    ctr: %d\n", evictctr);
-printf("evict if ctr: %d\n", evictifctr);
-printf("oram ctr: %d\n", oramctr);
-printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
-printf("evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
-printf("\nrho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("invoke ctr: 	%d\n", invokectr);
-printf("rho hit #: %d\n", rho_hit);
-printf("rho bk evict rate: %f\n", (double)rho_bkctr/rho_hit);
+printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
+printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
+printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
+printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
 
 // print_cap_percent();
 // count_tree();

@@ -14,12 +14,12 @@ STASH_SIZE: 200
 BK_EVICTION: 1
 EMPTY_TOP: 0
 TOP_CACHE: 10
-TRACE_SIZE: 20000
+TRACE_SIZE: 100000
 LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
  = 96 ~> path length
 L1: 9   Z1:4
-L2: 15   Z2:4
-L3: 18   Z3:4
+L2: 10   Z2:4
+L3: 11   Z3:4
 
 CACHE_ENABLE: 1
 WRITE_BYPASS: 0
@@ -119,66 +119,3 @@ WQ_LOOKUP_LATENCY:              10
 
 ----------------------------------------------------------------------------------------
 Starting simulation.
-...........................Partial Stat..............................
-@ 1000:
-cache hit rate: 0.000000%
-bk evict rate: 0.000000
-
-rho hit rate: 0.000000%
-rho hit #: 0
-rho bk evict rate: -nan
-
-...........................Partial Stat..............................
-@ 2000:
-cache hit rate: 0.000000%
-bk evict rate: 0.000000
-
-rho hit rate: 0.000000%
-rho hit #: 0
-rho bk evict rate: -nan
-
-...........................Partial Stat..............................
-@ 3000:
-cache hit rate: 0.000000%
-bk evict rate: 0.000000
-
-rho hit rate: 0.000000%
-rho hit #: 0
-rho bk evict rate: -nan
-
-...........................Partial Stat..............................
-@ 4000:
-cache hit rate: 0.000000%
-bk evict rate: 0.000000
-
-rho hit rate: 0.000000%
-rho hit #: 0
-rho bk evict rate: -nan
-
-...........................Partial Stat..............................
-@ 5000:
-cache hit rate: 0.000800%
-bk evict rate: 0.000000
-
-rho hit rate: 0.000000%
-rho hit #: 0
-rho bk evict rate: -nan
-
-...........................Partial Stat..............................
-@ 6000:
-cache hit rate: 0.003667%
-bk evict rate: 0.000000
-
-rho hit rate: 0.000000%
-rho hit #: 0
-rho bk evict rate: -nan
-
-...........................Partial Stat..............................
-@ 8000:
-cache hit rate: 0.052625%
-bk evict rate: 0.000000
-
-rho hit rate: 1.418530%
-rho hit #: 111
-rho bk evict rate: 0.000000
-

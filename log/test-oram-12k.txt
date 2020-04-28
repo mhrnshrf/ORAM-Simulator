@@ -18,8 +18,8 @@ TRACE_SIZE: 12000
 LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
  = 96 ~> path length
 L1: 9   Z1:4
-L2: 15   Z2:4
-L3: 18   Z3:4
+L2: 10   Z2:4
+L3: 11   Z3:4
 
 CACHE_ENABLE: 1
 WRITE_BYPASS: 0
@@ -30,7 +30,7 @@ SUBTREE_SLOT: 32
 SUBTREE_BUCKET: 7
 SUBTREE_LEVEL: 3
 
-RHO_ENABLE: 0
+RHO_ENABLE: 1
 RHO_LEVEL: 17
 RHO_Z: 2
 RHO_PATH: 65536
@@ -50,10 +50,9 @@ test oram: tif:  /mnt/c/trace/comm1
 
 ............... Test ORAM Stats ...............
 trace ctr: 12000
-invoke ctr: 	12783
+invoke ctr: 	12000
 bk evict rate: 0.000000%
-cache hit rate: 7.583333%
-cache evict rate wrt # miss: 15.275023%
+cache hit rate: 21.905506%
+cache evict rate wrt # miss: 0.000000%
 rho hit rate: 0.000000%
-rho hit #: 0
-rho bk evict rate: -nan
+rho bk evict rate: -nan%

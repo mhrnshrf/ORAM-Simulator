@@ -14,12 +14,12 @@ STASH_SIZE: 200
 BK_EVICTION: 1
 EMPTY_TOP: 0
 TOP_CACHE: 10
-TRACE_SIZE: 8000
+TRACE_SIZE: 1000000
 LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
  = 96 ~> path length
 L1: 9   Z1:4
-L2: 15   Z2:4
-L3: 18   Z3:4
+L2: 10   Z2:4
+L3: 11   Z3:4
 
 CACHE_ENABLE: 1
 WRITE_BYPASS: 0
@@ -46,14 +46,13 @@ RHO_EMPTY_TOP: 0
 RHO_TOP_CACHE: 0
 after alloc
 after init
-test oram: tif:  /mnt/c/trace/comm1 
+test oram: tif:  /mnt/c/trace/leela-641s 
 
 ............... Test ORAM Stats ...............
-trace ctr: 8000
-invoke ctr: 	7690
+trace ctr: 1000000
+invoke ctr: 	1975387
 bk evict rate: 0.000000%
-cache hit rate: 5.262500%
-cache evict rate wrt # miss: 1.464573%
-rho hit rate: 1.443433%
-rho hit #: 111
-rho bk evict rate: 0.000000
+cache hit rate: 98.066633%
+cache evict rate wrt # miss: 97.538800%
+rho hit rate: 62.817514%
+rho bk evict rate: 0.000000%

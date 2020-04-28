@@ -1,0 +1,16 @@
+............... ORAM Stats ...............
+total time: 11.890625 s
+bk evict rate: 0.000000
+
+miss ctr: 48373
+trace ctr: 100013
+evict    ctr: 10829
+evict if ctr: 10828
+oram ctr: 119414
+cache hit rate: 51.633288%
+evict rate wrt # miss: 22.386455%
+
+rho hit rate: 20.555002%
+invoke ctr: 	59207
+rho hit #: 12170
+rho bk evict rate: 0.000000

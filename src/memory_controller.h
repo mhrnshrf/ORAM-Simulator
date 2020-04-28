@@ -8,8 +8,18 @@
 // Mehrnoosh:
 
 
+
 #include <math.h>
 
+// enable/disable options config
+#define VOLCANO_ENABLE 0  // 0/1 flag to disable/enable having volcano idea
+#define CACHE_ENABLE 1    // 0/1 flag to diable/enable having cache
+#define WRITE_BYPASS 0    // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
+#define SUBTREE_ENABLE 0  // 0/1 flag to diable/enable having subtree adddressing scheme
+#define RHO_ENABLE 1      // 0/1 flag to disable/enable having rho
+
+// oram config
+#define TRACE_SIZE 10000 // # addr read from trace file
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
@@ -18,61 +28,46 @@
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
 #define PLB_SIZE 1024     // size of plb (# entry)
-#define TRACE_SIZE 1000000 // # addr read from trace file
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
-
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
-
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 10   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 11   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
-
 #define Z1 4   // # slots per bucket upto L1
 #define Z2 4   // # slots per bucket upto L2
 #define Z3 4   // # slots per bucket upto L3
-
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
+// subtree config
 #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-
-// new ideas
-#define WRITE_BYPASS 0  // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
-
-#define CACHE_ENABLE 1  // 0/1 flag to diable/enable having cache
-
-#define SUBTREE_ENABLE 0  // 0/1 flag to diable/enable having subtree adddressing scheme
-
 #define NUM_CHANNELS_SUBTREE 2  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 
-// rho
+
+// rho config
 #define RHO_STASH_SIZE 200  // size of rho stash
 #define RHO_LEVEL 17    // # levels in rho
 #define RHO_Z 2  // # slots per bucket in rho
 #define RHO_OV_TRESHOLD   RHO_STASH_SIZE - RHO_Z*(RHO_LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define RHO_BK_EVICTION 1   // 0/1 flag to disable/enable background eviction in rho
-
 #define RHO_L1 7  // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define RHO_L2 8   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define RHO_L3 9   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
-
 #define RHO_Z1 2   // # slots per bucket upto L1
 #define RHO_Z2 2   // # slots per bucket upto L2
 #define RHO_Z3 2   // # slots per bucket upto L3
-
 #define RHO_EMPTY_TOP 0   // # top empty levels of rho ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define RHO_TOP_CACHE 0   // # top levels that are cached in rho
-
 #define RHO_WAY 10   // # ways in each set accociative entry of rho tag array
-#define RHO_ENABLE 1   // 0/1 flag to disable/enable having rho
 
 
 
 #include <stdbool.h>
 
+// extern long long int CYCLE_VAL; 
 extern int invokectr; 
 extern int bkctr; 
 extern int rho_bkctr; 

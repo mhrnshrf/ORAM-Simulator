@@ -20,8 +20,10 @@
 #include "cache.h"
 
 
+// long long int CYCLE_VAL = 0;
 
-  int tracectr_test = 0;
+
+int tracectr_test = 0;
 
 
 
@@ -439,7 +441,7 @@ void read_path(int label){
         if (i >= TOP_CACHE_VAR)
         {
           int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-          // insert_read(addr, orig_cycle, orig_thread, orig_instr, orig_pc);
+          insert_read(addr, orig_cycle++, orig_thread, orig_instr, orig_pc);
         }
 
         if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -533,7 +535,7 @@ void write_path(int label){
         if (i >= TOP_CACHE_VAR)
         {
           addr = SUBTREE_ENABLE ? index_to_addr(index, g):(index*Z_VAR+g);
-          // insert_write (addr, orig_cycle, orig_thread, orig_instr);
+          insert_write (addr, orig_cycle++, orig_thread, orig_instr);
         }
         
       }
@@ -557,7 +559,7 @@ void write_path(int label){
           if (i >= TOP_CACHE_VAR)
           {
             addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-            // insert_write (addr, orig_cycle, orig_thread, orig_instr);
+            insert_write (addr, orig_cycle++, orig_thread, orig_instr);
           }
         }
         else
@@ -565,7 +567,7 @@ void write_path(int label){
           if (i >= TOP_CACHE_VAR)
           {
             addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-            // insert_write (addr, orig_cycle, orig_thread, orig_instr);
+            insert_write (addr, orig_cycle++, orig_thread, orig_instr);
           }
 
           if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -1150,7 +1152,7 @@ void test_oram(char * argv[]){
           
 
           if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
-              tracectr_test++;
+              // tracectr_test++;
             if (opertype[numc] == 'R') {
               if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
               printf("Panic.  Poor trace format.\n");
@@ -1175,6 +1177,7 @@ void test_oram(char * argv[]){
             }
             else // miss occured
             {
+              tracectr_test++;
               missctr++;
               int victim = cache_fill(addr[numc], opertype[numc]);
               if ( victim != -1)
@@ -1284,8 +1287,7 @@ void test_oram(char * argv[]){
 	printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
   printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
 	printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
-	printf("rho hit #: %d\n", rho_hit);
-	printf("rho bk evict rate: %f\n", (double)rho_bkctr/rho_hit);
+	printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
 
   exit(0);
 
@@ -1326,6 +1328,7 @@ void invoke_oram(long long int physical_address,
       rho_access(addr, label);
       switch_tree_to(ORAM);
       // printf("invoke: after rho access @ %d\n", tracectr_test);
+      rho_hit++;
       return;
     }
   }
@@ -1467,7 +1470,6 @@ int rho_lookup(int addr){
   {
     if (TagArray[index][i] == addr)
     {
-      rho_hit++;
       return TagArrayLabel[index][i];
     }
   }
@@ -1502,8 +1504,8 @@ void rho_access(int addr, int label){
 
 // when a block gets evicted from llc it is placed into the rho
 void rho_insert(int physical_address){
-int addr = (int)(physical_address & (BLOCK-1));
-int index = addr % RHO_SET;
+  int addr = (int)(physical_address & (BLOCK-1));
+  int index = addr % RHO_SET;
 
   int victim = -1;
   int victim_label = -1;
@@ -1536,8 +1538,8 @@ int index = addr % RHO_SET;
   if (victim == -1)
   {
     // rho_access(new.addr, new.label);
-    // int label = rand() % RHO_PATH;
-    int label = new.label;
+    int label = rand() % RHO_PATH;
+    // int label = new.label;
     // printf("\n\nrho insert: b4 dummy access rho stash ctr: %d    @ trace: %d\n", rho_stashctr, tracectr_test);
     // print_path_occupancy(label);
     read_path(label);

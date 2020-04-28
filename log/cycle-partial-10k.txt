@@ -14,181 +14,40 @@ STASH_SIZE: 200
 BK_EVICTION: 1
 EMPTY_TOP: 0
 TOP_CACHE: 10
-TRACE_SIZE: 32000000
+TRACE_SIZE: 10000
 LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
  = 96 ~> path length
 L1: 9   Z1:4
-L2: 15   Z2:4
-L3: 18   Z3:4
+L2: 10   Z2:4
+L3: 11   Z3:4
+
+CACHE_ENABLE: 1
+WRITE_BYPASS: 0
+
+SUBTREE_ENABLE: 0
+SUBTREE_SIZE: 2048
+SUBTREE_SLOT: 32
+SUBTREE_BUCKET: 7
+SUBTREE_LEVEL: 3
+
+RHO_ENABLE: 1
+RHO_LEVEL: 17
+RHO_Z: 2
+RHO_PATH: 65536
+RHO_NODE: 131071
+RHO_SLOT: 262142
+RHO_BLOCK: 131071
+RHO_SET: 16000
+RHO_WAY: 10
+RHO_OV_TRESHOLD: 164
+RHO_STASH_SIZE: 200
+RHO_BK_EVICTION: 1
+RHO_EMPTY_TOP: 0
+RHO_TOP_CACHE: 0
 after alloc
 after init
-
-i: 0
-plb hit a0:    0%
-plb hit a1:    0%
-plb hit a2:    0%
-
-i: 1000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 2000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 3000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 4000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 5000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 6000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 7000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 8000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 9000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 10000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 11000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 12000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 13000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 14000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 15000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 16000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 17000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 18000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 19000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 20000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 21000000
-plb hit a0:    0%
-plb hit a1:    49%
-plb hit a2:    0%
-
-i: 22000000
-plb hit a0:    0%
-plb hit a1:    -47%
-plb hit a2:    0%
-
-i: 23000000
-plb hit a0:    0%
-plb hit a1:    -43%
-plb hit a2:    0%
-
-i: 24000000
-plb hit a0:    0%
-plb hit a1:    -39%
-plb hit a2:    0%
-
-i: 25000000
-plb hit a0:    0%
-plb hit a1:    -35%
-plb hit a2:    0%
-
-i: 26000000
-plb hit a0:    0%
-plb hit a1:    -32%
-plb hit a2:    0%
-
-i: 27000000
-plb hit a0:    0%
-plb hit a1:    -29%
-plb hit a2:    0%
-
-i: 28000000
-plb hit a0:    0%
-plb hit a1:    -26%
-plb hit a2:    0%
-
-i: 29000000
-plb hit a0:    0%
-plb hit a1:    -24%
-plb hit a2:    0%
-
-i: 30000000
-plb hit a0:    0%
-plb hit a1:    -21%
-plb hit a2:    0%
-
-i: 31000000
-plb hit a0:    0%
-plb hit a1:    -19%
-plb hit a2:    0%
-
-i: 32000000
-plb hit a0:    0%
-plb hit a1:    -17%
-plb hit a2:    0%
 Initializing.
-Core 0: Input trace file input/comm2 : Addresses will have prefix 0
+Core 0: Input trace file /mnt/c/trace/comm1 : Addresses will have prefix 0
 Reading vi file: 1Gb_x4.vi	
 16 Chips per Rank
 ----------------------------------------------------------------------------------------
@@ -260,3 +119,12 @@ WQ_LOOKUP_LATENCY:              10
 
 ----------------------------------------------------------------------------------------
 Starting simulation.
+
+...........................Partial Stat..............................
+@ trace: 0
+invoke ctr: 	0
+bk evict rate: -nan%
+cache hit rate: -nan%
+cache evict rate wrt # miss: -nan%
+rho hit rate: -nan%
+rho bk evict rate: -nan%

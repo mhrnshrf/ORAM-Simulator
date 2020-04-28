@@ -3,6 +3,7 @@
     "C_Cpp.errorSquiggles": "Disabled",
     "files.associations": {
         "cache.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "time.h": "c"
     }
 }

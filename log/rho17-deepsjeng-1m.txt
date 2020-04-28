@@ -46,13 +46,13 @@ RHO_EMPTY_TOP: 0
 RHO_TOP_CACHE: 0
 after alloc
 after init
-test oram: tif:  /mnt/c/trace/comm1 
+test oram: tif:  /mnt/c/trace/deepsjeng-631s 
 
 ............... Test ORAM Stats ...............
 trace ctr: 1000000
-invoke ctr: 	1961440
+invoke ctr: 	1967148
 bk evict rate: 0.000000%
-cache hit rate: 26.001569%
-cache evict rate wrt # miss: 96.144100%
-rho hit rate: 55.871197%
+cache hit rate: 96.240238%
+cache evict rate wrt # miss: 96.714900%
+rho hit rate: 73.963169%
 rho bk evict rate: 0.000000%

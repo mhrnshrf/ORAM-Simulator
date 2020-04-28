@@ -18,8 +18,8 @@ TRACE_SIZE: 10000
 LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
  = 96 ~> path length
 L1: 9   Z1:4
-L2: 15   Z2:4
-L3: 18   Z3:4
+L2: 10   Z2:4
+L3: 11   Z3:4
 
 CACHE_ENABLE: 1
 WRITE_BYPASS: 0
@@ -47,7 +47,7 @@ RHO_TOP_CACHE: 0
 after alloc
 after init
 Initializing.
-Core 0: Input trace file /mnt/c/trace/swapt : Addresses will have prefix 0
+Core 0: Input trace file /mnt/c/trace/comm1 : Addresses will have prefix 0
 Reading vi file: 1Gb_x4.vi	
 16 Chips per Rank
 ----------------------------------------------------------------------------------------
@@ -119,3 +119,12 @@ WQ_LOOKUP_LATENCY:              10
 
 ----------------------------------------------------------------------------------------
 Starting simulation.
+
+...........................Partial Stat..............................
+@ trace: 0
+invoke ctr: 	0
+bk evict rate: -nan%
+cache hit rate: -nan%
+cache evict rate wrt # miss: -nan%
+rho hit rate: -nan%
+rho bk evict rate: -nan%
