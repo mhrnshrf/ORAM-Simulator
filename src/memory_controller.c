@@ -1255,7 +1255,7 @@ void test_oram(char * argv[]){
   {
     // printf("test oram: while trace ctr: %d  \n", tracectr_test);
     no_miss_occured = true;
-
+		// cache enabled:
     if (CACHE_ENABLE)
 		{
 			while (no_miss_occured)
@@ -1322,7 +1322,7 @@ void test_oram(char * argv[]){
         }
 			}
 		}
-		// cache disbaled:
+		// cache disabled:
 		else	
 		{
 		  /* Done consuming one line of the trace file.  Read in the next. */
@@ -1355,50 +1355,29 @@ void test_oram(char * argv[]){
 	      }
 		}
 
-  if (eviction_writeback[numc])
-  {
-    write_cache_hit = true;
-    eviction_writeback[numc] = false;
-    if (RHO_ENABLE)
+    if (eviction_writeback[numc])
     {
-      // rho_insert(evicted[numc].addr);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
-
-      int masked_addr = (int)(evicted[numc].addr & (BLOCK-1));
-      if (rho_lookup(masked_addr) == -1)
+      write_cache_hit = true;
+      eviction_writeback[numc] = false;
+      if (RHO_ENABLE)
       {
-        // printf("\ntest oram: %d gonna be inserted to rho @ trace: %d\n", masked_addr, tracectr_test);
-        rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
-        /* code */
+        // rho_insert(evicted[numc].addr);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
+
+        int masked_addr = (int)(evicted[numc].addr & (BLOCK-1));
+        if (rho_lookup(masked_addr) == -1)
+        {
+          // printf("\ntest oram: %d gonna be inserted to rho @ trace: %d\n", masked_addr, tracectr_test);
+          rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
+          /* code */
+        }
+        
       }
-      
     }
-  }
-  
-  // for debugggggggggg to be deleted later:
-  // if (tracectr_test == 7930)
-  // {
-  //   exit(0);
-  // }
-  
-
-  invoke_oram(addr[numc], 0, numc, 0, 0, opertype[numc]);
-
-  }
-
-
-  // for(long long int i = 0; i < TRACE_SIZE+1; i++)
-  // {
-  //   int addr = rand() % SLOT;
-  //   addr = (int)(addr & (BLOCK-1));
-
-  //   char type = (i % 4 == 0) ? 'W': 'R';
-
     
-  //   invoke_oram(addr, 0, 0, 0, 0, type);
+    invoke_oram(addr[numc], 0, numc, 0, 0, opertype[numc]);
 
-  //   fflush(stdout);
+  }
 
-  // }
 
 
   printf("\n............... Test ORAM Stats ...............\n");
@@ -1414,9 +1393,7 @@ void test_oram(char * argv[]){
 
 }
 
-void invoke_oram(long long int physical_address,
-    long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc, char type) {
+void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type) {
     
   invokectr++;
   
@@ -1489,6 +1466,55 @@ int index_to_addr(int index, int slot){
   int addr = root_of_curr_subtree + distance_from_root_subtree;
   addr = addr*Z_VAR + slot;
   return addr;
+}
+
+
+void test_subtree(){
+
+  // print 3 random path to see whether the address of each # subtree_level consecutive blocks on the path fal into the range of subtree_slots or not  
+  printf("\n\n\nPrinting 3 random paths...\n\n");
+  for (int i = 0; i < 3; i++)
+	{
+		int pl = rand() % PATH;
+		printf("\ni: %d		pl: %d\n", i, pl);
+		for (int i = 0; i < LEVEL; i++)
+		{
+			int idx = calc_index(pl, i);
+			int addr = index_to_addr(idx,0);
+			printf("@ Level: %d		index: %d		addr: %d\n", i, idx, addr);
+		}
+	}
+
+
+  // print head node of each level to see whether the index and addr matches every other sublevel_tree-1 levels or not
+  printf("\n\n\n\nPrinting head node of each level...\n\n");
+	int prevlevel = -1;
+	int level;
+
+	for (int i = 0; i < NODE; i++)
+	{
+		for (int j = 0; j < Z; j++)
+		{
+
+			int addr = index_to_addr(i, j);
+			level = calc_level(i);
+			if (level != prevlevel && j == 0)
+			{
+				printf("level: %d 	node: %d	slot: %d		index: %d		addr: %d\n", level, i, j,  i*Z+j, addr);
+			}
+
+		}
+
+		prevlevel = level;
+    if (prevlevel == LEVEL -1)
+    {
+      break;
+    }
+    
+		
+	}
+
+	exit(0);
 }
 
 
@@ -3478,6 +3504,8 @@ print_stats (int channel)
     printf ("Write Page Hit Rate :           %7.5f\n",
         ((double) (write_cmds - activates_for_writes) / write_cmds));
     printf ("------------------------------------\n");
+    printf ("write_cmds: %lld \n", write_cmds) ;
+    printf ("read_cmds: %lld \n", read_cmds) ;
   } }  void
 
 update_issuable_commands (int channel) 
