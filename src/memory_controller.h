@@ -15,11 +15,11 @@
 #define VOLCANO_ENABLE 0  // 0/1 flag to disable/enable having volcano idea
 #define CACHE_ENABLE 1    // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0    // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
-#define SUBTREE_ENABLE 1  // 0/1 flag to diable/enable having subtree adddressing scheme
+#define SUBTREE_ENABLE 0  // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0      // 0/1 flag to disable/enable having rho
 
 // oram config
-#define TRACE_SIZE 100000 // # addr read from trace file
+#define TRACE_SIZE 200000 // # addr read from trace file
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
@@ -32,9 +32,9 @@
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
-#define L1 5   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 6   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
-#define L3 7   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+#define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
+#define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define Z1 4   // # slots per bucket upto L1
 #define Z2 4   // # slots per bucket upto L2
 #define Z3 4   // # slots per bucket upto L3
@@ -43,7 +43,7 @@
 // subtree config
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-#define NUM_CHANNELS_SUBTREE 2  // # memory channel used for subtree calculation
+#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 

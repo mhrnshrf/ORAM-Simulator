@@ -1218,11 +1218,11 @@ void test_oram(char * argv[]){
   int evictctr = 0;
 
   typedef struct MemRequest{
-  bool valid;
-  int nonmemops; 
-  char opertype;
-  long long int addr;
-  long long int instrpc;
+    bool valid;
+    int nonmemops; 
+    char opertype;
+    long long int addr;
+    long long int instrpc;
   } MemRequest;
 
   MemRequest evicted[16]; 	// array of evicted request for cores, each core can have one evicted at a time 16: max num of cores
@@ -1254,6 +1254,11 @@ void test_oram(char * argv[]){
   while (tracectr_test < TRACE_SIZE)
   {
     // printf("test oram: while trace ctr: %d  \n", tracectr_test);
+    for (int i = 0; i < oramQ->size; i++)
+    {
+      Dequeue(oramQ);
+    }
+    
     no_miss_occured = true;
 		// cache enabled:
     if (CACHE_ENABLE)
@@ -1273,7 +1278,7 @@ void test_oram(char * argv[]){
           
 
           if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
-              // tracectr_test++;
+              tracectr_test++;
             if (opertype[numc] == 'R') {
               if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
               printf("Panic.  Poor trace format.\n");
@@ -1298,7 +1303,7 @@ void test_oram(char * argv[]){
             }
             else // miss occured
             {
-              tracectr_test++;
+              // tracectr_test++;
               missctr++;
               int victim = cache_fill(addr[numc], opertype[numc]);
               if ( victim != -1)
@@ -1383,6 +1388,7 @@ void test_oram(char * argv[]){
   printf("\n............... Test ORAM Stats ...............\n");
 	printf("trace ctr: %d\n", tracectr_test);
 	printf("invoke ctr: 	%d\n", invokectr);
+	printf("oram ctr: 	%d\n", oramctr);
 	printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
 	printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
   printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
@@ -3504,8 +3510,6 @@ print_stats (int channel)
     printf ("Write Page Hit Rate :           %7.5f\n",
         ((double) (write_cmds - activates_for_writes) / write_cmds));
     printf ("------------------------------------\n");
-    printf ("write_cmds: %lld \n", write_cmds) ;
-    printf ("read_cmds: %lld \n", read_cmds) ;
   } }  void
 
 update_issuable_commands (int channel) 

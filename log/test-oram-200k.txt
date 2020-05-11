@@ -1,0 +1,56 @@
+---------------------------------------------
+-- USIMM: the Utah SImulated Memory Module --
+--              Version: 1.3               --
+---------------------------------------------
+LEVEL: 24
+PATH: 8388608
+NODE: 16777215
+SLOT: 67108860
+BLOCK: 33554430
+Z: 4
+U: 0.500000
+OV_TRESHOLD: 100
+STASH_SIZE: 200
+BK_EVICTION: 1
+EMPTY_TOP: 0
+TOP_CACHE: 10
+TRACE_SIZE: 200000
+LZ: 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
+ = 96 ~> path length
+L1: 9   Z1:4
+L2: 15   Z2:4
+L3: 18   Z3:4
+
+CACHE_ENABLE: 1
+WRITE_BYPASS: 0
+
+SUBTREE_ENABLE: 0
+SUBTREE_SIZE: 8192
+SUBTREE_SLOT: 128
+SUBTREE_BUCKET: 31
+SUBTREE_LEVEL: 5
+
+RHO_ENABLE: 0
+RHO_LEVEL: 19
+RHO_Z: 2
+RHO_PATH: 262144
+RHO_NODE: 524287
+RHO_SLOT: 1048574
+RHO_BLOCK: 524287
+RHO_SET: 16000
+RHO_WAY: 10
+RHO_OV_TRESHOLD: 160
+RHO_STASH_SIZE: 200
+RHO_BK_EVICTION: 1
+RHO_EMPTY_TOP: 0
+RHO_TOP_CACHE: 0
+test oram: tif:  /mnt/c/trace/comm1 
+
+............... Test ORAM Stats ...............
+trace ctr: 200000
+invoke ctr: 	137489
+bk evict rate: 0.000000%
+cache hit rate: 55.988000%
+cache evict rate wrt # miss: 56.196037%
+rho hit rate: 0.000000%
+rho bk evict rate: -nan%

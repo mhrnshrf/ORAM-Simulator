@@ -52,6 +52,9 @@ int hitctr = 0;
 int missctr = 0;
 int evictctr = 0;
 int evictifctr = 0;
+int invokectr_prev = 0;
+
+bool oram_just_invoked = false;
 
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
@@ -138,7 +141,7 @@ int main(int argc, char * argv[])
 	// init_trace();
 
 	
-	test_subtree();
+	// test_subtree();
 	
 
 	cache_init();
@@ -409,7 +412,6 @@ int main(int argc, char * argv[])
 	// 	printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
 	// 	printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
 	// 	printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
-	
 	// 	// period = 0;
 	// 	// periodctr++;
 	// 	// roundprev = tracectr;
@@ -445,8 +447,8 @@ int main(int argc, char * argv[])
 	 instruction completion times. */
       for(int c=0; c < NUM_CHANNELS; c++)
       {
-	schedule(c);
-	gather_stats(c);	
+		schedule(c);
+		gather_stats(c);	
       }
     }
 
@@ -609,7 +611,7 @@ int main(int argc, char * argv[])
 								{
 									evictctr++;
 									evicted[numc].valid = true;
-									evicted[numc].nonmemops = nonmemops[numc]+1;
+									evicted[numc].nonmemops = 0;	//nonmemops[numc]+1;  // ??? probably it should be 0 instead
 									evicted[numc].opertype = 'W';
 									evicted[numc].addr = victim;
 								}
@@ -692,10 +694,12 @@ int main(int argc, char * argv[])
 			}
 
 			invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
+			oram_just_invoked = true;
 		} 
-		else
+		if (oramQ->size != 0)
 		{
 			// printf("else oramq size: %d   @ trace %d\n", oramQ->size, tracectr);
+			int nonmemsaved = nonmemops[numc];
 			Element *pN = Dequeue(oramQ);
 			addr[numc] = pN->addr;
 			// pN->cycle 
@@ -704,6 +708,13 @@ int main(int argc, char * argv[])
 			instrpc[numc] = pN->pc; 
 			opertype[numc] = pN->type;
 			nonmemops[numc] = 0; // ??? not sure about this one
+			
+			if (oram_just_invoked)
+			{
+				nonmemops[numc] = nonmemsaved; 	//  determined from the trace
+				oram_just_invoked = false;
+			}
+			
 			free(pN);
 
 		}
@@ -831,6 +842,7 @@ printf("\n............... ORAM Stats ...............\n");
 printf("total time: %f s\n", cpu_time_used);
 printf("trace ctr: %d\n", tracectr);
 printf("invoke ctr: 	%d\n", invokectr);
+printf("oram ctr: 	%d\n", oramctr);
 printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
 printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
