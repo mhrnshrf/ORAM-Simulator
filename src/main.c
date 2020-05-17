@@ -46,16 +46,25 @@ float core_power=0;
 struct timeval sday, eday;
 long int period = 0;
 int periodctr = 0;
-int tracectr = 0;
 int roundprev = 0;
-int hitctr = 0;
-int missctr = 0;
-int evictctr = 0;
+int tracectr = 0;	// # lines read from the trace file 
+int hitctr = 0;		// # hits on llc
+int missctr = 0;	// # misses on llc
+int evictctr = 0;	// # evictions caused after misses on llc
 int evictifctr = 0;
 int invokectr_prev = 0;
+int oram_path_length = 0;	// # slots along each path of oram
+int rho_path_length = 0;	// # slots along each path of rho
+int oram_effective_pl = 0;	// # slots along each path of oram minus numbers of slots that are cached from top of the tree
+int rho_effective_pl = 0;	// # slots along each path of rho minus numbers of slots that are cached from top of the tree
+int reqctr = 0;				// # reqs read from oramq that belongs to one oram access	
+int maxreq = 0;				// max number for reqctr that is determined based of effective path lengh ot tree (oram or rho)
+// int nomem_cycle = 0;		// # cycles passed in a timing interval	~~~> to keep track of cycles no oram access shall be issued  
 
-bool oram_just_invoked = false;
 
+bool oram_just_invoked = false;		// a flag raised when the current req from oramq is the first request of an freecursive oram access (an invokation of invoke_oram func)
+bool still_same_access = false;		// a flag that raised and maintained until a single oram access is dequeued from oramq
+bool shall_schedule = false; 		// a flag that is meant to pause and resume the shcedule function call
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -102,13 +111,19 @@ int main(int argc, char * argv[])
 	printf("TOP_CACHE: %d\n", TOP_CACHE);
 	printf("TRACE_SIZE: %d\n", TRACE_SIZE);
 	printf("LZ: ");
-	int length = 0;
+	// calculating oram path length
 	for (int i = 0; i < LEVEL; i++)
 	{
 		printf("%d ", LZ[i]);
-		length += LZ[i];
+		oram_path_length += LZ[i];
 	}
-	printf("\n = %d ~> path length\n", length);
+	// calculating effective oram path length
+	for (int i = TOP_CACHE; i < LEVEL; i++)
+	{
+		oram_effective_pl += LZ[i];
+	}
+	printf("\n= %d ~> oram path length\n", oram_path_length);
+	printf("  %d ~> oram effective path length\n", oram_effective_pl);
 	printf("L1: %d   Z1:%d\n", L1, Z1);
 	printf("L2: %d   Z2:%d\n", L2, Z2);
 	printf("L3: %d   Z3:%d\n", L3, Z3);
@@ -125,6 +140,19 @@ int main(int argc, char * argv[])
 	printf("\nRHO_ENABLE: %d\n", RHO_ENABLE);
 	printf("RHO_LEVEL: %d\n", RHO_LEVEL);
 	printf("RHO_Z: %d\n", RHO_Z);
+	// calculating rho path length
+	for (int i = 0; i < RHO_LEVEL; i++)
+	{
+		printf("%d ", RHO_LZ[i]);
+		rho_path_length += RHO_LZ[i];
+	}
+	// calculating effective rho path length
+	for (int i = RHO_TOP_CACHE; i < RHO_LEVEL; i++)
+	{
+		rho_effective_pl += RHO_LZ[i];
+	}
+	printf("\n= %d ~> rho path length\n", rho_path_length);
+	printf("  %d ~> rho effective path length\n", rho_effective_pl);
 	printf("RHO_PATH: %d\n", RHO_PATH);
 	printf("RHO_NODE: %d\n", RHO_NODE);
 	printf("RHO_SLOT: %d\n", RHO_SLOT);
@@ -194,6 +222,10 @@ int main(int argc, char * argv[])
   long long int *addr;
   long long int *instrpc;
   int chips_per_rank=-1;
+  // Mehrnoosh:
+  int *oramid;
+  int *tree;
+  // Mehrnoosh.
 
   /* Initialization code. */
   printf("Initializing.\n");
@@ -223,6 +255,10 @@ int main(int argc, char * argv[])
   instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
   prefixtable = (int *)malloc(sizeof(int)*NUMCORES);
   currMTapp = -1;
+  // Mehrnoosh:
+  oramid = (int *)malloc(sizeof(int)*NUMCORES);
+  tree = (int *)malloc(sizeof(int)*NUMCORES);
+  // Mehrnoosh.
   for (numc=0; numc < NUMCORES; numc++) {
      tif[numc] = fopen(argv[numc+2], "r");
      if (!tif[numc]) {
@@ -445,11 +481,31 @@ int main(int argc, char * argv[])
       /* Execute user-provided function to select ready instructions for issue. */
       /* Based on this selection, update DRAM data structures and set 
 	 instruction completion times. */
+	 
+	  // Mehrnoosh:
+	  	if (TIMING_ENABLE)
+		{
+			if (CYCLE_VAL % TIMING_INTERVAL == 0 || still_same_access)
+			{
+				shall_schedule = true;
+			} 
+			else
+			{
+				shall_schedule = false;
+			}
+			
+		}
+	  // Mehrnoosh.
       for(int c=0; c < NUM_CHANNELS; c++)
       {
-		schedule(c);
-		gather_stats(c);	
+		  if (!TIMING_ENABLE || shall_schedule)
+		  {
+			schedule(c);
+			gather_stats(c);	
+		  }
+		  
       }
+
     }
 
     /* For each core, bring in new instructions from the trace file to
@@ -467,10 +523,43 @@ int main(int argc, char * argv[])
     for (numc = 0; numc < NUMCORES; numc++) {
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
+	  printf("cycle val: %lld\n", CYCLE_VAL);
         while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) {
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
 	  /* If Memop, then populate read/write queue.  Set up completion time. */
+
+
+	  // Mehrnoosh:
+	  	// if (TIMING_ENABLE)
+		// {
+		// 	if (CYCLE_VAL % TIMING_INTERVAL == 0 || still_same_access)
+		// 	{
+		// 		nonmemops[numc] = 0;
+		// 	} 
+		// 	else
+		// 	{
+		// 		nonmemops[numc] = 1;
+		// 	}
+			
+		// }
+	  // Mehrnoosh.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	  if (nonmemops[numc]) {  /* Have some non-memory-ops to consume. */
 	    ROB[numc].optype[ROB[numc].tail] = 'N';
@@ -480,8 +569,14 @@ int main(int argc, char * argv[])
 	    ROB[numc].inflight++;
 	    fetched[numc]++;
 	    num_fetch++;
+		// Mehrnoosh:
+		// printf("cycle %lld   main: nonmem 	 trace: %d		req: %d 	nonmemops:%d\n", CYCLE_VAL, tracectr, reqctr, nonmemops[numc]);
+		// Mehrnoosh.
 	  }
 	  else { /* Done consuming non-memory-ops.  Must now consume the memory rd or wr. */
+			// Mehrnoosh:
+			// printf("cycle %lld   main: mem 	 trace: %d		req: %d\n", CYCLE_VAL, tracectr, reqctr);
+			// Mehrnoosh.
 	      if (opertype[numc] == 'R') {
 		  addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 	          ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
@@ -500,7 +595,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 
 			// start = clock();
-			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc]);
+			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc]);
 
 			// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
 
@@ -525,7 +620,7 @@ int main(int argc, char * argv[])
 				// start = clock();
 
 				
-				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail);
+				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc]);
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
@@ -699,6 +794,9 @@ int main(int argc, char * argv[])
 		if (oramQ->size != 0)
 		{
 			// printf("else oramq size: %d   @ trace %d\n", oramQ->size, tracectr);
+
+			still_same_access = true;
+			
 			int nonmemsaved = nonmemops[numc];
 			Element *pN = Dequeue(oramQ);
 			addr[numc] = pN->addr;
@@ -707,14 +805,26 @@ int main(int argc, char * argv[])
 			// pN->instr; 
 			instrpc[numc] = pN->pc; 
 			opertype[numc] = pN->type;
-			nonmemops[numc] = 0; // ??? not sure about this one
+			oramid[numc] = pN->oramid;
+			tree[numc] = pN->tree;
+			nonmemops[numc] = 0; // ??? not sure about this one ~~~> guess resolved
 			
+
 			if (oram_just_invoked)
 			{
+				printf("main: oram just invoked @ cycle %lld\n", CYCLE_VAL);
 				nonmemops[numc] = nonmemsaved; 	//  determined from the trace
 				oram_just_invoked = false;
 			}
+
+			if (reqctr == maxreq)
+			{
+				reqctr = 0;
+				maxreq = (pN->tree == RHO)? rho_effective_pl : oram_effective_pl;
+				still_same_access = false;
+			}
 			
+			reqctr++;
 			free(pN);
 
 		}
@@ -722,6 +832,18 @@ int main(int argc, char * argv[])
 
 
 		// Mehrnoosh.
+
+
+
+
+
+
+
+
+
+
+
+
 	      
 	  }  /* Done consuming the next rd or wr. */
 

@@ -17,9 +17,10 @@
 #define WRITE_BYPASS 0    // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 0  // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0      // 0/1 flag to disable/enable having rho
+#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 
 // oram config
-#define TRACE_SIZE 200000 // # addr read from trace file
+#define TRACE_SIZE 10 // # addr read from trace file
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
@@ -65,6 +66,14 @@
 #define RHO_WAY 10   // # ways in each set accociative entry of rho tag array
 
 
+// timing channel security config
+#define TIMING_INTERVAL 20   // # cycles after each one oram access is initiated either real or dummy one
+
+
+typedef enum {ORAM, RHO} TreeType;
+typedef enum {REGULAR, EVICT} AccessType;
+typedef struct Slot Slot;
+
 
 #include <stdbool.h>
 
@@ -75,6 +84,8 @@ typedef struct Element_t{
   int instr; 
   long long int pc;
   char type;
+  int oramid;
+  TreeType tree;
   struct Element_t *prev; 
 }Element;
 
@@ -123,11 +134,7 @@ enum{
   RHO_SET = 16000,
 };
 
-typedef enum {ORAM, RHO} TreeType;
-typedef enum {REGULAR, EVICT} AccessType;
 
-
-typedef struct Slot Slot;
 
 void oram_alloc();
 void oram_init();
@@ -241,6 +248,10 @@ typedef struct req
   long long int instruction_pc; // phy address of instruction that generated this request (valid only for reads)
   void * user_ptr; // user_specified data
   struct req * next;
+  // Mehrnoosh:
+  int oramid;       // oram access id to whcih the request belongs to
+  TreeType tree;    // which tree the request belongs to oram or rho
+  // Mehrnoosh.
 } request_t;
 
 // Bankstates
@@ -410,10 +421,10 @@ int read_matches_write_or_read_queue(long long int physical_address);
 int write_exists_in_write_queue(long long int physical_address);
 
 // enqueue a read into the corresponding read queue (returns ptr to new node)
-request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc);
+request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree);
 
 // enqueue a write into the corresponding write queue (returns ptr to new_node)
-request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id);
+request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree);
 
 // update stats counters
 void gather_stats(int channel);

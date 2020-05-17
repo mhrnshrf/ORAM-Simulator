@@ -19,6 +19,12 @@ void init_scheduler_vars()
 // end write queue drain once write queue has this many writes in it
 #define LO_WM 20
 
+
+// Mehrnoosh:
+int currAccess = 0;
+bool shall_issue = false;
+// Mehrnoosh.
+
 // 1 means we are in write-drain mode for that channel
 int drain_writes[MAX_NUM_CHANNELS];
 
@@ -78,11 +84,43 @@ void schedule(int channel)
 
 		LL_FOREACH(write_queue_head[channel], wr_ptr)
 		{
-			if(wr_ptr->command_issuable)
+			// Mehrnoosh:
+			if (TIMING_ENABLE)
 			{
+				if(wr_ptr->command_issuable)
+				{
+					if(CYCLE_VAL % TIMING_INTERVAL == 0)
+					{
+						currAccess = wr_ptr->oramid;
+					}
+
+					// if (wr_ptr->oramid == currAccess)
+					// {
+					// 	shall_issue = true;
+					// }
+					// else
+					// {
+					// 	shall_issue = false;
+					// }
+					shall_issue = (wr_ptr->oramid == currAccess) ? true : false;
+
+					if (shall_issue)
+					{
+						printf("schedule: issueing oram write: %d\n", wr_ptr->oramid);
+						issue_request_command(wr_ptr);
+						break;
+					}
+					break;
+					
+				}
+			}
+			else if(wr_ptr->command_issuable)
+			{
+				printf("schedule: issueing oram write: %d\n", wr_ptr->oramid);
 				issue_request_command(wr_ptr);
 				break;
 			}
+			// Mehrnoosh.
 		}
 		return;
 	}
@@ -95,11 +133,39 @@ void schedule(int channel)
 	{
 		LL_FOREACH(read_queue_head[channel],rd_ptr)
 		{
-			if(rd_ptr->command_issuable)
+			if (TIMING_ENABLE)
 			{
+				if(rd_ptr->command_issuable)
+				{
+					if(CYCLE_VAL % TIMING_INTERVAL == 0)
+					{
+						currAccess = rd_ptr->oramid;
+					}
+
+					shall_issue = (rd_ptr->oramid == currAccess) ? true : false;
+
+					if (shall_issue)
+					{
+						printf("schedule: issueing oram read: %d\n", rd_ptr->oramid);
+						issue_request_command(rd_ptr);
+						break;
+					}
+					break;
+					
+				}
+			}
+			else if(rd_ptr->command_issuable)
+			{
+				printf("schedule: issueing oram read: %d\n", rd_ptr->oramid);
 				issue_request_command(rd_ptr);
 				break;
 			}
+
+			// if(rd_ptr->command_issuable)
+			// {
+			// 	issue_request_command(rd_ptr);
+			// 	break;
+			// }
 		}
 		return;
 	}

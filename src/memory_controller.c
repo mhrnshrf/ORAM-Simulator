@@ -234,6 +234,8 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->instr = instr; 
   pN->pc = pc; 
   pN->type = type;
+  pN->oramid = (TREE_VAR == RHO) ? rhoctr : oramctr;
+  pN->tree = TREE_VAR;
   bool added = Enqueue(oramQ, pN);
   if (!added)
   {
@@ -558,7 +560,6 @@ void read_path(int label){
         if (i >= TOP_CACHE_VAR)
         {
           int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-          // insert_read(addr, orig_cycle, orig_thread, orig_instr, orig_pc);
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
         }
 
@@ -2008,7 +2009,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   void *
 init_new_node (long long int physical_address, long long int arrival_time,
     optype_t type, int thread_id, int instruction_id,
-    long long int instruction_pc) 
+    long long int instruction_pc, int oramid, TreeType tree) 
 {
   request_t * new_node = NULL;
   new_node = (request_t *) malloc (sizeof (request_t));
@@ -2023,31 +2024,10 @@ init_new_node (long long int physical_address, long long int arrival_time,
 
   {
     // Mehrnoosh:
-
-    // FILE *ftrace;
-    // FILE *fid;
-    // FILE *fpc;
-
-    // ftrace = fopen("trace.txt","a");
-    // fid = fopen("id.txt","a");
-    // fpc = fopen("pc.txt","a");
-
-    // // if(fptr == NULL)
-    // //  {
-    // //     printf("Error!");   
-    // //  }
-
-    //  fprintf(ftrace,"%lld\n",physical_address);
-    //  fprintf(fid,"%d\n",instruction_id);
-    //  fprintf(fpc,"%lld\n",instruction_pc);
-
-    //  fclose(ftrace);
-    //  fclose(fid);
-    //  fclose(fpc);
-
+    new_node->oramid = oramid;
+    new_node->tree = tree;
     // Mehrnoosh.
 
-    // oram_print_tree();
 
     new_node->physical_address = physical_address;
     new_node->arrival_time = arrival_time;
@@ -2145,7 +2125,7 @@ write_exists_in_write_queue (long long int physical_address)
 // Insert a new read to the read queue
 request_t * insert_read (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc) 
+    int instruction_id, long long int instruction_pc, int oramid, TreeType tree) 
 {
   optype_t this_op = READ;
 
@@ -2156,7 +2136,7 @@ request_t * insert_read (long long int physical_address,
   stats_reads_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, instruction_pc);
+        instruction_id, instruction_pc, oramid, tree);
   LL_APPEND (read_queue_head[channel], new_node);
   read_queue_length[channel]++;
 
@@ -2168,7 +2148,7 @@ request_t * insert_read (long long int physical_address,
 // Insert a new write to the write queue
 request_t * insert_write (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id) 
+    int instruction_id, int oramid, TreeType tree) 
 {
   optype_t this_op = WRITE;
   dram_address_t * this_addr = calc_dram_addr (physical_address);
@@ -2177,7 +2157,7 @@ request_t * insert_write (long long int physical_address,
   stats_writes_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, 0);
+        instruction_id, 0, oramid, tree);
   LL_APPEND (write_queue_head[channel], new_node);
   write_queue_length[channel]++;
 
@@ -3447,7 +3427,6 @@ gather_stats (int channel)
 
     {
       for (int b = 0; b < NUM_BANKS; b++)
-
       {
         if (dram_state[channel][i][b].state == ROW_ACTIVE)
 
