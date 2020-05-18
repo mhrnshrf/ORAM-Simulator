@@ -1732,8 +1732,16 @@ void rho_insert(int physical_address){
 
 }
 
+// dummy access is used when timing channel security is enabled, it accesses a random path w/o remapping any block (like in background eviction)
+void dummy_access(TreeType tree){
 
+    switch_tree_to(tree);
+    int label = rand() % PATH_VAR;
+    read_path(label);
+    write_path(label);
+    switch_tree_to(ORAM);
 
+}
 
 
 

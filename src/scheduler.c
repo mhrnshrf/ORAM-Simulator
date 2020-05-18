@@ -19,12 +19,6 @@ void init_scheduler_vars()
 // end write queue drain once write queue has this many writes in it
 #define LO_WM 20
 
-
-// Mehrnoosh:
-int currAccess = 0;
-bool shall_issue = false;
-// Mehrnoosh.
-
 // 1 means we are in write-drain mode for that channel
 int drain_writes[MAX_NUM_CHANNELS];
 
@@ -41,10 +35,8 @@ int drain_writes[MAX_NUM_CHANNELS];
    a power_up command (issue_powerup_command())
    OR
    an activate to a specific row (issue_activate_command()).
-
    If a COL-RD or COL-WR is picked for issue, the scheduler also has the
    option to issue an auto-precharge in this cycle (issue_autoprecharge()).
-
    Before issuing a command it is important to check if it is issuable. For the RD/WR queue resident commands, checking the "command_issuable" flag is necessary. To check if the other commands (mentioned above) can be issued, it is important to check one of the following functions: is_precharge_allowed, is_all_bank_precharge_allowed, is_powerdown_fast_allowed, is_powerdown_slow_allowed, is_powerup_allowed, is_refresh_allowed, is_autoprecharge_allowed, is_activate_allowed.
    */
 
@@ -84,43 +76,11 @@ void schedule(int channel)
 
 		LL_FOREACH(write_queue_head[channel], wr_ptr)
 		{
-			// Mehrnoosh:
-			if (TIMING_ENABLE)
+			if(wr_ptr->command_issuable)
 			{
-				if(wr_ptr->command_issuable)
-				{
-					if(CYCLE_VAL % TIMING_INTERVAL == 0)
-					{
-						currAccess = wr_ptr->oramid;
-					}
-
-					// if (wr_ptr->oramid == currAccess)
-					// {
-					// 	shall_issue = true;
-					// }
-					// else
-					// {
-					// 	shall_issue = false;
-					// }
-					shall_issue = (wr_ptr->oramid == currAccess) ? true : false;
-
-					if (shall_issue)
-					{
-						printf("schedule: issueing oram write: %d\n", wr_ptr->oramid);
-						issue_request_command(wr_ptr);
-						break;
-					}
-					break;
-					
-				}
-			}
-			else if(wr_ptr->command_issuable)
-			{
-				printf("schedule: issueing oram write: %d\n", wr_ptr->oramid);
 				issue_request_command(wr_ptr);
 				break;
 			}
-			// Mehrnoosh.
 		}
 		return;
 	}
@@ -133,39 +93,11 @@ void schedule(int channel)
 	{
 		LL_FOREACH(read_queue_head[channel],rd_ptr)
 		{
-			if (TIMING_ENABLE)
+			if(rd_ptr->command_issuable)
 			{
-				if(rd_ptr->command_issuable)
-				{
-					if(CYCLE_VAL % TIMING_INTERVAL == 0)
-					{
-						currAccess = rd_ptr->oramid;
-					}
-
-					shall_issue = (rd_ptr->oramid == currAccess) ? true : false;
-
-					if (shall_issue)
-					{
-						printf("schedule: issueing oram read: %d\n", rd_ptr->oramid);
-						issue_request_command(rd_ptr);
-						break;
-					}
-					break;
-					
-				}
-			}
-			else if(rd_ptr->command_issuable)
-			{
-				printf("schedule: issueing oram read: %d\n", rd_ptr->oramid);
 				issue_request_command(rd_ptr);
 				break;
 			}
-
-			// if(rd_ptr->command_issuable)
-			// {
-			// 	issue_request_command(rd_ptr);
-			// 	break;
-			// }
 		}
 		return;
 	}
@@ -175,4 +107,3 @@ void scheduler_stats()
 {
   /* Nothing to print for now. */
 }
-

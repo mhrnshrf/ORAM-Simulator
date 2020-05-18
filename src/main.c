@@ -61,10 +61,13 @@ int reqctr = 0;				// # reqs read from oramq that belongs to one oram access
 int maxreq = 0;				// max number for reqctr that is determined based of effective path lengh ot tree (oram or rho)
 // int nomem_cycle = 0;		// # cycles passed in a timing interval	~~~> to keep track of cycles no oram access shall be issued  
 
+long long int fetch_clk = 0;
 
 bool oram_just_invoked = false;		// a flag raised when the current req from oramq is the first request of an freecursive oram access (an invokation of invoke_oram func)
-bool still_same_access = false;		// a flag that raised and maintained until a single oram access is dequeued from oramq
-bool shall_schedule = false; 		// a flag that is meant to pause and resume the shcedule function call
+bool still_same_access = false;		// a flag that raised and maintained until a single oram access is dequeued from oramq ~> for timing enabled
+bool oram_tick = false;				// a flag that is raised at a cycle that timing interval has reached ~> for timing enabled
+bool mem_cycle = false;				// a flag to indicate whether at this cycle a mem op should be fetched ~> for timing enabled
+bool dummy_cycle = false;			// a flag to indicate whether at this cycle a dummy access should be made ~> for timing enabled
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -225,6 +228,7 @@ int main(int argc, char * argv[])
   // Mehrnoosh:
   int *oramid;
   int *tree;
+  int *nonmemops_timing;
   // Mehrnoosh.
 
   /* Initialization code. */
@@ -258,6 +262,7 @@ int main(int argc, char * argv[])
   // Mehrnoosh:
   oramid = (int *)malloc(sizeof(int)*NUMCORES);
   tree = (int *)malloc(sizeof(int)*NUMCORES);
+  nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
   // Mehrnoosh.
   for (numc=0; numc < NUMCORES; numc++) {
      tif[numc] = fopen(argv[numc+2], "r");
@@ -482,27 +487,11 @@ int main(int argc, char * argv[])
       /* Based on this selection, update DRAM data structures and set 
 	 instruction completion times. */
 	 
-	  // Mehrnoosh:
-	  	if (TIMING_ENABLE)
-		{
-			if (CYCLE_VAL % TIMING_INTERVAL == 0 || still_same_access)
-			{
-				shall_schedule = true;
-			} 
-			else
-			{
-				shall_schedule = false;
-			}
-			
-		}
-	  // Mehrnoosh.
+
       for(int c=0; c < NUM_CHANNELS; c++)
       {
-		  if (!TIMING_ENABLE || shall_schedule)
-		  {
-			schedule(c);
-			gather_stats(c);	
-		  }
+		schedule(c);
+		gather_stats(c);	
 		  
       }
 
@@ -523,7 +512,6 @@ int main(int argc, char * argv[])
     for (numc = 0; numc < NUMCORES; numc++) {
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
-	  printf("cycle val: %lld\n", CYCLE_VAL);
         while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) {
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
@@ -531,18 +519,23 @@ int main(int argc, char * argv[])
 
 
 	  // Mehrnoosh:
-	  	// if (TIMING_ENABLE)
-		// {
-		// 	if (CYCLE_VAL % TIMING_INTERVAL == 0 || still_same_access)
-		// 	{
-		// 		nonmemops[numc] = 0;
-		// 	} 
-		// 	else
-		// 	{
-		// 		nonmemops[numc] = 1;
-		// 	}
+	  	// printf("\ncycle: %lld", CYCLE_VAL);
+	  	printf("\nfetch clk: %lld", fetch_clk);
+	  	if (TIMING_ENABLE)
+		{
+			// oram_tick = (CYCLE_VAL % TIMING_INTERVAL == 0);				 // whether this cycle is when timing interval has reached
+			oram_tick = (fetch_clk % TIMING_INTERVAL == 0);				 // whether this cycle is when timing interval has reached
+			mem_cycle = (oram_tick || still_same_access) ? true : false; // whether this cycle should be fetching a mem op
 			
-		// }
+			nonmemops_timing[numc] = (mem_cycle) ? 0 : 1;
+			dummy_cycle = (mem_cycle && (nonmemops[numc] > 0))? true : false;	// whether a dummy access should be made at this cycle 
+			printf("	tick: %d	mem: %d		dummy: %d	nonmemps: %d	req: %d", oram_tick, mem_cycle, dummy_cycle, nonmemops[numc], reqctr);
+		}
+		else
+		{
+			nonmemops_timing[numc] = nonmemops[numc];
+		}
+		
 	  // Mehrnoosh.
 
 
@@ -561,7 +554,16 @@ int main(int argc, char * argv[])
 
 
 
-	  if (nonmemops[numc]) {  /* Have some non-memory-ops to consume. */
+
+
+
+
+
+
+
+	//Mehrnoosh:
+	  if (nonmemops_timing[numc]) {  /* Have some non-memory-ops to consume. */
+	//Mehrnoosh.
 	    ROB[numc].optype[ROB[numc].tail] = 'N';
 	    ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
 	    nonmemops[numc]--;
@@ -653,8 +655,13 @@ int main(int argc, char * argv[])
 
 		if (oramQ->size == 0)
 		{
+			if (TIMING_ENABLE && dummy_cycle)
+			{
+				dummy_access(ORAM); 	// oram to be changed to appropriate tree type based on m*n schedule
+			}
+			
 			// cache enabled:
-			if (CACHE_ENABLE)
+			else if(CACHE_ENABLE)
 			{
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while (no_miss_occured && !expt_done)
@@ -734,7 +741,7 @@ int main(int argc, char * argv[])
 
 			}
 			// cache disabled:
-			else	
+			else if (!CACHE_ENABLE)	
 			{
 			/* Done consuming one line of the trace file.  Read in the next. */
 			if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
@@ -812,7 +819,7 @@ int main(int argc, char * argv[])
 
 			if (oram_just_invoked)
 			{
-				printf("main: oram just invoked @ cycle %lld\n", CYCLE_VAL);
+				printf("\nmain: oram just invoked @ cycle %lld\n", CYCLE_VAL);
 				nonmemops[numc] = nonmemsaved; 	//  determined from the trace
 				oram_just_invoked = false;
 			}
@@ -846,6 +853,9 @@ int main(int argc, char * argv[])
 
 	      
 	  }  /* Done consuming the next rd or wr. */
+	// Mehrnoosh:
+	fetch_clk++;
+	// Mehrnoosh.
 
 	} /* One iteration of the fetch while loop done. */
       } /* Closing brace for if(trace not done). */

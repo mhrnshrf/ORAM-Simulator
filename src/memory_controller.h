@@ -17,7 +17,7 @@
 #define WRITE_BYPASS 0    // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 0  // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0      // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
+#define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
 
 // oram config
 #define TRACE_SIZE 10 // # addr read from trace file
@@ -67,7 +67,7 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 20   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 60   // # cycles after each one oram access is initiated either real or dummy one
 
 
 typedef enum {ORAM, RHO} TreeType;
@@ -177,6 +177,7 @@ bool isEmpty(Queue* pQueue);
 void test_queue();
 void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type);
 void test_subtree();
+void dummy_access(TreeType tree);
 
 
 
