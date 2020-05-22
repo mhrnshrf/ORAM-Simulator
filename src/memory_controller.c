@@ -103,6 +103,9 @@ int rho_bkctr = 0;  // # background eviction invoked in rho
 int rho_stash_dist[RHO_STASH_SIZE+1] = {0}; // rho stash occupancy distribution
 int rho_hit = 0;  // # hits on rho lookup
 
+int dummyctr = 0;
+int rho_dummyctr = 0;
+
 struct timeval start, end, mid;
 long int timeavg = 0;
 long int timeavg_mid = 0;
@@ -1734,6 +1737,17 @@ void rho_insert(int physical_address){
 
 // dummy access is used when timing channel security is enabled, it accesses a random path w/o remapping any block (like in background eviction)
 void dummy_access(TreeType tree){
+
+    if (tree == RHO)
+    {
+      rho_dummyctr++;
+    }
+    else
+    {
+      dummyctr++;
+    }
+    
+    
 
     switch_tree_to(tree);
     int label = rand() % PATH_VAR;

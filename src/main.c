@@ -62,12 +62,18 @@ int maxreq = 0;				// max number for reqctr that is determined based of effectiv
 // int nomem_cycle = 0;		// # cycles passed in a timing interval	~~~> to keep track of cycles no oram access shall be issued  
 
 long long int fetch_clk = 0;
+long long int mem_clk = 0;
 
 bool oram_just_invoked = false;		// a flag raised when the current req from oramq is the first request of an freecursive oram access (an invokation of invoke_oram func)
 bool still_same_access = false;		// a flag that raised and maintained until a single oram access is dequeued from oramq ~> for timing enabled
-bool oram_tick = false;				// a flag that is raised at a cycle that timing interval has reached ~> for timing enabled
+bool mem_tick = false;				// a flag that is raised at a cycle that timing interval has reached ~> for timing enabled
 bool mem_cycle = false;				// a flag to indicate whether at this cycle a mem op should be fetched ~> for timing enabled
-bool dummy_cycle = false;			// a flag to indicate whether at this cycle a dummy access should be made ~> for timing enabled
+bool dummy_tick = false;			// a flag to indicate whether at this cycle a dummy access should be made ~> for timing enabled
+bool oram_tick = false;				// a flag to indicate whether at this cycle an oram access should be made ~> for timing enabled
+bool rho_tick = false;				// a flag to indicate whether at this cycle an rho access should be made ~> for timing enabled
+bool dummy_oram = false;			// a flag to indicate whether at this cycle a dummy oram access should be made ~> for timing enabled
+bool dummy_rho = false;				// a flag to indicate whether at this cycle a dummy rho access should be made ~> for timing enabled
+
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -520,16 +526,42 @@ int main(int argc, char * argv[])
 
 	  // Mehrnoosh:
 	  	// printf("\ncycle: %lld", CYCLE_VAL);
-	  	printf("\nfetch clk: %lld", fetch_clk);
+	  	// printf("\nfetch clk: %lld", fetch_clk);
 	  	if (TIMING_ENABLE)
 		{
-			// oram_tick = (CYCLE_VAL % TIMING_INTERVAL == 0);				 // whether this cycle is when timing interval has reached
-			oram_tick = (fetch_clk % TIMING_INTERVAL == 0);				 // whether this cycle is when timing interval has reached
-			mem_cycle = (oram_tick || still_same_access) ? true : false; // whether this cycle should be fetching a mem op
+			mem_tick = (fetch_clk % TIMING_INTERVAL == 0);					 // whether this cycle it's time to initiate a mem access ~~~> timing interval has reached
+			mem_cycle = (mem_tick || still_same_access) ? true : false; 	 // whether this cycle should be processing a mem op
+
+			mem_clk = mem_tick ? mem_clk + 1 : mem_clk;					 // a counter keeping track of # passed mem ticks so far
+
+			oram_tick = (mem_tick && (mem_clk % 3 == 0) )? true : false;	 // whether this cycle it's time to initiate an oram access	
+			rho_tick = (mem_tick && !oram_tick)? true : false;				 // whether this cycle it's time to initiate a rho access	
 			
-			nonmemops_timing[numc] = (mem_cycle) ? 0 : 1;
-			dummy_cycle = (mem_cycle && (nonmemops[numc] > 0))? true : false;	// whether a dummy access should be made at this cycle 
-			printf("	tick: %d	mem: %d		dummy: %d	nonmemps: %d	req: %d", oram_tick, mem_cycle, dummy_cycle, nonmemops[numc], reqctr);
+			nonmemops_timing[numc] = (mem_cycle) ? 0 : 1;					 // # non mem ops shall be issued next, in case of mem cycle it would be none
+			dummy_tick = (mem_tick && (nonmemops[numc] > 0))? true : false;	 // whether this cycle it's time to make a dummy access 
+
+			dummy_oram = dummy_tick && oram_tick;							// whether the dummy access should be oram dummy
+			dummy_rho = dummy_tick && rho_tick;								// whether the dummy access should be rho dummy
+
+			if (oramQ->size != 0)
+			{
+				// if the current available access is not what it's supposed to be, make a dummy access instead
+				dummy_oram = (oram_tick && oramQ->head->tree == RHO) || dummy_oram;
+				dummy_rho = (rho_tick && oramQ->head->tree == ORAM) || dummy_rho;
+			}
+			
+			
+			char *str = oram_tick && !dummy_oram ? "|" : rho_tick && !dummy_rho ? "/" : oram_tick && dummy_oram ? "$" : rho_tick && dummy_rho ? "+" : "_";
+			printf("%s ", str);
+			if (fetch_clk % 60 == 0)
+			{
+				printf("\n");
+				printf("\n");
+			}
+			
+			// printf("	tick: %d	mem: %d		dummy: %d	nonmemps: %d	req: %d", mem_tick, mem_cycle, dummy_tick, nonmemops[numc], reqctr);
+			
+			
 		}
 		else
 		{
@@ -563,6 +595,7 @@ int main(int argc, char * argv[])
 
 	//Mehrnoosh:
 	  if (nonmemops_timing[numc]) {  /* Have some non-memory-ops to consume. */
+	//   if (nonmemops[numc]) {  /* Have some non-memory-ops to consume. */
 	//Mehrnoosh.
 	    ROB[numc].optype[ROB[numc].tail] = 'N';
 	    ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
@@ -655,7 +688,7 @@ int main(int argc, char * argv[])
 
 		if (oramQ->size == 0)
 		{
-			if (TIMING_ENABLE && dummy_cycle)
+			if (TIMING_ENABLE && dummy_tick)
 			{
 				dummy_access(ORAM); 	// oram to be changed to appropriate tree type based on m*n schedule
 			}
@@ -802,6 +835,29 @@ int main(int argc, char * argv[])
 		{
 			// printf("else oramq size: %d   @ trace %d\n", oramQ->size, tracectr);
 
+			// if (TIMING_ENABLE && dummy_tick)
+			// {
+			// 	TreeType t = oram_tick ? ORAM : RHO;
+			// 	dummy_access(t); 	// oram to be changed to appropriate tree type based on m*n schedule
+			// 	dummy_tick = false;
+			// }
+
+			// if (TIMING_ENABLE && mem_tick)
+			// {
+			// 	if (oram_tick && oramQ->head->tree == RHO)
+			// 	{
+			// 		dummy_access(ORAM);
+			// 		dummy_tick = false;
+			// 	}
+			// 	if (rho_tick && oramQ->head->tree == ORAM)
+			// 	{
+			// 		dummy_access(RHO);
+			// 		dummy_tick = false;
+			// 	}
+				
+			// }
+			
+
 			still_same_access = true;
 			
 			int nonmemsaved = nonmemops[numc];
@@ -819,7 +875,7 @@ int main(int argc, char * argv[])
 
 			if (oram_just_invoked)
 			{
-				printf("\nmain: oram just invoked @ cycle %lld\n", CYCLE_VAL);
+				// printf("\nmain: oram just invoked @ cycle %lld\n", CYCLE_VAL);
 				nonmemops[numc] = nonmemsaved; 	//  determined from the trace
 				oram_just_invoked = false;
 			}
@@ -975,11 +1031,13 @@ printf("total time: %f s\n", cpu_time_used);
 printf("trace ctr: %d\n", tracectr);
 printf("invoke ctr: 	%d\n", invokectr);
 printf("oram ctr: 	%d\n", oramctr);
+printf("oram dummy ctr: 	%d\n", dummyctr);
 printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
 printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
 printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
+printf("rho dummy ctr: 	%d\n", rho_dummyctr);
 
 // print_cap_percent();
 // count_tree();
