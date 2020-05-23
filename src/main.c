@@ -189,11 +189,11 @@ int main(int argc, char * argv[])
 
 	oram_init();
 	
-	
-
-	
-
+	// switch_enqueue_to(HEAD);
 	// test_queue();
+	
+
+	
 
 	// test_oram(argv);
 
@@ -532,7 +532,7 @@ int main(int argc, char * argv[])
 			mem_tick = (fetch_clk % TIMING_INTERVAL == 0);					 // whether this cycle it's time to initiate a mem access ~~~> timing interval has reached
 			mem_cycle = (mem_tick || still_same_access) ? true : false; 	 // whether this cycle should be processing a mem op
 
-			mem_clk = mem_tick ? mem_clk + 1 : mem_clk;					 // a counter keeping track of # passed mem ticks so far
+			mem_clk = mem_tick ? mem_clk + 1 : mem_clk;						 // a counter keeping track of # passed mem ticks so far
 
 			oram_tick = (mem_tick && (mem_clk % 3 == 0) )? true : false;	 // whether this cycle it's time to initiate an oram access	
 			rho_tick = (mem_tick && !oram_tick)? true : false;				 // whether this cycle it's time to initiate a rho access	
@@ -835,27 +835,21 @@ int main(int argc, char * argv[])
 		{
 			// printf("else oramq size: %d   @ trace %d\n", oramQ->size, tracectr);
 
-			// if (TIMING_ENABLE && dummy_tick)
-			// {
-			// 	TreeType t = oram_tick ? ORAM : RHO;
-			// 	dummy_access(t); 	// oram to be changed to appropriate tree type based on m*n schedule
-			// 	dummy_tick = false;
-			// }
+			if (TIMING_ENABLE)
+			{
+				if (dummy_oram)
+				{
+					dummy_access(ORAM); 
+					printf("\ndummy oram:  req: %d   max: %d\n", reqctr, maxreq);	
+				}
+				else if (dummy_rho)
+				{
+					dummy_access(ORAM); 	
+					printf("\ndummy rho:  req: %d   max: %d\n", reqctr, maxreq);	
+				}
+			}
 
-			// if (TIMING_ENABLE && mem_tick)
-			// {
-			// 	if (oram_tick && oramQ->head->tree == RHO)
-			// 	{
-			// 		dummy_access(ORAM);
-			// 		dummy_tick = false;
-			// 	}
-			// 	if (rho_tick && oramQ->head->tree == ORAM)
-			// 	{
-			// 		dummy_access(RHO);
-			// 		dummy_tick = false;
-			// 	}
 				
-			// }
 			
 
 			still_same_access = true;

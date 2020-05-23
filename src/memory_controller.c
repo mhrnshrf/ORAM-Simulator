@@ -131,7 +131,8 @@ int EMPTY_TOP_VAR = EMPTY_TOP;
 int TOP_CACHE_VAR = TOP_CACHE;
 int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  
 int PATH_VAR = PATH;
-AccessType ACCESS_VAR = REGULAR;    // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
+AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
+EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 
 
 Queue *ConstructQueue(int limit) {
@@ -184,6 +185,30 @@ bool Enqueue(Queue *pQueue, Element *item) {
     return true;
 }
 
+bool EnqueueHead(Queue *pQueue, Element *item) {
+    /* Bad parameter */
+    if ((pQueue == NULL) || (item == NULL)) {
+        return false;
+    }
+    // if(pQueue->limit != 0)
+    if (pQueue->size >= pQueue->limit) {
+        return false;
+    }
+    /*the queue is empty*/
+    item->prev = NULL;
+    if (pQueue->size == 0) {
+        pQueue->head = item;
+        pQueue->tail = item;
+
+    } else {
+        /*adding item to the head of the queue*/
+        item->prev = pQueue->head;
+        pQueue->head = item;
+    }
+    pQueue->size++;
+    return true;
+}
+
 Element * Dequeue(Queue *pQueue) {
     /*the queue is empty or bad param*/
     Element *item;
@@ -215,7 +240,15 @@ void test_queue(){
     pN->instr = i;
     pN->pc = i;
     pN->type = (rand() % 2) ? 'R' : 'W';
-    Enqueue(oramQ, pN);
+    // Enqueue(oramQ, pN);
+    if (ENQUEUE_VAR == TAIL)
+    {
+      Enqueue(oramQ, pN);
+    }
+    else if (ENQUEUE_VAR == HEAD){
+      EnqueueHead(oramQ, pN);
+    }
+    
   }
 
   while (!isEmpty(oramQ)) {
@@ -242,7 +275,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   bool added = Enqueue(oramQ, pN);
   if (!added)
   {
-    printf("ERROR: insert oramQ: failed to enqueue block: %lld\n", addr);
+    printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    dummys: %d\n", addr, oramQ->size, dummyctr+rho_dummyctr);
     exit(1);
   }
 }
@@ -267,6 +300,10 @@ void switch_tree_to(TreeType tree){
 
 void switch_access_to(AccessType access){
   ACCESS_VAR = access;
+}
+
+void switch_enqueue_to(EnqueueType enqueue){
+  ENQUEUE_VAR = enqueue;
 }
 
 /***********************
@@ -1738,22 +1775,23 @@ void rho_insert(int physical_address){
 // dummy access is used when timing channel security is enabled, it accesses a random path w/o remapping any block (like in background eviction)
 void dummy_access(TreeType tree){
 
-    if (tree == RHO)
-    {
-      rho_dummyctr++;
-    }
-    else
-    {
-      dummyctr++;
-    }
-    
-    
+  if (tree == RHO)
+  {
+    rho_dummyctr++;
+  }
+  else
+  {
+    dummyctr++;
+  }
+  
 
-    switch_tree_to(tree);
-    int label = rand() % PATH_VAR;
-    read_path(label);
-    write_path(label);
-    switch_tree_to(ORAM);
+  switch_tree_to(tree);
+  int label = rand() % PATH_VAR;
+  switch_enqueue_to(HEAD);
+  read_path(label);
+  write_path(label);
+  switch_enqueue_to(TAIL);  // switch back to normal tail enqueue 
+  switch_tree_to(ORAM);     // switch back to oram tree 
 
 }
 

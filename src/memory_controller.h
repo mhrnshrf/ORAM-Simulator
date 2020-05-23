@@ -72,6 +72,7 @@
 
 typedef enum {ORAM, RHO} TreeType;
 typedef enum {REGULAR, EVICT} AccessType;
+typedef enum {TAIL, HEAD} EnqueueType;
 typedef struct Slot Slot;
 
 
@@ -180,6 +181,7 @@ void test_queue();
 void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type);
 void test_subtree();
 void dummy_access(TreeType tree);
+void switch_enqueue_to(EnqueueType enqueue);
 
 
 
