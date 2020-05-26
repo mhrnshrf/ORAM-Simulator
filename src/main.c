@@ -73,7 +73,9 @@ bool oram_tick = false;				// a flag to indicate whether at this cycle an oram a
 bool rho_tick = false;				// a flag to indicate whether at this cycle an rho access should be made ~> for timing enabled
 bool dummy_oram = false;			// a flag to indicate whether at this cycle a dummy oram access should be made ~> for timing enabled
 bool dummy_rho = false;				// a flag to indicate whether at this cycle a dummy rho access should be made ~> for timing enabled
+bool skip_invokation = false;		// a flag to determine whether oram invokation should be skipped, it is raised at dummy tick ~> for timing enabled
 
+int curr_access = -3; 	// the id of current access (oram or rho, real or dummy)
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -546,14 +548,19 @@ int main(int argc, char * argv[])
 			if (oramQ->size != 0)
 			{
 				// if the current available access is not what it's supposed to be, make a dummy access instead
-				dummy_oram = (oram_tick && oramQ->head->tree == RHO) || dummy_oram;
-				dummy_rho = (rho_tick && oramQ->head->tree == ORAM) || dummy_rho;
+				dummy_oram = (oram_tick && oramQ->head->tree != ORAM) || dummy_oram;
+				dummy_rho = (rho_tick && oramQ->head->tree != RHO) || dummy_rho;
 			}
 			
 			
 			char *str = oram_tick && !dummy_oram ? "|" : rho_tick && !dummy_rho ? "/" : oram_tick && dummy_oram ? "$" : rho_tick && dummy_rho ? "+" : "_";
 			printf("%s ", str);
-			if (fetch_clk % 60 == 0)
+			// if (rho_tick && !dummy_rho)
+			// {
+			// 	printf("\nreal rho: oramq head: %d	size: %d\n", oramQ->head->oramid, oramQ->size);
+			// }
+			
+			if (fetch_clk % 120 == 0)
 			{
 				printf("\n");
 				printf("\n");
@@ -688,9 +695,22 @@ int main(int argc, char * argv[])
 
 		if (oramQ->size == 0)
 		{
+
 			if (TIMING_ENABLE && dummy_tick)
 			{
-				dummy_access(ORAM); 	// oram to be changed to appropriate tree type based on m*n schedule
+				// just skip the trace reading in case of dummy turn
+				skip_invokation = true;
+
+				if (dummy_oram)
+				{
+					dummy_access(ORAM); 
+					printf("\ndummy oram queue empty: ");	
+				}
+				else if (dummy_rho)
+				{
+					dummy_access(RHO); 	
+					printf("\ndummy rho queue empty: ");	
+				}
 			}
 			
 			// cache enabled:
@@ -828,28 +848,58 @@ int main(int argc, char * argv[])
 				}
 			}
 
-			invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
-			oram_just_invoked = true;
+			if (TIMING_ENABLE && !dummy_tick)
+			{
+				int masked_addr = (int)(addr[numc] & (BLOCK-1));
+				if (rho_tick && (rho_lookup(masked_addr) == -1))			// if it misses on rho and it's rho turn should raise dummy rho
+				{
+					dummy_rho = true;
+				}
+				else if (oram_tick && (rho_lookup(masked_addr) != -1))		// if it hits on rho but it's oram turn should raise dummy oram
+				{
+					dummy_oram = true;
+				}
+				
+			}
+			
+			// skip if dummy tick but if it's dummy rho or dummy oram due to rho miss or hit, invoke the oram anyway in order not to lose the trace just read 
+			if (!skip_invokation)
+			{
+				invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
+				oram_just_invoked = true;
+				skip_invokation = false;
+			}
+			
+			
 		} 
 		if (oramQ->size != 0)
 		{
 			// printf("else oramq size: %d   @ trace %d\n", oramQ->size, tracectr);
 
-			if (TIMING_ENABLE)
+			// if a dummy access is not already made ~> it would be already made if it was dummy tick and queue was empty
+			if (TIMING_ENABLE && !dummy_tick)
 			{
 				if (dummy_oram)
 				{
 					dummy_access(ORAM); 
-					printf("\ndummy oram:  req: %d   max: %d\n", reqctr, maxreq);	
+					printf("\ndummy oram: ");	
 				}
 				else if (dummy_rho)
 				{
-					dummy_access(ORAM); 	
-					printf("\ndummy rho:  req: %d   max: %d\n", reqctr, maxreq);	
+					dummy_access(RHO); 	
+					printf("\ndummy rho: ");	
 				}
 			}
 
-				
+			if (!still_same_access)
+			{
+				reqctr = 0;
+				curr_access = oramQ->head->oramid;
+				maxreq = (oramQ->head->tree == RHO) ? rho_effective_pl*2 : oram_effective_pl*2;
+				printf("\nfetch:  req: %d   max: %d	oramq: %d, curr:%d\n", reqctr, maxreq, oramQ->size, curr_access);	
+			}
+			
+			
 			
 
 			still_same_access = true;
@@ -866,29 +916,35 @@ int main(int argc, char * argv[])
 			tree[numc] = pN->tree;
 			nonmemops[numc] = 0; // ??? not sure about this one ~~~> guess resolved
 			
+			printf("\ndequeued: oramid: %d	req: %d \n", pN->oramid, reqctr);
 
 			if (oram_just_invoked)
 			{
-				// printf("\nmain: oram just invoked @ cycle %lld\n", CYCLE_VAL);
 				nonmemops[numc] = nonmemsaved; 	//  determined from the trace
 				oram_just_invoked = false;
 			}
 
-			if (reqctr == maxreq)
+			if (pN->oramid != curr_access)
 			{
-				reqctr = 0;
-				maxreq = (pN->tree == RHO)? rho_effective_pl : oram_effective_pl;
+				printf("\nERROR: deququed req %d does not match curr access %d @ trace %d\n", pN->oramid, curr_access, tracectr);
+				exit(1);
+			}
+
+			if (reqctr == maxreq-1)
+			{
 				still_same_access = false;
+				printf("\ncurr access ended:  oramq: %d\n", oramQ->size);
+					
 			}
 			
 			reqctr++;
 			free(pN);
 
 		}
-		
-
 
 		// Mehrnoosh.
+
+
 
 
 
@@ -1026,12 +1082,14 @@ printf("trace ctr: %d\n", tracectr);
 printf("invoke ctr: 	%d\n", invokectr);
 printf("oram ctr: 	%d\n", oramctr);
 printf("oram dummy ctr: 	%d\n", dummyctr);
+printf("rho ctr: 	%d\n", rhoctr);
+printf("rho dummy ctr: 	%d\n", rho_dummyctr);
+printf("mem cycles: 	%lld\n", mem_clk);
 printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
 printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
 printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
-printf("rho dummy ctr: 	%d\n", rho_dummyctr);
 
 // print_cap_percent();
 // count_tree();

@@ -271,8 +271,18 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->pc = pc; 
   pN->type = type;
   pN->oramid = (TREE_VAR == RHO) ? rhoctr : oramctr;
+  pN->oramid = (ENQUEUE_VAR == HEAD) ? -1 : pN->oramid;   // in case of dummy access set oram id to -1
   pN->tree = TREE_VAR;
-  bool added = Enqueue(oramQ, pN);
+  bool added = false;
+  if (ENQUEUE_VAR == TAIL)
+  {
+    added = Enqueue(oramQ, pN);
+  }
+  else if (ENQUEUE_VAR == HEAD)
+  {
+    added = EnqueueHead(oramQ, pN);
+  }
+  
   if (!added)
   {
     printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    dummys: %d\n", addr, oramQ->size, dummyctr+rho_dummyctr);
@@ -399,7 +409,7 @@ void oram_alloc(){
     Stash[i].isReal = false;
   }  
 
-  oramQ = ConstructQueue(1000);
+  oramQ = ConstructQueue(QUEUE_SIZE);
 }
 
 // initialize the oram tree by assigning a random path to each addr of address space

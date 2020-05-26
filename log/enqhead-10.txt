@@ -124,67 +124,989 @@ Starting simulation.
 + 
 
 
-dummy rho:  req: 0   max: 0
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
+dummy rho queue empty: 
+fetch:  req: 0   max: 76	oramq: 76, curr:-1
+
+dequeued: oramid: -1	req: 0 
+_ 
+dequeued: oramid: -1	req: 1 
+_ 
+dequeued: oramid: -1	req: 2 
+_ 
+dequeued: oramid: -1	req: 3 
+_ 
+dequeued: oramid: -1	req: 4 
+_ 
+dequeued: oramid: -1	req: 5 
+_ 
+dequeued: oramid: -1	req: 6 
+_ 
+dequeued: oramid: -1	req: 7 
+_ 
+dequeued: oramid: -1	req: 8 
+_ 
+dequeued: oramid: -1	req: 9 
+_ 
+dequeued: oramid: -1	req: 10 
+_ 
+dequeued: oramid: -1	req: 11 
+_ 
+dequeued: oramid: -1	req: 12 
+_ 
+dequeued: oramid: -1	req: 13 
+_ 
+dequeued: oramid: -1	req: 14 
+_ 
+dequeued: oramid: -1	req: 15 
+_ 
+dequeued: oramid: -1	req: 16 
+_ 
+dequeued: oramid: -1	req: 17 
+_ 
+dequeued: oramid: -1	req: 18 
+_ 
+dequeued: oramid: -1	req: 19 
+_ 
+dequeued: oramid: -1	req: 20 
+_ 
+dequeued: oramid: -1	req: 21 
+_ 
+dequeued: oramid: -1	req: 22 
+_ 
+dequeued: oramid: -1	req: 23 
+_ 
+dequeued: oramid: -1	req: 24 
+_ 
+dequeued: oramid: -1	req: 25 
+_ 
+dequeued: oramid: -1	req: 26 
+_ 
+dequeued: oramid: -1	req: 27 
+_ 
+dequeued: oramid: -1	req: 28 
+_ 
+dequeued: oramid: -1	req: 29 
+_ 
+dequeued: oramid: -1	req: 30 
+_ 
+dequeued: oramid: -1	req: 31 
+_ 
+dequeued: oramid: -1	req: 32 
+_ 
+dequeued: oramid: -1	req: 33 
+_ 
+dequeued: oramid: -1	req: 34 
+_ 
+dequeued: oramid: -1	req: 35 
+_ 
+dequeued: oramid: -1	req: 36 
+_ 
+dequeued: oramid: -1	req: 37 
+_ 
+dequeued: oramid: -1	req: 38 
+_ 
+dequeued: oramid: -1	req: 39 
+_ 
+dequeued: oramid: -1	req: 40 
+_ 
+dequeued: oramid: -1	req: 41 
+_ 
+dequeued: oramid: -1	req: 42 
+_ 
+dequeued: oramid: -1	req: 43 
+_ 
+dequeued: oramid: -1	req: 44 
+_ 
+dequeued: oramid: -1	req: 45 
+_ 
+dequeued: oramid: -1	req: 46 
+_ 
+dequeued: oramid: -1	req: 47 
+_ 
+dequeued: oramid: -1	req: 48 
+_ 
+dequeued: oramid: -1	req: 49 
+_ 
+dequeued: oramid: -1	req: 50 
+_ 
+dequeued: oramid: -1	req: 51 
+_ 
+dequeued: oramid: -1	req: 52 
+_ 
+dequeued: oramid: -1	req: 53 
+_ 
+dequeued: oramid: -1	req: 54 
+_ 
+dequeued: oramid: -1	req: 55 
+_ 
+dequeued: oramid: -1	req: 56 
+_ 
+dequeued: oramid: -1	req: 57 
+_ 
+dequeued: oramid: -1	req: 58 
+_ 
+dequeued: oramid: -1	req: 59 
+_ 
+dequeued: oramid: -1	req: 60 
+_ 
+dequeued: oramid: -1	req: 61 
+_ 
+dequeued: oramid: -1	req: 62 
+_ 
+dequeued: oramid: -1	req: 63 
+_ 
+dequeued: oramid: -1	req: 64 
+_ 
+dequeued: oramid: -1	req: 65 
+_ 
+dequeued: oramid: -1	req: 66 
+_ 
+dequeued: oramid: -1	req: 67 
+_ 
+dequeued: oramid: -1	req: 68 
+_ 
+dequeued: oramid: -1	req: 69 
+_ 
+dequeued: oramid: -1	req: 70 
+_ 
+dequeued: oramid: -1	req: 71 
+_ 
+dequeued: oramid: -1	req: 72 
+_ 
+dequeued: oramid: -1	req: 73 
+_ 
+dequeued: oramid: -1	req: 74 
+_ 
+dequeued: oramid: -1	req: 75 
+
+curr access ended:  oramq: 0
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ / 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ $ 
 
 
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
+dummy oram queue empty: 
+fetch:  req: 0   max: 112	oramq: 112, curr:-1
 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
+dequeued: oramid: -1	req: 0 
+_ 
+dequeued: oramid: -1	req: 1 
+_ 
+dequeued: oramid: -1	req: 2 
+_ 
+dequeued: oramid: -1	req: 3 
+_ 
+dequeued: oramid: -1	req: 4 
+_ 
+dequeued: oramid: -1	req: 5 
+_ 
+dequeued: oramid: -1	req: 6 
+_ 
+dequeued: oramid: -1	req: 7 
+_ 
+dequeued: oramid: -1	req: 8 
+_ 
+dequeued: oramid: -1	req: 9 
+_ 
+dequeued: oramid: -1	req: 10 
+_ 
+dequeued: oramid: -1	req: 11 
+_ 
+dequeued: oramid: -1	req: 12 
+_ 
+dequeued: oramid: -1	req: 13 
+_ 
+dequeued: oramid: -1	req: 14 
+_ 
+dequeued: oramid: -1	req: 15 
+_ 
+dequeued: oramid: -1	req: 16 
+_ 
+dequeued: oramid: -1	req: 17 
+_ 
+dequeued: oramid: -1	req: 18 
+_ 
+dequeued: oramid: -1	req: 19 
+_ 
+dequeued: oramid: -1	req: 20 
+_ 
+dequeued: oramid: -1	req: 21 
+_ 
+dequeued: oramid: -1	req: 22 
+_ 
+dequeued: oramid: -1	req: 23 
+_ 
+dequeued: oramid: -1	req: 24 
+_ 
+dequeued: oramid: -1	req: 25 
+_ 
+dequeued: oramid: -1	req: 26 
+_ 
+dequeued: oramid: -1	req: 27 
+_ 
+dequeued: oramid: -1	req: 28 
+_ 
+dequeued: oramid: -1	req: 29 
+_ 
+dequeued: oramid: -1	req: 30 
+_ 
+dequeued: oramid: -1	req: 31 
+_ 
+dequeued: oramid: -1	req: 32 
+_ 
+dequeued: oramid: -1	req: 33 
+_ 
+dequeued: oramid: -1	req: 34 
+_ 
+dequeued: oramid: -1	req: 35 
+_ 
+dequeued: oramid: -1	req: 36 
+_ 
+dequeued: oramid: -1	req: 37 
+_ 
+dequeued: oramid: -1	req: 38 
+_ 
+dequeued: oramid: -1	req: 39 
+_ 
+dequeued: oramid: -1	req: 40 
+_ 
+dequeued: oramid: -1	req: 41 
+_ 
+dequeued: oramid: -1	req: 42 
+_ 
+dequeued: oramid: -1	req: 43 
+_ 
+dequeued: oramid: -1	req: 44 
+_ 
+dequeued: oramid: -1	req: 45 
+_ 
+dequeued: oramid: -1	req: 46 
+_ 
+dequeued: oramid: -1	req: 47 
+_ 
+dequeued: oramid: -1	req: 48 
+_ 
+dequeued: oramid: -1	req: 49 
+_ 
+dequeued: oramid: -1	req: 50 
+_ 
+dequeued: oramid: -1	req: 51 
+_ 
+dequeued: oramid: -1	req: 52 
+_ 
+dequeued: oramid: -1	req: 53 
+_ 
+dequeued: oramid: -1	req: 54 
+_ 
+dequeued: oramid: -1	req: 55 
+_ 
+dequeued: oramid: -1	req: 56 
+_ 
+dequeued: oramid: -1	req: 57 
+_ 
+dequeued: oramid: -1	req: 58 
+_ 
+dequeued: oramid: -1	req: 59 
+_ 
+dequeued: oramid: -1	req: 60 
+_ 
+dequeued: oramid: -1	req: 61 
+_ 
+dequeued: oramid: -1	req: 62 
+_ 
+dequeued: oramid: -1	req: 63 
+_ 
+dequeued: oramid: -1	req: 64 
+_ 
+dequeued: oramid: -1	req: 65 
+_ 
+dequeued: oramid: -1	req: 66 
+_ 
+dequeued: oramid: -1	req: 67 
+_ 
+dequeued: oramid: -1	req: 68 
+_ 
+dequeued: oramid: -1	req: 69 
+_ 
+dequeued: oramid: -1	req: 70 
+_ 
+dequeued: oramid: -1	req: 71 
+_ 
+dequeued: oramid: -1	req: 72 
+_ 
+dequeued: oramid: -1	req: 73 
+_ 
+dequeued: oramid: -1	req: 74 
+_ 
+dequeued: oramid: -1	req: 75 
+_ 
+dequeued: oramid: -1	req: 76 
+_ 
+dequeued: oramid: -1	req: 77 
+_ 
+dequeued: oramid: -1	req: 78 
+_ 
+dequeued: oramid: -1	req: 79 
+_ 
+dequeued: oramid: -1	req: 80 
+_ 
+dequeued: oramid: -1	req: 81 
+_ 
+dequeued: oramid: -1	req: 82 
+_ 
+dequeued: oramid: -1	req: 83 
+_ 
+dequeued: oramid: -1	req: 84 
+_ 
+dequeued: oramid: -1	req: 85 
+_ 
+dequeued: oramid: -1	req: 86 
+_ 
+dequeued: oramid: -1	req: 87 
+_ 
+dequeued: oramid: -1	req: 88 
+_ 
+dequeued: oramid: -1	req: 89 
+_ 
+dequeued: oramid: -1	req: 90 
+_ 
+dequeued: oramid: -1	req: 91 
+_ 
+dequeued: oramid: -1	req: 92 
+_ 
+dequeued: oramid: -1	req: 93 
+_ 
+dequeued: oramid: -1	req: 94 
+_ 
+dequeued: oramid: -1	req: 95 
+_ 
+dequeued: oramid: -1	req: 96 
+_ 
+dequeued: oramid: -1	req: 97 
+_ 
+dequeued: oramid: -1	req: 98 
+_ 
+dequeued: oramid: -1	req: 99 
+_ 
+dequeued: oramid: -1	req: 100 
+_ 
+dequeued: oramid: -1	req: 101 
+_ 
+dequeued: oramid: -1	req: 102 
+_ 
+dequeued: oramid: -1	req: 103 
+_ 
+dequeued: oramid: -1	req: 104 
+_ 
+dequeued: oramid: -1	req: 105 
+_ 
+dequeued: oramid: -1	req: 106 
+_ 
+dequeued: oramid: -1	req: 107 
+_ 
+dequeued: oramid: -1	req: 108 
+_ 
+dequeued: oramid: -1	req: 109 
+_ 
+dequeued: oramid: -1	req: 110 
+_ 
+dequeued: oramid: -1	req: 111 
+
+curr access ended:  oramq: 0
+_ _ _ _ _ _ _ _ / 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
 
 
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
+dummy rho queue empty: 
+fetch:  req: 0   max: 76	oramq: 76, curr:-1
+
+dequeued: oramid: -1	req: 0 
+_ 
+dequeued: oramid: -1	req: 1 
+_ 
+dequeued: oramid: -1	req: 2 
+_ 
+dequeued: oramid: -1	req: 3 
+_ 
+dequeued: oramid: -1	req: 4 
+_ 
+dequeued: oramid: -1	req: 5 
+_ 
+dequeued: oramid: -1	req: 6 
+_ 
+dequeued: oramid: -1	req: 7 
+_ 
+dequeued: oramid: -1	req: 8 
+_ 
+dequeued: oramid: -1	req: 9 
+_ 
+dequeued: oramid: -1	req: 10 
+_ 
+dequeued: oramid: -1	req: 11 
+_ 
+dequeued: oramid: -1	req: 12 
+_ 
+dequeued: oramid: -1	req: 13 
+_ 
+dequeued: oramid: -1	req: 14 
+_ 
+dequeued: oramid: -1	req: 15 
+_ 
+dequeued: oramid: -1	req: 16 
+_ 
+dequeued: oramid: -1	req: 17 
+_ 
+dequeued: oramid: -1	req: 18 
+_ 
+dequeued: oramid: -1	req: 19 
+_ 
+dequeued: oramid: -1	req: 20 
+_ 
+dequeued: oramid: -1	req: 21 
+_ 
+dequeued: oramid: -1	req: 22 
+_ 
+dequeued: oramid: -1	req: 23 
+_ 
+dequeued: oramid: -1	req: 24 
+_ 
+dequeued: oramid: -1	req: 25 
+_ 
+dequeued: oramid: -1	req: 26 
+_ 
+dequeued: oramid: -1	req: 27 
+_ 
+dequeued: oramid: -1	req: 28 
+_ 
+dequeued: oramid: -1	req: 29 
+_ 
+dequeued: oramid: -1	req: 30 
+_ 
+dequeued: oramid: -1	req: 31 
+_ 
+dequeued: oramid: -1	req: 32 
+_ 
+dequeued: oramid: -1	req: 33 
+_ 
+dequeued: oramid: -1	req: 34 
+_ 
+dequeued: oramid: -1	req: 35 
+_ 
+dequeued: oramid: -1	req: 36 
+_ 
+dequeued: oramid: -1	req: 37 
+_ 
+dequeued: oramid: -1	req: 38 
+_ 
+dequeued: oramid: -1	req: 39 
+_ 
+dequeued: oramid: -1	req: 40 
+_ 
+dequeued: oramid: -1	req: 41 
+_ 
+dequeued: oramid: -1	req: 42 
+_ 
+dequeued: oramid: -1	req: 43 
+_ 
+dequeued: oramid: -1	req: 44 
+_ 
+dequeued: oramid: -1	req: 45 
+_ 
+dequeued: oramid: -1	req: 46 
+_ 
+dequeued: oramid: -1	req: 47 
+_ 
+dequeued: oramid: -1	req: 48 
+_ 
+dequeued: oramid: -1	req: 49 
+_ 
+dequeued: oramid: -1	req: 50 
+_ 
+dequeued: oramid: -1	req: 51 
+_ 
+dequeued: oramid: -1	req: 52 
+_ 
+dequeued: oramid: -1	req: 53 
+_ 
+dequeued: oramid: -1	req: 54 
+_ 
+dequeued: oramid: -1	req: 55 
+_ 
+dequeued: oramid: -1	req: 56 
+_ 
+dequeued: oramid: -1	req: 57 
+_ 
+dequeued: oramid: -1	req: 58 
+_ 
+dequeued: oramid: -1	req: 59 
+_ 
+dequeued: oramid: -1	req: 60 
+_ 
+dequeued: oramid: -1	req: 61 
+_ 
+dequeued: oramid: -1	req: 62 
+_ 
+dequeued: oramid: -1	req: 63 
+_ 
+dequeued: oramid: -1	req: 64 
+_ 
+dequeued: oramid: -1	req: 65 
+_ 
+dequeued: oramid: -1	req: 66 
+_ 
+dequeued: oramid: -1	req: 67 
+_ 
+dequeued: oramid: -1	req: 68 
+_ 
+dequeued: oramid: -1	req: 69 
+_ 
+dequeued: oramid: -1	req: 70 
+_ 
+dequeued: oramid: -1	req: 71 
+_ 
+dequeued: oramid: -1	req: 72 
+_ 
+dequeued: oramid: -1	req: 73 
+_ 
+dequeued: oramid: -1	req: 74 
+_ 
+dequeued: oramid: -1	req: 75 
+
+curr access ended:  oramq: 0
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ / 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ / 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
 
 
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
+dummy rho queue empty: 
+fetch:  req: 0   max: 76	oramq: 76, curr:-1
 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
+dequeued: oramid: -1	req: 0 
+_ 
+dequeued: oramid: -1	req: 1 
+_ 
+dequeued: oramid: -1	req: 2 
+_ 
+dequeued: oramid: -1	req: 3 
+_ 
+dequeued: oramid: -1	req: 4 
+_ 
+dequeued: oramid: -1	req: 5 
+_ 
+dequeued: oramid: -1	req: 6 
+_ 
+dequeued: oramid: -1	req: 7 
+_ 
+dequeued: oramid: -1	req: 8 
+_ 
+dequeued: oramid: -1	req: 9 
+_ 
+dequeued: oramid: -1	req: 10 
+_ 
+dequeued: oramid: -1	req: 11 
+_ 
+dequeued: oramid: -1	req: 12 
+_ 
+dequeued: oramid: -1	req: 13 
+_ 
+dequeued: oramid: -1	req: 14 
+_ 
+dequeued: oramid: -1	req: 15 
+_ 
+dequeued: oramid: -1	req: 16 
+_ 
+dequeued: oramid: -1	req: 17 
+_ 
+dequeued: oramid: -1	req: 18 
+_ 
+dequeued: oramid: -1	req: 19 
+_ 
+dequeued: oramid: -1	req: 20 
+_ 
+dequeued: oramid: -1	req: 21 
+_ 
+dequeued: oramid: -1	req: 22 
+_ 
+dequeued: oramid: -1	req: 23 
+_ 
+dequeued: oramid: -1	req: 24 
+_ 
+dequeued: oramid: -1	req: 25 
+_ 
+dequeued: oramid: -1	req: 26 
+_ 
+dequeued: oramid: -1	req: 27 
+_ 
+dequeued: oramid: -1	req: 28 
+_ 
+dequeued: oramid: -1	req: 29 
+_ 
+dequeued: oramid: -1	req: 30 
+_ 
+dequeued: oramid: -1	req: 31 
+_ 
+dequeued: oramid: -1	req: 32 
+_ 
+dequeued: oramid: -1	req: 33 
+_ 
+dequeued: oramid: -1	req: 34 
+_ 
+dequeued: oramid: -1	req: 35 
+_ 
+dequeued: oramid: -1	req: 36 
+_ 
+dequeued: oramid: -1	req: 37 
+_ 
+dequeued: oramid: -1	req: 38 
+_ 
+dequeued: oramid: -1	req: 39 
+_ 
+dequeued: oramid: -1	req: 40 
+_ 
+dequeued: oramid: -1	req: 41 
+_ 
+dequeued: oramid: -1	req: 42 
+_ 
+dequeued: oramid: -1	req: 43 
+_ 
+dequeued: oramid: -1	req: 44 
+_ 
+dequeued: oramid: -1	req: 45 
+_ 
+dequeued: oramid: -1	req: 46 
+_ 
+dequeued: oramid: -1	req: 47 
+_ 
+dequeued: oramid: -1	req: 48 
+_ 
+dequeued: oramid: -1	req: 49 
+_ 
+dequeued: oramid: -1	req: 50 
+_ 
+dequeued: oramid: -1	req: 51 
+_ 
+dequeued: oramid: -1	req: 52 
+_ 
+dequeued: oramid: -1	req: 53 
+_ 
+dequeued: oramid: -1	req: 54 
+_ 
+dequeued: oramid: -1	req: 55 
+_ 
+dequeued: oramid: -1	req: 56 
+_ 
+dequeued: oramid: -1	req: 57 
+_ 
+dequeued: oramid: -1	req: 58 
+_ 
+dequeued: oramid: -1	req: 59 
+_ 
+dequeued: oramid: -1	req: 60 
+_ 
+dequeued: oramid: -1	req: 61 
+_ 
+dequeued: oramid: -1	req: 62 
+_ 
+dequeued: oramid: -1	req: 63 
+_ 
+dequeued: oramid: -1	req: 64 
+_ 
+dequeued: oramid: -1	req: 65 
+_ 
+dequeued: oramid: -1	req: 66 
+_ 
+dequeued: oramid: -1	req: 67 
+_ 
+dequeued: oramid: -1	req: 68 
+_ 
+dequeued: oramid: -1	req: 69 
+_ 
+dequeued: oramid: -1	req: 70 
+_ 
+dequeued: oramid: -1	req: 71 
+_ 
+dequeued: oramid: -1	req: 72 
+_ 
+dequeued: oramid: -1	req: 73 
+_ 
+dequeued: oramid: -1	req: 74 
+_ 
+dequeued: oramid: -1	req: 75 
+
+curr access ended:  oramq: 0
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ / 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
 
 
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
+dummy rho queue empty: 
+fetch:  req: 0   max: 76	oramq: 76, curr:-1
+
+dequeued: oramid: -1	req: 0 
+_ 
+dequeued: oramid: -1	req: 1 
+_ 
+dequeued: oramid: -1	req: 2 
+_ 
+dequeued: oramid: -1	req: 3 
+_ 
+dequeued: oramid: -1	req: 4 
+_ 
+dequeued: oramid: -1	req: 5 
+_ 
+dequeued: oramid: -1	req: 6 
+_ 
+dequeued: oramid: -1	req: 7 
+_ 
+dequeued: oramid: -1	req: 8 
+_ 
+dequeued: oramid: -1	req: 9 
+_ 
+dequeued: oramid: -1	req: 10 
+_ 
+dequeued: oramid: -1	req: 11 
+_ 
+dequeued: oramid: -1	req: 12 
+_ 
+dequeued: oramid: -1	req: 13 
+_ 
+dequeued: oramid: -1	req: 14 
+_ 
+dequeued: oramid: -1	req: 15 
+_ 
+dequeued: oramid: -1	req: 16 
+_ 
+dequeued: oramid: -1	req: 17 
+_ 
+dequeued: oramid: -1	req: 18 
+_ 
+dequeued: oramid: -1	req: 19 
+_ 
+dequeued: oramid: -1	req: 20 
+_ 
+dequeued: oramid: -1	req: 21 
+_ 
+dequeued: oramid: -1	req: 22 
+_ 
+dequeued: oramid: -1	req: 23 
+_ 
+dequeued: oramid: -1	req: 24 
+_ 
+dequeued: oramid: -1	req: 25 
+_ 
+dequeued: oramid: -1	req: 26 
+_ 
+dequeued: oramid: -1	req: 27 
+_ 
+dequeued: oramid: -1	req: 28 
+_ 
+dequeued: oramid: -1	req: 29 
+_ 
+dequeued: oramid: -1	req: 30 
+_ 
+dequeued: oramid: -1	req: 31 
+_ 
+dequeued: oramid: -1	req: 32 
+_ 
+dequeued: oramid: -1	req: 33 
+_ 
+dequeued: oramid: -1	req: 34 
+_ 
+dequeued: oramid: -1	req: 35 
+_ 
+dequeued: oramid: -1	req: 36 
+_ 
+dequeued: oramid: -1	req: 37 
+_ 
+dequeued: oramid: -1	req: 38 
+_ 
+dequeued: oramid: -1	req: 39 
+_ 
+dequeued: oramid: -1	req: 40 
+_ 
+dequeued: oramid: -1	req: 41 
+_ 
+dequeued: oramid: -1	req: 42 
+_ 
+dequeued: oramid: -1	req: 43 
+_ 
+dequeued: oramid: -1	req: 44 
+_ 
+dequeued: oramid: -1	req: 45 
+_ 
+dequeued: oramid: -1	req: 46 
+_ 
+dequeued: oramid: -1	req: 47 
+_ 
+dequeued: oramid: -1	req: 48 
+_ 
+dequeued: oramid: -1	req: 49 
+_ 
+dequeued: oramid: -1	req: 50 
+_ 
+dequeued: oramid: -1	req: 51 
+_ 
+dequeued: oramid: -1	req: 52 
+_ 
+dequeued: oramid: -1	req: 53 
+_ 
+dequeued: oramid: -1	req: 54 
+_ 
+dequeued: oramid: -1	req: 55 
+_ 
+dequeued: oramid: -1	req: 56 
+_ 
+dequeued: oramid: -1	req: 57 
+_ 
+dequeued: oramid: -1	req: 58 
+_ 
+dequeued: oramid: -1	req: 59 
+_ 
+dequeued: oramid: -1	req: 60 
+_ 
+dequeued: oramid: -1	req: 61 
+_ 
+dequeued: oramid: -1	req: 62 
+_ 
+dequeued: oramid: -1	req: 63 
+_ 
+dequeued: oramid: -1	req: 64 
+_ 
+dequeued: oramid: -1	req: 65 
+_ 
+dequeued: oramid: -1	req: 66 
+_ 
+dequeued: oramid: -1	req: 67 
+_ 
+dequeued: oramid: -1	req: 68 
+_ 
+dequeued: oramid: -1	req: 69 
+_ 
+dequeued: oramid: -1	req: 70 
+_ 
+dequeued: oramid: -1	req: 71 
+_ 
+dequeued: oramid: -1	req: 72 
+_ 
+dequeued: oramid: -1	req: 73 
+_ 
+dequeued: oramid: -1	req: 74 
+_ 
+dequeued: oramid: -1	req: 75 
+
+curr access ended:  oramq: 0
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ / 
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
+
+_ Done with loop. Printing stats.
+Cycles 4204
+Done: Core 0: Fetched 1682 : Committed 1554 : At time : 4204
+Sum of execution times for all programs: 4204
+Num reads merged: 206
+Num writes merged: 0
+-------- Channel 0 Stats-----------
+Total Reads Serviced :          11     
+Total Writes Serviced :         192    
+Average Read Latency :          463.18182
+Average Read Queue Latency :    403.18182
+Average Write Latency :         755.59375
+Average Write Queue Latency :   691.59375
+Read Page Hit Rate :            0.45455
+Write Page Hit Rate :           0.58854
+------------------------------------
+
+#-----------------------------Simulated Cycles Break-Up-------------------------------------------
+Note:  1.(Read Cycles + Write Cycles + Read Other + Write Other) should add up to % cycles during which
+          the channel is busy. This should be the same for all Ranks on a Channel
+       2.(PRE_PDN_FAST + PRE_PDN_SLOW + ACT_PDN + ACT_STBY + PRE_STBY) should add up to 100%
+       3.Power Down means Clock Enable, CKE = 0. In Standby mode, CKE = 1
+#-------------------------------------------------------------------------------------------------
+Total Simulation Cycles                             4204
+---------------------------------------------------------------
+
+Channel 0 Rank 0 Read Cycles(%)                0.02 # % cycles the Rank performed a Read
+Channel 0 Rank 0 Write Cycles(%)               0.60 # % cycles the Rank performed a Write
+Channel 0 Rank 0 Read Other(%)                 0.02 # % cycles other Ranks on the channel performed a Read
+Channel 0 Rank 0 Write Other(%)                0.13 # % cycles other Ranks on the channel performed a Write
+Channel 0 Rank 0 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 0 Rank 0 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 0 Rank 0 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 0 Rank 0 ACT_STBY(%)                   0.99 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 0 Rank 0 PRE_STBY(%)                   0.01 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 0 Rank 1 Read Cycles(%)                0.02 # % cycles the Rank performed a Read
+Channel 0 Rank 1 Write Cycles(%)               0.13 # % cycles the Rank performed a Write
+Channel 0 Rank 1 Read Other(%)                 0.02 # % cycles other Ranks on the channel performed a Read
+Channel 0 Rank 1 Write Other(%)                0.60 # % cycles other Ranks on the channel performed a Write
+Channel 0 Rank 1 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 0 Rank 1 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 0 Rank 1 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 0 Rank 1 ACT_STBY(%)                   1.00 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 0 Rank 1 PRE_STBY(%)                   0.00 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
 
 
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
+#-------------------------------------- Power Stats ----------------------------------------------
+Note:  1. termRoth/termWoth is the power dissipated in the ODT resistors when Read/Writes terminate 
+          in other ranks on the same channel
+#-------------------------------------------------------------------------------------------------
 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
+Channel 0 Rank 0 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
+Channel 0 Rank 0 Act(mW)                     70.52 # power spend bringing data to the row buffer
+Channel 0 Rank 0 Read(mW)                     3.25 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 0 Write(mW)                   90.20 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 0 Read Terminate(mW)           0.73 # power dissipated in ODT resistors during Read
+Channel 0 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 0 Rank 0 termRoth(mW)                 4.74 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 0 termWoth(mW)                29.61 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 0 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 0 Rank 0 Total Rank Power(mW)      4307.04 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
 
-
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
-
-
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
-
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
-
-
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
-
-
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
-
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
-
-
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
-
-
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
-
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
+Channel 0 Rank 1 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
+Channel 0 Rank 1 Act(mW)                     54.34 # power spend bringing data to the row buffer
+Channel 0 Rank 1 Read(mW)                     2.71 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 1 Write(mW)                   19.41 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 1 Read Terminate(mW)           0.61 # power dissipated in ODT resistors during Read
+Channel 0 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 0 Rank 1 termRoth(mW)                 5.69 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 1 termWoth(mW)               137.58 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 1 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 0 Rank 1 Total Rank Power(mW)      4647.76 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
 
 
-dummy rho:  req: 1   max: 56
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ + 
+#-------------------------------------------------------------------------------------------------
+Total memory system power = 8.954797 W
+Miscellaneous system power = 10 W  # Processor uncore power, disk, I/O, cooling, etc.
+Processor core power = 5.000000 W  # Assuming that each core consumes 5 W
+Total system power = 23.954796 W # Sum of the previous three lines
+Energy Delay product (EDP) = 0.000000000 J.s
 
-ERROR: insert oramQ: failed to enqueue block: 13933    oramq size: 1000    dummys: 15
+............... ORAM Stats ...............
+total time: 0.015625 s
+trace ctr: 10
+invoke ctr: 	0
+oram ctr: 	0
+oram dummy ctr: 	1
+rho ctr: 	0
+rho dummy ctr: 	4
+mem cycles: 	15
+bk evict rate: -nan%
+cache hit rate: 0.000000%
+cache evict rate wrt # miss: 0.000000%
+rho hit rate: -nan%
+rho bk evict rate: -nan%

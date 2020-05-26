@@ -67,7 +67,11 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 60   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 120   // # cycles after each one oram access is initiated either real or dummy one
+
+
+// other simulation parameter
+#define QUEUE_SIZE 1000     // oramq capacity
 
 
 typedef enum {ORAM, RHO} TreeType;
