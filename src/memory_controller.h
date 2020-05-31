@@ -10,6 +10,9 @@
 
 
 #include <math.h>
+// other simulation parameter
+#define TRACE_SIZE 200000 // # addr read from trace file
+#define QUEUE_SIZE 1000     // oramq capacity
 
 // enable/disable options config
 #define VOLCANO_ENABLE 0  // 0/1 flag to disable/enable having volcano idea
@@ -20,7 +23,6 @@
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
 
 // oram config
-#define TRACE_SIZE 100 // # addr read from trace file
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
@@ -70,8 +72,6 @@
 #define TIMING_INTERVAL 120   // # cycles after each one oram access is initiated either real or dummy one
 
 
-// other simulation parameter
-#define QUEUE_SIZE 1000     // oramq capacity
 
 
 typedef enum {ORAM, RHO} TreeType;
