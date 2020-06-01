@@ -121,38 +121,38 @@ int main(int argc, char * argv[])
 	printf("\n....................................................\n");
 	printf("                     Options\n");
 	printf("....................................................\n");
-	printf("Volcano		%s\n", VOLCANO_ENABLE?"Enabled":"No" );
-	printf("Cache		%s\n", CACHE_ENABLE?"Enabled":"No" );
-	printf("Write Bypass	%s\n", WRITE_BYPASS?"Enabled":"No" );
-	printf("Subtree		%s\n", SUBTREE_ENABLE?"Enabled":"No" );
-	printf("Rho		%s\n", RHO_ENABLE?"Enabled":"No" );
-	printf("Timing		%s\n\n", TIMING_ENABLE?"Enabled":"No" );
+	printf("Volcano        %s\n", VOLCANO_ENABLE?"Enabled":"No" );
+	printf("Cache          %s\n", CACHE_ENABLE?"Enabled":"No" );
+	printf("Write Bypass   %s\n", WRITE_BYPASS?"Enabled":"No" );
+	printf("Subtree        %s\n", SUBTREE_ENABLE?"Enabled":"No" );
+	printf("Rho            %s\n", RHO_ENABLE?"Enabled":"No" );
+	printf("Timing         %s\n\n", TIMING_ENABLE?"Enabled":"No" );
 
 
 	printf("....................................................\n");
 	printf("             Simulation Parameter\n");
 	printf("....................................................\n");
-	printf("Trace Size	%d\n", TRACE_SIZE);
-	printf("Queue Size	%d\n\n", QUEUE_SIZE);
+	printf("Trace Size    %d\n", TRACE_SIZE);
+	printf("Queue Size    %d\n\n", QUEUE_SIZE);
 
 	printf("....................................................\n");
 	printf("                   ORAM Config\n");
 	printf("....................................................\n");
-	printf("Level	 	%d\n",  LEVEL);
-	printf("Path		%d\n",  PATH);
-	printf("Node		%d\n", NODE);
-	printf("Slot		%d\n", SLOT);
-	printf("Block 		%d\n", BLOCK);
-	printf("Z 		%d\n", Z);
-	printf("U 		%f\n", U);
-	printf("OV Treshold 	%d\n", OV_TRESHOLD);
-	printf("Stash Size 	%d\n", STASH_SIZE);
-	printf("BK Eviction 	%d\n", BK_EVICTION);
-	printf("Empty Top 	%d\n", EMPTY_TOP);
-	printf("Top Cache	%d\n\n", TOP_CACHE);
-	printf("L1  %d    	Z1  %d\n", L1, Z1);
-	printf("L2  %d   	Z2  %d\n", L2, Z2);
-	printf("L3  %d   	Z3  %d\n\n", L3, Z3);
+	printf("Level           %d\n",  LEVEL);
+	printf("Path            %d\n",  PATH);
+	printf("Node            %d\n", NODE);
+	printf("Slot            %d\n", SLOT);
+	printf("Block           %d\n", BLOCK);
+	printf("Z               %d\n", Z);
+	printf("U               %f\n", U);
+	printf("OV Treshold     %d\n", OV_TRESHOLD);
+	printf("Stash Size      %d\n", STASH_SIZE);
+	printf("BK Eviction     %d\n", BK_EVICTION);
+	printf("Empty Top       %d\n", EMPTY_TOP);
+	printf("Top Cache       %d\n\n", TOP_CACHE);
+	printf("L1  %d       Z1  %d\n", L1, Z1);
+	printf("L2  %d      Z2  %d\n", L2, Z2);
+	printf("L3  %d      Z3  %d\n\n", L3, Z3);
 	printf("LZ ");
 	// calculating oram path length
 	for (int i = 0; i < LEVEL; i++)
@@ -169,41 +169,41 @@ int main(int argc, char * argv[])
 	printf("  %d ~> oram effective path length\n\n", oram_effective_pl);
 
 	printf("\n....................................................\n");
-	printf("                   Cache Config\n");
+	printf("                  Cache Config\n");
 	printf("....................................................\n");
-	printf("Cache Enable	 %s\n", CACHE_ENABLE?"On":"Off");
-	printf("Cache Size 	 %d\n", CACHE_SIZE);
-	printf("Write Bypass 	 %d\n", WRITE_BYPASS);
+	printf("Cache Enable   %s\n", CACHE_ENABLE?"On":"Off");
+	printf("Cache Size     %d\n", CACHE_SIZE);
+	printf("Write Bypass   %d\n", WRITE_BYPASS);
 
 	printf("\n....................................................\n");
-	printf("                   Subtree Config\n");
+	printf("                 Subtree Config\n");
 	printf("....................................................\n");
-	printf("Subtree Enable 	 %s\n", SUBTREE_ENABLE?"On":"Off");
-	printf("Subtree Size	 %d\n", SUBTREE_SIZE);
-	printf("Subtree Slot	 %d\n", SUBTREE_SLOT);
-	printf("Subtree  Bucket	 %d\n", SUBTREE_BUCKET);
-	printf("Subtree Level	 %d\n", SUBTREE_LEVEL);
+	printf("Subtree Enable 	  %s\n", SUBTREE_ENABLE?"On":"Off");
+	printf("Subtree Size      %d\n", SUBTREE_SIZE);
+	printf("Subtree Slot	  %d\n", SUBTREE_SLOT);
+	printf("Subtree Bucket    %d\n", SUBTREE_BUCKET);
+	printf("Subtree Level     %d\n", SUBTREE_LEVEL);
 
 	printf("\n....................................................\n");
 	printf("                   RHO Config\n");
 	printf("....................................................\n");
-	printf("Rho Enable		%s\n", RHO_ENABLE?"On":"Off");
-	printf("Rho Level     		%d\n", RHO_LEVEL);
-	printf("Rho Path	 	%d\n", RHO_PATH);
-	printf("Rho Node	 	%d\n", RHO_NODE);
-	printf("Rho Slot	 	%d\n", RHO_SLOT);
-	printf("Rho Block	 	%d\n", RHO_BLOCK);
-	printf("Rho Set 	 	%d\n", RHO_SET);
-	printf("Rho Way		 	%d\n", RHO_WAY);
-	printf("Rho Z 	     		%d\n", RHO_Z);
- 	printf("Rho OV Treshold 	%d\n", RHO_OV_TRESHOLD);
-	printf("Rho Stash Size 		%d\n", RHO_STASH_SIZE);
-	printf("Rho BK Eviction 	%d\n", RHO_BK_EVICTION);
-	printf("Rho Empty Top 		%d\n", RHO_EMPTY_TOP);
-	printf("Rho Top Cache 		%d\n\n", RHO_TOP_CACHE);
-	printf("Rho L1  %d    	Rho Z1  %d\n", RHO_L1, RHO_Z1);
-	printf("Rho L2  %d   	Rho Z2  %d\n", RHO_L2, RHO_Z2);
-	printf("Rho L3  %d   	Rho Z3  %d\n\n", RHO_L3, RHO_Z3);
+	printf("Rho Enable          %s\n", RHO_ENABLE?"On":"Off");
+	printf("Rho Level           %d\n", RHO_LEVEL);
+	printf("Rho Path            %d\n", RHO_PATH);
+	printf("Rho Node            %d\n", RHO_NODE);
+	printf("Rho Slot            %d\n", RHO_SLOT);
+	printf("Rho Block           %d\n", RHO_BLOCK);
+	printf("Rho Set             %d\n", RHO_SET);
+	printf("Rho Way             %d\n", RHO_WAY);
+	printf("Rho Z               %d\n", RHO_Z);
+ 	printf("Rho OV Treshold     %d\n", RHO_OV_TRESHOLD);
+	printf("Rho Stash Size      %d\n", RHO_STASH_SIZE);
+	printf("Rho BK Eviction     %d\n", RHO_BK_EVICTION);
+	printf("Rho Empty Top       %d\n", RHO_EMPTY_TOP);
+	printf("Rho Top Cache       %d\n\n", RHO_TOP_CACHE);
+	printf("Rho   L1  %d     Z1  %d\n", RHO_L1, RHO_Z1);
+	printf("Rho   L2  %d     Z2  %d\n", RHO_L2, RHO_Z2);
+	printf("Rho   L3  %d     Z3  %d\n\n", RHO_L3, RHO_Z3);
 	printf("Rho LZ ");
 	// calculating rho path length
 	for (int i = 0; i < RHO_LEVEL; i++)
@@ -218,7 +218,7 @@ int main(int argc, char * argv[])
 	}
 	printf("\n= %d ~> rho path length\n", rho_path_length);
 	printf("  %d ~> rho effective path length\n\n", rho_effective_pl);
-	printf("....................................................\n");
+	printf("....................................................\n\n");
 
 	
 	// init_trace();
