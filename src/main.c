@@ -1135,21 +1135,21 @@ end = clock();
 cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 
 
-printf("\n............... ORAM Stats ...............\n");
-printf("total time: %f s\n", cpu_time_used);
-printf("trace ctr: %d\n", tracectr);
-printf("invoke ctr: 	%d\n", invokectr);
-printf("oram ctr: 	%d\n", oramctr);
-printf("oram dummy ctr: 	%d\n", dummyctr);
-printf("rho ctr: 	%d\n", rhoctr);
-printf("rho dummy ctr: 	%d\n", rho_dummyctr);
-printf("mem cycles: 	%lld\n", mem_clk);
-printf("oramq size: 	%d\n", oramQ->size);
-printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
-printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
-printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
-printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
-printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
+printf("\n\n............... ORAM Stats ...............\n\n");
+printf("Execution Time     %f s\n", cpu_time_used);
+printf("Trace Size         %d\n", tracectr);
+printf("Invoke Mem #    %d\n", invokectr);
+printf("ORAM Access #      %d\n", oramctr);
+printf("Rho Access #       %d\n", rhoctr);
+printf("ORAM Dummy #       %d\n", dummyctr);
+printf("Rho  Dummy #       %d\n", rho_dummyctr);
+printf("Mem Cycles #       %lld\n", mem_clk);
+printf("oramQ Size         %d\n", oramQ->size);
+printf("Bk Evict           %f%%\n", 100*(double)bkctr/invokectr);
+printf("Cache Hit          %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+printf("Cache Evict        %f%%\n", 100*(double)evictctr/(missctr));
+printf("Rho Hit            %f%%\n", 100*(double)rho_hit/(invokectr));
+printf("Rho Bk Evict       %f%%\n", 100*(double)rho_bkctr/rho_hit);
 
 // print_cap_percent();
 // count_tree();

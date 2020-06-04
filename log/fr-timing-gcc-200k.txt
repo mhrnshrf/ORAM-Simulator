@@ -6,38 +6,38 @@
 ....................................................
                      Options
 ....................................................
-Volcano		No
-Cache		Enabled
-Write Bypass	No
-Subtree		No
-Rho		No
-Timing		Enabled
+Volcano        No
+Cache          Enabled
+Write Bypass   No
+Subtree        No
+Rho            No
+Timing         Enabled
 
 ....................................................
              Simulation Parameter
 ....................................................
-Trace Size	200000
-Queue Size	1000
+Trace Size    200000
+Queue Size    1000
 
 ....................................................
                    ORAM Config
 ....................................................
-Level	 	24
-Path		8388608
-Node		16777215
-Slot		67108860
-Block 		33554430
-Z 		4
-U 		0.500000
-OV Treshold 	100
-Stash Size 	200
-BK Eviction 	1
-Empty Top 	0
-Top Cache	10
+Level           24
+Path            8388608
+Node            16777215
+Slot            67108860
+Block           33554430
+Z               4
+U               0.500000
+OV Treshold     100
+Stash Size      200
+BK Eviction     1
+Empty Top       0
+Top Cache       10
 
-L1  9    	Z1  4
-L2  15   	Z2  4
-L3  18   	Z3  4
+L1  9       Z1  4
+L2  15      Z2  4
+L3  18      Z3  4
 
 LZ 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
 = 96 ~> oram path length
@@ -45,48 +45,49 @@ LZ 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
 
 
 ....................................................
-                   Cache Config
+                  Cache Config
 ....................................................
-Cache Enable	 On
-Cache Size 	 2097152
-Write Bypass 	 0
+Cache Enable   On
+Cache Size     2097152
+Write Bypass   0
 
 ....................................................
-                   Subtree Config
+                 Subtree Config
 ....................................................
-Subtree Enable 	 Off
-Subtree Size	 8192
-Subtree Slot	 128
-Subtree  Bucket	 31
-Subtree Level	 5
+Subtree Enable 	  Off
+Subtree Size      8192
+Subtree Slot	  128
+Subtree Bucket    31
+Subtree Level     5
 
 ....................................................
                    RHO Config
 ....................................................
-Rho Enable		Off
-Rho Level     		19
-Rho Path	 	262144
-Rho Node	 	524287
-Rho Slot	 	1048574
-Rho Block	 	524287
-Rho Set 	 	16000
-Rho Way		 	10
-Rho Z 	     		2
-Rho OV Treshold 	160
-Rho Stash Size 		200
-Rho BK Eviction 	1
-Rho Empty Top 		0
-Rho Top Cache 		0
+Rho Enable          Off
+Rho Level           19
+Rho Path            262144
+Rho Node            524287
+Rho Slot            1048574
+Rho Block           524287
+Rho Set             16000
+Rho Way             10
+Rho Z               2
+Rho OV Treshold     160
+Rho Stash Size      200
+Rho BK Eviction     1
+Rho Empty Top       0
+Rho Top Cache       0
 
-Rho L1  7    	Rho Z1  2
-Rho L2  8   	Rho Z2  2
-Rho L3  9   	Rho Z3  2
+Rho   L1  7     Z1  2
+Rho   L2  8     Z2  2
+Rho   L3  9     Z3  2
 
 Rho LZ 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
 = 38 ~> rho path length
   38 ~> rho effective path length
 
 ....................................................
+
 Initializing.
 Core 0: Input trace file /mnt/c/trace/gcc : Addresses will have prefix 0
 Reading vi file: 1Gb_x4.vi	
@@ -249,7 +250,7 @@ Total system power = 25.289057 W # Sum of the previous three lines
 Energy Delay product (EDP) = 0.602002084 J.s
 
 ............... ORAM Stats ...............
-total time: 3500.281250 s
+total time: 1198.703125 s
 trace ctr: 200001
 invoke ctr: 	92059
 oram ctr: 	257654
