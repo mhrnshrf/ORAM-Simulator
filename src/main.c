@@ -47,7 +47,7 @@ struct timeval sday, eday;
 long int period = 0;
 int periodctr = 0;
 int roundprev = 0;
-int tracectr = 0;	// # lines read from the trace file 
+// int tracectr = 0;	// # lines read from the trace file 
 int hitctr = 0;		// # hits on llc
 int missctr = 0;	// # misses on llc
 int evictctr = 0;	// # evictions caused after misses on llc
@@ -77,6 +77,7 @@ bool skip_invokation = false;		// a flag to indicate whether oram invokation sho
 bool dummy_already_made = false;	// a flag to indicate whether a dummy access has already been made ~> for timing enabled
 
 int curr_access = -3; 	// the id of current access (oram or rho, real or dummy)
+int curr_trace = -1; 	// the current trace address 
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -126,7 +127,8 @@ int main(int argc, char * argv[])
 	printf("Write Bypass   %s\n", WRITE_BYPASS?"Enabled":"No" );
 	printf("Subtree        %s\n", SUBTREE_ENABLE?"Enabled":"No" );
 	printf("Rho            %s\n", RHO_ENABLE?"Enabled":"No" );
-	printf("Timing         %s\n\n", TIMING_ENABLE?"Enabled":"No" );
+	printf("Timing         %s\n", TIMING_ENABLE?"Enabled":"No" );
+	printf("Prefetch       %s\n\n", PREFETCH_ENABLE?"Enabled":"No" );
 
 
 	printf("....................................................\n");
@@ -572,6 +574,12 @@ int main(int argc, char * argv[])
 
 	  // Mehrnoosh:
 
+		// if (plbQ->size > 1)
+		// {
+		// 	printf("plb queue: %d @ 	trace: %d\n", plbQ->size, tracectr);
+		// }
+	  
+
 	  	// printf("\ncycle: %lld", CYCLE_VAL);
 	  	// printf("\nfetch clk: %lld", fetch_clk);
 	  	if (TIMING_ENABLE)
@@ -909,6 +917,7 @@ int main(int argc, char * argv[])
 			{
 				invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
 				oram_just_invoked = true;
+				curr_trace = addr[numc];
 
 			}
 			skip_invokation = false;
@@ -925,13 +934,35 @@ int main(int argc, char * argv[])
 			{
 				if (dummy_oram)
 				{
-					dummy_access(ORAM); 
-					// printf("\ndummy oram: ");	
+					bool prefetch_issued = false;
+					if (PREFETCH_ENABLE)
+					{
+						int candidate = -1;
+						while (plbQ->size != 0)
+						{
+							Element *pq = Dequeue(plbQ);
+							candidate = pq->addr; 
+							if (!plb_contain(candidate) && !stash_contain(candidate))
+							{
+								break;
+							}
+							
+						}
+						if (candidate != -1)
+						{
+							prefetch_access(candidate);
+							prefetch_issued = true;
+
+						}
+					}
+					else if(!PREFETCH_ENABLE || !prefetch_issued)
+					{
+						dummy_access(ORAM); 
+					}
 				}
 				else if (dummy_rho)
 				{
 					dummy_access(RHO); 	
-					// printf("\ndummy rho: ");	
 				}
 			}
 			else if (TIMING_ENABLE && dummy_already_made)
@@ -968,6 +999,7 @@ int main(int argc, char * argv[])
 			opertype[numc] = pN->type;
 			oramid[numc] = pN->oramid;
 			tree[numc] = pN->tree;
+			
 			// nonmemops[numc] = 0; // ??? not sure about this one ~~~> guess resolved
 			
 			// printf("\ndequeued: oramid: %d	req: %d \n", pN->oramid, reqctr);
@@ -1138,18 +1170,21 @@ cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 printf("\n\n............... ORAM Stats ...............\n\n");
 printf("Execution Time     %f s\n", cpu_time_used);
 printf("Trace Size         %d\n", tracectr);
-printf("Invoke Mem #    %d\n", invokectr);
+printf("Invoke Mem #       %d\n", invokectr);
 printf("ORAM Access #      %d\n", oramctr);
 printf("Rho Access #       %d\n", rhoctr);
 printf("ORAM Dummy #       %d\n", dummyctr);
 printf("Rho  Dummy #       %d\n", rho_dummyctr);
+printf("Prefetch #         %d\n", prefetchctr);
 printf("Mem Cycles #       %lld\n", mem_clk);
 printf("oramQ Size         %d\n", oramQ->size);
 printf("Bk Evict           %f%%\n", 100*(double)bkctr/invokectr);
 printf("Cache Hit          %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict        %f%%\n", 100*(double)evictctr/(missctr));
 printf("Rho Hit            %f%%\n", 100*(double)rho_hit/(invokectr));
-printf("Rho Bk Evict       %f%%\n", 100*(double)rho_bkctr/rho_hit);
+printf("Rho Bk Evict       %f%%\n\n", 100*(double)rho_bkctr/rho_hit);
+
+// print_plb_stat();
 
 // print_cap_percent();
 // count_tree();

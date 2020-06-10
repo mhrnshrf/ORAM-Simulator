@@ -11,16 +11,17 @@
 
 #include <math.h>
 // other simulation parameter
-#define TRACE_SIZE 2 // # addr read from trace file
+#define TRACE_SIZE 1000000 // # addr read from trace file
 #define QUEUE_SIZE 1000     // oramq capacity
 
 // enable/disable options config
-#define VOLCANO_ENABLE 0  // 0/1 flag to disable/enable having volcano idea
-#define CACHE_ENABLE 0    // 0/1 flag to diable/enable having cache
-#define WRITE_BYPASS 0    // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
-#define SUBTREE_ENABLE 0  // 0/1 flag to diable/enable having subtree adddressing scheme
-#define RHO_ENABLE 1     // 0/1 flag to disable/enable having rho
+#define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea
+#define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
+#define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
+#define SUBTREE_ENABLE 0     // 0/1 flag to diable/enable having subtree adddressing scheme
+#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
+#define PREFETCH_ENABLE 1      // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -104,8 +105,11 @@ typedef struct Queue {
 
 
 // extern long long int CYCLE_VAL; 
-extern Queue *oramQ;; 
+extern Queue *oramQ;
+extern Queue *plbQ; 
+extern int tracectr; 
 extern int invokectr; 
+extern int prefetchctr; 
 extern int bkctr; 
 extern int rho_bkctr; 
 extern int stash_dist[STASH_SIZE+1];
@@ -186,7 +190,9 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
 void test_subtree();
 void dummy_access(TreeType tree);
 void switch_enqueue_to(EnqueueType enqueue);
-
+void print_plb_stat();
+bool plb_contain(int tag);
+void prefetch_access(int addr);
 
 
 // Mehrnoosh.

@@ -23,7 +23,6 @@
 // long long int CYCLE_VAL = 0;
 
 
-int tracectr_test = 0;
 
 
 
@@ -58,7 +57,7 @@ typedef struct Entry{
 
 
 Queue *oramQ;
-
+Queue *plbQ;
 
 
 
@@ -91,6 +90,9 @@ Slot RhoStash[RHO_STASH_SIZE];       // rho stash
 
 
 // profiling stats
+int tracectr = 0; // # lines read from the trace file 
+int tracectr_test = 0;  // # lines read from the trace file for testing without simulator
+int prefetchctr = 0; // # prefetch access
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
@@ -118,7 +120,12 @@ int sub_cap = 0;
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
 long long int plb_access[H-1] = {0};   // # total plb access (hits + misses)
-
+int plb_evict[PLB_SIZE] = {[0 ... PLB_SIZE-1] = -1};  // array to keep address of blocks that are evicted from plb 
+int plb_hist[PLB_SIZE] = {0};   // array to track the amount of reuse of blocks that are evicted from plb 
+int plb_conflict[PLB_SIZE] = {0};   // array to track number of confilicts that happens on evictions
+int plb_trace[PLB_SIZE] = {[0 ... PLB_SIZE-1] = -1}; 
+int plb_interval[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
+int plb_temp[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
 
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
 TreeType TREE_VAR = ORAM;
@@ -291,6 +298,19 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
 }
 
 
+
+void insert_plbQ(int addr){
+  Element *pN = (Element*) malloc(sizeof (Element));
+  pN->addr = addr;
+  bool added = Enqueue(plbQ, pN);
+  if (!added)
+  {
+    printf("ERROR: insert plbQ: failed to enqueue block: %d    plbq size: %d\n", addr, plbQ->size);
+    exit(1);
+  }
+
+}
+
 // to set the parameters for different funcs like path read and write according to whether oram is being accessed or rho
 void switch_tree_to(TreeType tree){
   TREE_VAR = tree;
@@ -410,6 +430,7 @@ void oram_alloc(){
   }  
 
   oramQ = ConstructQueue(QUEUE_SIZE);
+  plbQ = ConstructQueue(128);
 }
 
 // initialize the oram tree by assigning a random path to each addr of address space
@@ -825,6 +846,44 @@ void print_plb(){
   
 }
 
+void print_plb_stat(){
+  for (int i = 0; i < PLB_SIZE; i++)
+  {
+    if (plb_hist[i] != -1)
+    {
+     printf("plb_hist[%d]:  %d\n", i, plb_hist[i]);
+    }
+  }
+
+  printf("\n\n");
+  
+  for (int i = 0; i < PLB_SIZE; i++)
+  {
+    if (plb_conflict[i] != -1)
+    {
+     printf("plb_conflict[%d]:  %d\n", i, plb_conflict[i]);
+    }
+  }
+
+  printf("\n\n");
+  
+  for (int i = 0; i < PLB_SIZE; i++)
+  {
+    if (plb_interval[i] != -1)
+    {
+     printf("plb_interval[%d]:  %d\n", i, plb_interval[i]);
+    }
+  }
+
+}
+
+bool plb_contain(int tag){
+  if (PLB[tag % PLB_SIZE] == tag)
+  {
+    return true;
+  }
+  return false;
+}
 
 void print_path_occupancy(int label){
   int count = 0;
@@ -1122,22 +1181,22 @@ void oram_access(int addr){
   stash_dist[stashctr]++;
 
   int label = PosMap[addr];
-    if (label == -1)
-    {
-      printf("ERROR: block label not found in pos map!\n");
-      exit(1);
-    }
+  if (label == -1)
+  {
+    printf("ERROR: block label not found in pos map!\n");
+    exit(1);
+  }
     
-    read_path(label);
-    
-    remap_block(addr);
+  read_path(label);
+  
+  remap_block(addr);
 
-    write_path(label);
+  write_path(label);
 
-    if (BK_EVICTION)
-    {
-      background_eviction(); 
-    }
+  if (BK_EVICTION)
+  {
+    background_eviction(); 
+  }
 }
 
 // Freecursive 4.2.4 ORAM access algorithm
@@ -1193,13 +1252,25 @@ void freecursive_access(int addr, char type){
       int ai = addr/pow(X,i_saved);
       int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
 
-
       if (tag == addr)
       {
         return;
       }
     
+      // profiling:
+      if (tag == plb_evict[tag % PLB_SIZE])
+      {
+        plb_hist[tag % PLB_SIZE]++;
+        // plb_trace[tag % PLB_SIZE]
+        if (plb_interval[tag % PLB_SIZE] == -1 && plb_trace[tag % PLB_SIZE] != -1)
+        {
+          plb_interval[tag % PLB_SIZE] = tracectr - plb_trace[tag % PLB_SIZE];
+        }
+        
+
+      }
       
+      // profiling.
 
       if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
       {
@@ -1212,6 +1283,31 @@ void freecursive_access(int addr, char type){
       if( victim != -1)
       {
         Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+
+        // profiling:
+        if (plbQ->size < plbQ->limit)
+        {
+          insert_plbQ(victim);
+        }
+
+        if (plb_evict[victim % PLB_SIZE] == -1)
+        {
+          plb_evict[victim % PLB_SIZE] = victim;
+          plb_trace[victim % PLB_SIZE] = tracectr;
+          // plb_hist[victim % PLB_SIZE] = 1;
+        }
+        // else if(plb_evict[victim % PLB_SIZE] == victim)
+        // {
+        //   plb_hist[victim % PLB_SIZE]++;
+        // }
+        else if(plb_evict[victim % PLB_SIZE] != victim)
+        {
+          plb_conflict[victim % PLB_SIZE]++;
+        }
+        // profiling.
+        
+        
+        
         
         if (stash_contain(s.addr))
         {
@@ -1805,8 +1901,46 @@ void dummy_access(TreeType tree){
 
 }
 
+void prefetch_access(int addr){
 
+  prefetchctr++;
 
+  int label = PosMap[addr];
+  if (label == -1)
+  {
+    printf("ERROR: prefetch access: block %d label not found in pos map!\n", addr);
+    exit(1);
+  }
+
+  switch_tree_to(ORAM);     // switch to oram tree 
+
+  switch_enqueue_to(HEAD);
+
+  pinOn();
+  read_path(label);
+  remap_block(addr);
+  write_path(label);
+  pinOff();
+
+  switch_enqueue_to(TAIL);  // switch back to normal tail enqueue 
+}
+
+void invoke_prefetch(){
+  int candidate = -1;
+  Element *pq = Dequeue(plbQ);
+  candidate = pq->addr; 
+  if (!plb_contain(candidate) && !stash_contain(candidate))
+  {
+    
+  }
+    
+  if (candidate != -1)
+  {
+    prefetch_access(candidate);
+
+  }
+  
+}
 
 
 
