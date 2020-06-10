@@ -12,7 +12,6 @@ Write Bypass   No
 Subtree        No
 Rho            No
 Timing         Enabled
-
 Prefetch       Enabled
 
 ....................................................
@@ -164,20 +163,20 @@ WQ_LOOKUP_LATENCY:              10
 ----------------------------------------------------------------------------------------
 Starting simulation.
 Done with loop. Printing stats.
-Cycles 1016893655
-Done: Core 0: Fetched 63971521 : Committed 63971410 : At time : 1016893655
-Sum of execution times for all programs: 1016893655
-Num reads merged: 7961
-Num writes merged: 2110
+Cycles 1016881439
+Done: Core 0: Fetched 63974401 : Committed 63974285 : At time : 1016881439
+Sum of execution times for all programs: 1016881439
+Num reads merged: 8487
+Num writes merged: 2018
 -------- Channel 0 Stats-----------
-Total Reads Serviced :          29843688
-Total Writes Serviced :         29849553
-Average Read Latency :          1624.84355
-Average Read Queue Latency :    1564.84355
-Average Write Latency :         1220.55919
-Average Write Queue Latency :   1156.55919
-Read Page Hit Rate :            0.59603
-Write Page Hit Rate :           0.66870
+Total Reads Serviced :          29844457
+Total Writes Serviced :         29850934
+Average Read Latency :          1624.92847
+Average Read Queue Latency :    1564.92847
+Average Write Latency :         1220.66716
+Average Write Queue Latency :   1156.66716
+Read Page Hit Rate :            0.59605
+Write Page Hit Rate :           0.66866
 ------------------------------------
 
 #-----------------------------Simulated Cycles Break-Up-------------------------------------------
@@ -186,7 +185,7 @@ Note:  1.(Read Cycles + Write Cycles + Read Other + Write Other) should add up t
        2.(PRE_PDN_FAST + PRE_PDN_SLOW + ACT_PDN + ACT_STBY + PRE_STBY) should add up to 100%
        3.Power Down means Clock Enable, CKE = 0. In Standby mode, CKE = 1
 #-------------------------------------------------------------------------------------------------
-Total Simulation Cycles                       1016893655
+Total Simulation Cycles                       1016881439
 ---------------------------------------------------------------
 
 Channel 0 Rank 0 Read Cycles(%)                0.29 # % cycles the Rank performed a Read
@@ -218,51 +217,53 @@ Note:  1. termRoth/termWoth is the power dissipated in the ODT resistors when Re
 #-------------------------------------------------------------------------------------------------
 
 Channel 0 Rank 0 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
-Channel 0 Rank 0 Act(mW)                     70.99 # power spend bringing data to the row buffer
+Channel 0 Rank 0 Act(mW)                     70.97 # power spend bringing data to the row buffer
 Channel 0 Rank 0 Read(mW)                    40.62 # power spent doing a Read  after the Row Buffer is open
 Channel 0 Rank 0 Write(mW)                   42.76 # power spent doing a Write after the Row Buffer is open
 Channel 0 Rank 0 Read Terminate(mW)           9.12 # power dissipated in ODT resistors during Read
 Channel 0 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
 Channel 0 Rank 0 termRoth(mW)                45.95 # power dissipated in ODT resistors during Reads  in other ranks
-Channel 0 Rank 0 termWoth(mW)                42.23 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 0 termWoth(mW)                42.24 # power dissipated in ODT resistors during Writes in other ranks
 Channel 0 Rank 0 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
 ---------------------------------------------------------------
-Channel 0 Rank 0 Total Rank Power(mW)      5149.09 # (Sum of above components)*(num chips in each Rank)
+Channel 0 Rank 0 Total Rank Power(mW)      5148.90 # (Sum of above components)*(num chips in each Rank)
 ---------------------------------------------------------------
 
 Channel 0 Rank 1 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
-Channel 0 Rank 1 Act(mW)                     55.25 # power spend bringing data to the row buffer
+Channel 0 Rank 1 Act(mW)                     55.29 # power spend bringing data to the row buffer
 Channel 0 Rank 1 Read(mW)                    26.30 # power spent doing a Read  after the Row Buffer is open
 Channel 0 Rank 1 Write(mW)                   27.69 # power spent doing a Write after the Row Buffer is open
 Channel 0 Rank 1 Read Terminate(mW)           5.91 # power dissipated in ODT resistors during Read
 Channel 0 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
 Channel 0 Rank 1 termRoth(mW)                70.97 # power dissipated in ODT resistors during Reads  in other ranks
-Channel 0 Rank 1 termWoth(mW)                65.22 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 1 termWoth(mW)                65.23 # power dissipated in ODT resistors during Writes in other ranks
 Channel 0 Rank 1 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
 ---------------------------------------------------------------
-Channel 0 Rank 1 Total Rank Power(mW)      5143.73 # (Sum of above components)*(num chips in each Rank)
+Channel 0 Rank 1 Total Rank Power(mW)      5144.40 # (Sum of above components)*(num chips in each Rank)
 ---------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------------------------
-Total memory system power = 10.292823 W
+Total memory system power = 10.293295 W
 Miscellaneous system power = 10 W  # Processor uncore power, disk, I/O, cooling, etc.
 Processor core power = 5.000000 W  # Assuming that each core consumes 5 W
-Total system power = 25.292824 W # Sum of the previous three lines
-Energy Delay product (EDP) = 2.554162025 J.s
+Total system power = 25.293295 W # Sum of the previous three lines
+Energy Delay product (EDP) = 2.554148197 J.s
 
 
 ............... ORAM Stats ...............
 
-Execution Time     6489.640625 s
+Execution Time     3734.203125 s
 Trace Size         1000011
 Invoke Mem #       186762
-ORAM Access #      532906
+ORAM Access #      532903
 Rho Access #       0
-ORAM Dummy #       17
+ORAM Dummy #       0
 Rho  Dummy #       0
-Prefetch #         146
-Mem Cycles #       533097
+Prefetch #         189
+Pos1 #             36
+Pos2 #             153
+Mem Cycles #       533121
 oramQ Size         335
 Bk Evict           0.000000%
 Cache Hit          89.959210%

@@ -71,6 +71,8 @@ bool pinFlag = false;     // a flag to indicate whether the intended block shoul
 int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 int candidate[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
 bool write_cache_hit = false;
+int curr_trace = -1; 	// the current trace address 
+
 
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on
@@ -93,6 +95,8 @@ Slot RhoStash[RHO_STASH_SIZE];       // rho stash
 int tracectr = 0; // # lines read from the trace file 
 int tracectr_test = 0;  // # lines read from the trace file for testing without simulator
 int prefetchctr = 0; // # prefetch access
+int pos1ctr = 0; // # prefetch pos1
+int pos2ctr = 0; // # prefetch pos2
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
@@ -1926,18 +1930,35 @@ void prefetch_access(int addr){
 }
 
 void invoke_prefetch(){
+
   int candidate = -1;
-  Element *pq = Dequeue(plbQ);
-  candidate = pq->addr; 
-  if (!plb_contain(candidate) && !stash_contain(candidate))
+
+  int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
+
+  int pos1 = (curr_addr/pow(X,1)) + 1;   // the 1st posmap block of current trace + 1 ~> candidate for prefetching
+  int pos2 = (curr_addr/pow(X,2)) + 1;   // the 2nd posmap block of current trace + 1 ~> candidate for prefetching
+
+  if (plb_contain(pos2) || stash_contain(pos2))
   {
-    
+    candidate = pos1; // if pos2 is available go ahead and preftech pos1
+    pos1ctr++; 
+  } 
+  else
+  {
+    candidate = pos2; // otherwise prefetch pos2
+    pos2ctr++; 
   }
+  
+  
     
   if (candidate != -1)
   {
     prefetch_access(candidate);
-
+  }
+  else
+  {
+    printf("ERROR: invoke prefetch: @ curr trace %d\n", curr_trace);
+    exit(1);
   }
   
 }

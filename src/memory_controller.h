@@ -19,7 +19,7 @@
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 0     // 0/1 flag to diable/enable having subtree adddressing scheme
-#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
+#define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 1      // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 
@@ -120,6 +120,9 @@ extern int rho_hit;
 extern bool write_cache_hit;   // flag to be effective if write bypass is enabled
 extern int dummyctr;
 extern int rho_dummyctr;
+extern int curr_trace;
+extern int pos1ctr;
+extern int pos2ctr;
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
@@ -193,6 +196,7 @@ void switch_enqueue_to(EnqueueType enqueue);
 void print_plb_stat();
 bool plb_contain(int tag);
 void prefetch_access(int addr);
+void invoke_prefetch();
 
 
 // Mehrnoosh.

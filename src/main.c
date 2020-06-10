@@ -77,7 +77,6 @@ bool skip_invokation = false;		// a flag to indicate whether oram invokation sho
 bool dummy_already_made = false;	// a flag to indicate whether a dummy access has already been made ~> for timing enabled
 
 int curr_access = -3; 	// the id of current access (oram or rho, real or dummy)
-int curr_trace = -1; 	// the current trace address 
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -753,13 +752,18 @@ int main(int argc, char * argv[])
 				// printf("\nskip on\n");
 				if (dummy_oram)
 				{
-					dummy_access(ORAM); 
-					// printf("\ndummy oram queue empty: ");	
+					if (PREFETCH_ENABLE)
+					{
+						invoke_prefetch();
+					}
+					else
+					{
+						dummy_access(ORAM); 
+					} 
 				}
 				else if (dummy_rho)
 				{
 					dummy_access(RHO); 	
-					// printf("\ndummy rho queue empty: ");	
 				}
 			}
 			
@@ -934,28 +938,11 @@ int main(int argc, char * argv[])
 			{
 				if (dummy_oram)
 				{
-					bool prefetch_issued = false;
 					if (PREFETCH_ENABLE)
 					{
-						int candidate = -1;
-						while (plbQ->size != 0)
-						{
-							Element *pq = Dequeue(plbQ);
-							candidate = pq->addr; 
-							if (!plb_contain(candidate) && !stash_contain(candidate))
-							{
-								break;
-							}
-							
-						}
-						if (candidate != -1)
-						{
-							prefetch_access(candidate);
-							prefetch_issued = true;
-
-						}
+						invoke_prefetch();
 					}
-					else if(!PREFETCH_ENABLE || !prefetch_issued)
+					else
 					{
 						dummy_access(ORAM); 
 					}
@@ -1176,6 +1163,8 @@ printf("Rho Access #       %d\n", rhoctr);
 printf("ORAM Dummy #       %d\n", dummyctr);
 printf("Rho  Dummy #       %d\n", rho_dummyctr);
 printf("Prefetch #         %d\n", prefetchctr);
+printf("Pos1 #             %d\n", pos1ctr);
+printf("Pos2 #             %d\n", pos2ctr);
 printf("Mem Cycles #       %lld\n", mem_clk);
 printf("oramQ Size         %d\n", oramQ->size);
 printf("Bk Evict           %f%%\n", 100*(double)bkctr/invokectr);
