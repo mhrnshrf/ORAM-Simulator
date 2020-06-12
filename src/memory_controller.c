@@ -1968,8 +1968,8 @@ void insert_buffer(int addr){
     {
       bool added = add_to_stash(s);
       if(!added){
-      printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
-      exit(1);
+        printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
+        exit(1);
       }
       
     }
@@ -1979,6 +1979,15 @@ void insert_buffer(int addr){
   PreBuffer[index].addr = addr;
   PreBuffer[index].timestamp = CYCLE_VAL;
   PreBuffer[index].valid = true;  
+
+  int si = get_stash(addr);
+  if (si == -1)
+  {
+    printf("ERROR: insert buffer: block not found in stash!\n");
+    exit(1);
+  }
+  
+  remove_from_stash(si);
   
 }
 
@@ -1998,17 +2007,18 @@ void prefetch_access(int addr){
   }
 
   switch_tree_to(ORAM);     // switch to oram tree 
-
   switch_enqueue_to(HEAD);
-
   pinOn();
   read_path(label);
   remap_block(addr);
   write_path(label);
   pinOff();
-  
-
   switch_enqueue_to(TAIL);  // switch back to normal tail enqueue 
+
+  // insert the pinned block in the stash to the prefetch buffer and then remove it from the stash, 
+  // if it leads to evict another block will add that evicted block to the stash 
+  insert_buffer(addr);      
+
 }
 
 void invoke_prefetch(){
@@ -2033,7 +2043,6 @@ void invoke_prefetch(){
     candidate = pos2; // otherwise prefetch pos2
     pos2ctr++; 
   }
-  
   
     
   if (candidate != -1)
