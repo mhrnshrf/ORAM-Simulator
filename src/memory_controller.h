@@ -72,6 +72,10 @@
 // timing channel security config
 #define TIMING_INTERVAL 120   // # cycles after each one oram access is initiated either real or dummy one
 
+// prefetching config
+#define PREFETCH_BUF_SIZE 256
+
+
 
 
 
@@ -197,6 +201,7 @@ void print_plb_stat();
 bool plb_contain(int tag);
 void prefetch_access(int addr);
 void invoke_prefetch();
+void insert_buffer(int addr);
 
 
 // Mehrnoosh.

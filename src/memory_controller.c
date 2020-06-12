@@ -12,6 +12,9 @@
 #include "processor.h"
 
 
+// Current Processor Cycle
+extern long long int CYCLE_VAL;
+
 /////////////// Mehrnoosh:
 #include <stdbool.h>
 #include <math.h>
@@ -48,12 +51,15 @@ typedef struct Bucket{
 }Bucket;
 
 typedef struct Entry{
-  int addr;         // address of block e.g. A, B
+  int addr;       // address of block e.g. A, B
   int label;      // path label e.g. 0 (=> L0)
 }Entry;
 
-
-
+typedef struct EntryBuf{
+  int addr;         // address of the posmap block prefetched
+  int timestamp;    // a timestamp to prioritize in prefetch buffer when eviction needed
+  bool valid;
+}EntryBuf;
 
 
 Queue *oramQ;
@@ -65,6 +71,7 @@ Bucket GlobTree[NODE];      // global oram tree
 int PosMap[BLOCK];          // position map
 Slot Stash[STASH_SIZE];     // stash
 int PLB[PLB_SIZE] = {[0 ... PLB_SIZE-1] = -1};   // posmap lookaside buffer
+EntryBuf PreBuffer[PREFETCH_BUF_SIZE]; // prefetch buffer
 
 int intended = -1;         // index of intended block in stash
 bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
@@ -431,10 +438,16 @@ void oram_alloc(){
   for (int i = 0; i < STASH_SIZE; i++)
   {
     Stash[i].isReal = false;
+  } 
+
+  for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
+  {
+    PreBuffer[i].valid = false;
   }  
 
   oramQ = ConstructQueue(QUEUE_SIZE);
   plbQ = ConstructQueue(128);
+
 }
 
 // initialize the oram tree by assigning a random path to each addr of address space
@@ -1286,7 +1299,6 @@ void freecursive_access(int addr, char type){
       int victim = PLB[tag % PLB_SIZE];
       if( victim != -1)
       {
-        Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
 
         // profiling:
         if (plbQ->size < plbQ->limit)
@@ -1311,6 +1323,7 @@ void freecursive_access(int addr, char type){
         // profiling.
         
         
+        Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
         
         
         if (stash_contain(s.addr))
@@ -1905,6 +1918,74 @@ void dummy_access(TreeType tree){
 
 }
 
+int buffer_find_victim(){
+  int min = CYCLE_VAL;
+  int index = -1;
+  for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
+  {
+    if (PreBuffer[i].timestamp < min)
+    {
+      min = PreBuffer[i].timestamp;
+      index = i;
+    }
+  }
+  if (index == -1)
+  {
+    printf("ERROR: buffer find victim failed!\n");
+    exit(1);
+  }
+  
+  return index;
+}
+
+void insert_buffer(int addr){
+
+  int index = -1;
+
+  // look for empty spot in prefetch buffer
+  for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
+  {
+    if(!PreBuffer[i].valid)
+    {
+      index = i;
+    }
+  }
+
+  // if no free spot found in the buffer, find a victim to evict
+  if (index == -1)
+  {
+    index = buffer_find_victim(); 
+
+    // add the victim to the stash
+    Slot s = {.addr = PreBuffer[index].addr , .label = PosMap[PreBuffer[index].addr], .isReal = true, .isData = false};
+    
+    if (stash_contain(s.addr))
+    {
+      printf("ERROR: insert buffer: block %d already in stash!\n", s.addr);
+      exit(1);
+    }
+    else
+    {
+      bool added = add_to_stash(s);
+      if(!added){
+      printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
+      exit(1);
+      }
+      
+    }
+  }
+   
+  // insert the intended posmap block to the buffer
+  PreBuffer[index].addr = addr;
+  PreBuffer[index].timestamp = CYCLE_VAL;
+  PreBuffer[index].valid = true;  
+  
+}
+
+
+
+
+
 void prefetch_access(int addr){
 
   prefetchctr++;
@@ -1925,6 +2006,7 @@ void prefetch_access(int addr){
   remap_block(addr);
   write_path(label);
   pinOff();
+  
 
   switch_enqueue_to(TAIL);  // switch back to normal tail enqueue 
 }
@@ -1942,6 +2024,9 @@ void invoke_prefetch(){
   {
     candidate = pos1; // if pos2 is available go ahead and preftech pos1
     pos1ctr++; 
+    // if (!plb_contain(pos1) && !stash_contain(pos1))
+    // {
+    // }
   } 
   else
   {
@@ -1997,8 +2082,8 @@ void invoke_prefetch(){
 // when the read request completes
 extern struct robstructure *ROB;
 
-// Current Processor Cycle
-extern long long int CYCLE_VAL;
+// // Current Processor Cycle
+// extern long long int CYCLE_VAL;
 
 #define max(a,b) (((a)>(b))?(a):(b))
 
