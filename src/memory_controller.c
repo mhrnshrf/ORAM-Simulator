@@ -59,6 +59,7 @@ typedef struct EntryBuf{
   int addr;         // address of the posmap block prefetched
   int timestamp;    // a timestamp to prioritize in prefetch buffer when eviction needed
   bool valid;
+  PosType type;
 }EntryBuf;
 
 
@@ -104,6 +105,8 @@ int tracectr_test = 0;  // # lines read from the trace file for testing without 
 int prefetchctr = 0; // # prefetch access
 int pos1ctr = 0; // # prefetch pos1
 int pos2ctr = 0; // # prefetch pos2
+int pos1hit = 0; // # hit on prefetch buffer for pos1
+int pos2hit = 0; // # hit on prefetch buffer for pos2
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
@@ -151,7 +154,7 @@ int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L
 int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
-
+PosType pos_var = POS2;
 
 Queue *ConstructQueue(int limit) {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
@@ -978,7 +981,7 @@ void remap_block(int addr){
   {
     if (RHO_ENABLE && (TREE_VAR == RHO))
     {
-      printf("ERROR: remap: block %d not found in rho stash!\n", addr);
+      printf("ERROR: remap: @ trace %d  block %d not found in rho stash!\n", tracectr, addr);
     }
     else
     {
@@ -1247,9 +1250,16 @@ void freecursive_access(int addr, char type){
       int ai = addr/pow(X,i);
       int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
       
-      if (PLB[tag % PLB_SIZE] == tag)  // PLB hit
+      if ((PLB[tag % PLB_SIZE] == tag) || buffer_contain(tag))  // PLB hit
       {
         plb_hit[i]++;
+        if (buffer_contain(tag))
+        {
+          int pi = buffer_index(tag);
+          pos1hit = (PreBuffer[pi].type == POS1) ? pos1hit + 1 : pos1hit; 
+          pos2hit = (PreBuffer[pi].type == POS2) ? pos2hit + 1 : pos2hit; 
+        }
+        
         if (i == 0)   // if the intended block is originally a posmap block itself terminate!
         {
           return;
@@ -1918,6 +1928,39 @@ void dummy_access(TreeType tree){
 
 }
 
+
+// prefetch functions:
+bool buffer_contain(int addr){
+  for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
+  {
+    if (PreBuffer[i].addr == addr && PreBuffer[i].valid)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+int buffer_index(int addr){
+
+  int index = -1;
+  for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
+  {
+    if (PreBuffer[i].addr == addr && PreBuffer[i].valid)
+    {
+      index = i;
+      break;
+    }
+  }
+  if (index == -1)
+  {
+    printf("ERROR: buffer index: @ trace %d  block %d does not exist!\n", tracectr, addr);
+    exit(1);
+  }
+
+  return index;
+}
+
 int buffer_find_victim(){
   int min = CYCLE_VAL;
   int index = -1;
@@ -1979,6 +2022,7 @@ void insert_buffer(int addr){
   PreBuffer[index].addr = addr;
   PreBuffer[index].timestamp = CYCLE_VAL;
   PreBuffer[index].valid = true;  
+  PreBuffer[index].type = pos_var;  
 
   int si = get_stash(addr);
   if (si == -1)
@@ -1990,10 +2034,6 @@ void insert_buffer(int addr){
   remove_from_stash(si);
   
 }
-
-
-
-
 
 void prefetch_access(int addr){
 
@@ -2030,17 +2070,20 @@ void invoke_prefetch(){
   int pos1 = (curr_addr/pow(X,1)) + 1;   // the 1st posmap block of current trace + 1 ~> candidate for prefetching
   int pos2 = (curr_addr/pow(X,2)) + 1;   // the 2nd posmap block of current trace + 1 ~> candidate for prefetching
 
-  if (plb_contain(pos2) || stash_contain(pos2))
+  if (plb_contain(pos2) || stash_contain(pos2) || buffer_contain(pos2))
   {
-    candidate = pos1; // if pos2 is available go ahead and preftech pos1
-    pos1ctr++; 
-    // if (!plb_contain(pos1) && !stash_contain(pos1))
-    // {
-    // }
+    if (!plb_contain(pos1) && !stash_contain(pos1) && !buffer_contain(pos1))
+    {
+      candidate = pos1; // if pos2 is available go ahead and preftech pos1
+      pos_var = POS1;
+      pos1ctr++; 
+    }
+    // printf("pos1 @ trace %d\n", tracectr);
   } 
   else
   {
     candidate = pos2; // otherwise prefetch pos2
+    pos_var = POS2;
     pos2ctr++; 
   }
   
@@ -2051,8 +2094,7 @@ void invoke_prefetch(){
   }
   else
   {
-    printf("ERROR: invoke prefetch: @ curr trace %d\n", curr_trace);
-    exit(1);
+    dummy_access(ORAM);
   }
   
 }

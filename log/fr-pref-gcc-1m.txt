@@ -90,7 +90,7 @@ Rho LZ 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
 ....................................................
 
 Initializing.
-Core 0: Input trace file /mnt/c/trace/mcf : Addresses will have prefix 0
+Core 0: Input trace file /mnt/c/trace/gcc : Addresses will have prefix 0
 Reading vi file: 1Gb_x4.vi	
 16 Chips per Rank
 ----------------------------------------------------------------------------------------
@@ -162,210 +162,21 @@ WQ_LOOKUP_LATENCY:              10
 
 ----------------------------------------------------------------------------------------
 Starting simulation.
-invoke in q empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q empty
-invoke in q empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q empty
-invoke in q not empty
-invoke in q not empty
-invoke in q empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
-invoke in q not empty
 Done with loop. Printing stats.
-Cycles 1016795599
-Done: Core 0: Fetched 63964561 : Committed 63964445 : At time : 1016795599
-Sum of execution times for all programs: 1016795599
-Num reads merged: 7221
-Num writes merged: 1949
+Cycles 1637754183
+Done: Core 0: Fetched 103296601 : Committed 103296485 : At time : 1637754183
+Sum of execution times for all programs: 1637754183
+Num reads merged: 288384
+Num writes merged: 3199
 -------- Channel 0 Stats-----------
-Total Reads Serviced :          29840562
-Total Writes Serviced :         29845860
-Average Read Latency :          1624.71203
-Average Read Queue Latency :    1564.71203
-Average Write Latency :         1220.73449
-Average Write Queue Latency :   1156.73449
-Read Page Hit Rate :            0.59610
-Write Page Hit Rate :           0.66878
+Total Reads Serviced :          47913512
+Total Writes Serviced :         48198738
+Average Read Latency :          1623.31377
+Average Read Queue Latency :    1563.31377
+Average Write Latency :         1219.23803
+Average Write Queue Latency :   1155.23803
+Read Page Hit Rate :            0.59680
+Write Page Hit Rate :           0.66797
 ------------------------------------
 
 #-----------------------------Simulated Cycles Break-Up-------------------------------------------
@@ -374,13 +185,13 @@ Note:  1.(Read Cycles + Write Cycles + Read Other + Write Other) should add up t
        2.(PRE_PDN_FAST + PRE_PDN_SLOW + ACT_PDN + ACT_STBY + PRE_STBY) should add up to 100%
        3.Power Down means Clock Enable, CKE = 0. In Standby mode, CKE = 1
 #-------------------------------------------------------------------------------------------------
-Total Simulation Cycles                       1016795599
+Total Simulation Cycles                       1637754183
 ---------------------------------------------------------------
 
-Channel 0 Rank 0 Read Cycles(%)                0.29 # % cycles the Rank performed a Read
+Channel 0 Rank 0 Read Cycles(%)                0.28 # % cycles the Rank performed a Read
 Channel 0 Rank 0 Write Cycles(%)               0.29 # % cycles the Rank performed a Write
 Channel 0 Rank 0 Read Other(%)                 0.18 # % cycles other Ranks on the channel performed a Read
-Channel 0 Rank 0 Write Other(%)                0.18 # % cycles other Ranks on the channel performed a Write
+Channel 0 Rank 0 Write Other(%)                0.19 # % cycles other Ranks on the channel performed a Write
 Channel 0 Rank 0 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
 Channel 0 Rank 0 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
 Channel 0 Rank 0 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
@@ -389,8 +200,8 @@ Channel 0 Rank 0 PRE_STBY(%)                   0.01 # % cycles the Rank was in S
 ---------------------------------------------------------------
 
 Channel 0 Rank 1 Read Cycles(%)                0.18 # % cycles the Rank performed a Read
-Channel 0 Rank 1 Write Cycles(%)               0.18 # % cycles the Rank performed a Write
-Channel 0 Rank 1 Read Other(%)                 0.29 # % cycles other Ranks on the channel performed a Read
+Channel 0 Rank 1 Write Cycles(%)               0.19 # % cycles the Rank performed a Write
+Channel 0 Rank 1 Read Other(%)                 0.28 # % cycles other Ranks on the channel performed a Read
 Channel 0 Rank 1 Write Other(%)                0.29 # % cycles other Ranks on the channel performed a Write
 Channel 0 Rank 1 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
 Channel 0 Rank 1 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
@@ -406,57 +217,59 @@ Note:  1. termRoth/termWoth is the power dissipated in the ODT resistors when Re
 #-------------------------------------------------------------------------------------------------
 
 Channel 0 Rank 0 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
-Channel 0 Rank 0 Act(mW)                     70.96 # power spend bringing data to the row buffer
-Channel 0 Rank 0 Read(mW)                    40.62 # power spent doing a Read  after the Row Buffer is open
-Channel 0 Rank 0 Write(mW)                   42.76 # power spent doing a Write after the Row Buffer is open
-Channel 0 Rank 0 Read Terminate(mW)           9.12 # power dissipated in ODT resistors during Read
+Channel 0 Rank 0 Act(mW)                     70.93 # power spend bringing data to the row buffer
+Channel 0 Rank 0 Read(mW)                    40.50 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 0 Write(mW)                   42.87 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 0 Read Terminate(mW)           9.09 # power dissipated in ODT resistors during Read
 Channel 0 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
-Channel 0 Rank 0 termRoth(mW)                45.95 # power dissipated in ODT resistors during Reads  in other ranks
-Channel 0 Rank 0 termWoth(mW)                42.23 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 0 termRoth(mW)                45.79 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 0 termWoth(mW)                42.34 # power dissipated in ODT resistors during Writes in other ranks
 Channel 0 Rank 0 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
 ---------------------------------------------------------------
-Channel 0 Rank 0 Total Rank Power(mW)      5148.54 # (Sum of above components)*(num chips in each Rank)
+Channel 0 Rank 0 Total Rank Power(mW)      5146.75 # (Sum of above components)*(num chips in each Rank)
 ---------------------------------------------------------------
 
 Channel 0 Rank 1 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
-Channel 0 Rank 1 Act(mW)                     55.25 # power spend bringing data to the row buffer
-Channel 0 Rank 1 Read(mW)                    26.29 # power spent doing a Read  after the Row Buffer is open
-Channel 0 Rank 1 Write(mW)                   27.68 # power spent doing a Write after the Row Buffer is open
-Channel 0 Rank 1 Read Terminate(mW)           5.90 # power dissipated in ODT resistors during Read
+Channel 0 Rank 1 Act(mW)                     55.23 # power spend bringing data to the row buffer
+Channel 0 Rank 1 Read(mW)                    26.20 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 1 Write(mW)                   27.76 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 1 Read Terminate(mW)           5.88 # power dissipated in ODT resistors during Read
 Channel 0 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
-Channel 0 Rank 1 termRoth(mW)                70.97 # power dissipated in ODT resistors during Reads  in other ranks
-Channel 0 Rank 1 termWoth(mW)                65.23 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 1 termRoth(mW)                70.77 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 1 termWoth(mW)                65.40 # power dissipated in ODT resistors during Writes in other ranks
 Channel 0 Rank 1 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
 ---------------------------------------------------------------
-Channel 0 Rank 1 Total Rank Power(mW)      5143.74 # (Sum of above components)*(num chips in each Rank)
+Channel 0 Rank 1 Total Rank Power(mW)      5142.22 # (Sum of above components)*(num chips in each Rank)
 ---------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------------------------
-Total memory system power = 10.292281 W
+Total memory system power = 10.288969 W
 Miscellaneous system power = 10 W  # Processor uncore power, disk, I/O, cooling, etc.
 Processor core power = 5.000000 W  # Assuming that each core consumes 5 W
-Total system power = 25.292282 W # Sum of the previous three lines
-Energy Delay product (EDP) = 2.553614855 J.s
+Total system power = 25.288969 W # Sum of the previous three lines
+Energy Delay product (EDP) = 6.624126911 J.s
 
 
 ............... ORAM Stats ...............
 
-Execution Time     2447.359375 s
-Trace Size         1000011
-Invoke Mem #       186762
-ORAM Access #      532847
+Execution Time     6112.171875 s
+Trace Size         1000018
+Invoke Mem #       316740
+ORAM Access #      853120
 Rho Access #       0
-ORAM Dummy #       0
+ORAM Dummy #       5477
 Rho  Dummy #       0
-Prefetch #         153
-Pos1 #             49
-Pos2 #             104
-Mem Cycles #       533039
+Prefetch #         2155
+Pos1 #             738
+Pos2 #             1417
+Pos1 Hit           0.000000%
+Pos2 Hit           37.685251%
+Mem Cycles #       860806
 oramQ Size         335
 Bk Evict           0.000000%
-Cache Hit          89.959210%
-Cache Evict        86.002251%
+Cache Hit          82.758110%
+Cache Evict        83.701036%
 Rho Hit            0.000000%
 Rho Bk Evict       -nan%
 

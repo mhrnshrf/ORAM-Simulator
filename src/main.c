@@ -753,7 +753,7 @@ int main(int argc, char * argv[])
 				if (dummy_oram)
 				{
 					if (PREFETCH_ENABLE)
-					{
+					{	
 						invoke_prefetch();
 					}
 					else
@@ -1165,6 +1165,8 @@ printf("Rho  Dummy #       %d\n", rho_dummyctr);
 printf("Prefetch #         %d\n", prefetchctr);
 printf("Pos1 #             %d\n", pos1ctr);
 printf("Pos2 #             %d\n", pos2ctr);
+printf("Pos1 Hit           %f%%\n", 100*(double)pos1hit/pos1ctr);
+printf("Pos2 Hit           %f%%\n", 100*(double)pos2hit/pos2ctr);
 printf("Mem Cycles #       %lld\n", mem_clk);
 printf("oramQ Size         %d\n", oramQ->size);
 printf("Bk Evict           %f%%\n", 100*(double)bkctr/invokectr);
