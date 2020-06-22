@@ -70,10 +70,11 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 120   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 15   // # cycles after each one oram access is initiated either real or dummy one
 
 // prefetching config
 #define PREFETCH_BUF_SIZE 256
+#define PREFETCH_STRIDE 1
 
 
 
@@ -128,8 +129,12 @@ extern int rho_dummyctr;
 extern int curr_trace;
 extern int pos1ctr;
 extern int pos2ctr;
+extern int pos1acc_ctr;
+extern int pos2acc_ctr;
 extern int pos1hit;
 extern int pos2hit;
+extern int pos1conf;
+extern int pos2conf;
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho

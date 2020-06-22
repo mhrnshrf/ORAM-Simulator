@@ -61,7 +61,7 @@ int reqctr = 0;				// # reqs read from oramq that belongs to one oram access
 int maxreq = 0;				// max number for reqctr that is determined based of effective path lengh ot tree (oram or rho)
 // int nomem_cycle = 0;		// # cycles passed in a timing interval	~~~> to keep track of cycles no oram access shall be issued  
 
-long long int fetch_clk = 0;
+long long int trace_clk = 0;
 long long int mem_clk = 0;
 
 bool oram_just_invoked = false;		// a flag raised when the current req from oramq is the first request of an freecursive oram access (an invokation of invoke_oram func)
@@ -99,7 +99,7 @@ int subtree_array[SUBARRAY_TEST] = {0};
 void print_req_symbols(){
 	char *str = oram_tick && !dummy_oram ? "|" : rho_tick && !dummy_rho ? "/" : oram_tick && dummy_oram ? "$" : rho_tick && dummy_rho ? "+" : "_";
 	printf("%s ", str);
-	if (fetch_clk % TIMING_INTERVAL == 0)
+	if (trace_clk % TIMING_INTERVAL == 0)
 	{
 		printf("\n");
 		printf("\n");
@@ -219,9 +219,21 @@ int main(int argc, char * argv[])
 	}
 	printf("\n= %d ~> rho path length\n", rho_path_length);
 	printf("  %d ~> rho effective path length\n\n", rho_effective_pl);
-	printf("....................................................\n\n");
+
+	printf("\n....................................................\n");
+	printf("                  Timing Config\n");
+	printf("....................................................\n");
+	printf("Timing Enable          %s\n", TIMING_ENABLE?"On":"Off");
+	printf("Timing Interval        %d\n\n", TIMING_INTERVAL);
+
+	printf("\n....................................................\n");
+	printf("                 Prefetch Config\n");
+	printf("....................................................\n");
+	printf("Prefetch Enable          %s\n", PREFETCH_ENABLE?"On":"Off");
+	printf("Buffer Entry #           %d\n\n", PREFETCH_BUF_SIZE);
 
 	
+	printf("....................................................\n\n\n\n\n");
 	// init_trace();
 
 	
@@ -580,10 +592,10 @@ int main(int argc, char * argv[])
 	  
 
 	  	// printf("\ncycle: %lld", CYCLE_VAL);
-	  	// printf("\nfetch clk: %lld", fetch_clk);
+	  	// printf("\nfetch clk: %lld", trace_clk);
 	  	if (TIMING_ENABLE)
 		{
-			mem_tick = (fetch_clk % TIMING_INTERVAL == 0);					 // whether this cycle it's time to initiate a mem access ~~~> timing interval has reached
+			mem_tick = (trace_clk % TIMING_INTERVAL == 0);					 // whether this cycle it's time to initiate a mem access ~~~> timing interval has reached
 			mem_cycle = (mem_tick || still_same_access) ? true : false; 	 // whether this cycle should be processing a mem op
 
 			mem_clk = mem_tick ? mem_clk + 1 : mem_clk;						 // a counter keeping track of # passed mem ticks so far
@@ -615,6 +627,14 @@ int main(int argc, char * argv[])
 			}
 			
 			// printf("tick: %d	mem: %d		dummy: %d	nonmemps: %d	req: %d\n", mem_tick, mem_cycle, dummy_tick, nonmemops[numc], reqctr);
+			// if (mem_tick)
+			// {
+			// 	printf("\ntrace clk: %lld  nonmemops: %d\n", trace_clk, nonmemops[numc]);
+			// }
+			// else
+			// {
+			// 	printf("\nN   fetch clk: %lld\n", trace_clk);
+			// }
 			
 			
 		}
@@ -660,6 +680,8 @@ int main(int argc, char * argv[])
 	    fetched[numc]++;
 	    num_fetch++;
 		// Mehrnoosh:
+		trace_clk++;
+
 		// printf("nonmemops: %d\n", nonmemops[numc]);
 		// Mehrnoosh.
 	  }
@@ -963,13 +985,14 @@ int main(int argc, char * argv[])
 				reqctr = 0;
 				curr_access = oramQ->head->oramid;
 				maxreq = (oramQ->head->tree == RHO) ? rho_effective_pl*2 : oram_effective_pl*2;
+				trace_clk++;
 				// printf("\nfetch:  req: %d   max: %d	oramq: %d, curr:%d\n", reqctr, maxreq, oramQ->size, curr_access);	
 			}
 			
-			if (TIMING_ENABLE && nonmemops[numc] > 0)
-			{
-				nonmemops[numc]--;
-			}
+			// if (TIMING_ENABLE && nonmemops[numc] > 0)
+			// {
+			// 	nonmemops[numc]--;
+			// }
 			
 			
 			
@@ -1037,7 +1060,6 @@ int main(int argc, char * argv[])
 	      
 	  }  /* Done consuming the next rd or wr. */
 	// Mehrnoosh:
-	fetch_clk++;
 	// print_req_symbols();
 	// Mehrnoosh.
 
@@ -1165,8 +1187,14 @@ printf("Rho  Dummy #       %d\n", rho_dummyctr);
 printf("Prefetch #         %d\n", prefetchctr);
 printf("Pos1 #             %d\n", pos1ctr);
 printf("Pos2 #             %d\n", pos2ctr);
-printf("Pos1 Hit           %f%%\n", 100*(double)pos1hit/pos1ctr);
-printf("Pos2 Hit           %f%%\n", 100*(double)pos2hit/pos2ctr);
+printf("Pos1 Hit           %f%%\n", 100*(double)pos1hit/pos1acc_ctr);
+printf("Pos2 Hit           %f%%\n", 100*(double)pos2hit/pos2acc_ctr);
+printf("Pos1 hit #         %d\n", pos1hit);
+printf("Pos2 hit #         %d\n", pos2hit);
+printf("Pos1 acc #         %d\n", pos1acc_ctr);
+printf("Pos2 acc #         %d\n", pos2acc_ctr);
+printf("Pos1 conf #        %d\n", pos1conf);
+printf("Pos2 conf #        %d\n", pos2conf);
 printf("Mem Cycles #       %lld\n", mem_clk);
 printf("oramQ Size         %d\n", oramQ->size);
 printf("Bk Evict           %f%%\n", 100*(double)bkctr/invokectr);

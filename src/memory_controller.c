@@ -105,7 +105,11 @@ int tracectr_test = 0;  // # lines read from the trace file for testing without 
 int prefetchctr = 0; // # prefetch access
 int pos1ctr = 0; // # prefetch pos1
 int pos2ctr = 0; // # prefetch pos2
+int pos1acc_ctr = 0; // # accesses to prefetched pos1
+int pos2acc_ctr = 0; // # accesses to prefetched pos2
 int pos1hit = 0; // # hit on prefetch buffer for pos1
+int pos1conf = 0;
+int pos2conf = 0;
 int pos2hit = 0; // # hit on prefetch buffer for pos2
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
@@ -1249,16 +1253,53 @@ void freecursive_access(int addr, char type){
       // reading form PLB if miss then proceed to access ORAM tree
       int ai = addr/pow(X,i);
       int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
+
+      printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
+
+      // profiling:
+      if ((PLB[tag % PLB_SIZE] != tag) && i != 0)
+      {
+          if (i == 1)
+          {
+            pos1acc_ctr++;
+          }
+          else if (i == 2)
+          {
+            pos2acc_ctr++;
+          }
+      }
+      // profiling.
       
       if ((PLB[tag % PLB_SIZE] == tag) || buffer_contain(tag))  // PLB hit
       {
         plb_hit[i]++;
+        // profiling:
         if (buffer_contain(tag))
         {
           int pi = buffer_index(tag);
-          pos1hit = (PreBuffer[pi].type == POS1) ? pos1hit + 1 : pos1hit; 
-          pos2hit = (PreBuffer[pi].type == POS2) ? pos2hit + 1 : pos2hit; 
+          if (i == 1)
+          {
+            pos1hit++;
+            if (PreBuffer[pi].type != POS1)
+            {
+              pos1conf++;
+              //  printf("ERROR: freecursive: @trace %d pos1 & i %d don't match!\n", tracectr, i);
+              //  exit(1);
+            }
+            
+          }
+          else if (i == 2)
+          {
+            pos2hit++;
+            if (PreBuffer[pi].type != POS2)
+            {
+              pos2conf++;
+              //  printf("ERROR: freecursive: @trace %d pos2 & i %d don't match!\n", tracectr, i);
+              //  exit(1);
+            }
+          }
         }
+       // profiling.
         
         if (i == 0)   // if the intended block is originally a posmap block itself terminate!
         {
@@ -1278,6 +1319,7 @@ void freecursive_access(int addr, char type){
     {
       int ai = addr/pow(X,i_saved);
       int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
+      // printf("@ trace %d  i saved: %d   ai: %x    tag: %x\n", tracectr, i_saved, ai, tag);
 
       if (tag == addr)
       {
@@ -2067,8 +2109,13 @@ void invoke_prefetch(){
 
   int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
 
-  int pos1 = (curr_addr/pow(X,1)) + 1;   // the 1st posmap block of current trace + 1 ~> candidate for prefetching
-  int pos2 = (curr_addr/pow(X,2)) + 1;   // the 2nd posmap block of current trace + 1 ~> candidate for prefetching
+  int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
+  int pos2 = (curr_addr/pow(X,2));   // the 2nd posmap block of current trace ~>  + stride will be candidate for prefetching
+
+  pos1 = pos1 + PREFETCH_STRIDE;
+  pos2 = pos2 + PREFETCH_STRIDE;
+  pos1 = concat(1,pos1);
+  pos2 = concat(2,pos2);
 
   if (plb_contain(pos2) || stash_contain(pos2) || buffer_contain(pos2))
   {
@@ -2078,7 +2125,6 @@ void invoke_prefetch(){
       pos_var = POS1;
       pos1ctr++; 
     }
-    // printf("pos1 @ trace %d\n", tracectr);
   } 
   else
   {
@@ -2087,9 +2133,12 @@ void invoke_prefetch(){
     pos2ctr++; 
   }
   
+
+  
     
   if (candidate != -1)
   {
+    printf("\n@ trace %d  prefetch:  pos%s   candidate: %x\n\n", tracectr, (pos_var == POS1)?"1":(pos_var == POS2)?"2":"?", candidate);
     prefetch_access(candidate);
   }
   else
