@@ -108,9 +108,15 @@ int pos2ctr = 0; // # prefetch pos2
 int pos1acc_ctr = 0; // # accesses to prefetched pos1
 int pos2acc_ctr = 0; // # accesses to prefetched pos2
 int pos1hit = 0; // # hit on prefetch buffer for pos1
+int pos2hit = 0; // # hit on prefetch buffer for pos2
 int pos1conf = 0;
 int pos2conf = 0;
-int pos2hit = 0; // # hit on prefetch buffer for pos2
+int case1 = 0;
+int case2 = 0;
+int case3 = 0;
+int plbpos1 = 0;
+int stashpos1 = 0;
+int bufferpos1 = 0;
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
@@ -159,6 +165,16 @@ int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var = POS2;
+
+// convert byte address to block address, each block is 64 bytes 
+// upper 32 bits are discarded and also oram memory address is cut into half because of utilization 50%
+unsigned int byteAddr_to_blockAddr(long long int physical_addr){
+  unsigned int addr = (unsigned int)(physical_addr & (0xffffffff));
+  addr = addr >> (unsigned int) log2(BLOCK_SIZE);
+  addr = (addr & (BLOCK-1));
+  return addr;
+}
+
 
 Queue *ConstructQueue(int limit) {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
@@ -989,7 +1005,7 @@ void remap_block(int addr){
     }
     else
     {
-      printf("ERROR: remap: block %d not found in stash!\n", addr);
+      printf("ERROR: remap: @ trace %d  block %d not found in stash!\n", tracectr, addr);
       printf("remap:  previous Posmap[%d]: %d\n", addr, prevlabel);
       printf("remap:  Posmap[%d]: %d\n", addr, PosMap[addr]);
       printf("remap:  stashctr: %d\n", stashctr);
@@ -1254,7 +1270,7 @@ void freecursive_access(int addr, char type){
       int ai = addr/pow(X,i);
       int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
 
-      printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
+      // printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
 
       // profiling:
       if ((PLB[tag % PLB_SIZE] != tag) && i != 0)
@@ -1272,7 +1288,7 @@ void freecursive_access(int addr, char type){
       
       if ((PLB[tag % PLB_SIZE] == tag) || buffer_contain(tag))  // PLB hit
       {
-        plb_hit[i]++;
+        
         // profiling:
         if (buffer_contain(tag))
         {
@@ -1299,6 +1315,11 @@ void freecursive_access(int addr, char type){
             }
           }
         }
+        else
+        {
+          plb_hit[i]++;
+        }
+        
        // profiling.
         
         if (i == 0)   // if the intended block is originally a posmap block itself terminate!
@@ -1625,7 +1646,8 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  int addr = (int)(physical_address & (BLOCK-1));
+  // int addr = (int)(physical_address & (BLOCK-1));
+  unsigned int addr = byteAddr_to_blockAddr(physical_address);
   // printf("invoke oram: physical addr: %lld\n", addr);
   // printf("invoke oram: b4 freecursive call addr: %d\n", addr);
 
@@ -2107,38 +2129,69 @@ void invoke_prefetch(){
 
   int candidate = -1;
 
-  int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
+  // int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
+  unsigned int curr_addr = byteAddr_to_blockAddr(curr_trace);
 
   int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
   int pos2 = (curr_addr/pow(X,2));   // the 2nd posmap block of current trace ~>  + stride will be candidate for prefetching
 
-  pos1 = pos1 + PREFETCH_STRIDE;
-  pos2 = pos2 + PREFETCH_STRIDE;
+  int pos1_next = pos1 + PREFETCH_STRIDE;
+  int pos2_next = pos2 + PREFETCH_STRIDE;
+
   pos1 = concat(1,pos1);
   pos2 = concat(2,pos2);
 
+  pos1_next = concat(1, pos1_next);
+  pos2_next = concat(2, pos2_next);
+
   if (plb_contain(pos2) || stash_contain(pos2) || buffer_contain(pos2))
   {
-    if (!plb_contain(pos1) && !stash_contain(pos1) && !buffer_contain(pos1))
+    case1++;
+    if (plb_contain(pos1_next))
     {
-      candidate = pos1; // if pos2 is available go ahead and preftech pos1
+      plbpos1++;
+    }
+    else if (stash_contain(pos1_next))
+    {
+      stashpos1++;
+    }
+    else if (buffer_contain(pos1_next))
+    {
+      bufferpos1++;
+    }
+    
+    
+    if (!plb_contain(pos1_next) && !stash_contain(pos1_next) && !buffer_contain(pos1_next))
+    {
+      curr_trace = curr_trace + (1 << (int)log2(X));
+      candidate = pos1_next; // if pos2 is available go ahead and preftech pos1
       pos_var = POS1;
-      pos1ctr++; 
+      pos1ctr++;
     }
   } 
   else
   {
     candidate = pos2; // otherwise prefetch pos2
     pos_var = POS2;
-    pos2ctr++; 
+    pos2ctr++;
+    case2++;
   }
-  
-
+  if (candidate == -1)
+  {
+    if (!plb_contain(pos2_next) && !stash_contain(pos2_next) && !buffer_contain(pos2_next))
+    {
+      curr_trace = curr_trace + (1 << 2*((int)log2(X)));
+      candidate = pos2_next; // if still has no candidate prefetch pos2_next
+      pos_var = POS2;
+      pos2ctr++;
+      case3++;
+    }
+  }
   
     
   if (candidate != -1)
   {
-    printf("\n@ trace %d  prefetch:  pos%s   candidate: %x\n\n", tracectr, (pos_var == POS1)?"1":(pos_var == POS2)?"2":"?", candidate);
+    // printf("\n@ trace %d  prefetch:  pos%s   candidate: %x\n\n", tracectr, (pos_var == POS1)?"1":(pos_var == POS2)?"2":"?", candidate);
     prefetch_access(candidate);
   }
   else
@@ -2147,6 +2200,7 @@ void invoke_prefetch(){
   }
   
 }
+
 
 
 

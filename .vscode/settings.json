@@ -4,6 +4,7 @@
     "files.associations": {
         "cache.h": "c",
         "stdbool.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "limits": "c"
     }
 }
