@@ -252,7 +252,6 @@ int main(int argc, char * argv[])
 	// test_queue();
 	
 
-	
 
 	// test_oram(argv);
 
@@ -1176,7 +1175,7 @@ end = clock();
 cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 
 
-printf("\n\n............... ORAM Stats ...............\n\n");
+printf("\n\n\n\n............... ORAM Stats ...............\n\n");
 printf("Execution Time     %f s\n", cpu_time_used);
 printf("Trace Size         %d\n", tracectr);
 printf("Invoke Mem #       %d\n", invokectr);

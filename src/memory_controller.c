@@ -14,6 +14,7 @@
 
 // Current Processor Cycle
 extern long long int CYCLE_VAL;
+extern long long int trace_clk;
 
 /////////////// Mehrnoosh:
 #include <stdbool.h>
@@ -117,6 +118,8 @@ int case3 = 0;
 int plbpos1 = 0;
 int stashpos1 = 0;
 int bufferpos1 = 0;
+int pos1_recent = 0;
+int pos2_recent = 0;
 int stashctr = 0; // # blocks in stash ~ stash occupancy
 int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
@@ -304,6 +307,7 @@ void test_queue(){
 }
 
 void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type) {
+  addr = addr << (int)log2(BLOCK_SIZE);
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = addr;
   pN->cycle = cycle; 
@@ -314,6 +318,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->oramid = (TREE_VAR == RHO) ? rhoctr : oramctr;
   pN->oramid = (ENQUEUE_VAR == HEAD) ? -1 : pN->oramid;   // in case of dummy access set oram id to -1
   pN->tree = TREE_VAR;
+  pN->orig_addr = orig_addr;
   bool added = false;
   if (ENQUEUE_VAR == TAIL)
   {
@@ -679,7 +684,7 @@ void read_path(int label){
           if(RhoTree[index].slot[j].isReal)
           {
             
-            if(add_to_stash(RhoTree[index].slot[j]))
+            if(add_to_stash(RhoTree[index].slot[j]) != -1)
             {
               RhoTree[index].slot[j].isReal = false;
               RhoTree[index].slot[j].addr = -1;
@@ -697,7 +702,7 @@ void read_path(int label){
           if(GlobTree[index].slot[j].isReal)
           {
             
-            if(add_to_stash(GlobTree[index].slot[j]))
+            if(add_to_stash(GlobTree[index].slot[j]) != -1)
             {
               GlobTree[index].slot[j].isReal = false;
               GlobTree[index].slot[j].addr = -1;
@@ -1033,7 +1038,7 @@ void remap_block(int addr){
   
 }
 
-bool add_to_stash(Slot s){
+int add_to_stash(Slot s){
   
   
   for(int i = 0; i < STASH_SIZE_VAR; i++ )
@@ -1049,7 +1054,7 @@ bool add_to_stash(Slot s){
         RhoStash[i].isData = true;
         
         rho_stashctr++;
-        return true;
+        return i;
       }
     }
     else
@@ -1063,12 +1068,12 @@ bool add_to_stash(Slot s){
         Stash[i].isData = true;
         
         stashctr++;
-        return true;
+        return i;
       }
     }
     
   }
-  return false;
+  return -1;
 }
 
 
@@ -1272,18 +1277,28 @@ void freecursive_access(int addr, char type){
 
       // printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
 
+
       // profiling:
+
       if ((PLB[tag % PLB_SIZE] != tag) && i != 0)
       {
           if (i == 1)
           {
+            // int pos1_diff = ai - pos1_recent;
+            // printf("%d\n", pos1_diff);
+            // pos1_recent = ai;
             pos1acc_ctr++;
           }
           else if (i == 2)
           {
+            // int pos2_diff = ai - pos2_recent;
+            // printf("%d\n", pos2_diff);
+            // pos2_recent = ai;
             pos2acc_ctr++;
           }
       }
+
+      
       // profiling.
       
       if ((PLB[tag % PLB_SIZE] == tag) || buffer_contain(tag))  // PLB hit
@@ -1292,9 +1307,12 @@ void freecursive_access(int addr, char type){
         // profiling:
         if (buffer_contain(tag))
         {
-          int pi = buffer_index(tag);
+          // int pi = buffer_index(tag);
+          int pi = tag % PREFETCH_BUF_SIZE;
+
           if (i == 1)
           {
+            // printf("%lld\n", trace_clk - PreBuffer[pi].timestamp);
             pos1hit++;
             if (PreBuffer[pi].type != POS1)
             {
@@ -1306,6 +1324,7 @@ void freecursive_access(int addr, char type){
           }
           else if (i == 2)
           {
+            // printf("%lld\n", trace_clk - PreBuffer[pi].timestamp);
             pos2hit++;
             if (PreBuffer[pi].type != POS2)
             {
@@ -1335,6 +1354,11 @@ void freecursive_access(int addr, char type){
         i_saved = H-2;
       }
     }
+
+    // profiling:
+    pos1_recent = addr/pow(X,1);
+    pos2_recent = addr/pow(X,2);
+    // profiling.
 
     while(i_saved >= 1)   // STEP 2  PosMap block access
     {
@@ -1368,7 +1392,7 @@ void freecursive_access(int addr, char type){
         oram_access(tag);
         pinOff();
       }
-
+      int si;
       int victim = PLB[tag % PLB_SIZE];
       if( victim != -1)
       {
@@ -1406,8 +1430,8 @@ void freecursive_access(int addr, char type){
         }
         else
         {
-          bool added = add_to_stash(s);
-          if(!added){
+          si = add_to_stash(s);
+          if(si == -1){
           printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
           exit(1);
           }
@@ -1709,6 +1733,7 @@ int index_to_addr(int index, int slot){
   int distance_from_root_subtree = head_of_curr_sublevel + horiz_distance_index_from_head -  num_sublevel_passed * pow(2, inner_sublevel);
   int addr = root_of_curr_subtree + distance_from_root_subtree;
   addr = addr*Z_VAR + slot;
+  // addr = addr << (int)log2(BLOCK_SIZE);
   return addr;
 }
 
@@ -1916,7 +1941,7 @@ void rho_insert(int physical_address){
   tag_array_reset_LRU(index, way);
   Slot new = {.addr = addr , .label = TagArrayLabel[index][way], .isReal = true, .isData = true};  // ??? isdata not necessarily true but doesn't matter at this point
   switch_tree_to(RHO);
-  if (!add_to_stash(new))
+  if (add_to_stash(new) == -1)
   {
     printf("ERROR: rho insert: block %d is not added to rho stash\n", addr);
     printf("ERROR: rho insert: rho stash ctr: %d\n", rho_stashctr);
@@ -1957,7 +1982,7 @@ void rho_insert(int physical_address){
     PosMap[victim] = rand() % PATH;  
     Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = true};  // ??? isdata not necessarily true but doesn't matter at this point
     switch_tree_to(ORAM);
-    if (!add_to_stash(s))
+    if (add_to_stash(s) == -1)
     {
       printf("ERROR: rho insert: block %d is not added to oram stash\n", victim);
       printf("ERROR: rho insert: oram stash ctr: %d\n", stashctr);
@@ -1995,12 +2020,18 @@ void dummy_access(TreeType tree){
 
 // prefetch functions:
 bool buffer_contain(int addr){
-  for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
+  // for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
+  // {
+  //   if (PreBuffer[i].addr == addr && PreBuffer[i].valid)
+  //   {
+  //     return true;
+  //   }
+  // }
+  // return false;
+  int i = addr % PREFETCH_BUF_SIZE;
+  if (PreBuffer[i].addr == addr && PreBuffer[i].valid)
   {
-    if (PreBuffer[i].addr == addr && PreBuffer[i].valid)
-    {
-      return true;
-    }
+    return true;
   }
   return false;
 }
@@ -2050,20 +2081,23 @@ void insert_buffer(int addr){
   int index = -1;
 
   // look for empty spot in prefetch buffer
-  for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
-  {
-    if(!PreBuffer[i].valid)
-    {
-      index = i;
-    }
-  }
+  // for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
+  // {
+  //   if(!PreBuffer[i].valid)
+  //   {
+  //     index = i;
+  //   }
+  // }
+
+  index = addr % PREFETCH_BUF_SIZE;
 
   // if no free spot found in the buffer, find a victim to evict
-  if (index == -1)
+  if (PreBuffer[index].valid)
   {
-    index = buffer_find_victim(); 
+    // index = buffer_find_victim(); 
 
     // add the victim to the stash
+
     Slot s = {.addr = PreBuffer[index].addr , .label = PosMap[PreBuffer[index].addr], .isReal = true, .isData = false};
     
     if (stash_contain(s.addr))
@@ -2073,8 +2107,8 @@ void insert_buffer(int addr){
     }
     else
     {
-      bool added = add_to_stash(s);
-      if(!added){
+      int vi = add_to_stash(s);
+      if(vi == -1){
         printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
         exit(1);
       }
@@ -2084,7 +2118,7 @@ void insert_buffer(int addr){
    
   // insert the intended posmap block to the buffer
   PreBuffer[index].addr = addr;
-  PreBuffer[index].timestamp = CYCLE_VAL;
+  PreBuffer[index].timestamp = trace_clk;
   PreBuffer[index].valid = true;  
   PreBuffer[index].type = pos_var;  
 
@@ -2130,7 +2164,15 @@ void invoke_prefetch(){
   int candidate = -1;
 
   // int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
-  unsigned int curr_addr = byteAddr_to_blockAddr(curr_trace);
+  // unsigned int curr_addr = byteAddr_to_blockAddr(curr_trace);
+  unsigned int curr_addr;
+  if (oramQ->size != 0)
+  {
+    curr_addr = oramQ->head->orig_addr;
+    curr_addr = byteAddr_to_blockAddr(curr_addr);
+  }
+  
+  
 
   int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
   int pos2 = (curr_addr/pow(X,2));   // the 2nd posmap block of current trace ~>  + stride will be candidate for prefetching
@@ -2163,7 +2205,7 @@ void invoke_prefetch(){
     
     if (!plb_contain(pos1_next) && !stash_contain(pos1_next) && !buffer_contain(pos1_next))
     {
-      curr_trace = curr_trace + (1 << (int)log2(X));
+      // curr_trace = curr_trace + (1 << (int)log2(X));
       candidate = pos1_next; // if pos2 is available go ahead and preftech pos1
       pos_var = POS1;
       pos1ctr++;
@@ -2180,7 +2222,7 @@ void invoke_prefetch(){
   {
     if (!plb_contain(pos2_next) && !stash_contain(pos2_next) && !buffer_contain(pos2_next))
     {
-      curr_trace = curr_trace + (1 << 2*((int)log2(X)));
+      // curr_trace = curr_trace + (1 << 2*((int)log2(X)));
       candidate = pos2_next; // if still has no candidate prefetch pos2_next
       pos_var = POS2;
       pos2ctr++;

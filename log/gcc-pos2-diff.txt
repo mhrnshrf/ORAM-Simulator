@@ -1,0 +1,1429 @@
+---------------------------------------------
+-- USIMM: the Utah SImulated Memory Module --
+--              Version: 1.3               --
+---------------------------------------------
+
+....................................................
+                     Options
+....................................................
+Volcano        No
+Cache          Enabled
+Write Bypass   No
+Subtree        No
+Rho            No
+Timing         Enabled
+Prefetch       Enabled
+
+....................................................
+             Simulation Parameter
+....................................................
+Trace Size    1000000
+Queue Size    1000
+
+....................................................
+                   ORAM Config
+....................................................
+Level           24
+Path            8388608
+Node            16777215
+Slot            67108860
+Block           33554430
+Z               4
+U               0.500000
+OV Treshold     100
+Stash Size      200
+BK Eviction     1
+Empty Top       0
+Top Cache       10
+
+L1  9       Z1  4
+L2  15      Z2  4
+L3  18      Z3  4
+
+LZ 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
+= 96 ~> oram path length
+  56 ~> oram effective path length
+
+
+....................................................
+                  Cache Config
+....................................................
+Cache Enable   On
+Cache Size     2097152
+Write Bypass   0
+
+....................................................
+                 Subtree Config
+....................................................
+Subtree Enable 	  Off
+Subtree Size      8192
+Subtree Slot	  128
+Subtree Bucket    31
+Subtree Level     5
+
+....................................................
+                   RHO Config
+....................................................
+Rho Enable          Off
+Rho Level           19
+Rho Path            262144
+Rho Node            524287
+Rho Slot            1048574
+Rho Block           524287
+Rho Set             16000
+Rho Way             10
+Rho Z               2
+Rho OV Treshold     160
+Rho Stash Size      200
+Rho BK Eviction     1
+Rho Empty Top       0
+Rho Top Cache       0
+
+Rho   L1  7     Z1  2
+Rho   L2  8     Z2  2
+Rho   L3  9     Z3  2
+
+Rho LZ 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+= 38 ~> rho path length
+  38 ~> rho effective path length
+
+
+....................................................
+                  Timing Config
+....................................................
+Timing Enable          On
+Timing Interval        300
+
+
+....................................................
+                 Prefetch Config
+....................................................
+Prefetch Enable          On
+Buffer Entry #           256
+
+....................................................
+
+
+
+
+Initializing.
+Core 0: Input trace file /mnt/c/trace/gcc : Addresses will have prefix 0
+Reading vi file: 1Gb_x16.vi	
+4 Chips per Rank
+----------------------------------------------------------------------------------------
+------------------------
+- SIMULATOR PARAMETERS -
+------------------------
+
+-------------
+- PROCESSOR -
+-------------
+PROCESSOR_CLK_MULTIPLIER:        4
+ROBSIZE:                       160
+MAX_FETCH:                       4
+MAX_RETIRE:                      4
+PIPELINEDEPTH:                  10
+
+---------------
+- DRAM Config -
+---------------
+NUM_CHANNELS:                    4
+NUM_RANKS:                       2
+NUM_BANKS:                       8
+NUM_ROWS:                    32768
+NUM_COLUMNS:                   128
+
+---------------
+- DRAM Timing -
+---------------
+T_RCD:                          44
+T_RP:                           44
+T_CAS:                          44
+T_RC:                          156
+T_RAS:                         112
+T_RRD:                          20
+T_FAW:                         128
+T_WR:                           48
+T_WTR:                          24
+T_RTP:                          24
+T_CCD:                          16
+T_RFC:                         352
+T_REFI:                      24960
+T_CWD:                          20
+T_RTRS:                          8
+T_PD_MIN:                       16
+T_XP:                           20
+T_XP_DLL:                       80
+T_DATA_TRANS:                   16
+
+---------------------------
+- DRAM Idd Specifications -
+---------------------------
+VDD:                        01.50
+IDD0:                       120.00
+IDD2P0:                     12.00
+IDD2P1:                     45.00
+IDD2N:                      70.00
+IDD3P:                      45.00
+IDD3N:                      67.00
+IDD4R:                      250.00
+IDD4W:                      250.00
+IDD5:                       260.00
+
+-------------------
+- DRAM Controller -
+-------------------
+WQ_CAPACITY:                    96
+ADDRESS_MAPPING:                 0
+WQ_LOOKUP_LATENCY:              10
+
+----------------------------------------------------------------------------------------
+Starting simulation.
+17400
+27300
+31500
+34800
+20400
+23100
+24300
+27900
+59100
+79800
+99900
+124500
+150300
+171300
+197100
+219600
+215700
+219000
+221700
+222900
+228600
+242700
+243900
+260700
+261300
+263100
+281100
+302400
+318600
+329100
+330300
+342900
+354000
+355200
+375900
+401700
+402900
+408900
+410100
+418500
+422400
+424500
+429900
+432600
+439200
+442200
+444900
+448500
+450600
+456600
+465300
+466500
+470400
+474600
+480000
+486600
+487800
+497100
+498000
+501900
+537900
+539100
+543600
+546600
+553800
+557400
+560700
+567900
+572400
+574200
+589800
+596400
+614100
+767700
+785700
+792000
+816300
+825900
+848700
+861600
+882600
+1069200
+1075800
+1083300
+1086900
+1093800
+1099200
+1249500
+1268100
+1371300
+1386000
+1452000
+1479300
+1609800
+1629600
+1661700
+1844400
+1914300
+1962000
+1971300
+2421300
+2429100
+2457600
+2466600
+2560200
+3108600
+3257100
+3605100
+3885900
+3996600
+16197300
+21739800
+1137900
+204000
+333600
+503400
+575700
+691800
+1952700
+728400
+819000
+845100
+864000
+876300
+880800
+803100
+917100
+934500
+954600
+960000
+2212800
+2215800
+984900
+988200
+990300
+1004400
+217800
+265800
+294300
+295500
+306600
+347700
+383700
+402000
+419700
+1299000
+438600
+473400
+476700
+479100
+480600
+487500
+503700
+504900
+506100
+1371600
+513600
+516900
+518100
+613500
+1480500
+664500
+1540500
+686700
+1553700
+1554900
+1556100
+1561800
+1566000
+1587600
+377100
+378600
+1604100
+389100
+1610400
+1611600
+456300
+465000
+1703100
+515400
+517500
+522600
+548100
+551400
+1775700
+560700
+1780800
+1822200
+1838700
+997800
+1006800
+1850700
+1937400
+1967100
+1972500
+1974900
+1980900
+1992300
+2010000
+873000
+2095500
+912900
+2082300
+2083800
+2204700
+3475200
+2237400
+1382700
+2284200
+2204400
+2344800
+2355300
+2359200
+2395800
+336000
+1212900
+2433600
+2492400
+1704900
+2618400
+1420800
+553800
+1833000
+2709300
+2710800
+1558200
+1932000
+1584000
+2890500
+2915100
+1715700
+3025500
+26351700
+1453200
+2313000
+3221100
+3360300
+2030700
+2036400
+2089200
+3621900
+3637800
+1643400
+3748800
+2297400
+3097500
+1888200
+3989400
+4413300
+4444200
+3347700
+4567200
+3923400
+6172200
+2847600
+3366900
+5940300
+6070200
+4017600
+5460900
+8241300
+7409400
+7375200
+31949400
+6698400
+8988900
+9608100
+33531000
+10100100
+2400
+107700
+127500
+130500
+147000
+159600
+165300
+11693700
+209400
+223200
+243900
+272700
+277500
+315000
+347100
+369000
+357600
+358800
+381900
+387300
+475500
+493500
+511200
+530100
+531600
+554400
+555600
+538200
+557400
+593400
+625200
+622200
+633300
+668100
+705900
+740700
+743100
+763800
+766800
+827100
+846300
+864000
+921300
+918900
+941700
+982500
+1031400
+1043100
+1044900
+1028700
+1062900
+1068600
+1107000
+1159200
+1182600
+1187400
+1202700
+1224300
+1278900
+1298100
+1373100
+1388700
+1430700
+1478400
+1522500
+1512000
+1525200
+1578300
+1581000
+1609200
+1616100
+1617300
+1646100
+1701300
+13301700
+1809000
+1814400
+2019600
+2058000
+2109300
+2186400
+13759500
+2313900
+2331000
+2346900
+2366700
+2420400
+12942300
+38307600
+2599200
+2668200
+14190600
+2710800
+8283300
+8291700
+2727600
+8301300
+8313900
+2991300
+3027600
+38890500
+3126900
+3246600
+3495000
+3511200
+3604800
+3630300
+3787800
+4094700
+4352700
+4570200
+5046900
+5199000
+5242800
+5290500
+6275700
+6294300
+6341100
+17897700
+6421500
+6530400
+6866700
+6996600
+7163400
+7675500
+7699500
+7921200
+7995600
+8011200
+8197800
+9607800
+9659400
+20168100
+45564600
+9723600
+20379600
+9999600
+21720000
+10770000
+10868100
+11026500
+11292000
+11541900
+24010500
+12559800
+12642300
+12727200
+14017800
+25505400
+14400600
+16153800
+16264500
+26784600
+26786100
+52435500
+29007900
+17537700
+17785200
+29406900
+18213600
+18271500
+18450900
+28970700
+18736800
+18969000
+19148700
+19519500
+20243100
+30996300
+20575500
+20645100
+20684700
+32552700
+32916900
+21526800
+21552000
+21553500
+21557400
+21754200
+21755400
+21810000
+21887700
+21978300
+21979500
+21984000
+22053900
+22103700
+22114800
+22128600
+237600
+22167600
+22208400
+22215000
+319500
+335100
+22281300
+467700
+610800
+22582800
+714600
+22651500
+22744800
+22836600
+22879800
+23900100
+24545700
+24996300
+24997800
+25020300
+25109100
+3277500
+3681000
+37303800
+25877700
+25898400
+25918500
+26897100
+26997000
+38611500
+27771000
+40288800
+28833900
+28896300
+28970700
+29287800
+29289300
+29475900
+29604600
+43582200
+29935800
+29945100
+30207000
+30214800
+41921700
+30466800
+30475200
+30594000
+30808200
+30838200
+30893400
+30899100
+31024500
+31073400
+67133100
+31320300
+31326900
+31419300
+31474500
+31505700
+43087500
+31702200
+31952400
+32235600
+32283900
+32506200
+33010200
+33276600
+33864900
+33879300
+33936900
+34008300
+34322700
+34330200
+34660500
+36019500
+42012000
+48042300
+51106200
+36949200
+42681600
+42846300
+37824900
+37935000
+52519500
+50586300
+50387400
+55743300
+24900
+25500
+56002500
+174300
+236700
+328500
+331200
+339000
+1395000
+57414600
+54648600
+1841700
+57949500
+2881200
+59132400
+59150400
+59225700
+59261700
+58583100
+84281100
+62653200
+86228700
+86236500
+86340900
+56086800
+64372800
+86407800
+64511400
+86597400
+86598000
+86999100
+56847600
+87274200
+10045800
+62630400
+87946200
+88242600
+88446000
+88565400
+88586400
+88914000
+88965300
+88969800
+89030700
+89080500
+89162400
+89275500
+89473200
+89522700
+89536200
+89591400
+89681700
+89757900
+12222300
+89893800
+89923200
+12734700
+90581100
+90803400
+91626600
+91670400
+91880700
+92033400
+92271600
+67942500
+92311200
+92510100
+92510700
+92654400
+92820300
+92888100
+93177000
+93256800
+93372900
+93547200
+93848400
+93853200
+93921900
+93985200
+72085200
+94108800
+94669800
+94707300
+94838700
+94930800
+95132700
+95169900
+95250900
+95462700
+95473500
+95575800
+95797800
+95961000
+96030000
+96067500
+96288600
+96291000
+74367900
+74874300
+74933100
+97149000
+75354300
+97374000
+97438200
+97587300
+97828200
+97831800
+97935300
+98014500
+98049000
+98091300
+98104200
+98317200
+98534700
+98629500
+98636100
+98681400
+98691300
+98795400
+98851500
+98929200
+98961300
+99065100
+99071700
+99170700
+99267300
+99318000
+99337500
+99368700
+99894300
+100074300
+100148700
+78251100
+100778400
+100855800
+101454000
+101643300
+101735700
+102075300
+102436200
+102467400
+102477600
+102492300
+102799200
+104333100
+104467500
+104917800
+105211800
+105277800
+105353400
+83411100
+105455100
+105514200
+105519300
+105524100
+105528600
+105530100
+105534300
+105537300
+105538800
+105543900
+105553500
+105558300
+105563100
+105571800
+105573300
+105612300
+105659400
+105678600
+105718500
+106184700
+106198800
+106325100
+106359300
+106464300
+106479900
+106504800
+106547700
+106570200
+106571700
+106608900
+106680900
+106689000
+107265000
+107400600
+107797500
+107851800
+107862600
+108053700
+108095400
+108190200
+108414000
+108463800
+108635700
+108936900
+109208400
+87221100
+109721100
+88388700
+111361200
+112212900
+35624700
+35733000
+35744400
+35759100
+35762400
+35776200
+35777700
+35788500
+113097900
+113125200
+113214300
+113218800
+35972400
+113286600
+113313900
+36153600
+113452200
+113634600
+113662200
+56691900
+56788500
+56811000
+56866800
+56892900
+56910000
+114858000
+37674000
+115108500
+37890000
+37914600
+38574900
+38973000
+39004200
+39012300
+59036100
+59059500
+95605800
+93532500
+93610800
+95003100
+89187300
+62751600
+63239100
+85671900
+85673100
+85711200
+85854000
+86422200
+86682600
+98195400
+88068000
+124146900
+67680000
+101277600
+68948700
+91964100
+102532500
+102596400
+102603300
+50277000
+102814200
+92991600
+93134100
+94252200
+53165700
+95104800
+131749800
+107451300
+77464800
+99762300
+78392700
+144446100
+78175200
+158067300
+134191500
+134232300
+134694300
+134916600
+106862700
+129128400
+129129900
+140694900
+140883300
+108875700
+132365100
+90949800
+146627700
+147040800
+116157900
+116166300
+118644900
+122872500
+123121200
+156177900
+157283700
+159047400
+126243000
+160450200
+186072900
+186433200
+128744400
+151448100
+152212200
+154818000
+168511500
+160740900
+161036700
+161037900
+161237400
+161841600
+162864300
+163069800
+163299600
+166019700
+166457100
+181623000
+171434400
+153120000
+59700
+175315800
+261600
+317100
+337800
+539400
+945000
+996600
+187808100
+1283700
+1320900
+1351200
+1495500
+1602000
+1735200
+1742100
+2034000
+2131500
+2210100
+2331000
+2480100
+2587500
+2751900
+156328500
+3124800
+156455700
+3234300
+156547800
+3315300
+156627000
+3413100
+3457200
+156713400
+3613200
+3696000
+3724800
+157016400
+157107900
+157362300
+157446300
+4287300
+4446000
+157755600
+157846800
+4686900
+4776600
+158162400
+4923600
+158179500
+158279400
+6207300
+6308400
+6405000
+6530700
+6822300
+160207200
+7047300
+7125900
+7191300
+7324500
+193108800
+193109700
+7478400
+126368700
+7617900
+7696200
+7794600
+161172000
+7941300
+8103000
+194049000
+8580000
+8771400
+9084600
+9278100
+9294600
+9310500
+9533100
+9989400
+Done with loop. Printing stats.
+Cycles 494691303
+Done: Core 0: Fetched 302887617 : Committed 302887457 : At time : 494691303
+Sum of execution times for all programs: 494691303
+Num reads merged: 129597
+Num writes merged: 4160
+-------- Channel 0 Stats-----------
+Total Reads Serviced :          10277289
+Total Writes Serviced :         10308784
+Average Read Latency :          348.99865
+Average Read Queue Latency :    288.99865
+Average Write Latency :         884.27402
+Average Write Queue Latency :   820.27402
+Read Page Hit Rate :            0.83505
+Write Page Hit Rate :           0.85819
+------------------------------------
+-------- Channel 1 Stats-----------
+Total Reads Serviced :          10288428
+Total Writes Serviced :         10319826
+Average Read Latency :          257.30871
+Average Read Queue Latency :    197.30871
+Average Write Latency :         783.56732
+Average Write Queue Latency :   719.56732
+Read Page Hit Rate :            0.82057
+Write Page Hit Rate :           0.89437
+------------------------------------
+-------- Channel 2 Stats-----------
+Total Reads Serviced :          10284966
+Total Writes Serviced :         10316387
+Average Read Latency :          264.57070
+Average Read Queue Latency :    204.57070
+Average Write Latency :         803.73691
+Average Write Queue Latency :   739.73691
+Read Page Hit Rate :            0.82233
+Write Page Hit Rate :           0.88752
+------------------------------------
+-------- Channel 3 Stats-----------
+Total Reads Serviced :          10289039
+Total Writes Serviced :         10320437
+Average Read Latency :          353.08160
+Average Read Queue Latency :    293.08160
+Average Write Latency :         874.49582
+Average Write Queue Latency :   810.49582
+Read Page Hit Rate :            0.83492
+Write Page Hit Rate :           0.86274
+------------------------------------
+
+#-----------------------------Simulated Cycles Break-Up-------------------------------------------
+Note:  1.(Read Cycles + Write Cycles + Read Other + Write Other) should add up to % cycles during which
+          the channel is busy. This should be the same for all Ranks on a Channel
+       2.(PRE_PDN_FAST + PRE_PDN_SLOW + ACT_PDN + ACT_STBY + PRE_STBY) should add up to 100%
+       3.Power Down means Clock Enable, CKE = 0. In Standby mode, CKE = 1
+#-------------------------------------------------------------------------------------------------
+Total Simulation Cycles                        494691303
+---------------------------------------------------------------
+
+Channel 0 Rank 0 Read Cycles(%)                0.17 # % cycles the Rank performed a Read
+Channel 0 Rank 0 Write Cycles(%)               0.17 # % cycles the Rank performed a Write
+Channel 0 Rank 0 Read Other(%)                 0.17 # % cycles other Ranks on the channel performed a Read
+Channel 0 Rank 0 Write Other(%)                0.17 # % cycles other Ranks on the channel performed a Write
+Channel 0 Rank 0 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 0 Rank 0 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 0 Rank 0 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 0 Rank 0 ACT_STBY(%)                   0.98 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 0 Rank 0 PRE_STBY(%)                   0.02 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 0 Rank 1 Read Cycles(%)                0.17 # % cycles the Rank performed a Read
+Channel 0 Rank 1 Write Cycles(%)               0.17 # % cycles the Rank performed a Write
+Channel 0 Rank 1 Read Other(%)                 0.17 # % cycles other Ranks on the channel performed a Read
+Channel 0 Rank 1 Write Other(%)                0.17 # % cycles other Ranks on the channel performed a Write
+Channel 0 Rank 1 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 0 Rank 1 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 0 Rank 1 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 0 Rank 1 ACT_STBY(%)                   0.99 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 0 Rank 1 PRE_STBY(%)                   0.01 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 1 Rank 0 Read Cycles(%)                0.17 # % cycles the Rank performed a Read
+Channel 1 Rank 0 Write Cycles(%)               0.17 # % cycles the Rank performed a Write
+Channel 1 Rank 0 Read Other(%)                 0.17 # % cycles other Ranks on the channel performed a Read
+Channel 1 Rank 0 Write Other(%)                0.17 # % cycles other Ranks on the channel performed a Write
+Channel 1 Rank 0 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 1 Rank 0 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 1 Rank 0 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 1 Rank 0 ACT_STBY(%)                   0.99 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 1 Rank 0 PRE_STBY(%)                   0.01 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 1 Rank 1 Read Cycles(%)                0.17 # % cycles the Rank performed a Read
+Channel 1 Rank 1 Write Cycles(%)               0.17 # % cycles the Rank performed a Write
+Channel 1 Rank 1 Read Other(%)                 0.17 # % cycles other Ranks on the channel performed a Read
+Channel 1 Rank 1 Write Other(%)                0.17 # % cycles other Ranks on the channel performed a Write
+Channel 1 Rank 1 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 1 Rank 1 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 1 Rank 1 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 1 Rank 1 ACT_STBY(%)                   0.99 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 1 Rank 1 PRE_STBY(%)                   0.01 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 2 Rank 0 Read Cycles(%)                0.17 # % cycles the Rank performed a Read
+Channel 2 Rank 0 Write Cycles(%)               0.17 # % cycles the Rank performed a Write
+Channel 2 Rank 0 Read Other(%)                 0.17 # % cycles other Ranks on the channel performed a Read
+Channel 2 Rank 0 Write Other(%)                0.17 # % cycles other Ranks on the channel performed a Write
+Channel 2 Rank 0 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 2 Rank 0 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 2 Rank 0 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 2 Rank 0 ACT_STBY(%)                   0.99 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 2 Rank 0 PRE_STBY(%)                   0.01 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 2 Rank 1 Read Cycles(%)                0.17 # % cycles the Rank performed a Read
+Channel 2 Rank 1 Write Cycles(%)               0.17 # % cycles the Rank performed a Write
+Channel 2 Rank 1 Read Other(%)                 0.17 # % cycles other Ranks on the channel performed a Read
+Channel 2 Rank 1 Write Other(%)                0.17 # % cycles other Ranks on the channel performed a Write
+Channel 2 Rank 1 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 2 Rank 1 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 2 Rank 1 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 2 Rank 1 ACT_STBY(%)                   0.99 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 2 Rank 1 PRE_STBY(%)                   0.01 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 3 Rank 0 Read Cycles(%)                0.17 # % cycles the Rank performed a Read
+Channel 3 Rank 0 Write Cycles(%)               0.17 # % cycles the Rank performed a Write
+Channel 3 Rank 0 Read Other(%)                 0.17 # % cycles other Ranks on the channel performed a Read
+Channel 3 Rank 0 Write Other(%)                0.17 # % cycles other Ranks on the channel performed a Write
+Channel 3 Rank 0 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 3 Rank 0 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 3 Rank 0 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 3 Rank 0 ACT_STBY(%)                   0.99 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 3 Rank 0 PRE_STBY(%)                   0.01 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 3 Rank 1 Read Cycles(%)                0.17 # % cycles the Rank performed a Read
+Channel 3 Rank 1 Write Cycles(%)               0.17 # % cycles the Rank performed a Write
+Channel 3 Rank 1 Read Other(%)                 0.17 # % cycles other Ranks on the channel performed a Read
+Channel 3 Rank 1 Write Other(%)                0.17 # % cycles other Ranks on the channel performed a Write
+Channel 3 Rank 1 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 3 Rank 1 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 3 Rank 1 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 3 Rank 1 ACT_STBY(%)                   0.98 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 3 Rank 1 PRE_STBY(%)                   0.02 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+
+#-------------------------------------- Power Stats ----------------------------------------------
+Note:  1. termRoth/termWoth is the power dissipated in the ODT resistors when Read/Writes terminate 
+          in other ranks on the same channel
+#-------------------------------------------------------------------------------------------------
+
+Channel 0 Rank 0 Background(mw)             100.57 # depends only on Power Down time and time all banks were precharged
+Channel 0 Rank 0 Act(mW)                     40.51 # power spend bringing data to the row buffer
+Channel 0 Rank 0 Read(mW)                    45.63 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 0 Write(mW)                   45.77 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 0 Read Terminate(mW)           5.32 # power dissipated in ODT resistors during Read
+Channel 0 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 0 Rank 0 termRoth(mW)                41.37 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 0 termWoth(mW)                38.13 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 0 Refresh(mW)                  4.08 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 0 Rank 0 Total Rank Power(mW)      1285.58 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+Channel 0 Rank 1 Background(mw)             100.57 # depends only on Power Down time and time all banks were precharged
+Channel 0 Rank 1 Act(mW)                     37.38 # power spend bringing data to the row buffer
+Channel 0 Rank 1 Read(mW)                    45.61 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 1 Write(mW)                   45.75 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 1 Read Terminate(mW)           5.32 # power dissipated in ODT resistors during Read
+Channel 0 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 0 Rank 1 termRoth(mW)                41.40 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 1 termWoth(mW)                38.15 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 1 Refresh(mW)                  4.08 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 0 Rank 1 Total Rank Power(mW)      1273.01 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+Channel 1 Rank 0 Background(mw)             100.57 # depends only on Power Down time and time all banks were precharged
+Channel 1 Rank 0 Act(mW)                     36.79 # power spend bringing data to the row buffer
+Channel 1 Rank 0 Read(mW)                    45.62 # power spent doing a Read  after the Row Buffer is open
+Channel 1 Rank 0 Write(mW)                   45.76 # power spent doing a Write after the Row Buffer is open
+Channel 1 Rank 0 Read Terminate(mW)           5.32 # power dissipated in ODT resistors during Read
+Channel 1 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 1 Rank 0 termRoth(mW)                41.47 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 1 Rank 0 termWoth(mW)                38.22 # power dissipated in ODT resistors during Writes in other ranks
+Channel 1 Rank 0 Refresh(mW)                  4.08 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 1 Rank 0 Total Rank Power(mW)      1271.38 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+Channel 1 Rank 1 Background(mw)             100.57 # depends only on Power Down time and time all banks were precharged
+Channel 1 Rank 1 Act(mW)                     35.64 # power spend bringing data to the row buffer
+Channel 1 Rank 1 Read(mW)                    45.72 # power spent doing a Read  after the Row Buffer is open
+Channel 1 Rank 1 Write(mW)                   45.86 # power spent doing a Write after the Row Buffer is open
+Channel 1 Rank 1 Read Terminate(mW)           5.33 # power dissipated in ODT resistors during Read
+Channel 1 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 1 Rank 1 termRoth(mW)                41.38 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 1 Rank 1 termWoth(mW)                38.14 # power dissipated in ODT resistors during Writes in other ranks
+Channel 1 Rank 1 Refresh(mW)                  4.08 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 1 Rank 1 Total Rank Power(mW)      1266.92 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+Channel 2 Rank 0 Background(mw)             100.57 # depends only on Power Down time and time all banks were precharged
+Channel 2 Rank 0 Act(mW)                     36.34 # power spend bringing data to the row buffer
+Channel 2 Rank 0 Read(mW)                    45.63 # power spent doing a Read  after the Row Buffer is open
+Channel 2 Rank 0 Write(mW)                   45.77 # power spent doing a Write after the Row Buffer is open
+Channel 2 Rank 0 Read Terminate(mW)           5.32 # power dissipated in ODT resistors during Read
+Channel 2 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 2 Rank 0 termRoth(mW)                41.44 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 2 Rank 0 termWoth(mW)                38.19 # power dissipated in ODT resistors during Writes in other ranks
+Channel 2 Rank 0 Refresh(mW)                  4.08 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 2 Rank 0 Total Rank Power(mW)      1269.35 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+Channel 2 Rank 1 Background(mw)             100.57 # depends only on Power Down time and time all banks were precharged
+Channel 2 Rank 1 Act(mW)                     37.37 # power spend bringing data to the row buffer
+Channel 2 Rank 1 Read(mW)                    45.68 # power spent doing a Read  after the Row Buffer is open
+Channel 2 Rank 1 Write(mW)                   45.82 # power spent doing a Write after the Row Buffer is open
+Channel 2 Rank 1 Read Terminate(mW)           5.33 # power dissipated in ODT resistors during Read
+Channel 2 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 2 Rank 1 termRoth(mW)                41.39 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 2 Rank 1 termWoth(mW)                38.15 # power dissipated in ODT resistors during Writes in other ranks
+Channel 2 Rank 1 Refresh(mW)                  4.08 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 2 Rank 1 Total Rank Power(mW)      1273.56 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+Channel 3 Rank 0 Background(mw)             100.57 # depends only on Power Down time and time all banks were precharged
+Channel 3 Rank 0 Act(mW)                     36.95 # power spend bringing data to the row buffer
+Channel 3 Rank 0 Read(mW)                    45.69 # power spent doing a Read  after the Row Buffer is open
+Channel 3 Rank 0 Write(mW)                   45.83 # power spent doing a Write after the Row Buffer is open
+Channel 3 Rank 0 Read Terminate(mW)           5.33 # power dissipated in ODT resistors during Read
+Channel 3 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 3 Rank 0 termRoth(mW)                41.41 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 3 Rank 0 termWoth(mW)                38.17 # power dissipated in ODT resistors during Writes in other ranks
+Channel 3 Rank 0 Refresh(mW)                  4.08 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 3 Rank 0 Total Rank Power(mW)      1272.16 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+Channel 3 Rank 1 Background(mw)             100.57 # depends only on Power Down time and time all banks were precharged
+Channel 3 Rank 1 Act(mW)                     39.90 # power spend bringing data to the row buffer
+Channel 3 Rank 1 Read(mW)                    45.66 # power spent doing a Read  after the Row Buffer is open
+Channel 3 Rank 1 Write(mW)                   45.79 # power spent doing a Write after the Row Buffer is open
+Channel 3 Rank 1 Read Terminate(mW)           5.32 # power dissipated in ODT resistors during Read
+Channel 3 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 3 Rank 1 termRoth(mW)                41.45 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 3 Rank 1 termWoth(mW)                38.20 # power dissipated in ODT resistors during Writes in other ranks
+Channel 3 Rank 1 Refresh(mW)                  4.08 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 3 Rank 1 Total Rank Power(mW)      1283.89 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------------------------
+Total memory system power = 10.195848 W
+Miscellaneous system power = 40 W  # Processor uncore power, disk, I/O, cooling, etc.
+Processor core power = 10.000000 W  # Assuming that each core consumes 10 W when running
+Total system power = 60.195847 W # Sum of the previous three lines
+Energy Delay product (EDP) = 1.438583732 J.s
+
+
+
+
+............... ORAM Stats ...............
+
+Execution Time     1562.625000 s
+Trace Size         1000018
+Invoke Mem #       316740
+ORAM Access #      734698
+Rho Access #       0
+ORAM Dummy #       2128
+Rho  Dummy #       0
+Prefetch #         129
+Pos1 #             91
+Pos2 #             38
+Pos1 Hit           0.239934%
+Pos2 Hit           0.542694%
+Pos1 hit #         590
+Pos2 hit #         944
+Pos1 acc #         245901
+Pos2 acc #         173947
+Pos1 conf #        0
+Pos2 conf #        0
+Case1 #            2247
+Case2 #            10
+Case3 #            28
+PLB pos1 #         64
+Stash pos1 #       1
+Buffer pos1 #      2091
+PLB pos1 hit #     70495
+PLB pos2 hit #     71364
+PLB pos0 hit       0.102614%
+PLB pos1 hit       22.280623%
+PLB pos2 hit       29.091235%
+Mem Cycles #       737297
+oramQ Size         335
+Bk Evict           0.000000%
+Cache Hit          82.758110%
+Cache Evict        83.701036%
+Rho Hit            0.000000%
+Rho Bk Evict       -nan%
+
