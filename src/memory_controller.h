@@ -20,8 +20,8 @@
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
-#define PREFETCH_ENABLE 1    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
+#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
+#define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -198,7 +198,7 @@ int assign_a_path(int addr);
 void print_cap_percent();
 int concat(int a, int b);
 int digcount(int num);
-int index_to_addr(int index, int slot);
+int index_to_addr(int index);
 void rho_alloc();
 void rho_access(int addr, int label);
 int rho_lookup(int addr);

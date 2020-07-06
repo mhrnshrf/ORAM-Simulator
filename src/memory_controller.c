@@ -74,6 +74,7 @@ int PosMap[BLOCK];          // position map
 Slot Stash[STASH_SIZE];     // stash
 int PLB[PLB_SIZE] = {[0 ... PLB_SIZE-1] = -1};   // posmap lookaside buffer
 EntryBuf PreBuffer[PREFETCH_BUF_SIZE]; // prefetch buffer
+int SubMap[NODE];          // subtree address map
 
 int intended = -1;         // index of intended block in stash
 bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
@@ -494,6 +495,12 @@ void oram_init(){
     
 
   }
+
+  for (int i = 0; i < NODE; i++)
+  {
+    SubMap[i] = index_to_addr(i);
+  }
+  
 }
 
 void print_count_level(){
@@ -675,7 +682,8 @@ void read_path(int label){
       {
         if (i >= TOP_CACHE_VAR)
         {
-          int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
+          // int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
+          int  addr = SUBTREE_ENABLE ? SubMap[index]+j : (index*Z_VAR+j);
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
         }
 
@@ -769,7 +777,7 @@ void write_path(int label){
       {
         if (i >= TOP_CACHE_VAR)
         {
-          addr = SUBTREE_ENABLE ? index_to_addr(index, g):(index*Z_VAR+g);
+          addr = SUBTREE_ENABLE ?  SubMap[index]+g:(index*Z_VAR+g);
           // insert_write (addr, orig_cycle, orig_thread, orig_instr);
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
         }
@@ -794,7 +802,7 @@ void write_path(int label){
         {
           if (i >= TOP_CACHE_VAR)
           {
-            addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
+            addr = SUBTREE_ENABLE ?  SubMap[index]+j : (index*Z_VAR+j);
             // insert_write (addr, orig_cycle, orig_thread, orig_instr);
             insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
           }
@@ -803,7 +811,7 @@ void write_path(int label){
         {
           if (i >= TOP_CACHE_VAR)
           {
-            addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
+            addr = SUBTREE_ENABLE ?  SubMap[index]+j: (index*Z_VAR+j);
             // insert_write (addr, orig_cycle, orig_thread, orig_instr);
             insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
           }
@@ -1719,7 +1727,7 @@ void print_cap_percent(){
 
 
 // translate ORAM tree index to DRAM address using subtree scheme to exploit channel parallelism
-int index_to_addr(int index, int slot){
+int index_to_addr(int index){
   int level = floor(log_base2(index+1));
   int sublevel = floor(level/SUBTREE_LEVEL);
   int inner_sublevel = level - sublevel*SUBTREE_LEVEL;
@@ -1732,7 +1740,7 @@ int index_to_addr(int index, int slot){
   int head_of_curr_sublevel = pow(2, inner_sublevel) - 1;
   int distance_from_root_subtree = head_of_curr_sublevel + horiz_distance_index_from_head -  num_sublevel_passed * pow(2, inner_sublevel);
   int addr = root_of_curr_subtree + distance_from_root_subtree;
-  addr = addr*Z_VAR + slot;
+  addr = addr*Z_VAR;
   // addr = addr << (int)log2(BLOCK_SIZE);
   return addr;
 }
@@ -1749,7 +1757,7 @@ void test_subtree(){
 		for (int i = 0; i < LEVEL; i++)
 		{
 			int idx = calc_index(pl, i);
-			int addr = index_to_addr(idx,0);
+			int addr = index_to_addr(idx)+0;
 			printf("@ Level: %d		index: %d		addr: %d\n", i, idx, addr);
 		}
 	}
@@ -1765,7 +1773,7 @@ void test_subtree(){
 		for (int j = 0; j < Z; j++)
 		{
 
-			int addr = index_to_addr(i, j);
+			int addr = index_to_addr(i)+j;
 			level = calc_level(i);
 			if (level != prevlevel && j == 0)
 			{
@@ -2169,9 +2177,14 @@ void invoke_prefetch(){
   if (oramQ->size != 0)
   {
     curr_addr = oramQ->head->orig_addr;
-    curr_addr = byteAddr_to_blockAddr(curr_addr);
+  }
+  else
+  {
+    curr_addr = curr_trace;
   }
   
+  
+  curr_addr = byteAddr_to_blockAddr(curr_addr);
   
 
   int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
