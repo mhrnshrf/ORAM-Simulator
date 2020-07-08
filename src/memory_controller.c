@@ -1119,10 +1119,21 @@ int get_stash(int addr){
 
 // check whether a block exist in stash
 bool stash_contain(int addr){
+  int count = 0;
   for(int k= 0; k < STASH_SIZE_VAR; k++)
   {
+    if (count > stashctr)
+    {
+      break;    // break if already seen all the real blocks in the stash
+    }
+    
     int stash_addr = (RHO_ENABLE && (TREE_VAR == RHO)) ? RhoStash[k].addr : Stash[k].addr;
     bool stash_real = (RHO_ENABLE && (TREE_VAR == RHO)) ? RhoStash[k].isReal :  Stash[k].isReal;
+    if (stash_real)
+    {
+      count++;
+    }
+    
     if (stash_addr == addr && stash_real)
     {
       return true;
@@ -1928,7 +1939,9 @@ void rho_access(int addr, int label){
 
 // when a block gets evicted from llc it is placed into the rho
 void rho_insert(int physical_address){
-  int addr = (int)(physical_address & (BLOCK-1));
+  // int addr = (int)(physical_address & (BLOCK-1));
+  int addr = byteAddr_to_blockAddr(physical_address);
+
   int index = addr % RHO_SET;
 
   int victim = -1;
@@ -2182,7 +2195,7 @@ void invoke_prefetch(){
   {
     curr_addr = curr_trace;
   }
-  
+
   
   curr_addr = byteAddr_to_blockAddr(curr_addr);
   
@@ -2215,7 +2228,6 @@ void invoke_prefetch(){
       bufferpos1++;
     }
     
-    
     if (!plb_contain(pos1_next) && !stash_contain(pos1_next) && !buffer_contain(pos1_next))
     {
       // curr_trace = curr_trace + (1 << (int)log2(X));
@@ -2242,7 +2254,16 @@ void invoke_prefetch(){
       case3++;
     }
   }
+
+
+  // int cand_pos1 = (candidate/pow(X,1));
+  // int pos1 = (curr_addr/pow(X,1));
+  // if (cand_pos1 != pos1)
+  // {
+  //   candidate = - 1;
+  // }
   
+
     
   if (candidate != -1)
   {

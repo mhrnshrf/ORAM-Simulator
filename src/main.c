@@ -915,7 +915,7 @@ int main(int argc, char * argv[])
 				eviction_writeback[numc] = false;
 				if (RHO_ENABLE)
 				{
-					int masked_addr = (int)(evicted[numc].addr & (BLOCK-1));
+					int masked_addr = byteAddr_to_blockAddr(evicted[numc].addr);
 					if (rho_lookup(masked_addr) == -1)
 					{
 						rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
