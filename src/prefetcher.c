@@ -10,6 +10,11 @@ char LRU[NUM_SET][NUM_WAY];                   // an array to keep track of lru f
 MatchType INDEX_VAR = PC;
 MatchType TAG_VAR = PC_ADDR;
 
+
+// profiling stat
+int match_hit = 0;
+
+
 // invalidate all cahce blocks upon init
 void table_init(){
     for (unsigned int i = 0; i < NUM_SET; i++)
@@ -144,21 +149,21 @@ bool match_tag(Event e, int index, int way){
 }
 
 // return true on hit and false on miss
-bool table_access(Event e){
+int table_access(Event e){
     unsigned int index = get_index(e);
-    unsigned int tag = get_tag(addr);
 
     for (unsigned int j = 0; j < NUM_WAY; j++)
     {
         // hit
         if (match_tag(e, index, j))
         {   
-            update_LRU(index, j);  
-            return true;    
+            update_LRU(index, j);
+            match_hit++;  
+            return HistoryTable[index][j].candidate;    
         }        
     }
     // miss
-    return false;
+    return -1;
 }
 
 
@@ -179,7 +184,7 @@ void table_fill(Event e, unsigned int candidate){
     HistoryTable[index][way].tag.pc = e.pc;
     HistoryTable[index][way].tag.addr = e.addr;
     HistoryTable[index][way].tag.offset = e.offset;
-    HistoryTable[index][way].addr = candidate;
+    HistoryTable[index][way].candidate = candidate;
     reset_LRU(index, way);  
 
 }

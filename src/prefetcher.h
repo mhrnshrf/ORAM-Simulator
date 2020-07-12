@@ -13,8 +13,7 @@
 
 typedef enum {PC, ADDR, OFFSET, PC_ADDR, PC_OFFSET} MatchType;
 
-#define INDEX_TYPE PC
-#define TAG_TYPE PC_ADDR
+extern int match_hit;
 
 enum{
   NUM_SET = (unsigned int)(HISTORY_TABLE_ENTRY)/NUM_WAY,  // # sets
@@ -36,7 +35,7 @@ typedef struct HistEntry{
   // unsigned int tag;        
   bool valid;
   Event tag;          // the tuple of events that is the key to lookup history table, it can be pc+addr, pc+offset or only pc
-  unsigned int addr;  // the candidate address to prefetch
+  unsigned int candidate;  // the candidate address to prefetch
 } HistEntry;
 
 
