@@ -30,7 +30,7 @@ void table_init(){
     }
 }
 
-void update_LRU(unsigned int index, unsigned int way){
+void updateLRU_hist(unsigned int index, unsigned int way){
     if (LRU[index][way] == 255)
     {
         LRU[index][way] = 0;
@@ -41,13 +41,13 @@ void update_LRU(unsigned int index, unsigned int way){
     } 
 }
 
-void reset_LRU(unsigned int index, unsigned int way){
+void resetLRU_hist(unsigned int index, unsigned int way){
     LRU[index][way] = 1;
 
 }
 
 
-int find_spot(unsigned int index){
+int find_spot_hist(unsigned int index){
     for (unsigned int j = 0; j < NUM_WAY; j++)
     {
         if (!HistoryTable[index][j].valid)
@@ -60,7 +60,7 @@ int find_spot(unsigned int index){
 
 
 // find the tableline with the least recently used
-int find_victim(unsigned int index) {
+int find_victim_hist(unsigned int index) {
     int victim = -1;
     for (unsigned int j = 0; j < NUM_WAY; j++)
     {
@@ -76,10 +76,7 @@ int find_victim(unsigned int index) {
 
 
 
-unsigned int get_index(Event e){
-    // unsigned int index = addr << TAG_WIDTH;
-    // index = index >> (TAG_WIDTH+OFFSET_WIDTH);
-    // return index;
+unsigned int index_hist(Event e){
     unsigned int index; 
     switch (INDEX_VAR)
     {
@@ -97,10 +94,6 @@ unsigned int get_index(Event e){
     return index;
 }
 
-unsigned int get_tag(unsigned int addr){
-    unsigned int tag = addr >> (INDEX_WIDTH+OFFSET_WIDTH);
-    return tag;
-}
 
 bool match_tag(Event e, int index, int way){
     if (HistoryTable[index][way].valid)
@@ -150,14 +143,14 @@ bool match_tag(Event e, int index, int way){
 
 // return true on hit and false on miss
 int table_access(Event e){
-    unsigned int index = get_index(e);
+    unsigned int index = index_hist(e);
 
     for (unsigned int j = 0; j < NUM_WAY; j++)
     {
         // hit
         if (match_tag(e, index, j))
         {   
-            update_LRU(index, j);
+            updateLRU_hist(index, j);
             match_hit++;  
             return HistoryTable[index][j].candidate;    
         }        
@@ -169,15 +162,15 @@ int table_access(Event e){
 
 // try to fill the table with new data, it may lead to eviction ~~~> evicted entry is simply overwritten
 void table_fill(Event e, unsigned int candidate){
-    unsigned int index = get_index(e);  
+    unsigned int index = index_hist(e);  
 
     // miss only
-    int way = find_spot(index);
+    int way = find_spot_hist(index);
 
     // miss & evict
     if (way == -1)
     {
-        way = find_victim(index);
+        way = find_victim_hist(index);
     }
 
     HistoryTable[index][way].valid = true;
@@ -185,7 +178,7 @@ void table_fill(Event e, unsigned int candidate){
     HistoryTable[index][way].tag.addr = e.addr;
     HistoryTable[index][way].tag.offset = e.offset;
     HistoryTable[index][way].candidate = candidate;
-    reset_LRU(index, way);  
+    resetLRU_hist(index, way);  
 
 }
 

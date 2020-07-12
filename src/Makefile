@@ -2,7 +2,7 @@
 OUT = usimm
 BINDIR = ../bin
 OBJDIR = ../obj
-OBJS = $(OBJDIR)/main.o $(OBJDIR)/memory_controller.o $(OBJDIR)/scheduler.o $(OBJDIR)/cache.o
+OBJS = $(OBJDIR)/main.o $(OBJDIR)/memory_controller.o $(OBJDIR)/scheduler.o $(OBJDIR)/cache.o $(OBJDIR)/prefetcher.o
 CC = gcc
 DEBUG = -g
 CFLAGS = -std=c99 -Wall -c $(DEBUG) 
@@ -13,11 +13,11 @@ $(BINDIR)/$(OUT): $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o $(BINDIR)/$(OUT)	-lm 
 	chmod 777 $(BINDIR)/$(OUT)
 
-$(OBJDIR)/main.o: main.c processor.h configfile.h memory_controller.h scheduler.h params.h cache.h
+$(OBJDIR)/main.o: main.c processor.h configfile.h memory_controller.h scheduler.h params.h cache.h prefetcher.h
 	$(CC) $(CFLAGS) main.c -o $(OBJDIR)/main.o -lm 
 	chmod 777 $(OBJDIR)/main.o
 
-$(OBJDIR)/memory_controller.o: memory_controller.c utlist.h utils.h params.h memory_controller.h scheduler.h processor.h cache.h
+$(OBJDIR)/memory_controller.o: memory_controller.c utlist.h utils.h params.h memory_controller.h scheduler.h processor.h cache.h prefetcher.h
 	$(CC) $(CFLAGS) memory_controller.c -o $(OBJDIR)/memory_controller.o -lm 
 	chmod 777 $(OBJDIR)/memory_controller.o
 
@@ -28,6 +28,10 @@ $(OBJDIR)/scheduler.o: scheduler.c scheduler.h utlist.h utils.h memory_controlle
 $(OBJDIR)/cache.o: cache.c cache.h configfile.h params.h 
 	$(CC) $(CFLAGS) cache.c -o $(OBJDIR)/cache.o -lm 
 	chmod 777 $(OBJDIR)/cache.o
+
+$(OBJDIR)/prefetcher.o: prefetcher.c prefetcher.h configfile.h params.h 
+	$(CC) $(CFLAGS) prefetcher.c -o $(OBJDIR)/prefetcher.o -lm 
+	chmod 777 $(OBJDIR)/prefetcher.o	
 
 clean:
 	rm -f $(BINDIR)/$(OUT) $(OBJS)

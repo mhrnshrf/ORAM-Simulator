@@ -40,10 +40,9 @@ typedef struct HistEntry{
 
 
 void table_init();
-bool table_access(Event e);
+int table_access(Event e);
 void table_fill(Event e, unsigned int candidate);
-unsigned int get_tag(unsigned int addr);
-unsigned int get_index(Event e);
+unsigned int index_hist(Event e);
 
 
 #endif // __PREFETCHER_HH__
