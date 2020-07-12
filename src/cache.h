@@ -11,7 +11,7 @@
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
 
-enum reqlkdgdjffn {CREAD = 'R', CWRITE = 'W'};
+enum reqType {CREAD = 'R', CWRITE = 'W'};
 enum status {MISS = false, HIT = true};
 enum eviction{NO_EVICT = -1};
 

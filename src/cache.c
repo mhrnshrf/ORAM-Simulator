@@ -6,7 +6,7 @@
 
 
 Cacheline LLC[NUM_SET][NUM_WAY];     // the cache
-char LRU[NUM_SET][NUM_WAY];                  // a array to keep track of lru for eviction
+char LRU[NUM_SET][NUM_WAY];          // an array to keep track of lru for eviction
 
 // invalidate all cahce blocks upon init
 void cache_init(){
