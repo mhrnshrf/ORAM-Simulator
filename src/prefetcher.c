@@ -8,7 +8,7 @@
 HistEntry HistoryTable[NUM_SET_HIST][NUM_WAY_HIST];     // the history table
 char LRU[NUM_SET_HIST][NUM_WAY_HIST];                   // an array to keep track of lru for eviction
 MatchType INDEX_VAR = PC;
-MatchType TAG_VAR = PC_OFFSET;
+MatchType TAG_VAR = PC_ADDR;
 
 
 // profiling stat

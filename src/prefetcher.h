@@ -25,9 +25,9 @@ enum{
 };
 
 typedef struct Event{
-    long long int pc;
-    unsigned int addr;
-    char offset;
+    long long int pc;   // trigger pc
+    unsigned int addr;  // trigger page addr
+    char offset;        // trigger block offset in the page
 }Event; 
 
 

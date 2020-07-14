@@ -848,7 +848,7 @@ int main(int argc, char * argv[])
 								{
 									fill_access++;
 									Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
-									if (table_access(e) == -1)
+									if ((table_access(e) == -1) && (__builtin_popcount(curr_footprint) > 1))
 									{
 										fill_miss++;
 										table_fill(e, curr_footprint);
@@ -865,6 +865,25 @@ int main(int argc, char * argv[])
 								{
 									footprint_update(addr[numc]);
 								}
+
+								// unsigned int region = region_addr(addr[numc]);
+								// if (region != curr_region)
+								// {
+								// 	fill_access++;
+								// 	Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
+								// 	if (table_access(e) == -1)
+								// 	{
+								// 		fill_miss++;
+								// 		table_fill(e, curr_footprint);
+								// 	}
+									
+								// 	curr_page = page;
+								// 	curr_pc = instrpc[numc];
+								// 	curr_offset = offset_val(addr[numc]);
+								// 	curr_footprint = 0;
+								// 	footprint_update(addr[numc]);
+								// }
+
 								
 								
 								int victim = cache_fill(addr[numc], opertype[numc]);

@@ -192,10 +192,25 @@ unsigned int block_addr(long long int physical_addr){
 
 // convert byte address to page address, each page is 4KB i.e 64 blocks
 unsigned int page_addr(long long int physical_addr){
-  unsigned int addr =block_addr(physical_addr);
+  unsigned int addr = block_addr(physical_addr);
   addr = addr >> (unsigned int) log2(PAGE_SIZE/BLOCK_SIZE);
   return addr;
 }
+
+
+
+unsigned int region_addr(long long int physical_addr){
+  unsigned int addr = block_addr(physical_addr);
+  addr = addr >> (unsigned int) log2((X*PAGE_SIZE)/BLOCK_SIZE);
+  return addr;
+}
+
+unsigned int subregion_addr(long long int physical_addr){
+  unsigned int addr = block_addr(physical_addr);
+  addr = addr >> (unsigned int) log2((PAGE_SIZE/4)/BLOCK_SIZE);
+  return addr;
+}
+
 
 char offset_val(long long int addr){
   unsigned int block = block_addr(addr);
@@ -545,10 +560,10 @@ void oram_init(){
 
   }
 
-  for (int i = 0; i < NODE; i++)
-  {
-    SubMap[i] = index_to_addr(i);
-  }
+  // for (int i = 0; i < NODE; i++)
+  // {
+  //   SubMap[i] = index_to_addr(i);
+  // }
   
 }
 
@@ -2335,23 +2350,29 @@ void invoke_prefetch(){
 
   int candidate = -1;
   unsigned int addr = block_addr(curr_trace);
-  bool pos1_needed[4] = {false}; // flag to determine whether footprint suggest to prefetch pos1 nexts
-  int pos1_next[4];              // pos1_next[0] is pos1 of current block address
-  int pos2;
 
+  bool pos1_needed[4] = {false};     // flag to determine whether footprint suggest to prefetch pos1 nexts
+  bool pos1_possible[4] = {false};   // flag to determine whether prefetch pos1 nexts can be prefetched
+  int pos1_count[4] = {0};           // popcount of pos1 nexts
+  int pos1_next[4];                  // pos1_next[0] is pos1 of current block address
+  int pos2;
+  int max = 0;
 
   Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
   unsigned long long int footprint = table_access(e);
 
   if (footprint != -1)
   {
+    // printf("\n\n\n@ trace %d\n", tracectr);
     for (int i = 0; i < 4; i++)
     {
-      pos1_needed[i] = ((footprint & (0xf<<(i*4))) != 0);
+      pos1_needed[i] = ((footprint & (0xffff<<(i*X))) != 0);
+      pos1_count[i] = __builtin_popcount((footprint & (0xffff<<(i*X))));
+      // printf("pos1[%d]  %s   popcount: %d\n", i, pos1_needed[i]?"needed":"not needed", pos1_count[i]);
     }
   } 
 
-  for (int i = 1; i < 4; i++)
+  for (int i = 0; i < 4; i++)
   {
     if (pos1_needed[i])
     {
@@ -2366,14 +2387,26 @@ void invoke_prefetch(){
         if (!plb_contain(pos1_next[i]) && !stash_contain(pos1_next[i]) && !buffer_contain(pos1_next[i]))
         {
           case3++;
-          candidate = pos1_next[i];
-          pos_var = POS1;
+          pos1_possible[i] = true;
           break;
         }
       }
     }
-    
   }
+
+  for (int i = 0; i < 4; i++)
+  {
+    if (pos1_possible[i])
+    {
+      if (pos1_count[i] > max)
+      {
+        max = pos1_count[i];
+        candidate = pos1_next[i];
+        pos_var = POS1;
+      }
+    }
+  }
+  
 
   if (candidate != -1)
   {
