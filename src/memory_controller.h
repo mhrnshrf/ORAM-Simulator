@@ -11,8 +11,9 @@
 
 #include <math.h>
 // other simulation parameter
-#define TRACE_SIZE 1000000 // # addr read from trace file
+#define TRACE_SIZE 1000000  // # addr read from trace file
 #define QUEUE_SIZE 1000     // oramq capacity
+#define PAGE_SIZE 4096      // page size in byte ~~~> 4KB
 
 // enable/disable options config
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea
@@ -144,6 +145,10 @@ extern int case3;
 extern int plbpos1;
 extern int stashpos1;
 extern int bufferpos1;
+extern int curr_page;
+extern long long int curr_pc;
+extern char curr_offset;
+extern unsigned long long int curr_footprint;
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
@@ -221,7 +226,11 @@ void invoke_prefetch();
 void insert_buffer(int addr);
 bool buffer_contain(int addr);
 int buffer_index(int addr);
-unsigned int byteAddr_to_blockAddr(long long int physical_addr);
+unsigned int block_addr(long long int physical_addr);
+unsigned int page_addr(long long int physical_addr);
+char offset_val(long long int addr);
+void footprint_update(long long int addr);
+void test_footprint();
 
 // Mehrnoosh.
 

@@ -5,21 +5,22 @@
 
 
 
-HistEntry HistoryTable[NUM_SET][NUM_WAY];     // the history table
-char LRU[NUM_SET][NUM_WAY];                   // an array to keep track of lru for eviction
+HistEntry HistoryTable[NUM_SET_HIST][NUM_WAY_HIST];     // the history table
+char LRU[NUM_SET_HIST][NUM_WAY_HIST];                   // an array to keep track of lru for eviction
 MatchType INDEX_VAR = PC;
-MatchType TAG_VAR = PC_ADDR;
+MatchType TAG_VAR = PC_OFFSET;
 
 
 // profiling stat
 int match_hit = 0;
+int hist_access = 0;
 
 
 // invalidate all cahce blocks upon init
 void table_init(){
-    for (unsigned int i = 0; i < NUM_SET; i++)
+    for (unsigned int i = 0; i < NUM_SET_HIST; i++)
     {
-        for (unsigned int j = 0; j < NUM_WAY; j++)
+        for (unsigned int j = 0; j < NUM_WAY_HIST; j++)
         {
             // HistoryTable[i][j].dirty = false;
             HistoryTable[i][j].valid = false;
@@ -48,7 +49,7 @@ void resetLRU_hist(unsigned int index, unsigned int way){
 
 
 int find_spot_hist(unsigned int index){
-    for (unsigned int j = 0; j < NUM_WAY; j++)
+    for (unsigned int j = 0; j < NUM_WAY_HIST; j++)
     {
         if (!HistoryTable[index][j].valid)
         {
@@ -62,7 +63,7 @@ int find_spot_hist(unsigned int index){
 // find the tableline with the least recently used
 int find_victim_hist(unsigned int index) {
     int victim = -1;
-    for (unsigned int j = 0; j < NUM_WAY; j++)
+    for (unsigned int j = 0; j < NUM_WAY_HIST; j++)
     {
         unsigned int min = 256;
         if (LRU[index][j] < min)
@@ -81,13 +82,13 @@ unsigned int index_hist(Event e){
     switch (INDEX_VAR)
     {
     case PC:
-        index = e.pc % NUM_SET; 
+        index = e.pc % NUM_SET_HIST; 
         break;
     case ADDR:
-        index = e.pc % NUM_SET; 
+        index = e.pc % NUM_SET_HIST; 
         break;    
     default:
-        index = e.pc % NUM_SET;
+        index = e.pc % NUM_SET_HIST;
         break;
     }
 
@@ -142,17 +143,18 @@ bool match_tag(Event e, int index, int way){
 }
 
 // return true on hit and false on miss
-int table_access(Event e){
+long long int table_access(Event e){
+    hist_access++;
     unsigned int index = index_hist(e);
 
-    for (unsigned int j = 0; j < NUM_WAY; j++)
+    for (unsigned int j = 0; j < NUM_WAY_HIST; j++)
     {
         // hit
         if (match_tag(e, index, j))
         {   
             updateLRU_hist(index, j);
             match_hit++;  
-            return HistoryTable[index][j].candidate;    
+            return HistoryTable[index][j].footprint;    
         }        
     }
     // miss
@@ -161,7 +163,7 @@ int table_access(Event e){
 
 
 // try to fill the table with new data, it may lead to eviction ~~~> evicted entry is simply overwritten
-void table_fill(Event e, unsigned int candidate){
+void table_fill(Event e, unsigned long long int footprint){
     unsigned int index = index_hist(e);  
 
     // miss only
@@ -177,7 +179,7 @@ void table_fill(Event e, unsigned int candidate){
     HistoryTable[index][way].tag.pc = e.pc;
     HistoryTable[index][way].tag.addr = e.addr;
     HistoryTable[index][way].tag.offset = e.offset;
-    HistoryTable[index][way].candidate = candidate;
+    HistoryTable[index][way].footprint = footprint;
     resetLRU_hist(index, way);  
 
 }

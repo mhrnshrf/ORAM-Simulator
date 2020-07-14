@@ -42,6 +42,7 @@ float core_power=0;
 #include <sys/time.h>
 #include <time.h>
 #include "cache.h"
+#include "prefetcher.h"
 
 struct timeval sday, eday;
 long int period = 0;
@@ -77,6 +78,9 @@ bool skip_invokation = false;		// a flag to indicate whether oram invokation sho
 bool dummy_already_made = false;	// a flag to indicate whether a dummy access has already been made ~> for timing enabled
 
 int curr_access = -3; 	// the id of current access (oram or rho, real or dummy)
+
+int fill_access = 0;	// # prefetch history table access
+int fill_miss = 0;		// # miss on prefetch history table access
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -239,6 +243,7 @@ int main(int argc, char * argv[])
 	
 	// test_subtree();
 	
+	// test_footprint();
 
 	cache_init();
 	
@@ -247,7 +252,9 @@ int main(int argc, char * argv[])
 	rho_alloc();
 
 	oram_init();
-	
+
+
+
 	// switch_enqueue_to(HEAD);
 	// test_queue();
 	
@@ -819,7 +826,7 @@ int main(int argc, char * argv[])
 							}
 							else {
 								if (opertype[numc] == 'W') {
-									if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
+									if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
 										printf("Panic.  Poor trace format.\n");
 										return -3;
 									}
@@ -836,6 +843,30 @@ int main(int argc, char * argv[])
 							else // miss occured
 							{
 								missctr++;
+								unsigned int page = page_addr(addr[numc]);
+								if (page != curr_page)
+								{
+									fill_access++;
+									Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
+									if (table_access(e) == -1)
+									{
+										fill_miss++;
+										table_fill(e, curr_footprint);
+									}
+									
+									curr_page = page;
+									curr_pc = instrpc[numc];
+									curr_offset = offset_val(addr[numc]);
+									curr_footprint = 0;
+									footprint_update(addr[numc]);
+
+								}
+								else
+								{
+									footprint_update(addr[numc]);
+								}
+								
+								
 								int victim = cache_fill(addr[numc], opertype[numc]);
 								if ( victim != -1)
 								{
@@ -915,7 +946,7 @@ int main(int argc, char * argv[])
 				eviction_writeback[numc] = false;
 				if (RHO_ENABLE)
 				{
-					int masked_addr = byteAddr_to_blockAddr(evicted[numc].addr);
+					int masked_addr = block_addr(evicted[numc].addr);
 					if (rho_lookup(masked_addr) == -1)
 					{
 						rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
@@ -1212,6 +1243,12 @@ printf("Cache Hit          %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict        %f%%\n", 100*(double)evictctr/(missctr));
 printf("Rho Hit            %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("Rho Bk Evict       %f%%\n\n", 100*(double)rho_bkctr/rho_hit);
+printf("Fill hit           %f%%\n", 100*(double)(fill_access-fill_miss)/fill_access);
+printf("Fill hit #         %d\n", fill_access-fill_miss);
+printf("Fill access #      %d\n", fill_access);
+printf("Match hit          %f%%\n", 100*(double)(match_hit-(fill_access-fill_miss))/(hist_access-fill_access));
+printf("Match hit #        %d\n", match_hit-(fill_access-fill_miss));
+printf("Match access #     %d\n", hist_access-fill_access);
 
 // print_plb_stat();
 
