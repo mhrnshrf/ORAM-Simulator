@@ -298,6 +298,10 @@ int main(int argc, char * argv[])
   long long int *instrpc;
   int chips_per_rank=-1;
   // Mehrnoosh:
+  int *shad_nonmemops;
+  char *shad_opertype;
+  long long int *shad_addr;
+  long long int *shad_instrpc;
   int *oramid;
   int *tree;
   int *nonmemops_timing;
@@ -337,6 +341,10 @@ int main(int argc, char * argv[])
   oramid = (int *)malloc(sizeof(int)*NUMCORES);
   tree = (int *)malloc(sizeof(int)*NUMCORES);
   nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
+  shad_nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
+  shad_opertype = (char *)malloc(sizeof(char)*NUMCORES);
+  shad_addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+  shad_instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
   // Mehrnoosh.
   for (numc=0; numc < NUMCORES; numc++) {
      tif[numc] = fopen(argv[numc+2], "r");
@@ -344,6 +352,14 @@ int main(int argc, char * argv[])
        printf("Missing input trace file %d.  Quitting. \n",numc);
        return -5;
      }
+
+	// Mehrnoosh:
+	 shadtif[numc] = fopen(argv[numc+2], "r");
+     if (!shadtif[numc]) {
+       printf("Missing shadow input trace file %d.  Quitting. \n",numc);
+       return -5;
+     }
+	// Mehrnoosh.
 
      /* The addresses in each trace are given a prefix that equals
         their core ID.  If the input trace starts with "MT", it is
@@ -466,6 +482,10 @@ int main(int argc, char * argv[])
   for(numc=0; numc<NUMCORES; numc++)
   {
 	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+			  // Mehrnoosh:
+			  fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]);
+			  fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]);
+			  // Mehrnoosh:
 	        if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
 		  if (opertype[numc] == 'R') {
 		    if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
@@ -506,6 +526,7 @@ int main(int argc, char * argv[])
   while (!expt_done) {
 
 	// Mehrnoosh:
+	
 
 	no_miss_occured = true;
 
@@ -593,7 +614,6 @@ int main(int argc, char * argv[])
 
 
 	  // Mehrnoosh:
-
 		// if (plbQ->size > 1)
 		// {
 		// 	printf("plb queue: %d @ 	trace: %d\n", plbQ->size, tracectr);
@@ -697,6 +717,7 @@ int main(int argc, char * argv[])
 	  else { /* Done consuming non-memory-ops.  Must now consume the memory rd or wr. */
 			// Mehrnoosh:
 			// printf("cycle %lld   main: mem 	 trace: %d		req: %d\n", CYCLE_VAL, tracectr, reqctr);
+
 			// Mehrnoosh.
 	      if (opertype[numc] == 'R') {
 		  addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
@@ -806,6 +827,15 @@ int main(int argc, char * argv[])
 				{
 					if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 						// printf("while readline trace ctr: %d  \n", tracectr);
+						if (fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]))
+						{
+							if (sscanf(shadstr,"%d %c %Lx %Lx",&shad_nonmemops[numc],&shad_opertype[numc],&shad_addr[numc],&shad_instrpc[numc]) < 1) {
+										printf("SHADOW Panic.  Poor trace format.\n");
+										return -3;
+							}
+							next_trace = shad_addr[numc];
+						}
+						
 						if (evicted[numc].valid)
 						{
 							nonmemops[numc] = evicted[numc].nonmemops;
@@ -1277,7 +1307,7 @@ printf("Match hit #        %d\n", match_hit-(fill_access-fill_miss));
 printf("Match access #     %d\n\n\n", hist_access-fill_access);
 printf("PLB pos0 hit #     %lld\n", plb_hit[0]);
 printf("PLB pos1 hit #     %lld\n", plb_hit[1]);
-printf("PLB pos2 hit #     %lld\n", plb_hit[2]);
+printf("PLB pos2 hit #     %lld\n\n", plb_hit[2]);
 printf("PLB pos0 acc #     %lld\n", plb_access[0]);
 printf("PLB pos1 acc #     %lld\n", plb_access[1]);
 printf("PLB pos2 acc #     %lld\n", plb_access[2]);

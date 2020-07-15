@@ -20,9 +20,9 @@
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 0     // 0/1 flag to diable/enable having subtree adddressing scheme
-#define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
+#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
-#define PREFETCH_ENABLE 1    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
+#define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -75,7 +75,7 @@
 
 // prefetching config
 #define PREFETCH_BUF_SIZE 256
-#define PREFETCH_STRIDE 1
+#define PREFETCH_STRIDE 0
 
 
 
@@ -129,6 +129,7 @@ extern bool write_cache_hit;   // flag to be effective if write bypass is enable
 extern int dummyctr;
 extern int rho_dummyctr;
 extern int curr_trace;
+extern int next_trace;
 extern int pos1ctr;
 extern int pos2ctr;
 extern int pos1acc_ctr;

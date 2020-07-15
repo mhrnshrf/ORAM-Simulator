@@ -20,12 +20,13 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define CACHE_SIZE 262144  // in bytes ~~~> 256 KB
+#define CACHE_SIZE 524288  // in bytes ~~~> 512 KB
 #define NUM_WAY 2           // bytes ~~~> # way per set
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
+#define L1_LATENCY 3        // # cycles
 
-enum reqlkdgdjffn {CREAD = 'R', CWRITE = 'W'};
+enum reqType {CREAD = 'R', CWRITE = 'W'};
 enum status {MISS = false, HIT = true};
 enum eviction{NO_EVICT = -1};
 
@@ -201,16 +202,16 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 	    fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
 	    nonmemops = 0;	
 
-		int victim = cache_fill(*(unsigned int*)addr, 'R');
+		unsigned int victim = cache_fill(*(unsigned int*)addr, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			fprintf(trace,"%d W %d %p\n", nonmemops, victim,  ip);
+			fprintf(trace,"%d W %x %p\n", nonmemops, victim,  ip);
 		}
 	}
 	else	// hit
 	{
-		nonmemops++;
+		nonmemops += L1_LATENCY;
 	}
 
 }
@@ -223,16 +224,16 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	    fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
 	    nonmemops = 0;	
 
-		int victim = cache_fill(*(unsigned int*)addr, 'W');
+		unsigned int victim = cache_fill(*(unsigned int*)addr, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			fprintf(trace,"%d W %d %p\n", nonmemops, victim,  ip);
+			fprintf(trace,"%d W %x %p\n", nonmemops, victim,  ip);
 		}
 	}
 	else // hit
 	{
-		nonmemops++;
+		nonmemops += L1_LATENCY;
 	}
 }
 

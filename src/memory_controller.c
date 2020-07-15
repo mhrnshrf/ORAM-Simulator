@@ -83,6 +83,7 @@ int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 int candidate[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
 bool write_cache_hit = false;
 int curr_trace = -1; 	// the current trace address 
+int next_trace = 0; 	// the current trace address 
 int curr_page = 0; 	// the current page address 
 long long int curr_pc = 0; 	// the current pc address 
 char curr_offset = 0; 	// the current offset
@@ -2245,172 +2246,87 @@ void prefetch_access(int addr){
 
 }
 
-// void invoke_prefetch(){
-
-//   int candidate = -1;
-
-//   // int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
-//   // unsigned int curr_addr = block_addr(curr_trace);
-//   unsigned int curr_addr;
-//   if (oramQ->size != 0)
-//   {
-//     curr_addr = oramQ->head->orig_addr;
-//   }
-//   else
-//   {
-//     curr_addr = curr_trace;
-//   }
-
-  
-//   curr_addr = block_addr(curr_addr);
-  
-
-//   int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
-//   int pos2 = (curr_addr/pow(X,2));   // the 2nd posmap block of current trace ~>  + stride will be candidate for prefetching
-
-//   int pos1_next = pos1 + PREFETCH_STRIDE;
-//   int pos2_next = pos2 + PREFETCH_STRIDE;
-
-//   pos1 = concat(1,pos1);
-//   pos2 = concat(2,pos2);
-
-//   pos1_next = concat(1, pos1_next);
-//   pos2_next = concat(2, pos2_next);
-
-//   if (plb_contain(pos2) || stash_contain(pos2) || buffer_contain(pos2))
-//   {
-//     case1++;
-//     if (plb_contain(pos1_next))
-//     {
-//       plbpos1++;
-//     }
-//     else if (stash_contain(pos1_next))
-//     {
-//       stashpos1++;
-//     }
-//     else if (buffer_contain(pos1_next))
-//     {
-//       bufferpos1++;
-//     }
-    
-//     if (!plb_contain(pos1_next) && !stash_contain(pos1_next) && !buffer_contain(pos1_next))
-//     {
-//       // curr_trace = curr_trace + (1 << (int)log2(X));
-//       candidate = pos1_next; // if pos2 is available go ahead and preftech pos1
-//       pos_var = POS1;
-//       pos1ctr++;
-//     }
-//   } 
-//   else
-//   {
-//     candidate = pos2; // otherwise prefetch pos2
-//     pos_var = POS2;
-//     pos2ctr++;
-//     case2++;
-//   }
-//   if (candidate == -1)
-//   {
-//     if (!plb_contain(pos2_next) && !stash_contain(pos2_next) && !buffer_contain(pos2_next))
-//     {
-//       // curr_trace = curr_trace + (1 << 2*((int)log2(X)));
-//       candidate = pos2_next; // if still has no candidate prefetch pos2_next
-//       pos_var = POS2;
-//       pos2ctr++;
-//       case3++;
-//     }
-//   }
-
-
-
-    
-//   if (candidate != -1)
-//   {
-//     // printf("\n@ trace %d  prefetch:  pos%s   candidate: %x\n\n", tracectr, (pos_var == POS1)?"1":(pos_var == POS2)?"2":"?", candidate);
-//     prefetch_access(candidate);
-//   }
-//   else
-//   {
-//     dummy_access(ORAM);
-//   }
-  
-// }
-
-
 void invoke_prefetch(){
+
+  int candidate = -1;
 
   // int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
   // unsigned int curr_addr = block_addr(curr_trace);
+  unsigned int curr_addr;
   // if (oramQ->size != 0)
   // {
-  //   pa = oramQ->head->orig_addr;
+  //   curr_addr = oramQ->head->orig_addr;
   // }
   // else
   // {
-  //   pa = curr_trace;
+  //   curr_addr = curr_trace;
   // }
 
-  int candidate = -1;
-  unsigned int addr = block_addr(curr_trace);
-
-  bool pos1_needed[4] = {false};     // flag to determine whether footprint suggest to prefetch pos1 nexts
-  bool pos1_possible[4] = {false};   // flag to determine whether prefetch pos1 nexts can be prefetched
-  int pos1_count[4] = {0};           // popcount of pos1 nexts
-  int pos1_next[4];                  // pos1_next[0] is pos1 of current block address
-  int pos2;
-  int max = 0;
-
-  Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
-  unsigned long long int footprint = table_access(e);
-
-  if (footprint != -1)
-  {
-    // printf("\n\n\n@ trace %d\n", tracectr);
-    for (int i = 0; i < 4; i++)
-    {
-      pos1_needed[i] = ((footprint & (0xffff<<(i*X))) != 0);
-      pos1_count[i] = __builtin_popcount((footprint & (0xffff<<(i*X))));
-      // printf("pos1[%d]  %s   popcount: %d\n", i, pos1_needed[i]?"needed":"not needed", pos1_count[i]);
-    }
-  } 
-
-  for (int i = 0; i < 4; i++)
-  {
-    if (pos1_needed[i])
-    {
-      case1++;
-      pos1_next[i] = (addr/pow(X,1)) + i;  
-      pos2 = (pos1_next[i]/pow(X,1));
-      pos2 = concat(2, pos2);
-      pos1_next[i] = concat(1, pos1_next[i]);  
-      if (plb_contain(pos2) || stash_contain(pos2) || buffer_contain(pos2))
-      {
-        case2++;
-        if (!plb_contain(pos1_next[i]) && !stash_contain(pos1_next[i]) && !buffer_contain(pos1_next[i]))
-        {
-          case3++;
-          pos1_possible[i] = true;
-          break;
-        }
-      }
-    }
-  }
-
-  for (int i = 0; i < 4; i++)
-  {
-    if (pos1_possible[i])
-    {
-      if (pos1_count[i] > max)
-      {
-        max = pos1_count[i];
-        candidate = pos1_next[i];
-        pos_var = POS1;
-      }
-    }
-  }
+  
+  curr_addr = block_addr(next_trace);
   
 
+  int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
+  int pos2 = (curr_addr/pow(X,2));   // the 2nd posmap block of current trace ~>  + stride will be candidate for prefetching
+
+  int pos1_next = pos1 + PREFETCH_STRIDE;
+  int pos2_next = pos2 + PREFETCH_STRIDE;
+
+  pos1 = concat(1,pos1);
+  pos2 = concat(2,pos2);
+
+  pos1_next = concat(1, pos1_next);
+  pos2_next = concat(2, pos2_next);
+
+  if (plb_contain(pos2) || stash_contain(pos2) || buffer_contain(pos2))
+  {
+    case1++;
+    if (plb_contain(pos1_next))
+    {
+      plbpos1++;
+    }
+    else if (stash_contain(pos1_next))
+    {
+      stashpos1++;
+    }
+    else if (buffer_contain(pos1_next))
+    {
+      bufferpos1++;
+    }
+    
+    if (!plb_contain(pos1_next) && !stash_contain(pos1_next) && !buffer_contain(pos1_next))
+    {
+      // curr_trace = curr_trace + (1 << (int)log2(X));
+      candidate = pos1_next; // if pos2 is available go ahead and preftech pos1
+      pos_var = POS1;
+      pos1ctr++;
+    }
+  } 
+  else
+  {
+    candidate = pos2; // otherwise prefetch pos2
+    pos_var = POS2;
+    pos2ctr++;
+    case2++;
+  }
+  if (candidate == -1)
+  {
+    if (!plb_contain(pos2_next) && !stash_contain(pos2_next) && !buffer_contain(pos2_next))
+    {
+      // curr_trace = curr_trace + (1 << 2*((int)log2(X)));
+      candidate = pos2_next; // if still has no candidate prefetch pos2_next
+      pos_var = POS2;
+      pos2ctr++;
+      case3++;
+    }
+  }
+
+
+
+    
   if (candidate != -1)
   {
+    // printf("\n@ trace %d  prefetch:  pos%s   candidate: %x\n\n", tracectr, (pos_var == POS1)?"1":(pos_var == POS2)?"2":"?", candidate);
     prefetch_access(candidate);
   }
   else
@@ -2419,6 +2335,91 @@ void invoke_prefetch(){
   }
   
 }
+
+
+// void invoke_prefetch(){
+
+//   // int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
+//   // unsigned int curr_addr = block_addr(curr_trace);
+//   // if (oramQ->size != 0)
+//   // {
+//   //   pa = oramQ->head->orig_addr;
+//   // }
+//   // else
+//   // {
+//   //   pa = curr_trace;
+//   // }
+
+//   int candidate = -1;
+//   unsigned int addr = block_addr(curr_trace);
+
+//   bool pos1_needed[4] = {false};     // flag to determine whether footprint suggest to prefetch pos1 nexts
+//   bool pos1_possible[4] = {false};   // flag to determine whether prefetch pos1 nexts can be prefetched
+//   int pos1_count[4] = {0};           // popcount of pos1 nexts
+//   int pos1_next[4];                  // pos1_next[0] is pos1 of current block address
+//   int pos2;
+//   int max = 0;
+
+//   Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
+//   unsigned long long int footprint = table_access(e);
+
+//   if (footprint != -1)
+//   {
+//     // printf("\n\n\n@ trace %d\n", tracectr);
+//     for (int i = 0; i < 4; i++)
+//     {
+//       pos1_needed[i] = ((footprint & (0xffff<<(i*X))) != 0);
+//       pos1_count[i] = __builtin_popcount((footprint & (0xffff<<(i*X))));
+//       // printf("pos1[%d]  %s   popcount: %d\n", i, pos1_needed[i]?"needed":"not needed", pos1_count[i]);
+//     }
+//   } 
+
+//   for (int i = 0; i < 4; i++)
+//   {
+//     if (pos1_needed[i])
+//     {
+//       case1++;
+//       pos1_next[i] = (addr/pow(X,1)) + i;  
+//       pos2 = (pos1_next[i]/pow(X,1));
+//       pos2 = concat(2, pos2);
+//       pos1_next[i] = concat(1, pos1_next[i]);  
+//       if (plb_contain(pos2) || stash_contain(pos2) || buffer_contain(pos2))
+//       {
+//         case2++;
+//         if (!plb_contain(pos1_next[i]) && !stash_contain(pos1_next[i]) && !buffer_contain(pos1_next[i]))
+//         {
+//           case3++;
+//           pos1_possible[i] = true;
+//           break;
+//         }
+//       }
+//     }
+//   }
+
+//   for (int i = 0; i < 4; i++)
+//   {
+//     if (pos1_possible[i])
+//     {
+//       if (pos1_count[i] > max)
+//       {
+//         max = pos1_count[i];
+//         candidate = pos1_next[i];
+//         pos_var = POS1;
+//       }
+//     }
+//   }
+  
+
+//   if (candidate != -1)
+//   {
+//     prefetch_access(candidate);
+//   }
+//   else
+//   {
+//     dummy_access(ORAM);
+//   }
+  
+// }
 
 
 
