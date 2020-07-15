@@ -611,3 +611,227 @@ pos1[0]  needed   popcount: 10
 pos1[1]  needed   popcount: 2
 pos1[2]  needed   popcount: 10
 pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23167
+pos1[0]  needed   popcount: 10
+pos1[1]  needed   popcount: 2
+pos1[2]  needed   popcount: 10
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23257
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 2
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23264
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 2
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23268
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 2
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23273
+pos1[0]  needed   popcount: 3
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 3
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23278
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 8
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 8
+
+
+
+@ trace 23286
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 2
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23286
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 2
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23299
+pos1[0]  needed   popcount: 10
+pos1[1]  needed   popcount: 2
+pos1[2]  needed   popcount: 10
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23324
+pos1[0]  needed   popcount: 9
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 9
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23324
+pos1[0]  needed   popcount: 9
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 9
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23326
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 8
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 8
+
+
+
+@ trace 23326
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 8
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 8
+
+
+
+@ trace 23341
+pos1[0]  not needed   popcount: 0
+pos1[1]  needed   popcount: 2
+pos1[2]  not needed   popcount: 0
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23439
+pos1[0]  needed   popcount: 1
+pos1[1]  needed   popcount: 8
+pos1[2]  needed   popcount: 1
+pos1[3]  needed   popcount: 8
+
+
+
+@ trace 23523
+pos1[0]  needed   popcount: 2
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 2
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23578
+pos1[0]  needed   popcount: 7
+pos1[1]  needed   popcount: 13
+pos1[2]  needed   popcount: 7
+pos1[3]  needed   popcount: 13
+
+
+
+@ trace 23581
+pos1[0]  not needed   popcount: 0
+pos1[1]  needed   popcount: 2
+pos1[2]  not needed   popcount: 0
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23668
+pos1[0]  needed   popcount: 2
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 2
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23668
+pos1[0]  needed   popcount: 2
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 2
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23669
+pos1[0]  needed   popcount: 2
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 2
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23669
+pos1[0]  needed   popcount: 2
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 2
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23691
+pos1[0]  not needed   popcount: 0
+pos1[1]  needed   popcount: 2
+pos1[2]  not needed   popcount: 0
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23693
+pos1[0]  not needed   popcount: 0
+pos1[1]  needed   popcount: 2
+pos1[2]  not needed   popcount: 0
+pos1[3]  needed   popcount: 2
+
+
+
+@ trace 23726
+pos1[0]  needed   popcount: 2
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 2
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23726
+pos1[0]  needed   popcount: 2
+pos1[1]  not needed   popcount: 0
+pos1[2]  needed   popcount: 2
+pos1[3]  not needed   popcount: 0
+
+
+
+@ trace 23764
+pos1[0]  needed   popcount: 4
+pos1[1]  needed   popcount: 1
+pos1[2]  needed   popcount: 4
+pos1[3]  needed   popcount: 1
+
+
+
+@ trace 23844
+pos1[0]  not needed   popcount: 0
+pos1[1]  needed   popcount: 2
+pos1[2]  not needed   popcount: 0
+pos1[3]  needed   popcount: 2

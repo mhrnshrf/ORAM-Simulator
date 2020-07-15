@@ -1417,10 +1417,11 @@ void freecursive_access(int addr, char type){
             }
           }
         }
-        else
-        {
+        // else
+        // {
+        //   plb_hit[i]++;
+        // }
           plb_hit[i]++;
-        }
         
        // profiling.
         

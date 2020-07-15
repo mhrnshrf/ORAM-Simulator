@@ -36,6 +36,7 @@ int *prefixtable;
 long long int *time_done;
 long long int total_time_done;
 float core_power=0;
+FILE **shadtif;  /* The handles to the trace input files. */
 
 
 // Mehrnoosh:
@@ -300,6 +301,7 @@ int main(int argc, char * argv[])
   int *oramid;
   int *tree;
   int *nonmemops_timing;
+  char shadstr[MAXTRACELINESIZE];
   // Mehrnoosh.
 
   /* Initialization code. */
@@ -331,6 +333,7 @@ int main(int argc, char * argv[])
   prefixtable = (int *)malloc(sizeof(int)*NUMCORES);
   currMTapp = -1;
   // Mehrnoosh:
+  shadtif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
   oramid = (int *)malloc(sizeof(int)*NUMCORES);
   tree = (int *)malloc(sizeof(int)*NUMCORES);
   nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
@@ -848,10 +851,14 @@ int main(int argc, char * argv[])
 								{
 									fill_access++;
 									Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
-									if ((table_access(e) == -1) && (__builtin_popcount(curr_footprint) > 1))
+									if ((table_access(e) == -1))
 									{
 										fill_miss++;
-										table_fill(e, curr_footprint);
+										if ((__builtin_popcount(curr_footprint) > 1))
+										{
+											table_fill(e, curr_footprint);
+										}
+										
 									}
 									
 									curr_page = page;
@@ -1267,7 +1274,13 @@ printf("Fill hit #         %d\n", fill_access-fill_miss);
 printf("Fill access #      %d\n", fill_access);
 printf("Match hit          %f%%\n", 100*(double)(match_hit-(fill_access-fill_miss))/(hist_access-fill_access));
 printf("Match hit #        %d\n", match_hit-(fill_access-fill_miss));
-printf("Match access #     %d\n", hist_access-fill_access);
+printf("Match access #     %d\n\n\n", hist_access-fill_access);
+printf("PLB pos0 hit #     %lld\n", plb_hit[0]);
+printf("PLB pos1 hit #     %lld\n", plb_hit[1]);
+printf("PLB pos2 hit #     %lld\n", plb_hit[2]);
+printf("PLB pos0 acc #     %lld\n", plb_access[0]);
+printf("PLB pos1 acc #     %lld\n", plb_access[1]);
+printf("PLB pos2 acc #     %lld\n", plb_access[2]);
 
 // print_plb_stat();
 
