@@ -20,11 +20,11 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define CACHE_SIZE 524288  // in bytes ~~~> 512 KB
+#define CACHE_SIZE 524288   // in bytes ~~~> 512 KB
 #define NUM_WAY 2           // bytes ~~~> # way per set
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
-#define L1_LATENCY 3        // # cycles
+#define L1_LATENCY 3        // L1 latency in terms of # cycles 
 
 enum reqType {CREAD = 'R', CWRITE = 'W'};
 enum status {MISS = false, HIT = true};
@@ -203,10 +203,11 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 	    nonmemops = 0;	
 
 		long long int victim = cache_fill(*(unsigned int*)addr, 'R');
+        void * vp = &victim;
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			fprintf(trace,"%d W %p %p\n", nonmemops, victim,  ip);
+			fprintf(trace,"%d W %p %p\n", nonmemops, vp,  ip);
 		}
 	}
 	else	// hit
@@ -225,10 +226,11 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	    nonmemops = 0;	
 
 		long long int victim = cache_fill(*(unsigned int*)addr, 'W');
+        void * vp = &victim;
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			fprintf(trace,"%d W %p %p\n", nonmemops, victim,  ip);
+			fprintf(trace,"%d W %p %p\n", nonmemops, vp,  ip);
 		}
 	}
 	else // hit
