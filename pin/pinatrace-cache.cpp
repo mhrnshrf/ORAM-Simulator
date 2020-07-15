@@ -202,7 +202,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 	    fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
 	    nonmemops = 0;	
 
-		unsigned int victim = cache_fill(*(unsigned int*)addr, 'R');
+		long long int victim = cache_fill(*(unsigned int*)addr, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
@@ -224,7 +224,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	    fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
 	    nonmemops = 0;	
 
-		unsigned int victim = cache_fill(*(unsigned int*)addr, 'W');
+		long long int victim = cache_fill(*(unsigned int*)addr, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
