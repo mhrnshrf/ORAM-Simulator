@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define CACHE_SIZE 524288   // in bytes ~~~> 512 KB
+#define CACHE_SIZE 32768   // in bytes ~~~> 32 KB
 #define NUM_WAY 2           // bytes ~~~> # way per set
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
@@ -201,24 +201,27 @@ long long int hit = 0;
 VOID RecordMemRead(VOID * ip, VOID * addr)
 {
     access++;
+    nonmemops += L1_LATENCY;
 	if (!cache_access(*(unsigned int*)addr, 'R')) // miss
 	{
-	    // fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
-	    fprintf(trace,"%f\n", (double)100*hit/access);
-	    nonmemops = 0;	
+	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		long long int victim = cache_fill(*(unsigned int*)addr, 'R');
-        // unsigned long long int v = (unsigned long long int)victim;
+		long int victim = cache_fill(*(unsigned int*)addr, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			// fprintf(trace,"%d W 0x%llx %p\n", nonmemops, v,  ip);
+            unsigned long int v = (unsigned long int)victim;
+			fprintf(trace,"%d W 0x%lx %p\n", nonmemops, v,  ip);
 		}
+
+        nonmemops = L2_LATENCY;
+	    fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
+
+	    nonmemops = 0;	
 	}
 	else	// hit
 	{
         hit++;
-		nonmemops++;
 	}
 
 }
@@ -227,24 +230,28 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 VOID RecordMemWrite(VOID * ip, VOID * addr)
 {
     access++;
+    nonmemops += L1_LATENCY;
 	if (!cache_access(*(unsigned int*)addr, 'W')) // miss
 	{
-	    // fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
-	    fprintf(trace,"%f\n", (double)100*hit/access);
-	    nonmemops = 0;	
+	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		long long int victim = cache_fill(*(unsigned int*)addr, 'W');
-        // unsigned long long int v = (unsigned long long int)victim;
+		long int victim = cache_fill(*(unsigned int*)addr, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			// fprintf(trace,"%d W 0x%llx %p\n", nonmemops, v, ip);
+            unsigned long int v = (unsigned long int)victim;
+			fprintf(trace,"%d W 0x%lx %p\n", nonmemops, v, ip);
+
 		}
+        
+        nonmemops = L2_LATENCY;
+	    fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
+
+	    nonmemops = 0;	
 	}
 	else // hit
 	{
         hit++;
-		nonmemops++;
 	}
 }
 
