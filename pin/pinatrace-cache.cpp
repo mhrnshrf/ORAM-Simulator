@@ -25,6 +25,7 @@
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
+#define L2_LATENCY 10        // L2 latency in terms of # cycles 
 
 enum reqType {CREAD = 'R', CWRITE = 'W'};
 enum status {MISS = false, HIT = true};
@@ -212,7 +213,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 	}
 	else	// hit
 	{
-		nonmemops += L1_LATENCY;
+		nonmemops++;
 	}
 
 }
@@ -235,7 +236,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	}
 	else // hit
 	{
-		nonmemops += L1_LATENCY;
+		nonmemops++;
 	}
 }
 
