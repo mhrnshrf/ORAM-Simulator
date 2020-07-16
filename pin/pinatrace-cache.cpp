@@ -208,7 +208,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			fprintf(trace,"%d W %x %p\n", nonmemops, v,  ip);
+			fprintf(trace,"%d W 0x%llx %p\n", nonmemops, v,  ip);
 		}
 	}
 	else	// hit
@@ -231,7 +231,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			fprintf(trace,"%d W %x %p\n", nonmemops, v, ip);
+			fprintf(trace,"%d W 0x%llx %p\n", nonmemops, v, ip);
 		}
 	}
 	else // hit
