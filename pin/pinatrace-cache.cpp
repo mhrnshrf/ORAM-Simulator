@@ -200,7 +200,8 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 {
 	if (!cache_access(*(unsigned int*)addr, 'R')) // miss
 	{
-	    fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
+	    // fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
+	    fprintf(trace,"%d\n", nonmemops);
 	    nonmemops = 0;	
 
 		long long int victim = cache_fill(*(unsigned int*)addr, 'R');
@@ -208,7 +209,8 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			fprintf(trace,"%d W 0x%llx %p\n", nonmemops, v,  ip);
+			// fprintf(trace,"%d W 0x%llx %p\n", nonmemops, v,  ip);
+	        fprintf(trace,"%d\n", nonmemops);
 		}
 	}
 	else	// hit
@@ -223,7 +225,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 {
 	if (!cache_access(*(unsigned int*)addr, 'W')) // miss
 	{
-	    fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
+	    // fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
+        fprintf(trace,"%d\n", nonmemops);
 	    nonmemops = 0;	
 
 		long long int victim = cache_fill(*(unsigned int*)addr, 'W');
@@ -231,7 +234,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 		// if needed to evict a block
 		if (victim != -1)
 		{
-			fprintf(trace,"%d W 0x%llx %p\n", nonmemops, v, ip);
+			// fprintf(trace,"%d W 0x%llx %p\n", nonmemops, v, ip);
+            fprintf(trace,"%d\n", nonmemops);
 		}
 	}
 	else // hit
