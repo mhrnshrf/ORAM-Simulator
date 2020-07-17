@@ -215,7 +215,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
             nonmemops = L2_LATENCY;
 		}
 
-	    fprintf(trace,"%d R %p %x %p\n", nonmemops, addr,  *(unsigned int*)addr, ip);
+	    fprintf(trace,"%d R %p %x %p\n", nonmemops, addr,  *(int*)addr, ip);
 
 	    nonmemops = 0;	
 	}
@@ -244,7 +244,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             nonmemops = L2_LATENCY;
 		}
 
-	    fprintf(trace,"%d W %p %x %p\n", nonmemops, addr, *(unsigned int*)addr, ip);
+	    fprintf(trace,"%d W %p %x %p\n", nonmemops, addr, *(int*)addr, ip);
 
 	    nonmemops = 0;	
 	}
@@ -330,6 +330,7 @@ int main(int argc, char *argv[])
     if (PIN_Init(argc, argv)) return Usage();
 
     trace = fopen("pinatrace.out", "w");
+    cache_init();
 
     INS_AddInstrumentFunction(Instruction, 0);
     PIN_AddFiniFunction(Fini, 0);
