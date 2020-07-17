@@ -113,21 +113,21 @@ int find_victim(unsigned int index) {
 
 
 
-unsigned int get_index(void * addr){
+unsigned int get_index(unsigned int addr){
     unsigned int index = addr << TAG_WIDTH;
     index = index >> (TAG_WIDTH+OFFSET_WIDTH);
     return index;
 
 }
 
-unsigned int get_tag(void * addr){
+unsigned int get_tag(unsigned int addr){
     unsigned int tag = addr >> (INDEX_WIDTH+OFFSET_WIDTH);
     return tag;
 }
 
 
 // return true on hit and false on miss
-bool cache_access(void * addr, char type){
+bool cache_access(unsigned int addr, char type){
     unsigned int index = get_index(addr);
     unsigned int tag = get_tag(addr);
 
@@ -150,7 +150,7 @@ bool cache_access(void * addr, char type){
 
 
 // try to fill the cache with new data, it may lead to eviction ~~~> is called when miss happens
-int cache_fill(void * addr,  char type){
+int cache_fill(unsigned int addr,  char type){
     unsigned int index = get_index(addr);
     unsigned int tag = get_tag(addr);
 
@@ -202,11 +202,18 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 {
     access++;
     nonmemops += L1_LATENCY;
-	if (!cache_access(addr, 'R')) // miss
+
+    // get pointer value and store it in an usigned int
+    char str[100];
+    sprintf(str, "%p\n", addr);
+    unsigned int addrval;
+    sscanf(str,"%x", &addrval);
+
+	if (!cache_access(addrval, 'R')) // miss
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		int victim = cache_fill(addr, 'R');
+		int victim = cache_fill(addrval, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
@@ -215,7 +222,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
             nonmemops = L2_LATENCY;
 		}
         
-	    fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
+	    fprintf(trace,"%d R %p %x %p\n", nonmemops, addr, addrval, ip);
 
 	    nonmemops = 0;	
 	}
@@ -231,11 +238,18 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 {
     access++;
     nonmemops += L1_LATENCY;
-	if (!cache_access(addr, 'W')) // miss
+
+    // get pointer value and store it in an usigned int
+    char str[100];
+    sprintf(str, "%p\n", addr);
+    unsigned int addrval;
+    sscanf(str,"%x", &addrval);
+
+	if (!cache_access(addrval, 'W')) // miss
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		int victim = cache_fill(addr, 'W');
+		int victim = cache_fill(addrval, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
@@ -245,7 +259,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 		}
 
 
-	    fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
+	    fprintf(trace,"%d W %p %x %p\n", nonmemops, addr, addrval, ip);
 
 	    nonmemops = 0;	
 	}
