@@ -127,7 +127,7 @@ unsigned int get_tag(unsigned int addr){
 
 
 // return true on hit and false on miss
-bool cache_access(unsigned int addr, char type){
+bool cache_access(VOID * addr, char type){
     unsigned int index = get_index(addr);
     unsigned int tag = get_tag(addr);
 
@@ -150,7 +150,7 @@ bool cache_access(unsigned int addr, char type){
 
 
 // try to fill the cache with new data, it may lead to eviction ~~~> is called when miss happens
-int cache_fill(unsigned int addr,  char type){
+int cache_fill(VOID * addr,  char type){
     unsigned int index = get_index(addr);
     unsigned int tag = get_tag(addr);
 
@@ -206,7 +206,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		int victim = cache_fill(*(unsigned int*)addr, 'R');
+		int victim = cache_fill(addr, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
@@ -235,7 +235,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		int victim = cache_fill(*(unsigned int*)addr, 'W');
+		int victim = cache_fill(addr, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
