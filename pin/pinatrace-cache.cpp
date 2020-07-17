@@ -113,14 +113,14 @@ int find_victim(unsigned int index) {
 
 
 
-unsigned int get_index(unsigned int addr){
+unsigned int get_index(void * addr){
     unsigned int index = addr << TAG_WIDTH;
     index = index >> (TAG_WIDTH+OFFSET_WIDTH);
     return index;
 
 }
 
-unsigned int get_tag(unsigned int addr){
+unsigned int get_tag(void * addr){
     unsigned int tag = addr >> (INDEX_WIDTH+OFFSET_WIDTH);
     return tag;
 }
@@ -235,7 +235,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		int victim = cache_fill(I applied all the latency into the cache hierarchy and addr, 'W');
+		int victim = cache_fill(addr, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
