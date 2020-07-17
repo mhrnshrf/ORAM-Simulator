@@ -12,7 +12,7 @@ Write Bypass   No
 Subtree        No
 Rho            No
 Timing         Enabled
-Prefetch       Enabled
+Prefetch       No
 
 ....................................................
              Simulation Parameter
@@ -98,7 +98,7 @@ Timing Interval        100
 ....................................................
                  Prefetch Config
 ....................................................
-Prefetch Enable          On
+Prefetch Enable          Off
 Buffer Entry #           256
 
 ....................................................

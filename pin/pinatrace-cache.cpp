@@ -212,9 +212,9 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 		{
             unsigned int v = (unsigned int)victim;
 			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
+            nonmemops = L2_LATENCY;
 		}
 
-        nonmemops = L2_LATENCY;
 	    fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
 
 	    nonmemops = 0;	
@@ -241,10 +241,9 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 		{
             unsigned int v = (unsigned int)victim;
 			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v, ip);
-
+            nonmemops = L2_LATENCY;
 		}
 
-        nonmemops = L2_LATENCY;
 	    fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
 
 	    nonmemops = 0;	

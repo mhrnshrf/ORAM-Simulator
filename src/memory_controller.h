@@ -25,7 +25,7 @@
 #define SUBTREE_ENABLE 0     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
-#define PREFETCH_ENABLE 1    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
+#define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
