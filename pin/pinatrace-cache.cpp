@@ -222,6 +222,8 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 	else	// hit
 	{
         hit++;
+        fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
+
 	}
 
 }
@@ -251,6 +253,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	else // hit
 	{
         hit++;
+        fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
 	}
 }
 
