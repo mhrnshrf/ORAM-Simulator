@@ -206,11 +206,11 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		long int victim = cache_fill(*(unsigned int*)addr, 'R');
+		int victim = cache_fill(*(unsigned int*)addr, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
-            unsigned long int v = (unsigned long int)victim;
+            unsigned int v = (unsigned int)victim;
 			fprintf(trace,"%d W 0x%lx %p\n", nonmemops, v,  ip);
 		}
 
@@ -235,15 +235,15 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		long int victim = cache_fill(*(unsigned int*)addr, 'W');
+		int victim = cache_fill(*(unsigned int*)addr, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
-            unsigned long int v = (unsigned long int)victim;
+            unsigned int v = (unsigned int)victim;
 			fprintf(trace,"%d W 0x%lx %p\n", nonmemops, v, ip);
 
 		}
-        
+
         nonmemops = L2_LATENCY;
 	    fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
 

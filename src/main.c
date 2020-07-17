@@ -93,7 +93,7 @@ typedef struct MemRequest{
 } MemRequest;
 
 
-MemRequest evicted[16]; 	// array of evicted request for cores, each core can have one evicted at a time 16: max num of cores
+MemRequest waited_for_evicted[16]; 	// array of request that are waitng for evicted block writeback to finish for cores, each core can have one waited request at a time 16: max num of cores
 bool no_miss_occured;	// a flag that is set based on cache access and used to keep on reading trace file until it's cache hit
 bool eviction_writeback[16] = {0}; // a flag that says next request is gonna be eviction writeback
 
@@ -272,7 +272,7 @@ int main(int argc, char * argv[])
 
 	 for (int i = 0; i < NUMCORES; i++)
 	 {
-		 evicted[i].valid = false;
+		 waited_for_evicted[i].valid = false;
 	 }
 	 
 
@@ -836,12 +836,13 @@ int main(int argc, char * argv[])
 							next_trace = shad_addr[numc];
 						}
 						
-						if (evicted[numc].valid)
+						if (waited_for_evicted[numc].valid)
 						{
-							nonmemops[numc] = evicted[numc].nonmemops;
-							opertype[numc] = evicted[numc].opertype;
-							addr[numc] = evicted[numc].addr;
-							evicted[numc].valid = false;
+							nonmemops[numc] = waited_for_evicted[numc].nonmemops;
+							opertype[numc] = waited_for_evicted[numc].opertype;
+							addr[numc] = waited_for_evicted[numc].addr;
+							instrpc[numc] = waited_for_evicted[numc].instrpc;
+							waited_for_evicted[numc].valid = false;
 							eviction_writeback[numc] = true;
 							evictifctr++;
 							// printf("main: evicted if addr: %lld\n", addr[numc]);
@@ -876,6 +877,8 @@ int main(int argc, char * argv[])
 							else // miss occured
 							{
 								missctr++;
+
+								// prefetcher history collection
 								unsigned int page = page_addr(addr[numc]);
 								if (page != curr_page)
 								{
@@ -903,35 +906,24 @@ int main(int argc, char * argv[])
 									footprint_update(addr[numc]);
 								}
 
-								// unsigned int region = region_addr(addr[numc]);
-								// if (region != curr_region)
-								// {
-								// 	fill_access++;
-								// 	Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
-								// 	if (table_access(e) == -1)
-								// 	{
-								// 		fill_miss++;
-								// 		table_fill(e, curr_footprint);
-								// 	}
-									
-								// 	curr_page = page;
-								// 	curr_pc = instrpc[numc];
-								// 	curr_offset = offset_val(addr[numc]);
-								// 	curr_footprint = 0;
-								// 	footprint_update(addr[numc]);
-								// }
-
 								
-								
+								// first serve the evicted block then bext time serve this trace
 								int victim = cache_fill(addr[numc], opertype[numc]);
 								if ( victim != -1)
 								{
 									evictctr++;
-									evicted[numc].valid = true;
-									evicted[numc].nonmemops = 0;	//nonmemops[numc]+1;  // ??? probably it should be 0 instead
-									evicted[numc].opertype = 'W';
-									evicted[numc].addr = victim;
+									waited_for_evicted[numc].valid = true;
+									waited_for_evicted[numc].nonmemops = nonmemops[numc];	
+									waited_for_evicted[numc].opertype = opertype[numc];
+									waited_for_evicted[numc].addr = addr[numc];
+									waited_for_evicted[numc].instrpc = instrpc[numc];
+
+									addr[numc] = victim;
+									opertype[numc] = 'W';
+									nonmemops[numc] = MAINMEM_LATENCY;
 								}
+
+
 
 								no_miss_occured = false;
 
@@ -1002,7 +994,7 @@ int main(int argc, char * argv[])
 				eviction_writeback[numc] = false;
 				if (RHO_ENABLE)
 				{
-					int masked_addr = block_addr(evicted[numc].addr);
+					int masked_addr = block_addr(waited_for_evicted[numc].addr);
 					if (rho_lookup(masked_addr) == -1)
 					{
 						rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram
