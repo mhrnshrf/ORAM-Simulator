@@ -78,7 +78,7 @@
 
 // prefetching config
 #define PREFETCH_BUF_SIZE 256
-#define PREFETCH_STRIDE 1
+#define PREFETCH_STRIDE 0
 
 
 
