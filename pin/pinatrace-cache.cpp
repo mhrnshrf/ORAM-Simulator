@@ -127,7 +127,7 @@ unsigned int get_tag(unsigned int addr){
 
 
 // return true on hit and false on miss
-bool cache_access(VOID * addr, char type){
+bool cache_access(void * addr, char type){
     unsigned int index = get_index(addr);
     unsigned int tag = get_tag(addr);
 
@@ -150,7 +150,7 @@ bool cache_access(VOID * addr, char type){
 
 
 // try to fill the cache with new data, it may lead to eviction ~~~> is called when miss happens
-int cache_fill(VOID * addr,  char type){
+int cache_fill(void * addr,  char type){
     unsigned int index = get_index(addr);
     unsigned int tag = get_tag(addr);
 
