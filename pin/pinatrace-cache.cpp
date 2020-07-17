@@ -202,7 +202,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 {
     access++;
     nonmemops += L1_LATENCY;
-	if (!cache_access(*(unsigned int*)addr, 'R')) // miss
+	if (!cache_access(addr, 'R')) // miss
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
@@ -214,8 +214,8 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
             nonmemops = L2_LATENCY;
 		}
-        int addrval = addr;
-	    fprintf(trace,"%d R %p %d %p\n", nonmemops, addr, addrval, ip);
+        
+	    fprintf(trace,"%d R %p %p\n", nonmemops, addr, ip);
 
 	    nonmemops = 0;	
 	}
@@ -231,7 +231,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 {
     access++;
     nonmemops += L1_LATENCY;
-	if (!cache_access(*(unsigned int*)addr, 'W')) // miss
+	if (!cache_access(addr, 'W')) // miss
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
@@ -244,9 +244,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             nonmemops = L2_LATENCY;
 		}
 
-        int addrval = addr;
 
-	    fprintf(trace,"%d W %p %d %p\n", nonmemops, addr, addrval, ip);
+	    fprintf(trace,"%d W %p %p\n", nonmemops, addr, ip);
 
 	    nonmemops = 0;	
 	}
