@@ -235,7 +235,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
-		int victim = cache_fill(addr, 'W');
+		int victim = cache_fill(I applied all the latency into the cache hierarchy and addr, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
