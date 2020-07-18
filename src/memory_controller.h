@@ -11,7 +11,7 @@
 
 #include <math.h>
 // other simulation parameter
-#define TRACE_SIZE 10000000  // # addr read from trace file
+#define TRACE_SIZE 1000000  // # addr read from trace file
 #define QUEUE_SIZE 1000     // oramq capacity
 #define PAGE_SIZE 4096      // page size in byte ~~~> 4KB
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
@@ -25,7 +25,7 @@
 #define SUBTREE_ENABLE 0     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
-#define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
+#define PREFETCH_ENABLE 1    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
