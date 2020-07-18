@@ -211,18 +211,18 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 
 	if (!cache_access(addrval, 'R')) // miss
 	{
-	    fprintf(trace,"%f\n", (double)100*hit/access);
+	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
 		int victim = cache_fill(addrval, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
-            // unsigned int v = (unsigned int)victim;
-			// fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
+            unsigned int v = (unsigned int)victim;
+			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
             nonmemops = L2_LATENCY;
 		}
         
-	    // fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
+	    fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
 
 	    nonmemops = 0;	
 	}
@@ -247,19 +247,19 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 
 	if (!cache_access(addrval, 'W')) // miss
 	{
-	    fprintf(trace,"%f\n", (double)100*hit/access);
+	    // fprintf(trace,"%f\n", (double)100*hit/access);
 
 		int victim = cache_fill(addrval, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
-            // unsigned int v = (unsigned int)victim;
-			// fprintf(trace,"%d W 0x%x %p\n", nonmemops, v, ip);
+            unsigned int v = (unsigned int)victim;
+			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v, ip);
             nonmemops = L2_LATENCY;
 		}
 
 
-	    // fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
+	    fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
 
 	    nonmemops = 0;	
 	}

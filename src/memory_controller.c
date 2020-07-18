@@ -2263,8 +2263,8 @@ void invoke_prefetch(){
   // }
 
   
-  // curr_addr = block_addr(next_trace);
-  curr_addr = block_addr(curr_trace);
+  curr_addr = block_addr(next_trace);
+  // curr_addr = block_addr(curr_trace);
   
 
   int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
