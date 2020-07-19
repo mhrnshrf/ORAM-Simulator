@@ -247,6 +247,8 @@ int main(int argc, char * argv[])
 	// test_footprint();
 
 	cache_init();
+
+	table_init();
 	
 	oram_alloc();
 
@@ -907,7 +909,7 @@ int main(int argc, char * argv[])
 								}
 
 								
-								// first serve the evicted block then bext time serve this trace
+								// first serve the evicted block then next time serve this trace
 								int victim = cache_fill(addr[numc], opertype[numc]);
 								if ( victim != -1)
 								{

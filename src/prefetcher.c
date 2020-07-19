@@ -2,13 +2,14 @@
 
 #include "prefetcher.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 
 
 HistEntry HistoryTable[NUM_SET_HIST][NUM_WAY_HIST];     // the history table
-char LRU[NUM_SET_HIST][NUM_WAY_HIST];                   // an array to keep track of lru for eviction
+char tableLRU[NUM_SET_HIST][NUM_WAY_HIST];                   // an array to keep track of lru for eviction
 MatchType INDEX_VAR = PC;
-MatchType TAG_VAR = PC;
+MatchType TAG_VAR = PC_ADDR;
 
 
 // profiling stat
@@ -26,30 +27,30 @@ void table_init(){
             HistoryTable[i][j].valid = false;
             // HistoryTable[i][j].tag = -1;
             
-            LRU[i][j] = 0;
+            tableLRU[i][j] = 0;
         }
     }
 }
 
 void updateLRU_hist(unsigned int index, unsigned int way){
-    if (LRU[index][way] == 255)
+    if (tableLRU[index][way] >= 125)
     {
-        LRU[index][way] = 0;
+        tableLRU[index][way] = 0;
     }
     else
     {
-        LRU[index][way]++;
+        tableLRU[index][way]++;
     } 
 }
 
 void resetLRU_hist(unsigned int index, unsigned int way){
-    LRU[index][way] = 1;
+    tableLRU[index][way] = 1;
 
 }
 
 
 int find_spot_hist(unsigned int index){
-    for (unsigned int j = 0; j < NUM_WAY_HIST; j++)
+    for (int j = 0; j < NUM_WAY_HIST; j++)
     {
         if (!HistoryTable[index][j].valid)
         {
@@ -63,12 +64,15 @@ int find_spot_hist(unsigned int index){
 // find the tableline with the least recently used
 int find_victim_hist(unsigned int index) {
     int victim = -1;
-    for (unsigned int j = 0; j < NUM_WAY_HIST; j++)
+    char min = 127;
+    for (int j = 0; j < NUM_WAY_HIST; j++)
     {
-        unsigned int min = 256;
-        if (LRU[index][j] < min)
+        // printf("tableLRU[%d][%d]: %d      min: %d\n", index, j, tableLRU[index][j], min);
+        if (tableLRU[index][j] < min)
         {
+            // printf("hereeeeee\n");
             victim = j;
+            min = tableLRU[index][j];
         }
     }
 
@@ -85,7 +89,7 @@ unsigned int index_hist(Event e){
         index = e.pc % NUM_SET_HIST; 
         break;
     case ADDR:
-        index = e.pc % NUM_SET_HIST; 
+        index = e.addr % NUM_SET_HIST; 
         break;    
     default:
         index = e.pc % NUM_SET_HIST;
@@ -146,10 +150,13 @@ bool match_tag(Event e, int index, int way){
 long long int table_access(Event e){
     hist_access++;
     unsigned int index = index_hist(e);
+    // printf("after index hist addr %d\n", e.addr);
+
 
     for (unsigned int j = 0; j < NUM_WAY_HIST; j++)
     {
         // hit
+        
         if (match_tag(e, index, j))
         {   
             updateLRU_hist(index, j);
@@ -175,6 +182,12 @@ void table_fill(Event e, unsigned long long int footprint){
         way = find_victim_hist(index);
     }
 
+    if (way < 0)
+    {
+        printf("ERROR: table fill way: %d   index %d\n", way, index);
+        exit(1);
+    }
+    
     HistoryTable[index][way].valid = true;
     HistoryTable[index][way].tag.pc = e.pc;
     HistoryTable[index][way].tag.addr = e.addr;

@@ -24,7 +24,7 @@ void cache_init(){
 }
 
 void update_LRU(unsigned int index, unsigned int way){
-    if (LRU[index][way] == 255)
+    if (LRU[index][way] >= 125)
     {
         LRU[index][way] = 0;
     }
@@ -41,7 +41,7 @@ void reset_LRU(unsigned int index, unsigned int way){
 
 
 int find_spot(unsigned int index){
-    for (unsigned int j = 0; j < NUM_WAY; j++)
+    for (int j = 0; j < NUM_WAY; j++)
     {
         if (!LLC[index][j].valid)
         {
@@ -55,12 +55,13 @@ int find_spot(unsigned int index){
 // find the cacheline with the least recently used
 int find_victim(unsigned int index) {
     int victim = -1;
-    for (unsigned int j = 0; j < NUM_WAY; j++)
+    char min = 127;
+    for (int j = 0; j < NUM_WAY; j++)
     {
-        unsigned int min = 256;
         if (LRU[index][j] < min)
         {
             victim = j;
+            min = LRU[index][j];
         }
     }
 
@@ -125,6 +126,12 @@ int cache_fill(unsigned int addr,  char type){
         }
     }
 
+
+     if (way < 0)
+    {
+        printf("ERROR: cahce fill way: %d   index %d\n", way, index);
+        exit(1);
+    }
 
     // cacheline fill
     if (type == CWRITE)
