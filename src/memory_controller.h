@@ -25,7 +25,7 @@
 #define SUBTREE_ENABLE 0     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
-#define PREFETCH_ENABLE 1    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
+#define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -74,11 +74,13 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 100   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 300   // # cycles after each one oram access is initiated either real or dummy one
 
 // prefetching config
 #define PREFETCH_BUF_SIZE 256
-#define PREFETCH_STRIDE 0
+#define PREFETCH_STRIDE 1
+#define PREFETCH_TYPE COMBO
+
 
 
 
@@ -88,6 +90,9 @@ typedef enum {ORAM, RHO} TreeType;
 typedef enum {REGULAR, EVICT} AccessType;
 typedef enum {TAIL, HEAD} EnqueueType;
 typedef enum {POS1, POS2} PosType;
+typedef enum {STRIDE_BASED, HISTORY_BASED, COMBO} PrefetchType;
+
+
 typedef struct Slot Slot;
 
 

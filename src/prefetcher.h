@@ -5,11 +5,10 @@
 #include <stdbool.h>
 #include <math.h>
 
-// #define PREFETCHER_SIZE 262144  // in bytes ~~~> 256 KB
-#define HISTORY_TABLE_ENTRY 16*1024  // # entries of history table
-#define NUM_WAY_HIST 16                   //  ~~~> # way per set
-// #define BLOCK_SIZE 64                // bytes ~~~> tableline size
-// #define ADDR_WIDTH 32                // bits
+#define HISTORY_TABLE_ENTRY 16*1024    // # entries of history table
+#define NUM_WAY_HIST 16                //  ~~~> # way per set
+#define INDEX_VAR PC                 // index type
+#define TAG_VAR PC                   // tag type
 
 typedef enum {PC, ADDR, OFFSET, PC_ADDR, PC_OFFSET} MatchType;
 

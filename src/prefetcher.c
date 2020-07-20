@@ -8,8 +8,6 @@
 
 HistEntry HistoryTable[NUM_SET_HIST][NUM_WAY_HIST];     // the history table
 char tableLRU[NUM_SET_HIST][NUM_WAY_HIST];                   // an array to keep track of lru for eviction
-MatchType INDEX_VAR = PC;
-MatchType TAG_VAR = PC_ADDR;
 
 
 // profiling stat
@@ -67,10 +65,8 @@ int find_victim_hist(unsigned int index) {
     char min = 127;
     for (int j = 0; j < NUM_WAY_HIST; j++)
     {
-        // printf("tableLRU[%d][%d]: %d      min: %d\n", index, j, tableLRU[index][j], min);
         if (tableLRU[index][j] < min)
         {
-            // printf("hereeeeee\n");
             victim = j;
             min = tableLRU[index][j];
         }

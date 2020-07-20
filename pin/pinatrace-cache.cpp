@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define CACHE_SIZE 262144    // in bytes ~~~> 256 KB
+#define CACHE_SIZE 262144   // in bytes ~~~> 256 KB
 #define NUM_WAY 2           // bytes ~~~> # way per set
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
