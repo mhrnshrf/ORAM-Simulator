@@ -48,6 +48,7 @@ FILE **shadtif;  /* The handles to the trace input files. */
 struct timeval sday, eday;
 long int period = 0;
 int periodctr = 0;
+int nonmemctr = 0;
 int roundprev = 0;
 // int tracectr = 0;	// # lines read from the trace file 
 int hitctr = 0;		// # hits on llc
@@ -846,7 +847,7 @@ int main(int argc, char * argv[])
 							addr[numc] = waited_for_evicted[numc].addr;
 							instrpc[numc] = waited_for_evicted[numc].instrpc;
 							waited_for_evicted[numc].valid = false;
-							eviction_writeback[numc] = true;
+							// eviction_writeback[numc] = true;
 							evictifctr++;
 							// printf("main: evicted if addr: %lld\n", addr[numc]);
 							break;
@@ -880,7 +881,11 @@ int main(int argc, char * argv[])
 							else // miss occured
 							{
 								missctr++;
-
+								if (nonmemops[numc] > 100)
+								{
+									nonmemctr += (nonmemops[numc]/100);
+									// nonmemctr++;
+								}
 								// prefetcher history collection
 								unsigned int page = page_addr(addr[numc]);
 								if (page != curr_page)
@@ -920,6 +925,7 @@ int main(int argc, char * argv[])
 									waited_for_evicted[numc].opertype = opertype[numc];
 									waited_for_evicted[numc].addr = addr[numc];
 									waited_for_evicted[numc].instrpc = instrpc[numc];
+									eviction_writeback[numc] = true;
 
 									addr[numc] = victim;
 									opertype[numc] = 'W';
@@ -1304,6 +1310,7 @@ printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
 printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("Rho Bk Evict             %f%%\n\n", 100*(double)rho_bkctr/rho_hit);
+printf("Nonmemops #              %d\n\n", nonmemctr);
       
 // print_plb_stat();
 

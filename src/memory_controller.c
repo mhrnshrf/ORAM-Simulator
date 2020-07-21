@@ -2167,47 +2167,72 @@ void insert_buffer(int addr){
 
   int index = -1;
 
-  // look for empty spot in prefetch buffer
-  // for (int i = 0; i < PREFETCH_BUF_SIZE; i++)
-  // {
-  //   if(!PreBuffer[i].valid)
-  //   {
-  //     index = i;
-  //   }
-  // }
-
-  index = addr % PREFETCH_BUF_SIZE;
-
-  // if no free spot found in the buffer, find a victim to evict
-  if (PreBuffer[index].valid)
+  if (PREFETCH_INPLACE)
   {
-    // index = buffer_find_victim(); 
-
-    // add the victim to the stash
-
-    Slot s = {.addr = PreBuffer[index].addr , .label = PosMap[PreBuffer[index].addr], .isReal = true, .isData = false};
-    
-    if (stash_contain(s.addr))
+    index = addr % PLB_SIZE;
+    if (PLB[index] != -1)
     {
-      printf("ERROR: insert buffer: block %d already in stash!\n", s.addr);
-      exit(1);
-    }
-    else
-    {
-      int vi = add_to_stash(s);
-      if(vi == -1){
-        printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
+
+      // add the victim to the stash
+
+      Slot s = {.addr = PLB[index], .label = PosMap[PLB[index]], .isReal = true, .isData = false};
+      
+      if (stash_contain(s.addr))
+      {
+        printf("ERROR: insert buffer: block %d already in stash!\n", s.addr);
         exit(1);
       }
-      
+      else
+      {
+        int vi = add_to_stash(s);
+        if(vi == -1){
+          printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
+          exit(1);
+        }
+        
+      }
     }
+    PLB[index] = addr;
+
   }
-   
-  // insert the intended posmap block to the buffer
-  PreBuffer[index].addr = addr;
-  PreBuffer[index].timestamp = trace_clk;
-  PreBuffer[index].valid = true;  
-  PreBuffer[index].type = pos_var;  
+  else
+  {
+    index = addr % PREFETCH_BUF_SIZE;
+
+    // if no free spot found in the buffer, find a victim to evict
+    if (PreBuffer[index].valid)
+    {
+      // index = buffer_find_victim(); 
+
+      // add the victim to the stash
+
+      Slot s = {.addr = PreBuffer[index].addr , .label = PosMap[PreBuffer[index].addr], .isReal = true, .isData = false};
+      
+      if (stash_contain(s.addr))
+      {
+        printf("ERROR: insert buffer: block %d already in stash!\n", s.addr);
+        exit(1);
+      }
+      else
+      {
+        int vi = add_to_stash(s);
+        if(vi == -1){
+          printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
+          exit(1);
+        }
+        
+      }
+    }
+    
+    // insert the intended posmap block to the buffer
+    PreBuffer[index].addr = addr;
+    PreBuffer[index].timestamp = trace_clk;
+    PreBuffer[index].valid = true;  
+    PreBuffer[index].type = pos_var;  
+  }
+  
+  
+
 
   int si = get_stash(addr);
   if (si == -1)
@@ -2406,8 +2431,8 @@ void invoke_prefetch(){
   if ( (PREFETCH_TYPE == STRIDE_BASED) || (PREFETCH_TYPE == COMBO && (candidate == -1)) )
   {
     unsigned int curr_addr;
-    curr_addr = block_addr(next_trace);
-    // curr_addr = block_addr(curr_trace);
+    curr_addr = block_addr(curr_trace);
+    // curr_addr = block_addr(next_trace);
     
     int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
     int pos2 = (curr_addr/pow(X,2));   // the 2nd posmap block of current trace ~>  + stride will be candidate for prefetching
