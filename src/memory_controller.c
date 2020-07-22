@@ -105,6 +105,7 @@ int TagArray[RHO_SET][RHO_WAY];         // rho postion map that store tags ~~~> 
 int TagArrayLabel[RHO_SET][RHO_WAY];     // rho postion map that store the corresponding label~~~>  parallel to tag array
 char TagArrayLRU[RHO_SET][RHO_WAY];      // rho lru policiy for eviction ~~~>  parallel to tag array
 Slot RhoStash[RHO_STASH_SIZE];       // rho stash
+int RhoSubMap[NODE];              // rho subtree address map
 
 
 // profiling stats
@@ -561,10 +562,19 @@ void oram_init(){
 
   }
 
-  // for (int i = 0; i < NODE; i++)
-  // {
-  //   SubMap[i] = index_to_addr(i);
-  // }
+  // initialize subtree addressing for oram tree
+  for (int i = 0; i < NODE; i++)
+  {
+    SubMap[i] = index_to_addr(i);
+  }
+
+  // initialize subtree addressing for rho tree
+  switch_tree_to(RHO);
+  for (int i = 0; i < RHO_NODE; i++)
+  {
+    RhoSubMap[i] = index_to_addr(i);
+  }
+  switch_tree_to(ORAM);
   
 }
 
@@ -748,7 +758,7 @@ void read_path(int label){
         if (i >= TOP_CACHE_VAR)
         {
           // int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-          int  addr = SUBTREE_ENABLE ? SubMap[index]+j : (index*Z_VAR+j);
+          int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
         }
 
@@ -842,7 +852,9 @@ void write_path(int label){
       {
         if (i >= TOP_CACHE_VAR)
         {
-          addr = SUBTREE_ENABLE ?  SubMap[index]+g:(index*Z_VAR+g);
+          // addr = SUBTREE_ENABLE ?  SubMap[index]+g:(index*Z_VAR+g);
+          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+g): (TREE_VAR == ORAM)? SubMap[index]+g : RhoSubMap[index]+g;
+
           // insert_write (addr, orig_cycle, orig_thread, orig_instr);
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
         }
@@ -867,7 +879,9 @@ void write_path(int label){
         {
           if (i >= TOP_CACHE_VAR)
           {
-            addr = SUBTREE_ENABLE ?  SubMap[index]+j : (index*Z_VAR+j);
+            // addr = SUBTREE_ENABLE ?  SubMap[index]+j : (index*Z_VAR+j);
+            addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+
             // insert_write (addr, orig_cycle, orig_thread, orig_instr);
             insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
           }
@@ -876,7 +890,9 @@ void write_path(int label){
         {
           if (i >= TOP_CACHE_VAR)
           {
-            addr = SUBTREE_ENABLE ?  SubMap[index]+j: (index*Z_VAR+j);
+            // addr = SUBTREE_ENABLE ?  SubMap[index]+j: (index*Z_VAR+j);
+            addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+
             // insert_write (addr, orig_cycle, orig_thread, orig_instr);
             insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
           }
@@ -2006,7 +2022,7 @@ void rho_access(int addr, int label){
 // when a block gets evicted from llc it is placed into the rho
 void rho_insert(int physical_address){
   // int addr = (int)(physical_address & (BLOCK-1));
-  int addr =block_addr(physical_address);
+  int addr = block_addr(physical_address);
 
   int index = addr % RHO_SET;
 

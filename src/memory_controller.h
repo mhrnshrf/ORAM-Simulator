@@ -22,7 +22,7 @@
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
-#define SUBTREE_ENABLE 0     // 0/1 flag to diable/enable having subtree adddressing scheme
+#define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
@@ -35,7 +35,7 @@
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
-#define PLB_SIZE 1024     // size of plb (# entry)
+#define PLB_SIZE 1056     // size of plb (# entry)
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
@@ -78,7 +78,7 @@
 
 // prefetching config
 #define PREFETCH_INPLACE 0
-#define PREFETCH_BUF_SIZE 256
+#define PREFETCH_BUF_SIZE 32
 #define PREFETCH_STRIDE 1
 #define PREFETCH_TYPE COMBO
 
