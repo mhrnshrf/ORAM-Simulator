@@ -173,13 +173,16 @@ int cache_fill(unsigned int addr,  char type){
 
 
     // cacheline fill
+    L1[index][way].valid = true;
+    L1[index][way].tag = tag;
+    L1[index][way].addr = addr;
+    L1[index][way].dirty = false;
+    
     if (type == CWRITE)
     {
         L1[index][way].dirty = true;
     }
-    L1[index][way].valid = true;
-    L1[index][way].tag = tag;
-    L1[index][way].addr = addr;
+    
     reset_LRU(index, way);  
 
     return victim;  

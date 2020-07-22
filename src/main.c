@@ -135,14 +135,20 @@ int main(int argc, char * argv[])
 	printf("Subtree        %s\n", SUBTREE_ENABLE?"Enabled":"No" );
 	printf("Rho            %s\n", RHO_ENABLE?"Enabled":"No" );
 	printf("Timing         %s\n", TIMING_ENABLE?"Enabled":"No" );
-	printf("Prefetch       %s\n\n", PREFETCH_ENABLE?"Enabled":"No" );
+	printf("Prefetch       %s\n", PREFETCH_ENABLE?"Enabled":"No" );
+	printf("Early Evict    %s\n\n", EVICT_ENABLE?"Enabled":"No" );
 
 
 	printf("....................................................\n");
 	printf("             Simulation Parameter\n");
 	printf("....................................................\n");
 	printf("Trace Size    %d\n", TRACE_SIZE);
-	printf("Queue Size    %d\n\n", QUEUE_SIZE);
+	printf("Queue Size    %d\n", QUEUE_SIZE);
+	printf("Page Size     %d\n", PAGE_SIZE);
+	printf("L1 Latency    %d\n", L1_LATENCY);
+	printf("L2 Latency    %d\n", L2_LATENCY);
+	printf("Mem Latency   %d\n", MAINMEM_LATENCY);
+	printf("Warmup Thld   %d\n\n", WARMUP_THRESHOLD);
 
 	printf("....................................................\n");
 	printf("                   ORAM Config\n");
@@ -156,6 +162,7 @@ int main(int argc, char * argv[])
 	printf("U               %f\n", U);
 	printf("OV Treshold     %d\n", OV_TRESHOLD);
 	printf("Stash Size      %d\n", STASH_SIZE);
+	printf("PLB Size        %d\n", PLB_SIZE);
 	printf("BK Eviction     %d\n", BK_EVICTION);
 	printf("Empty Top       %d\n", EMPTY_TOP);
 	printf("Top Cache       %d\n\n", TOP_CACHE);
@@ -942,9 +949,18 @@ int main(int argc, char * argv[])
 								nonmemops[numc] += hit_nonmemops;
 								hit_nonmemops = 0;
 
+								
 
 								no_miss_occured = false;
 
+							}
+							if (tracectr < WARMUP_THRESHOLD)
+							{
+								no_miss_occured = true;
+								hitctr = 0;
+								missctr = 0;
+								evictctr = 0;
+								cache_dirty = 0;
 							}
 						}
 						else {
@@ -1322,8 +1338,9 @@ printf("Bk Evict                 %f%%\n", 100*(double)bkctr/invokectr);
 printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
 printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
-printf("Rho Bk Evict             %f%%\n\n", 100*(double)rho_bkctr/rho_hit);
+printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
 printf("Early Evict #            %d\n", earlyctr);
+printf("Cache Dirty #            %d\n", cache_dirty);
 // printf("Nonmemops #              %d\n\n", nonmemctr);
       
 // print_plb_stat();

@@ -570,18 +570,18 @@ void oram_init(){
   }
 
   // initialize subtree addressing for oram tree
-  for (int i = 0; i < NODE; i++)
-  {
-    SubMap[i] = index_to_addr(i);
-  }
+  // for (int i = 0; i < NODE; i++)
+  // {
+  //   SubMap[i] = index_to_addr(i);
+  // }
 
-  // initialize subtree addressing for rho tree
-  switch_tree_to(RHO);
-  for (int i = 0; i < RHO_NODE; i++)
-  {
-    RhoSubMap[i] = index_to_addr(i);
-  }
-  switch_tree_to(ORAM);
+  // // initialize subtree addressing for rho tree
+  // switch_tree_to(RHO);
+  // for (int i = 0; i < RHO_NODE; i++)
+  // {
+  //   RhoSubMap[i] = index_to_addr(i);
+  // }
+  // switch_tree_to(ORAM);
   
 }
 
@@ -2443,6 +2443,8 @@ void early_evict(){
   int j_target = 0;
   int addr_target = -1;
 
+  printf("dirty %d   set start: %d   way start: %d \n", cache_dirty, set_start, way_start);
+
   for (int i = set_start; i < NUM_SET; i++)
   {
     for (int j = way_start; j < NUM_WAY; j++)
@@ -2459,6 +2461,7 @@ void early_evict(){
   if (addr_target != -1)
   {
     earlyctr++;
+    addr_target = block_addr(addr_target);
     int label = PosMap[addr_target];
 
     switch_tree_to(ORAM);     // switch to oram tree 
@@ -2486,6 +2489,8 @@ void early_evict(){
 
 
 // Mehrnoosh.
+
+
 
 
 

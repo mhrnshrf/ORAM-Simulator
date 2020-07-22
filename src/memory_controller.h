@@ -11,12 +11,13 @@
 
 #include <math.h>
 // other simulation parameter
-#define TRACE_SIZE 1000000  // # addr read from trace file
+#define TRACE_SIZE 2000000  // # addr read from trace file
 #define QUEUE_SIZE 1000     // oramq capacity
 #define PAGE_SIZE 4096      // page size in byte ~~~> 4KB
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
 #define MAINMEM_LATENCY 0       // L2 latency in terms of # cycles 
+#define WARMUP_THRESHOLD 1000000       // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 
 // enable/disable options config
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea
@@ -36,7 +37,7 @@
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE 200     // size of stash
-#define PLB_SIZE 1056     // size of plb (# entry)
+#define PLB_SIZE 1024     // size of plb (# entry)
 #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define EMPTY_TOP 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0

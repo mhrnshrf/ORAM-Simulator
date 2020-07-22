@@ -9,6 +9,7 @@
 
 Cacheline LLC[NUM_SET][NUM_WAY];     // the cache
 char LRU[NUM_SET][NUM_WAY];          // an array to keep track of lru for eviction
+int cache_dirty = 0;
 
 // invalidate all cahce blocks upon init
 void cache_init(){
@@ -98,6 +99,8 @@ bool cache_access(unsigned int addr, char type){
             if (type == CWRITE)
             {
                 LLC[index][j].dirty = true;
+                cache_dirty++;
+
             }
             update_LRU(index, j);  
             return true;    
@@ -136,13 +139,17 @@ int cache_fill(unsigned int addr,  char type){
     }
 
     // cacheline fill
-    if (type == CWRITE)
-    {
-        LLC[index][way].dirty = true;
-    }
     LLC[index][way].valid = true;
     LLC[index][way].tag = tag;
     LLC[index][way].addr = addr;
+    LLC[index][way].dirty = false;
+
+    if (type == CWRITE)
+    {
+        LLC[index][way].dirty = true;
+        cache_dirty++;
+    }
+    
     reset_LRU(index, way);  
 
     return victim;  

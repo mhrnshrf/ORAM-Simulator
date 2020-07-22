@@ -31,6 +31,7 @@ typedef struct Cacheline{
 } Cacheline;
 
 extern Cacheline LLC[NUM_SET][NUM_WAY];
+extern int cache_dirty;
 
 void cache_init();
 bool cache_access(unsigned int addr, char type);
