@@ -153,6 +153,9 @@ int cap_count[CAP_NODE] = {0};
 int path_length = 0;
 int sub_cap = 0;
 
+int earlyctr = 0;
+
+
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
 long long int plb_access[H-1] = {0};   // # total plb access (hits + misses)
 int plb_evict[PLB_SIZE] = {[0 ... PLB_SIZE-1] = -1};  // array to keep address of blocks that are evicted from plb 
@@ -176,6 +179,10 @@ int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var = POS2;
+
+int set_start = 0;
+int way_start = 0;
+
 
 // convert byte address to block address, each block is 64 bytes 
 // upper 32 bits are discarded and also oram memory address is cut into half because of utilization 50%
@@ -2288,98 +2295,6 @@ void prefetch_access(int addr){
 }
 
 
-// void invoke_prefetch(){
-
-//   int candidate = -1;
-
-//   // int curr_addr = (int)(curr_trace & (BLOCK-1));  // adapt the current trace address with the oram address space
-//   // unsigned int curr_addr = block_addr(curr_trace);
-//   unsigned int curr_addr;
-//   // if (oramQ->size != 0)
-//   // {
-//   //   curr_addr = oramQ->head->orig_addr;
-//   // }
-//   // else
-//   // {
-//   //   curr_addr = curr_trace;
-//   // }
-
-  
-//   curr_addr = block_addr(next_trace);
-//   // curr_addr = block_addr(curr_trace);
-  
-
-//   int pos1 = (curr_addr/pow(X,1));   // the 1st posmap block of current trace ~>  + stride will be candidate for prefetching
-//   int pos2 = (curr_addr/pow(X,2));   // the 2nd posmap block of current trace ~>  + stride will be candidate for prefetching
-
-//   int pos1_next = pos1 + PREFETCH_STRIDE;
-//   int pos2_next = pos2 + PREFETCH_STRIDE;
-
-//   pos1 = concat(1,pos1);
-//   pos2 = concat(2,pos2);
-
-//   pos1_next = concat(1, pos1_next);
-//   pos2_next = concat(2, pos2_next);
-
-//   if (plb_contain(pos2) || stash_contain(pos2) || buffer_contain(pos2))
-//   {
-//     case1++;
-//     if (plb_contain(pos1_next))
-//     {
-//       plbpos1++;
-//     }
-//     else if (stash_contain(pos1_next))
-//     {
-//       stashpos1++;
-//     }
-//     else if (buffer_contain(pos1_next))
-//     {
-//       bufferpos1++;
-//     }
-    
-//     if (!plb_contain(pos1_next) && !stash_contain(pos1_next) && !buffer_contain(pos1_next))
-//     {
-//       // curr_trace = curr_trace + (1 << (int)log2(X));
-//       candidate = pos1_next; // if pos2 is available go ahead and preftech pos1
-//       pos_var = POS1;
-//       pos1ctr++;
-//     }
-//   } 
-//   else
-//   {
-//     candidate = pos2; // otherwise prefetch pos2
-//     pos_var = POS2;
-//     pos2ctr++;
-//     case2++;
-//   }
-//   if (candidate == -1)
-//   {
-//     if (!plb_contain(pos2_next) && !stash_contain(pos2_next) && !buffer_contain(pos2_next))
-//     {
-//       // curr_trace = curr_trace + (1 << 2*((int)log2(X)));
-//       candidate = pos2_next; // if still has no candidate prefetch pos2_next
-//       pos_var = POS2;
-//       pos2ctr++;
-//       case3++;
-//     }
-//   }
-
-
-
-    
-//   if (candidate != -1)
-//   {
-//     // printf("\n@ trace %d  prefetch:  pos%s   candidate: %x\n\n", tracectr, (pos_var == POS1)?"1":(pos_var == POS2)?"2":"?", candidate);
-//     prefetch_access(candidate);
-//   }
-//   else
-//   {
-//     dummy_access(ORAM);
-//   }
-  
-// }
-
-
 void invoke_prefetch(){
 
   int candidate = -1;
@@ -2516,6 +2431,63 @@ void invoke_prefetch(){
   }
  
 }
+
+void reset_dirty_search(){
+  set_start = 0;
+  way_start = 0;
+}
+
+void early_evict(){
+
+  int i_target = 0;
+  int j_target = 0;
+  int addr_target = -1;
+
+  for (int i = set_start; i < NUM_SET; i++)
+  {
+    for (int j = way_start; j < NUM_WAY; j++)
+    {
+      if (LLC[i][j].valid && LLC[i][j].dirty)
+      {
+        addr_target = LLC[i][j].addr;
+        i_target = i;
+        j_target = j;
+      }
+    }
+  }
+
+  if (addr_target != -1)
+  {
+    earlyctr++;
+    int label = PosMap[addr_target];
+
+    switch_tree_to(ORAM);     // switch to oram tree 
+    switch_enqueue_to(HEAD);
+    read_path(label);
+    remap_block(addr_target);
+    write_path(label);
+    switch_enqueue_to(TAIL);  // switch back to normal tail enqueue
+
+    LLC[i_target][j_target].dirty = false;
+    
+    set_start = i_target;
+    way_start = j_target + 1;
+  }
+  else
+  {
+    dummy_access(ORAM);
+    set_start = NUM_SET;
+    way_start = NUM_WAY;
+  }
+  
+
+
+}
+
+
+// Mehrnoosh.
+
+
 
 
 

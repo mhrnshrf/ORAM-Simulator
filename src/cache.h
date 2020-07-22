@@ -15,7 +15,6 @@ enum reqType {CREAD = 'R', CWRITE = 'W'};
 enum status {MISS = false, HIT = true};
 enum eviction{NO_EVICT = -1};
 
-
 enum{
   NUM_SET = (unsigned int)(CACHE_SIZE/BLOCK_SIZE)/NUM_WAY,  // # sets
   INDEX_WIDTH = (unsigned int)log2(NUM_SET), 
@@ -31,12 +30,14 @@ typedef struct Cacheline{
   unsigned int addr;
 } Cacheline;
 
+extern Cacheline LLC[NUM_SET][NUM_WAY];
 
 void cache_init();
 bool cache_access(unsigned int addr, char type);
 int cache_fill(unsigned int addr,  char type);
 unsigned int get_tag(unsigned int addr);
 unsigned int get_index(unsigned int addr);
+
 
 
 #endif // __CACHE_HH__

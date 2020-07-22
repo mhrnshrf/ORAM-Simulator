@@ -810,7 +810,11 @@ int main(int argc, char * argv[])
 				// printf("\nskip on\n");
 				if (dummy_oram)
 				{
-					if (PREFETCH_ENABLE)
+					if (EVICT_ENABLE)
+					{
+						early_evict();
+					}
+					else if (PREFETCH_ENABLE)
 					{	
 						invoke_prefetch();
 					}
@@ -866,6 +870,7 @@ int main(int argc, char * argv[])
 							}
 							else {
 								if (opertype[numc] == 'W') {
+									reset_dirty_search();
 									if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
 										printf("Panic.  Poor trace format.\n");
 										return -3;
@@ -1051,7 +1056,11 @@ int main(int argc, char * argv[])
 			{
 				if (dummy_oram)
 				{
-					if (PREFETCH_ENABLE)
+					if (EVICT_ENABLE)
+					{
+						early_evict();
+					}
+					else if (PREFETCH_ENABLE)
 					{
 						invoke_prefetch();
 					}
@@ -1314,6 +1323,7 @@ printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
 printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("Rho Bk Evict             %f%%\n\n", 100*(double)rho_bkctr/rho_hit);
+printf("Early Evict #            %d\n", earlyctr);
 // printf("Nonmemops #              %d\n\n", nonmemctr);
       
 // print_plb_stat();
