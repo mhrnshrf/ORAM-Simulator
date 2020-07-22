@@ -84,6 +84,8 @@ int curr_access = -3; 	// the id of current access (oram or rho, real or dummy)
 int fill_access = 0;	// # prefetch history table access
 int fill_miss = 0;		// # miss on prefetch history table access
 
+int hit_nonmemops = 0;  // # nonmemops encountered during hit on llc
+
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
   bool valid;
@@ -877,6 +879,7 @@ int main(int argc, char * argv[])
 							if (cache_access(addr[numc], opertype[numc]) == HIT)
 							{
 								hitctr++;
+								hit_nonmemops += nonmemops[numc] + L2_LATENCY;
 							}
 							else // miss occured
 							{
@@ -921,7 +924,7 @@ int main(int argc, char * argv[])
 								{
 									evictctr++;
 									waited_for_evicted[numc].valid = true;
-									waited_for_evicted[numc].nonmemops = nonmemops[numc];	
+									waited_for_evicted[numc].nonmemops = MAINMEM_LATENCY;	
 									waited_for_evicted[numc].opertype = opertype[numc];
 									waited_for_evicted[numc].addr = addr[numc];
 									waited_for_evicted[numc].instrpc = instrpc[numc];
@@ -929,9 +932,10 @@ int main(int argc, char * argv[])
 
 									addr[numc] = victim;
 									opertype[numc] = 'W';
-									nonmemops[numc] = MAINMEM_LATENCY;
 								}
 
+								nonmemops[numc] += hit_nonmemops;
+								hit_nonmemops = 0;
 
 
 								no_miss_occured = false;
@@ -1310,7 +1314,7 @@ printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
 printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("Rho Bk Evict             %f%%\n\n", 100*(double)rho_bkctr/rho_hit);
-printf("Nonmemops #              %d\n\n", nonmemctr);
+// printf("Nonmemops #              %d\n\n", nonmemctr);
       
 // print_plb_stat();
 

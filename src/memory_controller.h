@@ -21,11 +21,11 @@
 // enable/disable options config
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
-#define WRITE_BYPASS 1       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
-#define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
-#define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
+#define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
+#define SUBTREE_ENABLE 0     // 0/1 flag to diable/enable having subtree adddressing scheme
+#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
-#define PREFETCH_ENABLE 1    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
+#define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -74,11 +74,11 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 100   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 1000   // # cycles after each one oram access is initiated either real or dummy one
 
 // prefetching config
 #define PREFETCH_INPLACE 0
-#define PREFETCH_BUF_SIZE 16
+#define PREFETCH_BUF_SIZE 256
 #define PREFETCH_STRIDE 1
 #define PREFETCH_TYPE COMBO
 
