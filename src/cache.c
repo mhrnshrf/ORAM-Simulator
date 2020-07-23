@@ -111,6 +111,25 @@ bool cache_access(unsigned int addr, char type){
 }
 
 
+bool cache_invalidate(unsigned int addr){
+    unsigned int index = get_index(addr);
+    unsigned int tag = get_tag(addr);
+
+    for (unsigned int j = 0; j < NUM_WAY; j++)
+    {
+        // hit
+        if (LLC[index][j].tag == tag && LLC[index][j].valid)
+        {   
+            LLC[index][j].valid = false;
+            LLC[index][j].dirty = false;
+            return true;    
+        }        
+    }
+    // miss
+    return false;
+}
+
+
 // try to fill the cache with new data, it may lead to eviction ~~~> is called when miss happens
 int cache_fill(unsigned int addr,  char type){
     unsigned int index = get_index(addr);
