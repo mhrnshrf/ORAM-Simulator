@@ -242,14 +242,15 @@ void invoke_prefetch();
 void insert_buffer(int addr);
 bool buffer_contain(int addr);
 int buffer_index(int addr);
-unsigned int block_addr(long long int physical_addr);
-unsigned int page_addr(long long int physical_addr);
-char offset_val(long long int addr);
-void footprint_update(long long int addr);
+// unsigned int block_addr(long long int physical_addr);
+unsigned int block_addr(unsigned int caddr);
+unsigned int page_addr(unsigned int physical_addr);
+char offset_val(unsigned int addr);
+void footprint_update(unsigned int addr);
 void test_footprint();
 void early_evict();
 void reset_dirty_search();
-
+unsigned int byte_addr(long long int physical_addr);
 // Mehrnoosh.
 
 

@@ -111,7 +111,7 @@ bool cache_access(unsigned int addr, char type){
 }
 
 
-bool cache_invalidate(unsigned int addr){
+int cache_invalidate(unsigned int addr){
     unsigned int index = get_index(addr);
     unsigned int tag = get_tag(addr);
 
@@ -122,11 +122,11 @@ bool cache_invalidate(unsigned int addr){
         {   
             LLC[index][j].valid = false;
             LLC[index][j].dirty = false;
-            return true;    
+            return  LLC[index][j].addr;    
         }        
     }
     // miss
-    return false;
+    return -1;
 }
 
 

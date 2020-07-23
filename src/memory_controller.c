@@ -185,23 +185,39 @@ int set_start = 0;
 int way_start = 0;
 
 
+unsigned int byte_addr(long long int physical_addr){
+  unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
+  unsigned int max = (BLOCK<<((unsigned int)log2(BLOCK_SIZE))) | (BLOCK_SIZE-1);
+  if (addr > max)
+  {
+    addr = max; 
+  }
+  return addr;
+}
+
+
 // convert byte address to block address, each block is 64 bytes 
 // upper 32 bits are discarded and also oram memory address is cut into half because of utilization 50%
-unsigned int block_addr(long long int physical_addr){
-  unsigned int addr = (unsigned int)(physical_addr & (0xffffffff));
-  addr = addr >> (unsigned int) log2(BLOCK_SIZE);
-  addr = (addr & (BLOCK+1));
-  if (addr >= BLOCK)
-  {
-    addr = BLOCK - 1; 
-  }
+// unsigned int block_addr(long long int physical_addr){
+//   unsigned int addr = (unsigned int)(physical_addr & (0xffffffff));
+//   addr = addr >> (unsigned int) log2(BLOCK_SIZE);
+//   addr = (addr & (BLOCK+1));
+//   if (addr >= BLOCK)
+//   {
+//     addr = BLOCK - 1; 
+//   }
   
+//   return addr;
+// }
+
+unsigned int block_addr(unsigned int caddr){
+  unsigned int addr = caddr >> (unsigned int) log2(BLOCK_SIZE);
   return addr;
 }
 
 
 // convert byte address to page address, each page is 4KB i.e 64 blocks
-unsigned int page_addr(long long int physical_addr){
+unsigned int page_addr(unsigned int physical_addr){
   unsigned int addr = block_addr(physical_addr);
   addr = addr >> (unsigned int) log2(PAGE_SIZE/BLOCK_SIZE);
   return addr;
@@ -209,27 +225,27 @@ unsigned int page_addr(long long int physical_addr){
 
 
 
-unsigned int region_addr(long long int physical_addr){
+unsigned int region_addr(unsigned int physical_addr){
   unsigned int addr = block_addr(physical_addr);
   addr = addr >> (unsigned int) log2((X*PAGE_SIZE)/BLOCK_SIZE);
   return addr;
 }
 
-unsigned int subregion_addr(long long int physical_addr){
+unsigned int subregion_addr(unsigned int physical_addr){
   unsigned int addr = block_addr(physical_addr);
   addr = addr >> (unsigned int) log2((PAGE_SIZE/4)/BLOCK_SIZE);
   return addr;
 }
 
 
-char offset_val(long long int addr){
+char offset_val(unsigned int addr){
   unsigned int block = block_addr(addr);
   unsigned int mask = 0b111111;
   char val = block & mask;
   return val;
 }
 
-void footprint_update(long long int addr){
+void footprint_update(unsigned int addr){
   unsigned int block = block_addr(addr);
   unsigned int mask = 0b111111;
   block = block & mask;
@@ -237,22 +253,22 @@ void footprint_update(long long int addr){
 }
 
 
-void test_footprint(){
-	long long int pa = 0x7fff219c90d7;
-	printf("byte addr:    %llx\n", pa);
-	printf("block addr:   %x\n", block_addr(pa));
-	printf("page addr:    %x\n", page_addr(pa));
-	printf("offset val:   %d\n", offset_val(pa));
-	footprint_update(0x7fff219c90d8);
-	footprint_update(0x7fff219c90d9);
-	footprint_update(0x7fff219c90da);
-	footprint_update(0x7fff219c90db);
-	footprint_update(0x7fff219c90dc);
-	footprint_update(0x7fff219c91dd);
-	footprint_update(0x7fff219c92de);
-	footprint_update(0x7fff219c93df);
-	printf("footprint:    %llx\n", curr_footprint);
-}
+// void test_footprint(){
+// 	long long int pa = 0x7fff219c90d7;
+// 	printf("byte addr:    %llx\n", pa);
+// 	printf("block addr:   %x\n", block_addr(pa));
+// 	printf("page addr:    %x\n", page_addr(pa));
+// 	printf("offset val:   %d\n", offset_val(pa));
+// 	footprint_update(0x7fff219c90d8);
+// 	footprint_update(0x7fff219c90d9);
+// 	footprint_update(0x7fff219c90da);
+// 	footprint_update(0x7fff219c90db);
+// 	footprint_update(0x7fff219c90dc);
+// 	footprint_update(0x7fff219c91dd);
+// 	footprint_update(0x7fff219c92de);
+// 	footprint_update(0x7fff219c93df);
+// 	printf("footprint:    %llx\n", curr_footprint);
+// }
 
 Queue *ConstructQueue(int limit) {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
@@ -1496,13 +1512,14 @@ void freecursive_access(int addr, char type){
       // profiling.
       if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
       {
-        // if (cache_access(tag, 'R'))
+        unsigned int caddr = tag << ((unsigned int) log2(BLOCK_SIZE));
+        // if (cache_invalidate(caddr) != -1)
         // {
-        //   printf("ERROR: @trace %d  cache contains %x\n", tracectr, tag);
+        //   printf("ERROR: @trace %d  cache contained %x  tagged %x \n", tracectr, caddr, tag);
         //   exit(1);
         // }
 
-        cache_invalidate(tag);
+        cache_invalidate(caddr);
         
         pinOn();
         oram_access(tag);
@@ -2460,18 +2477,23 @@ void early_evict(){
     {
       if (LLC[i][j].valid && LLC[i][j].dirty)
       {
+        // break;
         addr_target = LLC[i][j].addr;
         i_target = i;
         j_target = j;
-        int addr = block_addr(addr_target);
-        if (!plb_contain(addr) && !buffer_contain(addr))
-        {
-          break;
-        }
-        else
-        {
-          printf("block %x \n", addr_target);
-        }
+        break;
+        // int addr = block_addr(addr_target);
+        // if (!plb_contain(addr) && !buffer_contain(addr))
+        // {
+        //   break;
+        // }
+        // else
+        // {
+        //   // printf("block %x \n", addr_target);
+        //   addr_target = -1;
+        //   i_target = 0;
+        //   j_target = 0;
+        // }
         
         
       }
@@ -2483,7 +2505,7 @@ void early_evict(){
   }
 
   int addr = block_addr(addr_target);
-  if ((addr_target != -1) && !plb_contain(addr) && !buffer_contain(addr))
+  if ((addr_target != -1) /*&& !plb_contain(addr) && !buffer_contain(addr)*/)
   {
     earlyctr++;
     int label = PosMap[addr];

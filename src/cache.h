@@ -38,7 +38,7 @@ bool cache_access(unsigned int addr, char type);
 int cache_fill(unsigned int addr,  char type);
 unsigned int get_tag(unsigned int addr);
 unsigned int get_index(unsigned int addr);
-bool cache_invalidate(unsigned int addr);
+int cache_invalidate(unsigned int addr);
 
 
 #endif // __CACHE_HH__

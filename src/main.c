@@ -255,6 +255,13 @@ int main(int argc, char * argv[])
 	
 	// test_footprint();
 
+	// long long int inaddr = 0xfffffffff;
+	// long long int addrout = byte_addr(inaddr);
+	// printf("out: %llx\n", addrout);
+	// int xxx = block_addr(addrout);
+	// printf("xxx: %x\n", xxx);
+	
+
 	
 	cache_init();
 
@@ -891,7 +898,8 @@ int main(int argc, char * argv[])
 								return -2;
 								}
 							}
-							if (cache_access(addr[numc], opertype[numc]) == HIT)
+							addr[numc] = byte_addr(addr[numc]);
+							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
 							{
 								hitctr++;
 								hit_nonmemops += nonmemops[numc] + L2_LATENCY;
@@ -1048,7 +1056,7 @@ int main(int argc, char * argv[])
 
 			if (TIMING_ENABLE && !dummy_tick && RHO_ENABLE)
 			{
-				int masked_addr = (int)(addr[numc] & (BLOCK-1));
+				int masked_addr = block_addr(addr[numc]);
 				if (rho_tick && (rho_lookup(masked_addr) == -1))			// if it misses on rho and it's rho turn should raise dummy rho
 				{
 					dummy_rho = true;
