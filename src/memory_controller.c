@@ -2463,8 +2463,8 @@ void early_evict(){
         addr_target = LLC[i][j].addr;
         i_target = i;
         j_target = j;
-        // int addr = block_addr(addr_target);
-        if (!plb_contain(addr_target) && !buffer_contain(addr_target))
+        int addr = block_addr(addr_target);
+        if (!plb_contain(addr) && !buffer_contain(addr))
         {
           break;
         }
@@ -2482,16 +2482,16 @@ void early_evict(){
     }
   }
 
-  // int addr = block_addr(addr_target);
-  if ((addr_target != -1) && !plb_contain(addr_target) && !buffer_contain(addr_target))
+  int addr = block_addr(addr_target);
+  if ((addr_target != -1) && !plb_contain(addr) && !buffer_contain(addr))
   {
     earlyctr++;
-    int label = PosMap[addr_target];
+    int label = PosMap[addr];
 
     switch_tree_to(ORAM);     // switch to oram tree 
     switch_enqueue_to(HEAD);
     read_path(label);
-    remap_block(addr_target);
+    remap_block(addr);
     write_path(label);
     switch_enqueue_to(TAIL);  // switch back to normal tail enqueue
 
