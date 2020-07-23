@@ -1496,6 +1496,14 @@ void freecursive_access(int addr, char type){
       // profiling.
       if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
       {
+        // if (cache_access(tag, 'R'))
+        // {
+        //   printf("ERROR: @trace %d  cache contains %x\n", tracectr, tag);
+        //   exit(1);
+        // }
+
+        cache_invalidate(tag);
+        
         pinOn();
         oram_access(tag);
         pinOff();
@@ -2030,7 +2038,8 @@ void rho_access(int addr, int label){
 // when a block gets evicted from llc it is placed into the rho
 void rho_insert(int physical_address){
   // int addr = (int)(physical_address & (BLOCK-1));
-  int addr = block_addr(physical_address);
+  // int addr = block_addr(physical_address);
+  int addr = physical_address;
 
   int index = addr % RHO_SET;
 
@@ -2455,11 +2464,16 @@ void early_evict(){
         addr_target = LLC[i][j].addr;
         i_target = i;
         j_target = j;
-        int addr = block_addr(addr_target);
-        if (!plb_contain(addr) && !buffer_contain(addr))
+        // int addr = block_addr(addr_target);
+        if (!plb_contain(addr_target) && !buffer_contain(addr_target))
         {
           break;
         }
+        else
+        {
+          printf("block %x \n", addr_target);
+        }
+        
         
       }
     }
@@ -2469,16 +2483,16 @@ void early_evict(){
     }
   }
 
-  int addr = block_addr(addr_target);
-  if ((addr_target != -1) && !plb_contain(addr) && !buffer_contain(addr))
+  // int addr = block_addr(addr_target);
+  if ((addr_target != -1) && !plb_contain(addr_target) && !buffer_contain(addr_target))
   {
     earlyctr++;
-    int label = PosMap[addr];
+    int label = PosMap[addr_target];
 
     switch_tree_to(ORAM);     // switch to oram tree 
     switch_enqueue_to(HEAD);
     read_path(label);
-    remap_block(addr);
+    remap_block(addr_target);
     write_path(label);
     switch_enqueue_to(TAIL);  // switch back to normal tail enqueue
 

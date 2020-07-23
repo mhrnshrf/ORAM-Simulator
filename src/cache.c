@@ -168,7 +168,7 @@ int cache_fill(unsigned int addr,  char type){
         LLC[index][way].dirty = true;
         cache_dirty++;
     }
-    
+
     reset_LRU(index, way);  
 
     return victim;  
