@@ -154,6 +154,7 @@ int path_length = 0;
 int sub_cap = 0;
 
 int earlyctr = 0;
+int evictctr = 0;	// # evictions caused after misses on llc
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -1493,7 +1494,6 @@ void freecursive_access(int addr, char type){
       }
       
       // profiling.
-
       if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
       {
         pinOn();
@@ -1807,6 +1807,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
     }
   }
 
+ 
   freecursive_access(addr, type);
 }
 
@@ -2443,7 +2444,7 @@ void early_evict(){
   int j_target = 0;
   int addr_target = -1;
 
-  printf("dirty %d   set start: %d   way start: %d \n", cache_dirty, set_start, way_start);
+  // printf("\ndirty %d   early: %d   evict: %d    set start: %d   way start: %d \n", cache_dirty, earlyctr, evictctr, set_start, way_start);
 
   for (int i = set_start; i < NUM_SET; i++)
   {
@@ -2454,33 +2455,45 @@ void early_evict(){
         addr_target = LLC[i][j].addr;
         i_target = i;
         j_target = j;
+        int addr = block_addr(addr_target);
+        if (!plb_contain(addr) && !buffer_contain(addr))
+        {
+          break;
+        }
+        
       }
+    }
+    if(addr_target != -1)
+    {
+      break;
     }
   }
 
-  if (addr_target != -1)
+  int addr = block_addr(addr_target);
+  if ((addr_target != -1) && !plb_contain(addr) && !buffer_contain(addr))
   {
     earlyctr++;
-    addr_target = block_addr(addr_target);
-    int label = PosMap[addr_target];
+    int label = PosMap[addr];
 
     switch_tree_to(ORAM);     // switch to oram tree 
     switch_enqueue_to(HEAD);
     read_path(label);
-    remap_block(addr_target);
+    remap_block(addr);
     write_path(label);
     switch_enqueue_to(TAIL);  // switch back to normal tail enqueue
 
     LLC[i_target][j_target].dirty = false;
     
-    set_start = i_target;
-    way_start = j_target + 1;
+    // set_start = i_target;
+    // way_start = j_target + 1;
   }
   else
   {
     dummy_access(ORAM);
-    set_start = NUM_SET;
-    way_start = NUM_WAY;
+    // set_start = NUM_SET;
+    // way_start = NUM_WAY;
+    set_start = 0;
+    way_start = 0;
   }
   
 

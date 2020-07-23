@@ -53,7 +53,6 @@ int roundprev = 0;
 // int tracectr = 0;	// # lines read from the trace file 
 int hitctr = 0;		// # hits on llc
 int missctr = 0;	// # misses on llc
-int evictctr = 0;	// # evictions caused after misses on llc
 int evictifctr = 0;
 int invokectr_prev = 0;
 int oram_path_length = 0;	// # slots along each path of oram
@@ -863,7 +862,11 @@ int main(int argc, char * argv[])
 							// eviction_writeback[numc] = true;
 							evictifctr++;
 							// printf("main: evicted if addr: %lld\n", addr[numc]);
-							break;
+							if (tracectr >= WARMUP_THRESHOLD)
+							{
+								break;
+							}
+							
 						}
 						
 
@@ -901,33 +904,38 @@ int main(int argc, char * argv[])
 									nonmemctr += (nonmemops[numc]/100);
 									// nonmemctr++;
 								}
+
 								// prefetcher history collection
-								unsigned int page = page_addr(addr[numc]);
-								if (page != curr_page)
+								if (PREFETCH_ENABLE)
 								{
-									fill_access++;
-									Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
-									if ((table_access(e) == -1))
+									unsigned int page = page_addr(addr[numc]);
+									if (page != curr_page)
 									{
-										fill_miss++;
-										if ((__builtin_popcount(curr_footprint) > 1))
+										fill_access++;
+										Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
+										if ((table_access(e) == -1))
 										{
-											table_fill(e, curr_footprint);
+											fill_miss++;
+											if ((__builtin_popcount(curr_footprint) > 1))
+											{
+												table_fill(e, curr_footprint);
+											}
+											
 										}
 										
-									}
-									
-									curr_page = page;
-									curr_pc = instrpc[numc];
-									curr_offset = offset_val(addr[numc]);
-									curr_footprint = 0;
-									footprint_update(addr[numc]);
+										curr_page = page;
+										curr_pc = instrpc[numc];
+										curr_offset = offset_val(addr[numc]);
+										curr_footprint = 0;
+										footprint_update(addr[numc]);
 
+									}
+									else
+									{
+										footprint_update(addr[numc]);
+									}
 								}
-								else
-								{
-									footprint_update(addr[numc]);
-								}
+								
 
 								
 								// first serve the evicted block then next time serve this trace
@@ -957,6 +965,8 @@ int main(int argc, char * argv[])
 							if (tracectr < WARMUP_THRESHOLD)
 							{
 								no_miss_occured = true;
+								waited_for_evicted[numc].valid = false;
+								eviction_writeback[numc] = false;
 								hitctr = 0;
 								missctr = 0;
 								evictctr = 0;
