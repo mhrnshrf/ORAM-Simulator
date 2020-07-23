@@ -891,7 +891,7 @@ int main(int argc, char * argv[])
 								return -2;
 								}
 							}
-							if (cache_access(block_addr(addr[numc]), opertype[numc]) == HIT)
+							if (cache_access(addr[numc], opertype[numc]) == HIT)
 							{
 								hitctr++;
 								hit_nonmemops += nonmemops[numc] + L2_LATENCY;
@@ -939,14 +939,14 @@ int main(int argc, char * argv[])
 
 								
 								// first serve the evicted block then next time serve this trace
-								int victim = cache_fill(block_addr(addr[numc]), opertype[numc]);
+								int victim = cache_fill(addr[numc], opertype[numc]);
 								if ( victim != -1)
 								{
 									evictctr++;
 									waited_for_evicted[numc].valid = true;
 									waited_for_evicted[numc].nonmemops = MAINMEM_LATENCY;	
 									waited_for_evicted[numc].opertype = opertype[numc];
-									waited_for_evicted[numc].addr = block_addr(addr[numc]);
+									waited_for_evicted[numc].addr = addr[numc];
 									waited_for_evicted[numc].instrpc = instrpc[numc];
 									eviction_writeback[numc] = true;
 
@@ -1038,8 +1038,7 @@ int main(int argc, char * argv[])
 				eviction_writeback[numc] = false;
 				if (RHO_ENABLE)
 				{
-					// int masked_addr = block_addr(addr[numc]);
-					int masked_addr = addr[numc];
+					int masked_addr = block_addr(addr[numc]);
 					if (rho_lookup(masked_addr) == -1)
 					{
 						rho_insert(addr[numc]);		// add evicted blk from llc to rho and consequently evicted blk from rho to oram

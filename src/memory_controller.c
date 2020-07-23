@@ -2038,8 +2038,7 @@ void rho_access(int addr, int label){
 // when a block gets evicted from llc it is placed into the rho
 void rho_insert(int physical_address){
   // int addr = (int)(physical_address & (BLOCK-1));
-  // int addr = block_addr(physical_address);
-  int addr = physical_address;
+  int addr = block_addr(physical_address);
 
   int index = addr % RHO_SET;
 
