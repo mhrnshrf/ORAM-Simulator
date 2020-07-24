@@ -24,10 +24,10 @@
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
-#define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
+#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
+#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
-#define EVICT_ENABLE 1       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
+#define EVICT_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -64,9 +64,9 @@
 #define RHO_Z 2  // # slots per bucket in rho
 #define RHO_OV_TRESHOLD   RHO_STASH_SIZE - RHO_Z*(RHO_LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define RHO_BK_EVICTION 1   // 0/1 flag to disable/enable background eviction in rho
-#define RHO_L1 7  // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define RHO_L2 8   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
-#define RHO_L3 9   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+#define RHO_L1 9  // upto L1 level buckts have specific Z1 number of slots   (inclusive)
+#define RHO_L2 12   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define RHO_L3 14   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define RHO_Z1 2   // # slots per bucket upto L1
 #define RHO_Z2 2   // # slots per bucket upto L2
 #define RHO_Z3 2   // # slots per bucket upto L3

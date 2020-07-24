@@ -887,7 +887,7 @@ int main(int argc, char * argv[])
 							}
 							else {
 								if (opertype[numc] == 'W') {
-									reset_dirty_search();
+									// reset_dirty_search();
 									if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
 										printf("Panic.  Poor trace format.\n");
 										return -3;
@@ -899,8 +899,14 @@ int main(int argc, char * argv[])
 								}
 							}
 							addr[numc] = byte_addr(addr[numc]);
+							// hit
 							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
 							{
+								if (opertype[numc] == 'W')
+								{
+									reset_dirty_search();
+								}
+								
 								hitctr++;
 								hit_nonmemops += nonmemops[numc] + L2_LATENCY;
 							}
@@ -948,6 +954,10 @@ int main(int argc, char * argv[])
 								
 								// first serve the evicted block then next time serve this trace
 								int victim = cache_fill(addr[numc], opertype[numc]);
+								if (opertype[numc] == 'W')
+								{
+									reset_dirty_search();
+								}
 								if ( victim != -1)
 								{
 									evictctr++;

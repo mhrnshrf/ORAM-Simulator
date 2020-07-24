@@ -122,6 +122,7 @@ int cache_invalidate(unsigned int addr){
         {   
             LLC[index][j].valid = false;
             LLC[index][j].dirty = false;
+            cache_dirty--;
             return  LLC[index][j].addr;    
         }        
     }

@@ -1520,6 +1520,7 @@ void freecursive_access(int addr, char type){
         // }
 
         cache_invalidate(caddr);
+        reset_dirty_search();
         
         pinOn();
         oram_access(tag);
@@ -2469,7 +2470,8 @@ void early_evict(){
   int j_target = 0;
   int addr_target = -1;
 
-  // printf("\ndirty %d   early: %d   evict: %d    set start: %d   way start: %d \n", cache_dirty, earlyctr, evictctr, set_start, way_start);
+    // printf("\n@trace %d dirty %d   early: %d   evict: %d    set start: %d   way start: %d \n", tracectr, cache_dirty, earlyctr, evictctr, set_start, way_start);
+
 
   for (int i = set_start; i < NUM_SET; i++)
   {
@@ -2477,7 +2479,6 @@ void early_evict(){
     {
       if (LLC[i][j].valid && LLC[i][j].dirty)
       {
-        // break;
         addr_target = LLC[i][j].addr;
         i_target = i;
         j_target = j;
@@ -2520,15 +2521,17 @@ void early_evict(){
     LLC[i_target][j_target].dirty = false;
     
     // set_start = i_target;
-    // way_start = j_target + 1;
+    // way_start = j_target;
   }
   else
   {
     dummy_access(ORAM);
+
     // set_start = NUM_SET;
     // way_start = NUM_WAY;
-    set_start = 0;
-    way_start = 0;
+    // set_start = 0;
+    // way_start = 0;
+    reset_dirty_search();
   }
   
 
