@@ -84,6 +84,7 @@ int fill_access = 0;	// # prefetch history table access
 int fill_miss = 0;		// # miss on prefetch history table access
 
 int hit_nonmemops = 0;  // # nonmemops encountered during hit on llc
+int consec_dumctr = 0;
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -135,7 +136,7 @@ int main(int argc, char * argv[])
 	printf("Rho            %s\n", RHO_ENABLE?"Enabled":"No" );
 	printf("Timing         %s\n", TIMING_ENABLE?"Enabled":"No" );
 	printf("Prefetch       %s\n", PREFETCH_ENABLE?"Enabled":"No" );
-	printf("Early Evict    %s\n\n", EVICT_ENABLE?"Enabled":"No" );
+	printf("Early Evict    %s\n\n", EARLY_ENABLE?"Enabled":"No" );
 
 
 	printf("....................................................\n");
@@ -674,15 +675,21 @@ int main(int argc, char * argv[])
 				dummy_rho = (rho_tick && oramQ->head->tree != RHO) || dummy_rho;
 			}
 			
-			// printf("tick: %d	mem: %d		dummy: %d	nonmemps: %d	req: %d\n", mem_tick, mem_cycle, dummy_tick, nonmemops[numc], reqctr);
-			// if (mem_tick)
+			// if (dummy_tick)
 			// {
-			// 	printf("\ntrace clk: %lld  nonmemops: %d\n", trace_clk, nonmemops[numc]);
+			// 	consec_dumctr++;
 			// }
-			// else
+			// else if (mem_tick)
 			// {
-			// 	printf("\nN   fetch clk: %lld\n", trace_clk);
+			// 	if (consec_dumctr != 0 )
+			// 	{
+			// 		printf("%d\n", consec_dumctr);
+			// 	}
+			// 	// printf("%d\n", consec_dumctr);
+			// 	consec_dumctr = 0;
 			// }
+			
+			
 			
 			
 		}
@@ -823,9 +830,9 @@ int main(int argc, char * argv[])
 				// printf("\nskip on\n");
 				if (dummy_oram)
 				{
-					if (EVICT_ENABLE)
+					if (EARLY_ENABLE)
 					{
-						early_evict();
+						early_writeback();
 					}
 					else if (PREFETCH_ENABLE)
 					{	
@@ -902,10 +909,10 @@ int main(int argc, char * argv[])
 							// hit
 							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
 							{
-								if (opertype[numc] == 'W')
-								{
-									reset_dirty_search();
-								}
+								// if (opertype[numc] == 'W')
+								// {
+								// 	reset_dirty_search();
+								// }
 								
 								hitctr++;
 								hit_nonmemops += nonmemops[numc] + L2_LATENCY;
@@ -954,10 +961,10 @@ int main(int argc, char * argv[])
 								
 								// first serve the evicted block then next time serve this trace
 								int victim = cache_fill(addr[numc], opertype[numc]);
-								if (opertype[numc] == 'W')
-								{
-									reset_dirty_search();
-								}
+								// if (opertype[numc] == 'W')
+								// {
+								// 	reset_dirty_search();
+								// }
 								if ( victim != -1)
 								{
 									evictctr++;
@@ -1100,9 +1107,9 @@ int main(int argc, char * argv[])
 			{
 				if (dummy_oram)
 				{
-					if (EVICT_ENABLE)
+					if (EARLY_ENABLE)
 					{
-						early_evict();
+						early_writeback();
 					}
 					else if (PREFETCH_ENABLE)
 					{
@@ -1367,7 +1374,8 @@ printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
 printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
-printf("Early Evict #            %d\n", earlyctr);
+printf("Early WB #               %d\n", earlyctr);
+printf("WB Pointer Effective #   %d\n", dirty_pointctr);
 printf("Cache Dirty #            %d\n", cache_dirty);
 // printf("Nonmemops #              %d\n\n", nonmemctr);
       

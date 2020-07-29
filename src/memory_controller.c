@@ -184,6 +184,8 @@ PosType pos_var = POS2;
 int set_start = 0;
 int way_start = 0;
 
+int dirty_pointctr = 0;
+
 
 unsigned int byte_addr(long long int physical_addr){
   unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
@@ -1520,7 +1522,7 @@ void freecursive_access(int addr, char type){
         // }
 
         cache_invalidate(caddr);
-        reset_dirty_search();
+        // reset_dirty_search();
         
         pinOn();
         oram_access(tag);
@@ -1805,7 +1807,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_pc = instruction_pc;
 
   // int addr = (int)(physical_address & (BLOCK-1));
-  unsigned int addr =block_addr(physical_address);
+  unsigned int addr = block_addr(physical_address);
   // printf("invoke oram: physical addr: %lld\n", addr);
   // printf("invoke oram: b4 freecursive call addr: %d\n", addr);
 
@@ -2464,51 +2466,48 @@ void reset_dirty_search(){
   way_start = 0;
 }
 
-void early_evict(){
+void early_writeback(){
 
   int i_target = 0;
   int j_target = 0;
   int addr_target = -1;
 
-    // printf("\n@trace %d dirty %d   early: %d   evict: %d    set start: %d   way start: %d \n", tracectr, cache_dirty, earlyctr, evictctr, set_start, way_start);
+  int i = dirty_coor[0];
+  int j = dirty_coor[1];
 
-
-  for (int i = set_start; i < NUM_SET; i++)
+  if (LLC[i][j].valid && LLC[i][j].dirty)
   {
-    for (int j = way_start; j < NUM_WAY; j++)
+    addr_target = LLC[i][j].addr;
+    i_target = i;
+    j_target = j;
+    dirty_pointctr++;
+  }
+  else
+  {
+    for (i = set_start; i < NUM_SET; i++)
     {
-      if (LLC[i][j].valid && LLC[i][j].dirty)
+      for (j = way_start; j < NUM_WAY; j++)
       {
-        addr_target = LLC[i][j].addr;
-        i_target = i;
-        j_target = j;
+        if (LLC[i][j].valid && LLC[i][j].dirty)
+        {
+          addr_target = LLC[i][j].addr;
+          i_target = i;
+          j_target = j;
+          break;
+        }
+      }
+      if(addr_target != -1)
+      {
         break;
-        // int addr = block_addr(addr_target);
-        // if (!plb_contain(addr) && !buffer_contain(addr))
-        // {
-        //   break;
-        // }
-        // else
-        // {
-        //   // printf("block %x \n", addr_target);
-        //   addr_target = -1;
-        //   i_target = 0;
-        //   j_target = 0;
-        // }
-        
-        
       }
     }
-    if(addr_target != -1)
-    {
-      break;
-    }
   }
+  
 
-  int addr = block_addr(addr_target);
-  if ((addr_target != -1) /*&& !plb_contain(addr) && !buffer_contain(addr)*/)
+  if (addr_target != -1)
   {
     earlyctr++;
+    int addr = block_addr(addr_target);
     int label = PosMap[addr];
 
     switch_tree_to(ORAM);     // switch to oram tree 
@@ -2518,20 +2517,15 @@ void early_evict(){
     write_path(label);
     switch_enqueue_to(TAIL);  // switch back to normal tail enqueue
 
-    LLC[i_target][j_target].dirty = false;
-    
+    cache_clean(i_target, j_target);
+
     // set_start = i_target;
     // way_start = j_target;
   }
   else
   {
     dummy_access(ORAM);
-
-    // set_start = NUM_SET;
-    // way_start = NUM_WAY;
-    // set_start = 0;
-    // way_start = 0;
-    reset_dirty_search();
+    // reset_dirty_search();
   }
   
 

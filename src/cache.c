@@ -7,9 +7,10 @@
 
 
 
-Cacheline LLC[NUM_SET][NUM_WAY];     // the cache
+Cacheline LLC[NUM_SET][NUM_WAY];     // the last level cache
 char LRU[NUM_SET][NUM_WAY];          // an array to keep track of lru for eviction
-int cache_dirty = 0;
+int cache_dirty = 0;                 // # dirty blocks ever
+int dirty_coor[2] = {0};             // keep the coordinates of last dirty block llc[i][j] ~~~> dirty_coor[0] = i, dirty_coor[1] = j
 
 // invalidate all cahce blocks upon init
 void cache_init(){
@@ -101,6 +102,9 @@ bool cache_access(unsigned int addr, char type){
                 LLC[index][j].dirty = true;
                 cache_dirty++;
 
+                dirty_coor[0] = index;
+                dirty_coor[1] = j;
+
             }
             update_LRU(index, j);  
             return true;    
@@ -130,6 +134,9 @@ int cache_invalidate(unsigned int addr){
     return -1;
 }
 
+void cache_clean(int i, int j){
+    LLC[i][j].dirty = false;
+}
 
 // try to fill the cache with new data, it may lead to eviction ~~~> is called when miss happens
 int cache_fill(unsigned int addr,  char type){
@@ -168,6 +175,9 @@ int cache_fill(unsigned int addr,  char type){
     {
         LLC[index][way].dirty = true;
         cache_dirty++;
+
+        dirty_coor[0] = index;
+        dirty_coor[1] = way;
     }
 
     reset_LRU(index, way);  
