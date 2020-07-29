@@ -20,14 +20,14 @@
 #define WARMUP_THRESHOLD 1000000       // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 
 // enable/disable options config
-#define VOLCANO_ENABLE 1     // 0/1 flag to disable/enable having volcano idea
+#define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
+#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
-#define EARLY_ENABLE 1       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
+#define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -40,14 +40,14 @@
 #define PLB_SIZE 1024     // size of plb (# entry)
 // #define OV_TRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
-#define EMPTY_TOP VOLCANO_ENABLE ? 10 : 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
+// #define EMPTY_TOP VOLCANO_ENABLE ? 10 : 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
-#define Z1 VOLCANO_ENABLE ? 0 : 4   // # slots per bucket upto L1
-#define Z2 VOLCANO_ENABLE ? 2 : 4   // # slots per bucket upto L2
-#define Z3 VOLCANO_ENABLE ? 3 : 4   // # slots per bucket upto L3
+// #define Z1 VOLCANO_ENABLE ? 0 : 4   // # slots per bucket upto L1
+// #define Z2 VOLCANO_ENABLE ? 2 : 4   // # slots per bucket upto L2
+// #define Z3 VOLCANO_ENABLE ? 3 : 4   // # slots per bucket upto L3
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree config
@@ -89,11 +89,17 @@
 
 enum{
   // main tree
+  EMPTY_TOP = VOLCANO_ENABLE ? 10 : 0,
+  Z1 = VOLCANO_ENABLE ? 0 : 4,   // # slots per bucket upto L1
+  Z2 = VOLCANO_ENABLE ? 2 : 4,   // # slots per bucket upto L2
+  Z3 = VOLCANO_ENABLE ? 3 : 4,   // # slots per bucket upto L3
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
   BLOCK = (long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)))),  // # valid blocks in oram tree
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
+  STASH_SIZE = VOLCANO_ENABLE ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,
+  OV_TRESHOLD = STASH_SIZE - Z*(LEVEL+1),   // overflow threshold for background eviction; C - Z(L+1)
   // subtree scheme
   SUBTREE_SIZE = (int) ROW_BUFF_SIZE * NUM_CHANNELS_SUBTREE,  // size of each 2k-arry tree that forms a node in bytes
   SUBTREE_SLOT = (int) (SUBTREE_SIZE/CACHE_LINE_SIZE),    // # slots that subtree holds
@@ -106,8 +112,6 @@ enum{
   RHO_BLOCK = (int)((long long int)floor(U*(RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1))))),  // # valid blocks in rho
   // RHO_SET = (int) ceil(RHO_BLOCK/10),
   RHO_SET = 16000,
-  STASH_SIZE = VOLCANO_ENABLE ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,
-  OV_TRESHOLD = STASH_SIZE - Z*(LEVEL+1),   // overflow threshold for background eviction; C - Z(L+1)
 };
 
 

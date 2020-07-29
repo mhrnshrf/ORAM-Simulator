@@ -589,18 +589,18 @@ void oram_init(){
   }
 
   // initialize subtree addressing for oram tree
-  // for (int i = 0; i < NODE; i++)
-  // {
-  //   SubMap[i] = index_to_addr(i);
-  // }
+  for (int i = 0; i < NODE; i++)
+  {
+    SubMap[i] = index_to_addr(i);
+  }
 
-  // // initialize subtree addressing for rho tree
-  // switch_tree_to(RHO);
-  // for (int i = 0; i < RHO_NODE; i++)
-  // {
-  //   RhoSubMap[i] = index_to_addr(i);
-  // }
-  // switch_tree_to(ORAM);
+  // initialize subtree addressing for rho tree
+  switch_tree_to(RHO);
+  for (int i = 0; i < RHO_NODE; i++)
+  {
+    RhoSubMap[i] = index_to_addr(i);
+  }
+  switch_tree_to(ORAM);
   
 }
 
