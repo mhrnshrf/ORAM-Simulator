@@ -552,7 +552,7 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE || invokectr >= 500000 )
+	if (tracectr >= TRACE_SIZE || invokectr >= (TRACE_SIZE - WARMUP_THRESHOLD) )
 	{
 		break;
 	}
