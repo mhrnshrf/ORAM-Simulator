@@ -558,16 +558,16 @@ int main(int argc, char * argv[])
 	gettimeofday(&sday, NULL);
 
 	
-	// if ((tracectr % 2000 == 0) /*&& tracectr > 9000 && tracectr != roundprev*/ )
+	// if ((tracectr % 10000 == 0) /*&& tracectr > 9000 && tracectr != roundprev*/ )
 	// {
-	// 	printf("\n...........................Partial Stat..............................\n");
-	// 	printf("@ trace: %d\n", tracectr);
-	// 	printf("invoke ctr: 	%d\n", invokectr);
-	// 	printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
-	// 	printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
-	// 	printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
-	// 	printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
-	// 	printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
+	// 	// printf("\n...........................Partial Stat..............................\n");
+	// 	printf("\n@ trace: %d	invoke ctr: %d   cache hit: %f%%\n", tracectr, invokectr, 100*(double)hitctr/(hitctr+missctr));
+	// 	// printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+	// 	// printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
+	// 	// printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
+	// 	// printf("invoke ctr: 	%d\n", invokectr);
+	// 	// printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
+	// 	// printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
 	// 	// period = 0;
 	// 	// periodctr++;
 	// 	// roundprev = tracectr;

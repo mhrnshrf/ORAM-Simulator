@@ -20,7 +20,9 @@
 #define WARMUP_THRESHOLD 1000000       // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 
 // enable/disable options config
-#define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea
+#define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
+#define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
+#define STL_ENABLE 1         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
@@ -89,16 +91,16 @@
 
 enum{
   // main tree
-  EMPTY_TOP = VOLCANO_ENABLE ? 10 : 0,
-  Z1 = VOLCANO_ENABLE ? 0 : 4,   // # slots per bucket upto L1
-  Z2 = VOLCANO_ENABLE ? 2 : 4,   // # slots per bucket upto L2
-  Z3 = VOLCANO_ENABLE ? 3 : 4,   // # slots per bucket upto L3
+  EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
+  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : 4,   // # slots per bucket upto L1
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : 4,   // # slots per bucket upto L2
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : 4,   // # slots per bucket upto L3
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
   BLOCK = (long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)))),  // # valid blocks in oram tree
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
-  STASH_SIZE = VOLCANO_ENABLE ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,
+  STASH_SIZE = (VOLCANO_ENABLE || STT_ENABLE) ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,
   OV_TRESHOLD = STASH_SIZE - Z*(LEVEL+1),   // overflow threshold for background eviction; C - Z(L+1)
   // subtree scheme
   SUBTREE_SIZE = (int) ROW_BUFF_SIZE * NUM_CHANNELS_SUBTREE,  // size of each 2k-arry tree that forms a node in bytes

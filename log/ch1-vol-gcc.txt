@@ -279,7 +279,7 @@ Energy Delay product (EDP) = 1.676576972 J.s
 
 ............... ORAM Stats ...............
 
-Execution Time           1878.734375 s
+Execution Time           2409.328125 s
 Trace Size               2000005
 Mem Cycles #             0
 Invoke Mem #             424263

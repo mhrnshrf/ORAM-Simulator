@@ -424,7 +424,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   
   if (!added)
   {
-    printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    dummys: %d\n", addr, oramQ->size, dummyctr+rho_dummyctr);
+    printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    trace: %d\n", addr, oramQ->size, tracectr);
     exit(1);
   }
 }
