@@ -545,12 +545,14 @@ int main(int argc, char * argv[])
 	
   while (!expt_done) {
 
+
 	// Mehrnoosh:
+	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
 	
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE)
+	if (tracectr >= TRACE_SIZE || invokectr >= TRACE_SIZE )
 	{
 		break;
 	}
@@ -558,7 +560,7 @@ int main(int argc, char * argv[])
 	gettimeofday(&sday, NULL);
 
 	
-	// if ((tracectr % 10000 == 0) /*&& tracectr > 9000 && tracectr != roundprev*/ )
+	// if ((tracectr % 1000 == 0) /*&& tracectr > 9000 && tracectr != roundprev*/ )
 	// {
 	// 	// printf("\n...........................Partial Stat..............................\n");
 	// 	printf("\n@ trace: %d	invoke ctr: %d   cache hit: %f%%\n", tracectr, invokectr, 100*(double)hitctr/(hitctr+missctr));
@@ -628,6 +630,7 @@ int main(int argc, char * argv[])
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
         while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) {
+			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
 	  /* If Memop, then populate read/write queue.  Set up completion time. */

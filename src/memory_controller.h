@@ -11,18 +11,18 @@
 
 #include <math.h>
 // other simulation parameter
-#define TRACE_SIZE 2000000  // # addr read from trace file
+#define TRACE_SIZE 4000000  // # addr read from trace file
 #define QUEUE_SIZE 1000     // oramq capacity
 #define PAGE_SIZE 4096      // page size in byte ~~~> 4KB
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
 #define MAINMEM_LATENCY 0       // L2 latency in terms of # cycles 
-#define WARMUP_THRESHOLD 1000000       // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
+#define WARMUP_THRESHOLD 3000000       // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 
 // enable/disable options config
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE 1         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE 0         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
