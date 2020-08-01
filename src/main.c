@@ -130,6 +130,8 @@ int main(int argc, char * argv[])
 	printf("                     Options\n");
 	printf("....................................................\n");
 	printf("Volcano        %s\n", VOLCANO_ENABLE?"Enabled":"No" );
+	printf("STT            %s\n", STT_ENABLE?"Enabled":"No" );
+	printf("STL            %s\n", STL_ENABLE?"Enabled":"No" );
 	printf("Cache          %s\n", CACHE_ENABLE?"Enabled":"No" );
 	printf("Write Bypass   %s\n", WRITE_BYPASS?"Enabled":"No" );
 	printf("Subtree        %s\n", SUBTREE_ENABLE?"Enabled":"No" );
