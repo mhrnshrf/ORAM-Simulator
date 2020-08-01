@@ -14,6 +14,8 @@ int dirty_coor[2] = {0};             // keep the coordinates of last dirty block
 
 // invalidate all cahce blocks upon init
 void cache_init(){
+    printf("TAG WIDTH: %d \n", TAG_WIDTH);
+    printf("INDEX WIDTH: %d\n", INDEX_WIDTH);
     for (unsigned int i = 0; i < NUM_SET; i++)
     {
         for (unsigned int j = 0; j < NUM_WAY; j++)
@@ -77,12 +79,15 @@ int find_victim(unsigned int index) {
 unsigned int get_index(unsigned int addr){
     unsigned int index = addr << TAG_WIDTH;
     index = index >> (TAG_WIDTH+OFFSET_WIDTH);
+    // unsigned int index = addr >> OFFSET_WIDTH;
+    // index = index % NUM_SET;
     return index;
 
 }
 
 unsigned int get_tag(unsigned int addr){
     unsigned int tag = addr >> (INDEX_WIDTH+OFFSET_WIDTH);
+    // unsigned int tag = addr >> OFFSET_WIDTH;
     return tag;
 }
 
