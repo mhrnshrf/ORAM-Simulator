@@ -12,7 +12,7 @@
 #include <math.h>
 // other simulation parameter
 #define TRACE_SIZE 4000000  // # addr read from trace file
-#define QUEUE_SIZE 1000     // oramq capacity
+#define QUEUE_SIZE 2000     // oramq capacity
 #define PAGE_SIZE 4096      // page size in byte ~~~> 4KB
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
@@ -45,7 +45,7 @@
 // #define EMPTY_TOP VOLCANO_ENABLE ? 10 : 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 12   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L2 16   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 // #define Z1 VOLCANO_ENABLE ? 0 : 4   // # slots per bucket upto L1
 // #define Z2 VOLCANO_ENABLE ? 2 : 4   // # slots per bucket upto L2

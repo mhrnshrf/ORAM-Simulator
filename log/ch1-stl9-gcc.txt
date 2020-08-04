@@ -21,7 +21,7 @@ Early Evict    No
              Simulation Parameter
 ....................................................
 Trace Size    4000000
-Queue Size    1000
+Queue Size    2000
 Page Size     4096
 L1 Latency    3
 L2 Latency    10
@@ -38,7 +38,7 @@ Slot            66456572
 Block           33228286
 Z               4
 U               0.500000
-OV Treshold     100
+OV Threshold    100
 Stash Size      200
 PLB Size        1024
 BK Eviction     1
@@ -82,7 +82,7 @@ Rho Block           524287
 Rho Set             16000
 Rho Way             10
 Rho Z               2
-Rho OV Treshold     160
+Rho OV Threshold    160
 Rho Stash Size      200
 Rho BK Eviction     1
 Rho Empty Top       0
@@ -188,3 +188,4 @@ WQ_LOOKUP_LATENCY:              10
 
 ----------------------------------------------------------------------------------------
 Starting simulation.
+ERROR: insert oramQ: failed to enqueue block: 135464704    oramq size: 2000    trace: 3717001  stash: 119 bkctr: 88431

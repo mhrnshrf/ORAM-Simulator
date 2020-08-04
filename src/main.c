@@ -837,14 +837,13 @@ int main(int argc, char * argv[])
 
 		if (oramQ->size == 0)
 		{
-			// if (BK_EVICTION && bk_evict_needed())
-			// {
-			// 	background_eviction();
-			// 	skip_invokation = true; 
+			if (BK_EVICTION && bk_evict_needed())
+			{
+				background_eviction();
+				skip_invokation = true; 
 				
-			// }
-			// else 
-			if (TIMING_ENABLE && dummy_tick)
+			}
+			else if (TIMING_ENABLE && dummy_tick)
 			{
 				// just skip the trace reading in case of dummy turn
 				skip_invokation = true;
@@ -1122,7 +1121,7 @@ int main(int argc, char * argv[])
 		} 
 		if (oramQ->size != 0)
 		{
-			printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
+			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
 			if (BK_EVICTION && bk_evict_needed())
 			{
