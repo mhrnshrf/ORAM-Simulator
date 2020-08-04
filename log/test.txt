@@ -7,6 +7,8 @@
                      Options
 ....................................................
 Volcano        No
+STT            No
+STL            No
 Cache          Enabled
 Write Bypass   No
 Subtree        Enabled
@@ -24,7 +26,7 @@ Page Size     4096
 L1 Latency    3
 L2 Latency    10
 Mem Latency   0
-Warmup Thld   0
+Warmup Thld   3000000
 
 ....................................................
                    ORAM Config
@@ -36,7 +38,7 @@ Slot            67108860
 Block           33554430
 Z               4
 U               0.500000
-OV Treshold     100
+OV THRESHOLD     100
 Stash Size      200
 PLB Size        1024
 BK Eviction     1
@@ -44,8 +46,8 @@ Empty Top       0
 Top Cache       10
 
 L1  9       Z1  4
-L2  15      Z2  4
-L3  18      Z3  4
+L2  12      Z2  4
+L3  17      Z3  4
 
 LZ 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
 = 96 ~> oram path length
@@ -80,7 +82,7 @@ Rho Block           524287
 Rho Set             16000
 Rho Way             10
 Rho Z               2
-Rho OV Treshold     160
+Rho OV THRESHOLD     160
 Rho Stash Size      200
 Rho BK Eviction     1
 Rho Empty Top       0
@@ -113,10 +115,8 @@ Buffer Entry #           32
 
 
 
-TAG WIDTH: 14 
-INDEX WIDTH: 12
 Initializing.
-Core 0: Input trace file /mnt/c/trace/syn : Addresses will have prefix 0
+Core 0: Input trace file /mnt/c/trace/gcc : Addresses will have prefix 0
 Reading vi file: 1Gb_x4.vi	
 16 Chips per Rank
 ----------------------------------------------------------------------------------------
@@ -188,35 +188,21 @@ WQ_LOOKUP_LATENCY:              10
 
 ----------------------------------------------------------------------------------------
 Starting simulation.
-victim: ffffffff
-victim: ffffffff
-victim: ffffffff
-victim: ffffffff
-victim: ffffffff
-victim: ffffffff
-victim: ffffffff
-victim: ffffffff
-victim: 738c1200
-victim: 798c1200
-victim: ffffffff
-victim: ffffffff
-victim: ffffffff
-victim: ffffffff
 Done with loop. Printing stats.
-Cycles 85593
-Done: Core 0: Fetched 5184 : Committed 5184 : At time : 85593
-Sum of execution times for all programs: 85593
-Num reads merged: 0
-Num writes merged: 0
+Cycles 1221556917
+Done: Core 0: Fetched 484082698 : Committed 484082617 : At time : 1221556917
+Sum of execution times for all programs: 1221556917
+Num reads merged: 2705
+Num writes merged: 2165
 -------- Channel 0 Stats-----------
-Total Reads Serviced :          2577   
-Total Writes Serviced :         2576   
-Average Read Latency :          1894.05355
-Average Read Queue Latency :    1834.05355
-Average Write Latency :         1199.83036
-Average Write Queue Latency :   1135.83036
-Read Page Hit Rate :            0.87194
-Write Page Hit Rate :           0.94992
+Total Reads Serviced :          31026538
+Total Writes Serviced :         31027037
+Average Read Latency :          1685.85919
+Average Read Queue Latency :    1625.85919
+Average Write Latency :         1147.68229
+Average Write Queue Latency :   1083.68229
+Read Page Hit Rate :            0.89437
+Write Page Hit Rate :           0.93468
 ------------------------------------
 
 #-----------------------------Simulated Cycles Break-Up-------------------------------------------
@@ -225,29 +211,29 @@ Note:  1.(Read Cycles + Write Cycles + Read Other + Write Other) should add up t
        2.(PRE_PDN_FAST + PRE_PDN_SLOW + ACT_PDN + ACT_STBY + PRE_STBY) should add up to 100%
        3.Power Down means Clock Enable, CKE = 0. In Standby mode, CKE = 1
 #-------------------------------------------------------------------------------------------------
-Total Simulation Cycles                            85593
+Total Simulation Cycles                       1221556917
 ---------------------------------------------------------------
 
-Channel 0 Rank 0 Read Cycles(%)                0.28 # % cycles the Rank performed a Read
-Channel 0 Rank 0 Write Cycles(%)               0.28 # % cycles the Rank performed a Write
+Channel 0 Rank 0 Read Cycles(%)                0.20 # % cycles the Rank performed a Read
+Channel 0 Rank 0 Write Cycles(%)               0.20 # % cycles the Rank performed a Write
 Channel 0 Rank 0 Read Other(%)                 0.20 # % cycles other Ranks on the channel performed a Read
 Channel 0 Rank 0 Write Other(%)                0.20 # % cycles other Ranks on the channel performed a Write
 Channel 0 Rank 0 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
 Channel 0 Rank 0 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
 Channel 0 Rank 0 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
-Channel 0 Rank 0 ACT_STBY(%)                   1.00 # % cycles the Rank was in Standby and atleast one bank was Active
-Channel 0 Rank 0 PRE_STBY(%)                   0.00 # % cycles the Rank was in Standby and all Banks were Precharged
+Channel 0 Rank 0 ACT_STBY(%)                   0.98 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 0 Rank 0 PRE_STBY(%)                   0.02 # % cycles the Rank was in Standby and all Banks were Precharged
 ---------------------------------------------------------------
 
 Channel 0 Rank 1 Read Cycles(%)                0.20 # % cycles the Rank performed a Read
 Channel 0 Rank 1 Write Cycles(%)               0.20 # % cycles the Rank performed a Write
-Channel 0 Rank 1 Read Other(%)                 0.28 # % cycles other Ranks on the channel performed a Read
-Channel 0 Rank 1 Write Other(%)                0.28 # % cycles other Ranks on the channel performed a Write
+Channel 0 Rank 1 Read Other(%)                 0.20 # % cycles other Ranks on the channel performed a Read
+Channel 0 Rank 1 Write Other(%)                0.20 # % cycles other Ranks on the channel performed a Write
 Channel 0 Rank 1 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
 Channel 0 Rank 1 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
 Channel 0 Rank 1 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
-Channel 0 Rank 1 ACT_STBY(%)                   0.99 # % cycles the Rank was in Standby and atleast one bank was Active
-Channel 0 Rank 1 PRE_STBY(%)                   0.01 # % cycles the Rank was in Standby and all Banks were Precharged
+Channel 0 Rank 1 ACT_STBY(%)                   0.98 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 0 Rank 1 PRE_STBY(%)                   0.02 # % cycles the Rank was in Standby and all Banks were Precharged
 ---------------------------------------------------------------
 
 
@@ -257,67 +243,68 @@ Note:  1. termRoth/termWoth is the power dissipated in the ODT resistors when Re
 #-------------------------------------------------------------------------------------------------
 
 Channel 0 Rank 0 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
-Channel 0 Rank 0 Act(mW)                     19.26 # power spend bringing data to the row buffer
-Channel 0 Rank 0 Read(mW)                    39.98 # power spent doing a Read  after the Row Buffer is open
-Channel 0 Rank 0 Write(mW)                   42.06 # power spent doing a Write after the Row Buffer is open
-Channel 0 Rank 0 Read Terminate(mW)           8.98 # power dissipated in ODT resistors during Read
+Channel 0 Rank 0 Act(mW)                     12.69 # power spend bringing data to the row buffer
+Channel 0 Rank 0 Read(mW)                    28.95 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 0 Write(mW)                   30.47 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 0 Read Terminate(mW)           6.50 # power dissipated in ODT resistors during Read
 Channel 0 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
-Channel 0 Rank 0 termRoth(mW)                50.08 # power dissipated in ODT resistors during Reads  in other ranks
-Channel 0 Rank 0 termWoth(mW)                46.02 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 0 termRoth(mW)                50.61 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 0 termWoth(mW)                46.50 # power dissipated in ODT resistors during Writes in other ranks
 Channel 0 Rank 0 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
 ---------------------------------------------------------------
-Channel 0 Rank 0 Total Rank Power(mW)      4424.50 # (Sum of above components)*(num chips in each Rank)
+Channel 0 Rank 0 Total Rank Power(mW)      3933.83 # (Sum of above components)*(num chips in each Rank)
 ---------------------------------------------------------------
 
 Channel 0 Rank 1 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
-Channel 0 Rank 1 Act(mW)                     12.72 # power spend bringing data to the row buffer
-Channel 0 Rank 1 Read(mW)                    28.66 # power spent doing a Read  after the Row Buffer is open
-Channel 0 Rank 1 Write(mW)                   30.17 # power spent doing a Write after the Row Buffer is open
-Channel 0 Rank 1 Read Terminate(mW)           6.44 # power dissipated in ODT resistors during Read
+Channel 0 Rank 1 Act(mW)                     12.71 # power spend bringing data to the row buffer
+Channel 0 Rank 1 Read(mW)                    28.96 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 1 Write(mW)                   30.49 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 1 Read Terminate(mW)           6.50 # power dissipated in ODT resistors during Read
 Channel 0 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
-Channel 0 Rank 1 termRoth(mW)                69.87 # power dissipated in ODT resistors during Reads  in other ranks
-Channel 0 Rank 1 termWoth(mW)                64.15 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 1 termRoth(mW)                50.58 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 1 termWoth(mW)                46.48 # power dissipated in ODT resistors during Writes in other ranks
 Channel 0 Rank 1 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
 ---------------------------------------------------------------
-Channel 0 Rank 1 Total Rank Power(mW)      4514.44 # (Sum of above components)*(num chips in each Rank)
+Channel 0 Rank 1 Total Rank Power(mW)      3933.93 # (Sum of above components)*(num chips in each Rank)
 ---------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------------------------
-Total memory system power = 8.938931 W
+Total memory system power = 7.867766 W
 Miscellaneous system power = 10 W  # Processor uncore power, disk, I/O, cooling, etc.
 Processor core power = 5.000000 W  # Assuming that each core consumes 5 W
-Total system power = 23.938931 W # Sum of the previous three lines
-Energy Delay product (EDP) = 0.000000017 J.s
+Total system power = 22.867767 W # Sum of the previous three lines
+Energy Delay product (EDP) = 3.332355022 J.s
 
 
 
 
 ............... ORAM Stats ...............
 
-Execution Time           0.171875 s
-Trace Size               17
+Execution Time           3911.953125 s
+Trace Size               4000018
 Mem Cycles #             0
-Invoke Mem #             17
-ORAM Access #            49
+Invoke Mem #             433337
+ORAM Access #            554095
 Rho Access #             0
 ORAM Dummy #             0
 Rho  Dummy #             0
 Early WB #               0
 Early WB Pointer #       0
-Cache Dirty #            11
+Cache Dirty #            478682
 PLB pos0 hit             0.000000%
-PLB pos1 hit             5.882353%
-PLB pos2 hit             0.000000%
+PLB pos1 hit             78.351010%
+PLB pos2 hit             71.262738%
 PLB pos0 hit #           0
-PLB pos1 hit #           1
-PLB pos2 hit #           0
-PLB pos0 acc #           17
-PLB pos1 acc #           17
-PLB pos2 acc #           16
-oramQ Size               335
+PLB pos1 hit #           339520
+PLB pos2 hit #           66853
+PLB pos0 acc #           433332
+PLB pos1 acc #           433332
+PLB pos2 acc #           93812
+oramQ Size               111
 Bk Evict                 0.000000%
-Cache Hit                17.647059%
-Cache Evict              14.285714%
+Bk Evict #               0
+Cache Hit                75.416767%
+Cache Evict              76.270049%
 Rho Hit                  0.000000%
 Rho Bk Evict             -nan%

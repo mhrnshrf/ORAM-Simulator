@@ -3,6 +3,7 @@
 #include<string.h>
 #include<assert.h>
 
+
 #include "processor.h"
 #include "configfile.h"
 #include "memory_controller.h"
@@ -44,12 +45,14 @@ FILE **shadtif;  /* The handles to the trace input files. */
 #include <time.h>
 #include "cache.h"
 #include "prefetcher.h"
+#include<signal.h> 
 
 struct timeval sday, eday;
 long int period = 0;
 int periodctr = 0;
 int nonmemctr = 0;
 int roundprev = 0;
+double cpu_time_used = 0;
 // int tracectr = 0;	// # lines read from the trace file 
 int hitctr = 0;		// # hits on llc
 int missctr = 0;	// # misses on llc
@@ -115,10 +118,13 @@ void print_req_symbols(){
 }
 
 
+
+
 // Mehrnoosh.
 
 int main(int argc, char * argv[])
 {
+
   
   printf("---------------------------------------------\n");
   printf("-- USIMM: the Utah SImulated Memory Module --\n");
@@ -126,6 +132,7 @@ int main(int argc, char * argv[])
   printf("---------------------------------------------\n");
 
 //   Mehrnoosh:
+
 	printf("\n....................................................\n");
 	printf("                     Options\n");
 	printf("....................................................\n");
@@ -162,7 +169,7 @@ int main(int argc, char * argv[])
 	printf("Block           %d\n", BLOCK);
 	printf("Z               %d\n", Z);
 	printf("U               %f\n", U);
-	printf("OV Treshold     %d\n", OV_TRESHOLD);
+	printf("OV Threshold    %d\n", OV_THRESHOLD);
 	printf("Stash Size      %d\n", STASH_SIZE);
 	printf("PLB Size        %d\n", PLB_SIZE);
 	printf("BK Eviction     %d\n", BK_EVICTION);
@@ -214,7 +221,7 @@ int main(int argc, char * argv[])
 	printf("Rho Set             %d\n", RHO_SET);
 	printf("Rho Way             %d\n", RHO_WAY);
 	printf("Rho Z               %d\n", RHO_Z);
- 	printf("Rho OV Treshold     %d\n", RHO_OV_TRESHOLD);
+ 	printf("Rho OV Threshold    %d\n", RHO_OV_THRESHOLD);
 	printf("Rho Stash Size      %d\n", RHO_STASH_SIZE);
 	printf("Rho BK Eviction     %d\n", RHO_BK_EVICTION);
 	printf("Rho Empty Top       %d\n", RHO_EMPTY_TOP);
@@ -259,8 +266,10 @@ int main(int argc, char * argv[])
 	// test_footprint();
 
 	// long long int inaddr = 0xfffffffff;
-	// long long int addrout = byte_addr(inaddr);
-	// printf("out: %llx\n", addrout);
+	// int addrout = byte_addr(2147483520);
+	// printf("block: %d\n", BLOCK);
+	// printf("out: %d\n", addrout);
+	// printf("out: %x\n", addrout);
 	// int xxx = block_addr(addrout);
 	// printf("xxx: %x\n", xxx);
 	
@@ -290,7 +299,7 @@ int main(int argc, char * argv[])
 	fflush(stdout);
 	
 	 clock_t start, end;
-     double cpu_time_used = 0;
+     
 
 	 for (int i = 0; i < NUMCORES; i++)
 	 {
@@ -545,11 +554,13 @@ int main(int argc, char * argv[])
 
   printf("Starting simulation.\n");
 	
+//   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
 
 
 	// Mehrnoosh:
 	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
+	// printf("\n@ trace %d	bkctr: %d \n", tracectr, bkctr);
 	
 
 	no_miss_occured = true;
@@ -826,7 +837,13 @@ int main(int argc, char * argv[])
 
 		if (oramQ->size == 0)
 		{
-
+			// if (BK_EVICTION && bk_evict_needed())
+			// {
+			// 	background_eviction();
+			// 	skip_invokation = true; 
+				
+			// }
+			// else 
 			if (TIMING_ENABLE && dummy_tick)
 			{
 				// just skip the trace reading in case of dummy turn
@@ -1105,9 +1122,14 @@ int main(int argc, char * argv[])
 		} 
 		if (oramQ->size != 0)
 		{
-			// printf("else oramq size: %d   @ trace %d\n", oramQ->size, tracectr);
+			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
+			// if (BK_EVICTION && bk_evict_needed())
+			// {
+			// 	background_eviction();
+			// }
 			// if a dummy access is not already made ~> it would be already made if it was dummy tick and queue was empty
+			// else 
 			if (TIMING_ENABLE && !dummy_already_made)
 			{
 				if (dummy_oram)
@@ -1250,6 +1272,7 @@ int main(int argc, char * argv[])
 	gettimeofday(&eday, NULL);
     period =  ((eday.tv_sec * 1000000 + eday.tv_usec) - (sday.tv_sec * 1000000 + sday.tv_usec))/ 1000000;
 	fflush(stdout);
+	
 	// Mehrnoosh.
   }
 
@@ -1379,7 +1402,8 @@ printf("PLB pos0 acc #           %lld\n", plb_access[0]);
 printf("PLB pos1 acc #           %lld\n", plb_access[1]);
 printf("PLB pos2 acc #           %lld\n", plb_access[2]);
 printf("oramQ Size               %d\n", oramQ->size);
-printf("Bk Evict                 %f%%\n", 100*(double)bkctr/invokectr);
+printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
+printf("Bk Evict #               %d\n", bkctr);
 printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
 printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
@@ -1401,6 +1425,38 @@ printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
 
   return 0;
 }
+
+// void handle_sigint(int sig) 
+// { 
+//     printf("Caught signal %d\n", sig);
+// 	printf("\n\n\n\n............... ORAM Stats ...............\n\n");
+// 	printf("Execution Time           %f s\n", cpu_time_used);
+// 	printf("Trace Size               %d\n", tracectr);
+// 	printf("Mem Cycles #             %lld\n", mem_clk);
+// 	printf("Invoke Mem #             %d\n", invokectr);
+// 	printf("ORAM Access #            %d\n", oramctr);
+// 	printf("Rho Access #             %d\n", rhoctr);
+// 	printf("ORAM Dummy #             %d\n", dummyctr);
+// 	printf("Rho  Dummy #             %d\n", rho_dummyctr);
+// 	printf("Early WB #               %d\n", earlyctr);
+// 	printf("Early WB Pointer #       %d\n", dirty_pointctr);
+// 	printf("Cache Dirty #            %d\n", cache_dirty);
+// 	printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plb_access[0]);
+// 	printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plb_access[1]);
+// 	printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plb_access[2]);
+// 	printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
+// 	printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
+// 	printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
+// 	printf("PLB pos0 acc #           %lld\n", plb_access[0]);
+// 	printf("PLB pos1 acc #           %lld\n", plb_access[1]);
+// 	printf("PLB pos2 acc #           %lld\n", plb_access[2]);
+// 	printf("oramQ Size               %d\n", oramQ->size);
+// 	printf("Bk Evict                 %f%%\n", 100*(double)bkctr/invokectr);
+// 	printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+// 	printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
+// 	printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
+// 	printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit); 
+// }
 
 
 

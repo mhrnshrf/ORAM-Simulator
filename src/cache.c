@@ -14,8 +14,6 @@ int dirty_coor[2] = {0};             // keep the coordinates of last dirty block
 
 // invalidate all cahce blocks upon init
 void cache_init(){
-    printf("TAG WIDTH: %d \n", TAG_WIDTH);
-    printf("INDEX WIDTH: %d\n", INDEX_WIDTH);
     for (unsigned int i = 0; i < NUM_SET; i++)
     {
         for (unsigned int j = 0; j < NUM_WAY; j++)

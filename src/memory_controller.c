@@ -171,7 +171,7 @@ TreeType TREE_VAR = ORAM;
 int LEVEL_VAR = LEVEL;
 int Z_VAR = Z;
 int STASH_SIZE_VAR = STASH_SIZE;
-int OV_TRESHOLD_VAR = OV_TRESHOLD;  
+int OV_THRESHOLD_VAR = OV_THRESHOLD;  
 int BK_EVICTION_VAR = BK_EVICTION;
 int EMPTY_TOP_VAR = EMPTY_TOP;
 int TOP_CACHE_VAR = TOP_CACHE;
@@ -189,7 +189,7 @@ int dirty_pointctr = 0;
 
 unsigned int byte_addr(long long int physical_addr){
   unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
-  unsigned int max = (BLOCK<<((unsigned int)log2(BLOCK_SIZE))) | (BLOCK_SIZE-1);
+  unsigned int max = ((BLOCK-1)<<((unsigned int)log2(BLOCK_SIZE))) | (BLOCK_SIZE-1);
   if (addr > max)
   {
     addr = max; 
@@ -424,7 +424,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   
   if (!added)
   {
-    printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    trace: %d\n", addr, oramQ->size, tracectr);
+    printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    trace: %d  stash: %d bkctr: %d\n", addr, oramQ->size, tracectr, stashctr, bkctr);
     exit(1);
   }
 }
@@ -449,7 +449,7 @@ void switch_tree_to(TreeType tree){
   LEVEL_VAR = (tree == RHO) ? RHO_LEVEL: LEVEL ;
   Z_VAR = (tree == RHO) ? RHO_Z: Z;
   STASH_SIZE_VAR = (tree == RHO) ? RHO_STASH_SIZE: STASH_SIZE;
-  OV_TRESHOLD_VAR = (tree == RHO) ? RHO_OV_TRESHOLD: OV_TRESHOLD;
+  OV_THRESHOLD_VAR = (tree == RHO) ? RHO_OV_THRESHOLD: OV_THRESHOLD;
   BK_EVICTION_VAR = (tree == RHO) ? RHO_BK_EVICTION: BK_EVICTION;
   EMPTY_TOP_VAR = (tree == RHO) ? RHO_EMPTY_TOP: EMPTY_TOP; 
   TOP_CACHE_VAR = (tree == RHO) ? RHO_TOP_CACHE: TOP_CACHE;
@@ -776,6 +776,8 @@ void count_tree(){
 
 void read_path(int label){
 
+    // printf("\nread path @ trace %d\n", tracectr);
+
     for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     {
       int index = calc_index(label, i);
@@ -786,6 +788,7 @@ void read_path(int label){
           // int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
           int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+          // printf("insert oramq: %d\n", oramQ->size);
         }
 
         if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -860,6 +863,8 @@ void pick_candidate(int index, int label, int i){
 }
 
 void write_path(int label){
+
+    // printf("\nwrite path @ trace %d\n", tracectr);
   
   for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
@@ -883,6 +888,8 @@ void write_path(int label){
 
           // insert_write (addr, orig_cycle, orig_thread, orig_instr);
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+          // printf("insert oramq: %d\n", oramQ->size);
+
         }
         
       }
@@ -910,6 +917,8 @@ void write_path(int label){
 
             // insert_write (addr, orig_cycle, orig_thread, orig_instr);
             insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+            // printf("insert oramq: %d\n", oramQ->size);
+
           }
         }
         else
@@ -921,6 +930,8 @@ void write_path(int label){
 
             // insert_write (addr, orig_cycle, orig_thread, orig_instr);
             insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+          // printf("insert oramq: %d\n", oramQ->size);
+
           }
 
           if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -1067,28 +1078,32 @@ void print_path_occupancy(int label){
   
 }
 
+bool bk_evict_needed(){
+  int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
+  if(stashctr_var >= OV_THRESHOLD_VAR)
+  {
+    return true;
+  }
+  return false;
+}
+
 // issue dummy access (read path + write path) until stash occupancy drops a threshold
 void background_eviction(){
-  int i = 0;
-  int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
-  while(stashctr_var >= OV_TRESHOLD_VAR)
+
+  if (RHO_ENABLE && (TREE_VAR == RHO))
   {
-    if(i == 0 )
-    {
-      if (RHO_ENABLE && (TREE_VAR == RHO))
-      {
-        rho_bkctr++;
-      }
-      else
-      {
-        bkctr++;
-      }
-    }
-    int label = rand() % PATH_VAR;
-    read_path(label);
-    write_path(label);
-    i++;
+    rho_bkctr++;
   }
+  else
+  {
+    bkctr++;
+  }
+  int label = rand() % PATH_VAR;
+  // switch_enqueue_to(HEAD);
+  read_path(label);
+  write_path(label);
+  // switch_enqueue_to(TAIL);
+
 }
 
 // assign the block a new label and update in posmap and stash 
@@ -1128,7 +1143,7 @@ void remap_block(int addr){
       printf("ERROR: remap: @ trace %d  block %d not found in stash!\n", tracectr, addr);
       printf("remap:  previous Posmap[%d]: %d\n", addr, prevlabel);
       printf("remap:  Posmap[%d]: %d\n", addr, PosMap[addr]);
-      printf("remap:  stashctr: %d\n", stashctr);
+      printf("remap:  stashctr: %d    bkctr: %d\n", stashctr, bkctr);
       printf("remap:  PLB[%d]: %d\n", addr%PLB_SIZE, PLB[addr%PLB_SIZE]);
     }
     exit(1);
@@ -1275,7 +1290,7 @@ void test_read_write(){
     // printf("test rw: addr: %d\n", addr);
     // int label = rand() % PATH;
 
-    // if (stashctr > OV_TRESHOLD)
+    // if (stashctr > OV_THRESHOLD)
       // printf("i: %d  path: %d stashctr: %d\n", i, label, stashctr);
 
     stash_dist[stashctr]++;
@@ -1364,10 +1379,7 @@ void oram_access(int addr){
 
   write_path(label);
 
-  if (BK_EVICTION)
-  {
-    background_eviction(); 
-  }
+
 }
 
 // Freecursive 4.2.4 ORAM access algorithm
