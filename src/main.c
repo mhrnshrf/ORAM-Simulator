@@ -1122,15 +1122,14 @@ int main(int argc, char * argv[])
 		} 
 		if (oramQ->size != 0)
 		{
-			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
+			printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
-			// if (BK_EVICTION && bk_evict_needed())
-			// {
-			// 	background_eviction();
-			// }
+			if (BK_EVICTION && bk_evict_needed())
+			{
+				background_eviction();
+			}
 			// if a dummy access is not already made ~> it would be already made if it was dummy tick and queue was empty
-			// else 
-			if (TIMING_ENABLE && !dummy_already_made)
+			else if (TIMING_ENABLE && !dummy_already_made)
 			{
 				if (dummy_oram)
 				{

@@ -1099,10 +1099,10 @@ void background_eviction(){
     bkctr++;
   }
   int label = rand() % PATH_VAR;
-  // switch_enqueue_to(HEAD);
+  switch_enqueue_to(HEAD);
   read_path(label);
   write_path(label);
-  // switch_enqueue_to(TAIL);
+  switch_enqueue_to(TAIL);
 
 }
 
