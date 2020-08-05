@@ -45,6 +45,7 @@ FILE **shadtif;  /* The handles to the trace input files. */
 #include <time.h>
 #include "cache.h"
 #include "prefetcher.h"
+#include "plb.h"
 #include<signal.h> 
 
 struct timeval sday, eday;
@@ -276,6 +277,8 @@ int main(int argc, char * argv[])
 
 	
 	cache_init();
+
+	plb_init();
 
 	table_init();
 	
@@ -1394,15 +1397,15 @@ printf("Rho  Dummy #             %d\n", rho_dummyctr);
 printf("Early WB #               %d\n", earlyctr);
 printf("Early WB Pointer #       %d\n", dirty_pointctr);
 printf("Cache Dirty #            %d\n", cache_dirty);
-printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plb_access[0]);
-printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plb_access[1]);
-printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plb_access[2]);
+printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
 printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
 printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
 printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
-printf("PLB pos0 acc #           %lld\n", plb_access[0]);
-printf("PLB pos1 acc #           %lld\n", plb_access[1]);
-printf("PLB pos2 acc #           %lld\n", plb_access[2]);
+printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
+printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
+printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
 printf("oramQ Size               %d\n", oramQ->size);
 printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
 printf("Bk Evict #               %d\n", bkctr);
@@ -1443,15 +1446,15 @@ printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
 // 	printf("Early WB #               %d\n", earlyctr);
 // 	printf("Early WB Pointer #       %d\n", dirty_pointctr);
 // 	printf("Cache Dirty #            %d\n", cache_dirty);
-// 	printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plb_access[0]);
-// 	printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plb_access[1]);
-// 	printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plb_access[2]);
+// 	printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+// 	printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+// 	printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
 // 	printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
 // 	printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
 // 	printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
-// 	printf("PLB pos0 acc #           %lld\n", plb_access[0]);
-// 	printf("PLB pos1 acc #           %lld\n", plb_access[1]);
-// 	printf("PLB pos2 acc #           %lld\n", plb_access[2]);
+// 	printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
+// 	printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
+// 	printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
 // 	printf("oramQ Size               %d\n", oramQ->size);
 // 	printf("Bk Evict                 %f%%\n", 100*(double)bkctr/invokectr);
 // 	printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));

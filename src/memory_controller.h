@@ -22,7 +22,7 @@
 // enable/disable options config
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE 1         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE 0         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
@@ -39,7 +39,7 @@
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
-#define PLB_SIZE 1024     // size of plb (# entry)
+// #define PLB_SIZE 1024     // size of plb (# entry)
 // #define OV_THRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 // #define EMPTY_TOP VOLCANO_ENABLE ? 10 : 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
@@ -179,7 +179,7 @@ extern int pos2hit;
 extern int pos1conf;
 extern int pos2conf;
 extern long long int plb_hit[H-1];
-extern long long int plb_access[H-1];
+extern long long int plbaccess[H-1];
 extern int case1;
 extern int case2;
 extern int case3;
@@ -245,7 +245,7 @@ void test_subtree();
 void dummy_access(TreeType tree);
 void switch_enqueue_to(EnqueueType enqueue);
 void print_plb_stat();
-bool plb_contain(int tag);
+// bool plb_contain(int tag);
 void prefetch_access(int addr);
 void invoke_prefetch();
 void insert_buffer(int addr);
