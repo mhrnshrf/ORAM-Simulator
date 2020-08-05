@@ -1986,12 +1986,13 @@ int tag_array_find_spot(unsigned int index){
 
 int tag_array_find_victim(unsigned int index) {
     int victim = -1;
+    char min = 127;
     for (unsigned int j = 0; j < RHO_WAY; j++)
     {
-        unsigned int min = 256;
         if (TagArrayLRU[index][j] < min)
         {
-            victim = j;
+          victim = j;
+          min = TagArrayLRU[index][j];
         }
     }
     return victim;
@@ -1999,7 +2000,7 @@ int tag_array_find_victim(unsigned int index) {
 
 
 void tag_array_update_LRU(unsigned int index, unsigned int way){
-    if (TagArrayLRU[index][way] == 255)
+    if (TagArrayLRU[index][way] >= 125)
     {
         TagArrayLRU[index][way] = 0;
     }
