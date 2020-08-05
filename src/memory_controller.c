@@ -1541,65 +1541,70 @@ void freecursive_access(int addr, char type){
         oram_access(tag);
         pinOff();
       }
-      int si;
-      int victim = plb_fill(tag);
-      if( victim != -1)
+      if (i_saved == 1)
       {
 
-        // profiling:
-        // if (plbQ->size < plbQ->limit)
-        // {
-        //   insert_plbQ(victim);
-        // }
+        int si;
+        int victim = plb_fill(tag);
+        if( victim != -1)
+        {
 
-        // if (plb_evict[victim % PLB_SIZE] == -1)
-        // {
-        //   plb_evict[victim % PLB_SIZE] = victim;
-        //   plb_trace[victim % PLB_SIZE] = tracectr;
-        //   // plb_hist[victim % PLB_SIZE] = 1;
-        // }
-        // // else if(plb_evict[victim % PLB_SIZE] == victim)
-        // // {
-        // //   plb_hist[victim % PLB_SIZE]++;
-        // // }
-        // else if(plb_evict[victim % PLB_SIZE] != victim)
-        // {
-        //   plb_conflict[victim % PLB_SIZE]++;
-        // }
-        // profiling.
-        
-        
-        Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
-        
-        
-        if (stash_contain(s.addr))
-        {
-          printf("ERROR: freecursive: block %d already in stash!\n", s.addr);
-          exit(1);
-        }
-        else
-        {
-          si = add_to_stash(s);
-          if(si == -1){
-          printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
-          exit(1);
+          // profiling:
+          // if (plbQ->size < plbQ->limit)
+          // {
+          //   insert_plbQ(victim);
+          // }
+
+          // if (plb_evict[victim % PLB_SIZE] == -1)
+          // {
+          //   plb_evict[victim % PLB_SIZE] = victim;
+          //   plb_trace[victim % PLB_SIZE] = tracectr;
+          //   // plb_hist[victim % PLB_SIZE] = 1;
+          // }
+          // // else if(plb_evict[victim % PLB_SIZE] == victim)
+          // // {
+          // //   plb_hist[victim % PLB_SIZE]++;
+          // // }
+          // else if(plb_evict[victim % PLB_SIZE] != victim)
+          // {
+          //   plb_conflict[victim % PLB_SIZE]++;
+          // }
+          // profiling.
+          
+          
+          Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+          
+          
+          if (stash_contain(s.addr))
+          {
+            printf("ERROR: freecursive: block %d already in stash!\n", s.addr);
+            exit(1);
+          }
+          else
+          {
+            si = add_to_stash(s);
+            if(si == -1){
+            printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
+            exit(1);
+            }
+            
           }
           
+          
+
+        }
+
+        // PLB[tag % PLB_SIZE] = tag;
+        int index = get_stash(tag);
+        if (index == -1)
+        {
+          printf("ERROR: freecursive: block not found in stash!\n");
+          exit(1);
         }
         
-        
-
-      }
-
-      // PLB[tag % PLB_SIZE] = tag;
-      int index = get_stash(tag);
-      if (index == -1)
-      {
-        printf("ERROR: freecursive: block not found in stash!\n");
-        exit(1);
+        remove_from_stash(index);
       }
       
-      remove_from_stash(index);
       
       i_saved--;
     }
