@@ -55,7 +55,7 @@ int plb_find_spot(unsigned int index){
 // find the plbline with the least recently used
 int plb_find_victim(unsigned int index) {
     int victim = -1;
-    char min = PLB_WAY;
+    char min = PLB_WAY+1;
     for (int j = 0; j < PLB_WAY; j++)
     {
         if (REP[index][j] < min)
