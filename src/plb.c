@@ -24,7 +24,7 @@ void plb_init(){
 }
 
 void update_REP(unsigned int index, unsigned int way){
-    if (REP[index][way] >= 125)
+    if (REP[index][way] >= PLB_WAY - 1)
     {
         REP[index][way] = 0;
     }
@@ -55,7 +55,7 @@ int plb_find_spot(unsigned int index){
 // find the plbline with the least recently used
 int plb_find_victim(unsigned int index) {
     int victim = -1;
-    char min = 127;
+    char min = PLB_WAY;
     for (int j = 0; j < PLB_WAY; j++)
     {
         if (REP[index][j] < min)
