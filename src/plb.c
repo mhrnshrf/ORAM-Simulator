@@ -24,7 +24,8 @@ void plb_init(){
 }
 
 void update_REP(unsigned int index, unsigned int way){
-    if (REP[index][way] >= PLB_WAY )
+
+    if (REP[index][way] >= PLB_WAY-1 )
     {
         REP[index][way] = 0;
     }
@@ -54,8 +55,13 @@ int plb_find_spot(unsigned int index){
 
 // find the plbline with the least recently used
 int plb_find_victim(unsigned int index) {
+    if (PLB_WAY == 1)
+    {
+        return 0;
+    }
+    
     int victim = -1;
-    char min = PLB_WAY+1;
+    char min = PLB_WAY;
     for (int j = 0; j < PLB_WAY; j++)
     {
         if (REP[index][j] < min)
@@ -85,13 +91,16 @@ unsigned int plb_tag(unsigned int addr){
 bool plb_access(unsigned int addr){
     unsigned int index = plb_index(addr);
     unsigned int tag = plb_tag(addr);
+    
 
     for (unsigned int j = 0; j < PLB_WAY; j++)
     {
         // hit
         if (PLB[index][j].tag == tag && PLB[index][j].valid)
-        {   
-            update_REP(index, j);  
+        {   if (PLB_WAY != 1)
+            {
+                update_REP(index, j);  
+            }
             return true;    
         }        
     }
@@ -172,4 +181,41 @@ int plb_fill(unsigned int addr){
     return victim;  
 }
 
+
+
+void plb_test(){
+
+    plb_init();
+    int base = 100;
+    int index = base % PLB_SET;
+    for (int i = 0; i < PLB_WAY; i++)
+    {
+        plb_fill(base+i*PLB_SET);
+    }
+
+    for (int i = 0; i < PLB_WAY; i++)
+    {
+        printf("PLB[%d][%d]: %d     LRU: %d\n", index, i, PLB[index][i].tag, REP[index][i]);
+    }
+
+    for (int i = 0; i < PLB_WAY; i++)
+    {
+        for (int j = PLB_WAY-1; j > i; j--)
+        {
+            plb_access(base+i*PLB_SET);
+        }
+        
+    }
+    printf("\n");
+
+    for (int i = 0; i < PLB_WAY; i++)
+    {
+        printf("PLB[%d][%d]: %d     LRU: %d\n", index, i, PLB[index][i].tag, REP[index][i]);
+    }
+
+    int victim = plb_fill(base+PLB_WAY*PLB_SET);
+    printf("victim: %d\n", victim);
+    
+    
+}
 //  Mehrnoosh.

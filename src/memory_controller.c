@@ -156,6 +156,8 @@ int sub_cap = 0;
 
 int earlyctr = 0;
 int evictctr = 0;	// # evictions caused after misses on llc
+int pos1_access = 0;
+int pos2_access = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -1540,6 +1542,17 @@ void freecursive_access(int addr, char type){
         pinOn();
         oram_access(tag);
         pinOff();
+
+        if (i_saved == 1)
+        {
+          pos1_access++;
+        }
+        else if (i_saved == 2)
+        {
+          pos2_access++;
+        }
+        
+        
       }
       // if (i_saved == 1)
       // {

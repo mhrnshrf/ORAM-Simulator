@@ -55,7 +55,7 @@
 // subtree config
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-#define NUM_CHANNELS_SUBTREE 4  // # memory channel used for subtree calculation
+#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 
@@ -193,6 +193,8 @@ extern unsigned long long int curr_footprint;
 extern int earlyctr;
 extern int evictctr;
 extern int dirty_pointctr;
+extern int pos1_access;
+extern int pos2_access;
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho

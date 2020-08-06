@@ -150,7 +150,7 @@ int main(int argc, char * argv[])
 
 
 	printf("....................................................\n");
-	printf("             Simulation Parameter\n");
+	printf("             Simulation Parameters\n");
 	printf("....................................................\n");
 	printf("Trace Size    %d\n", TRACE_SIZE);
 	printf("Queue Size    %d\n", QUEUE_SIZE);
@@ -172,11 +172,11 @@ int main(int argc, char * argv[])
 	printf("U               %f\n", U);
 	printf("OV Threshold    %d\n", OV_THRESHOLD);
 	printf("Stash Size      %d\n", STASH_SIZE);
-	printf("PLB Size        %d\n", PLB_SIZE);
+	printf("PLB Size        %d, %d-way\n", PLB_SIZE, PLB_WAY);
 	printf("BK Eviction     %d\n", BK_EVICTION);
 	printf("Empty Top       %d\n", EMPTY_TOP);
 	printf("Top Cache       %d\n\n", TOP_CACHE);
-	printf("L1  %d       Z1  %d\n", L1, Z1);
+	printf("L1  %d      Z1  %d\n", L1, Z1);
 	printf("L2  %d      Z2  %d\n", L2, Z2);
 	printf("L3  %d      Z3  %d\n\n", L3, Z3);
 	printf("LZ ");
@@ -198,17 +198,18 @@ int main(int argc, char * argv[])
 	printf("                  Cache Config\n");
 	printf("....................................................\n");
 	printf("Cache Enable   %s\n", CACHE_ENABLE?"On":"Off");
-	printf("Cache Size     %d\n", CACHE_SIZE);
+	printf("LLC Size       %d B, %d-way\n", CACHE_SIZE, NUM_WAY);
 	printf("Write Bypass   %d\n", WRITE_BYPASS);
 
 	printf("\n....................................................\n");
 	printf("                 Subtree Config\n");
 	printf("....................................................\n");
-	printf("Subtree Enable 	  %s\n", SUBTREE_ENABLE?"On":"Off");
-	printf("Subtree Size      %d\n", SUBTREE_SIZE);
-	printf("Subtree Slot	  %d\n", SUBTREE_SLOT);
-	printf("Subtree Bucket    %d\n", SUBTREE_BUCKET);
-	printf("Subtree Level     %d\n", SUBTREE_LEVEL);
+	printf("Subtree Enable 	   %s\n", SUBTREE_ENABLE?"On":"Off");
+	printf("Subtree Channels   %d\n", NUM_CHANNELS_SUBTREE);
+	printf("Subtree Size       %d\n", SUBTREE_SIZE);
+	printf("Subtree Slot	   %d\n", SUBTREE_SLOT);
+	printf("Subtree Bucket     %d\n", SUBTREE_BUCKET);
+	printf("Subtree Level      %d\n", SUBTREE_LEVEL);
 
 	printf("\n....................................................\n");
 	printf("                   RHO Config\n");
@@ -274,6 +275,8 @@ int main(int argc, char * argv[])
 	// int xxx = block_addr(addrout);
 	// printf("xxx: %x\n", xxx);
 	
+
+	// plb_test();
 
 	
 	cache_init();
@@ -1386,17 +1389,17 @@ cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 // printf("Nonmemops #              %d\n\n", nonmemctr);
 
 printf("\n\n\n\n............... ORAM Stats ...............\n\n");
-printf("Execution Time           %f s\n", cpu_time_used);
+printf("Execution Time (s)       %f\n", cpu_time_used);
+printf("Total Cycles             %lld \n", CYCLE_VAL);
 printf("Trace Size               %d\n", tracectr);
 printf("Mem Cycles #             %lld\n", mem_clk);
 printf("Invoke Mem #             %d\n", invokectr);
 printf("ORAM Access #            %d\n", oramctr);
-printf("Rho Access #             %d\n", rhoctr);
 printf("ORAM Dummy #             %d\n", dummyctr);
-printf("Rho  Dummy #             %d\n", rho_dummyctr);
-printf("Early WB #               %d\n", earlyctr);
-printf("Early WB Pointer #       %d\n", dirty_pointctr);
-printf("Cache Dirty #            %d\n", cache_dirty);
+printf("Pos1 Access #            %d\n", pos1_access);
+printf("Pos2 Access #            %d\n", pos2_access);
+printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
+printf("Bk Evict #               %d\n", bkctr);
 printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
 printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
 printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
@@ -1406,13 +1409,16 @@ printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
 printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
 printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
 printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
-printf("oramQ Size               %d\n", oramQ->size);
-printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
-printf("Bk Evict #               %d\n", bkctr);
 printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
+printf("oramQ Size               %d\n", oramQ->size);
 printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
+printf("Rho Access #             %d\n", rhoctr);
+printf("Rho  Dummy #             %d\n", rho_dummyctr);
 printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
+printf("Early WB #               %d\n", earlyctr);
+printf("Early WB Pointer #       %d\n", dirty_pointctr);
+printf("Cache Dirty #            %d\n", cache_dirty);
       
 // print_plb_stat();
 

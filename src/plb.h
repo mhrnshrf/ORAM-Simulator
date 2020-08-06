@@ -29,6 +29,7 @@ bool plb_contain(unsigned int addr);
 int plb_fill(unsigned int addr);
 unsigned int plb_tag(unsigned int addr);
 unsigned int plb_index(unsigned int addr);
+void plb_test();
 // int plb_invalidate(unsigned int addr);
 // void plb_clean(int i, int j);
 
