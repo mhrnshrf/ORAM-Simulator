@@ -65,10 +65,10 @@ Write Bypass   0
                  Subtree Config
 ....................................................
 Subtree Enable 	  On
-Subtree Size      8192
-Subtree Slot	  128
-Subtree Bucket    31
-Subtree Level     5
+Subtree Size      32768
+Subtree Slot	  512
+Subtree Bucket    127
+Subtree Level     7
 
 ....................................................
                    RHO Config
