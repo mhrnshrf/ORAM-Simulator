@@ -24,7 +24,7 @@ void plb_init(){
 }
 
 void update_REP(unsigned int index, unsigned int way){
-    if (REP[index][way] >= PLB_WAY - 1)
+    if (REP[index][way] >= PLB_WAY )
     {
         REP[index][way] = 0;
     }
