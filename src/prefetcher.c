@@ -31,7 +31,7 @@ void table_init(){
 }
 
 void updateLRU_hist(unsigned int index, unsigned int way){
-    if (tableLRU[index][way] >= 125)
+    if (tableLRU[index][way] >= NUM_WAY_HIST-1)
     {
         tableLRU[index][way] = 0;
     }
@@ -62,7 +62,7 @@ int find_spot_hist(unsigned int index){
 // find the tableline with the least recently used
 int find_victim_hist(unsigned int index) {
     int victim = -1;
-    char min = 127;
+    char min = NUM_WAY_HIST;
     for (int j = 0; j < NUM_WAY_HIST; j++)
     {
         if (tableLRU[index][j] < min)

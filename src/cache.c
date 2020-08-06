@@ -28,7 +28,7 @@ void cache_init(){
 }
 
 void update_LRU(unsigned int index, unsigned int way){
-    if (LRU[index][way] >= 125)
+    if (LRU[index][way] >= NUM_WAY - 1)
     {
         LRU[index][way] = 0;
     }
@@ -59,7 +59,7 @@ int find_spot(unsigned int index){
 // find the cacheline with the least recently used
 int find_victim(unsigned int index) {
     int victim = -1;
-    char min = 127;
+    char min = NUM_WAY;
     for (int j = 0; j < NUM_WAY; j++)
     {
         if (LRU[index][j] < min)
