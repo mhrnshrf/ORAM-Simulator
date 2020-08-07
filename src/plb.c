@@ -17,6 +17,7 @@ void plb_init(){
         for (unsigned int j = 0; j < PLB_WAY; j++)
         {
             PLB[i][j].valid = false;
+            PLB[i][j].pinned = false;
             
             REP[i][j] = 0;
         }
@@ -27,11 +28,18 @@ void update_REP(unsigned int index, unsigned int way){
 
     if (REP[index][way] >= PLB_WAY-1 )
     {
-        REP[index][way] = 0;
+        if (!PLB[index][way].pinned)
+        {
+            REP[index][way] = 0;
+        }
+        
     }
     else
     {
-        REP[index][way]++;
+        if (!PLB[index][way].pinned)
+        {
+            REP[index][way]++;
+        }
     } 
 }
 
@@ -84,7 +92,29 @@ void plb_pin(unsigned int addr){
         // exist
         if (PLB[index][j].tag == tag && PLB[index][j].valid)
         {   
-            REP[index][j] = PLB_WAY - 1;
+            REP[index][j] = PLB_WAY;
+            PLB[index][j].pinned = true;
+            return;    
+        }        
+    }
+    // not exist ~~~> error
+    printf("ERROR: plb pin block %d not found!\n", addr);
+    exit(1);
+}
+
+
+void plb_unpin(unsigned int addr){
+    unsigned int index = plb_index(addr);
+    unsigned int tag = plb_tag(addr);
+    
+
+    for (unsigned int j = 0; j < PLB_WAY; j++)
+    {
+        // exist
+        if (PLB[index][j].tag == tag && PLB[index][j].valid)
+        {   
+            PLB[index][j].pinned = false;
+            update_REP(index, j);
             return;    
         }        
     }

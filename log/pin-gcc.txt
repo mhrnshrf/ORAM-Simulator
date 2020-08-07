@@ -13,9 +13,9 @@ Cache          Enabled
 Write Bypass   No
 Subtree        Enabled
 Rho            No
-Timing         Enabled
+Timing         No
 Prefetch       No
-Early Evict    Enabled
+Early Evict    No
 
 ....................................................
              Simulation Parameters
@@ -101,7 +101,7 @@ Rho LZ 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
 ....................................................
                  Timing Config
 ....................................................
-Timing Enable       On
+Timing Enable       Off
 Timing Interval     1000 cycles
 
 

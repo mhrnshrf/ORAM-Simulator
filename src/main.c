@@ -937,15 +937,19 @@ int main(int argc, char * argv[])
 							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
 							{
 								// pin idea for eraly wb
-								// if (opertype[numc] == 'W')
-								// {
-								// 	// reset_dirty_search();
-								// 	int posblk = pos_calc(addr[numc], 1);
-								// 	if (plb_contain(posblk))
-								// 	{
-								// 		plb_pin(posblk);
-								// 	}
-								// }
+								if (EARLY_ENABLE)
+								{
+									if (opertype[numc] == 'W')
+									{
+										// reset_dirty_search();
+										int posblk = pos_calc(block_addr(addr[numc]), 1);
+										if (plb_contain(posblk))
+										{
+											plb_pin(posblk);
+										}
+									}
+								}
+								
 								
 								hitctr++;
 								hit_nonmemops += nonmemops[numc] + L2_LATENCY;
@@ -1368,7 +1372,7 @@ int main(int argc, char * argv[])
 end = clock();
 cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-printf("\nPrefetch #               %d\n", prefetchctr);
+// printf("\nPrefetch #               %d\n", prefetchctr);
 // printf("Pref pos1 #              %d\n", pos1ctr);
 // printf("Pref pos2 #              %d\n", pos2ctr);
 // printf("Pref pos1 hit            %f%%\n", 100*(double)pos1hit/pos1acc_ctr);
@@ -1386,9 +1390,9 @@ printf("\nPrefetch #               %d\n", prefetchctr);
 
 // printf("Pos1 conf #              %d\n", pos1conf);
 // printf("Pos2 conf #              %d\n", pos2conf);
-printf("Case1 #                  %d\n", case1);
-printf("Case2 #                  %d\n", case2);
-printf("Case3 #                  %d\n", case3);
+// printf("Case1 #                  %d\n", case1);
+// printf("Case2 #                  %d\n", case2);
+// printf("Case3 #                  %d\n", case3);
 // printf("PLB pos1 #               %d\n", plbpos1);
 // printf("Stash pos1 #             %d\n", stashpos1);
 // printf("Buffer pos1 #            %d\n", bufferpos1);
@@ -1425,8 +1429,8 @@ printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
 printf("Early WB #               %d\n", earlyctr);
 printf("Early WB Pointer #       %d\n", dirty_pointctr);
 printf("Cache Dirty #            %d\n", cache_dirty);
-printf("ptr fail #               %d\n", ptr_fail);
-printf("search fail #            %d\n", search_fail);
+// printf("ptr fail #               %d\n", ptr_fail);
+// printf("search fail #            %d\n", search_fail);
       
 // print_plb_stat();
 

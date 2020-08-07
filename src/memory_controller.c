@@ -2558,6 +2558,7 @@ void early_writeback(){
       i_target = i;
       j_target = j;
       dirty_pointctr++;
+      plb_unpin(posblk);
     }
     else
     {
@@ -2579,6 +2580,7 @@ void early_writeback(){
             addr_target = LLC[i][j].addr;
             i_target = i;
             j_target = j;
+            plb_unpin(posblk);
             break;
           }
           else
