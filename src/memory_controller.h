@@ -41,7 +41,7 @@
 #define STASH_SIZE_ORG 200     // original size of stash
 // #define PLB_SIZE 1024     // size of plb (# entry)
 // #define OV_THRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
-#define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
+#define BK_EVICTION 0   // 0/1 flag to disable/enable background eviction
 // #define EMPTY_TOP VOLCANO_ENABLE ? 10 : 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
@@ -193,6 +193,8 @@ extern int evictctr;
 extern int dirty_pointctr;
 extern int pos1_access;
 extern int pos2_access;
+extern int ptr_fail;
+extern int search_fail;
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
@@ -262,6 +264,8 @@ void reset_dirty_search();
 unsigned int byte_addr(long long int physical_addr);
 void handle_sigint(int sig);
 bool bk_evict_needed();
+int pos_calc(int addr, int degree);
+
 // Mehrnoosh.
 
 

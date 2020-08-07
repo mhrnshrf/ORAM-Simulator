@@ -74,7 +74,24 @@ int plb_find_victim(unsigned int index) {
     return victim;
 }
 
+void plb_pin(unsigned int addr){
+    unsigned int index = plb_index(addr);
+    unsigned int tag = plb_tag(addr);
+    
 
+    for (unsigned int j = 0; j < PLB_WAY; j++)
+    {
+        // exist
+        if (PLB[index][j].tag == tag && PLB[index][j].valid)
+        {   
+            REP[index][j] = PLB_WAY - 1;
+            return;    
+        }        
+    }
+    // not exist ~~~> error
+    printf("ERROR: plb pin block %d not found!\n", addr);
+    exit(1);
+}
 
 unsigned int plb_index(unsigned int addr){
     unsigned int index = addr % PLB_SET;
