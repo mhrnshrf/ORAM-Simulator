@@ -146,7 +146,7 @@ int main(int argc, char * argv[])
 	printf("Rho            %s\n", RHO_ENABLE?"Enabled":"No" );
 	printf("Timing         %s\n", TIMING_ENABLE?"Enabled":"No" );
 	printf("Prefetch       %s\n", PREFETCH_ENABLE?"Enabled":"No" );
-	printf("Early Evict    %s\n\n", EARLY_ENABLE?"Enabled":"No" );
+	printf("Early WB       %s\n\n", EARLY_ENABLE?"Enabled":"No" );
 
 
 	printf("....................................................\n");
@@ -1429,8 +1429,8 @@ printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
 printf("Early WB #               %d\n", earlyctr);
 printf("Early WB Pointer #       %d\n", dirty_pointctr);
 printf("Cache Dirty #            %d\n", cache_dirty);
-// printf("ptr fail #               %d\n", ptr_fail);
-// printf("search fail #            %d\n", search_fail);
+printf("ptr fail #               %d\n", ptr_fail);
+printf("search fail #            %d\n", search_fail);
       
 // print_plb_stat();
 
