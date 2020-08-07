@@ -2547,10 +2547,12 @@ void early_writeback(){
 
   int i = dirty_coor[0];
   int j = dirty_coor[1];
+  int posblk;
 
   if (LLC[i][j].valid && LLC[i][j].dirty)
   {
-    if (plb_access(pos_calc(LLC[i][j].addr, 1)))
+    posblk = pos_calc(block_addr(LLC[i][j].addr), 1);
+    if (plb_access(posblk))
     {
       addr_target = LLC[i][j].addr;
       i_target = i;
@@ -2571,7 +2573,8 @@ void early_writeback(){
       {
         if (LLC[i][j].valid && LLC[i][j].dirty)
         {
-          if (plb_access(pos_calc(LLC[i][j].addr, 1)))
+          posblk = pos_calc(block_addr(LLC[i][j].addr), 1);
+          if (plb_access(posblk))
           {
             addr_target = LLC[i][j].addr;
             i_target = i;
