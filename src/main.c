@@ -152,16 +152,16 @@ int main(int argc, char * argv[])
 	printf("....................................................\n");
 	printf("             Simulation Parameters\n");
 	printf("....................................................\n");
-	printf("Trace Size    %d\n", TRACE_SIZE);
+	printf("Trace Size    %dm\n", (int)(TRACE_SIZE/pow(10,6)));
 	printf("Queue Size    %d\n", QUEUE_SIZE);
-	printf("Page Size     %d\n", PAGE_SIZE);
+	printf("Page Size     %d KB\n", (int)(PAGE_SIZE/pow(1024,1)));
 	printf("L1 Latency    %d\n", L1_LATENCY);
 	printf("L2 Latency    %d\n", L2_LATENCY);
 	printf("Mem Latency   %d\n", MAINMEM_LATENCY);
-	printf("Warmup Thld   %d\n\n", WARMUP_THRESHOLD);
+	printf("Warmup Thld   %dm\n\n", (int)(WARMUP_THRESHOLD/pow(10,6)));
 
 	printf("....................................................\n");
-	printf("                   ORAM Config\n");
+	printf("                  ORAM Config\n");
 	printf("....................................................\n");
 	printf("Level           %d\n",  LEVEL);
 	printf("Path            %d\n",  PATH);
@@ -176,7 +176,7 @@ int main(int argc, char * argv[])
 	printf("BK Eviction     %d\n", BK_EVICTION);
 	printf("Empty Top       %d\n", EMPTY_TOP);
 	printf("Top Cache       %d\n\n", TOP_CACHE);
-	printf("L1  %d      Z1  %d\n", L1, Z1);
+	printf("L1  %d       Z1  %d\n", L1, Z1);
 	printf("L2  %d      Z2  %d\n", L2, Z2);
 	printf("L3  %d      Z3  %d\n\n", L3, Z3);
 	printf("LZ ");
@@ -228,7 +228,7 @@ int main(int argc, char * argv[])
 	printf("Rho BK Eviction     %d\n", RHO_BK_EVICTION);
 	printf("Rho Empty Top       %d\n", RHO_EMPTY_TOP);
 	printf("Rho Top Cache       %d\n\n", RHO_TOP_CACHE);
-	printf("Rho   L1  %d    Z1  %d\n", RHO_L1, RHO_Z1);
+	printf("Rho   L1  %d     Z1  %d\n", RHO_L1, RHO_Z1);
 	printf("Rho   L2  %d    Z2  %d\n", RHO_L2, RHO_Z2);
 	printf("Rho   L3  %d    Z3  %d\n\n", RHO_L3, RHO_Z3);
 	printf("Rho LZ ");
@@ -247,16 +247,16 @@ int main(int argc, char * argv[])
 	printf("  %d ~> rho effective path length\n\n", rho_effective_pl);
 
 	printf("\n....................................................\n");
-	printf("                  Timing Config\n");
+	printf("                 Timing Config\n");
 	printf("....................................................\n");
-	printf("Timing Enable          %s\n", TIMING_ENABLE?"On":"Off");
-	printf("Timing Interval        %d\n\n", TIMING_INTERVAL);
+	printf("Timing Enable       %s\n", TIMING_ENABLE?"On":"Off");
+	printf("Timing Interval     %d cycles\n\n", TIMING_INTERVAL);
 
 	printf("\n....................................................\n");
 	printf("                 Prefetch Config\n");
 	printf("....................................................\n");
-	printf("Prefetch Enable          %s\n", PREFETCH_ENABLE?"On":"Off");
-	printf("Buffer Entry #           %d\n\n", PREFETCH_BUF_SIZE);
+	printf("Prefetch Enable     %s\n", PREFETCH_ENABLE?"On":"Off");
+	printf("Buffer Entry #      %d\n\n", PREFETCH_BUF_SIZE);
 
 	
 	printf("....................................................\n\n\n\n\n");
