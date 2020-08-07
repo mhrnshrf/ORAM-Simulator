@@ -172,7 +172,7 @@ int main(int argc, char * argv[])
 	printf("U               %f\n", U);
 	printf("OV Threshold    %d\n", OV_THRESHOLD);
 	printf("Stash Size      %d\n", STASH_SIZE);
-	printf("PLB Size        %d, %d-way\n", PLB_SIZE, PLB_WAY);
+	printf("PLB Size        %d KB / %d-way\n", (int)(PLB_SIZE/pow(1024,1)), PLB_WAY);
 	printf("BK Eviction     %d\n", BK_EVICTION);
 	printf("Empty Top       %d\n", EMPTY_TOP);
 	printf("Top Cache       %d\n\n", TOP_CACHE);
@@ -198,7 +198,7 @@ int main(int argc, char * argv[])
 	printf("                  Cache Config\n");
 	printf("....................................................\n");
 	printf("Cache Enable   %s\n", CACHE_ENABLE?"On":"Off");
-	printf("LLC Size       %d B, %d-way\n", CACHE_SIZE, NUM_WAY);
+	printf("LLC Size       %d MB / %d-way\n", (int)(CACHE_SIZE/pow(1024,2)), NUM_WAY);
 	printf("Write Bypass   %d\n", WRITE_BYPASS);
 
 	printf("\n....................................................\n");
@@ -228,9 +228,9 @@ int main(int argc, char * argv[])
 	printf("Rho BK Eviction     %d\n", RHO_BK_EVICTION);
 	printf("Rho Empty Top       %d\n", RHO_EMPTY_TOP);
 	printf("Rho Top Cache       %d\n\n", RHO_TOP_CACHE);
-	printf("Rho   L1  %d     Z1  %d\n", RHO_L1, RHO_Z1);
-	printf("Rho   L2  %d     Z2  %d\n", RHO_L2, RHO_Z2);
-	printf("Rho   L3  %d     Z3  %d\n\n", RHO_L3, RHO_Z3);
+	printf("Rho   L1  %d    Z1  %d\n", RHO_L1, RHO_Z1);
+	printf("Rho   L2  %d    Z2  %d\n", RHO_L2, RHO_Z2);
+	printf("Rho   L3  %d    Z3  %d\n\n", RHO_L3, RHO_Z3);
 	printf("Rho LZ ");
 	// calculating rho path length
 	for (int i = 0; i < RHO_LEVEL; i++)
@@ -1398,8 +1398,6 @@ printf("ORAM Access #            %d\n", oramctr);
 printf("ORAM Dummy #             %d\n", dummyctr);
 printf("Pos1 Access #            %d\n", pos1_access);
 printf("Pos2 Access #            %d\n", pos2_access);
-printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
-printf("Bk Evict #               %d\n", bkctr);
 printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
 printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
 printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
@@ -1409,9 +1407,11 @@ printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
 printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
 printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
 printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
+printf("oramQ Size               %d\n", oramQ->size);
+printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
+printf("Bk Evict #               %d\n", bkctr);
 printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
 printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
-printf("oramQ Size               %d\n", oramQ->size);
 printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
 printf("Rho Access #             %d\n", rhoctr);
 printf("Rho  Dummy #             %d\n", rho_dummyctr);
