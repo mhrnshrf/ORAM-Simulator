@@ -85,32 +85,32 @@ int plb_find_victim(unsigned int index) {
 void plb_pin(unsigned int addr){
     unsigned int index = plb_index(addr);
     unsigned int tag = plb_tag(addr);
-    int pincount = 0;
+    // int pincount = 0;
 
-    for (int i = 0; i < PLB_WAY; i++)
-    {
-        if (PLB[index][i].pinned)
-        {
-            pincount++;
-        }
-    }
+    // for (int i = 0; i < PLB_WAY; i++)
+    // {
+    //     if (PLB[index][i].pinned)
+    //     {
+    //         pincount++;
+    //     }
+    // }
     
-    if (pincount < PLB_WAY-1)
-    {
+    // if (pincount < PLB_WAY-1)
+    // {
         for (unsigned int j = 0; j < PLB_WAY; j++)
         {
             // exist
             if (PLB[index][j].tag == tag && PLB[index][j].valid)
             {   
                 REP[index][j] = PLB_WAY;
-                PLB[index][j].pinned = true;
+                // PLB[index][j].pinned = true;
                 return;    
             }        
         }
         // not exist ~~~> error
         printf("ERROR: plb pin block %d not found!\n", addr);
         exit(1);
-    }
+    // }
     
     
 

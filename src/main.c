@@ -937,7 +937,7 @@ int main(int argc, char * argv[])
 							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
 							{
 								// pin idea for eraly wb
-								if (EARLY_ENABLE)
+								if (true)
 								{
 									if (opertype[numc] == 'W')
 									{
@@ -945,6 +945,7 @@ int main(int argc, char * argv[])
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
 										if (plb_contain(posblk))
 										{
+											printf("here\n");
 											plb_pin(posblk);
 										}
 									}
