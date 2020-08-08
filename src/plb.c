@@ -102,6 +102,7 @@ void plb_pin(unsigned int addr){
             // exist
             if (PLB[index][j].tag == tag && PLB[index][j].valid)
             {   
+                printf("PLB LRU: %d\n", REP[index][j]);
                 REP[index][j] = PLB_WAY;
                 // PLB[index][j].pinned = true;
                 return;    
