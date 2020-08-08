@@ -103,7 +103,7 @@ void plb_pin(unsigned int addr){
             if (PLB[index][j].tag == tag && PLB[index][j].valid)
             {   
                 // printf("PLB LRU: %d\n", REP[index][j]);
-                REP[index][j] = PLB_WAY;
+                REP[index][j] = PLB_WAY - 1;
                 // PLB[index][j].pinned = true;
                 return;    
             }        
