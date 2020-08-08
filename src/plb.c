@@ -252,12 +252,12 @@ void plb_print(int addr){
         // hit
         if (PLB[index][j].tag == tag && PLB[index][j].valid)
         {   
-            printf("\naddr: %d   REP: %d\n", addr, REP[index][j]);
+            printf("\n\naddr: %d   REP: %d\n", addr, REP[index][j]);
         }        
     }
     // miss
-    printf("ERROR: plb print\n");
-    exit(1);
+    // printf("ERROR: plb print\n");
+    // exit(1);
 }
 
 void plb_test(){

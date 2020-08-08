@@ -2555,6 +2555,7 @@ void early_writeback(){
     plb_print(posblk);
     if (plb_access(posblk))
     {
+      plb_print(posblk);
       addr_target = LLC[i][j].addr;
       i_target = i;
       j_target = j;
