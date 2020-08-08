@@ -22,7 +22,8 @@ typedef struct PLB_Entry{
 } PLB_Entry;
 
 extern PLB_Entry PLB[PLB_SET][PLB_WAY];
-
+extern int pinctr;
+extern int unpinctr;
 
 void plb_init();
 bool plb_access(unsigned int addr);

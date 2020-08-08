@@ -10,6 +10,9 @@
 PLB_Entry PLB[PLB_SET][PLB_WAY];     // the last level plb
 char REP[PLB_SET][PLB_WAY];          // an array to keep track of lru for eviction
 
+int pinctr = 0;
+int unpinctr = 0;
+
 // invalidate all plb blocks upon init
 void plb_init(){
     for (unsigned int i = 0; i < PLB_SET; i++)
@@ -85,18 +88,18 @@ int plb_find_victim(unsigned int index) {
 void plb_pin(unsigned int addr){
     unsigned int index = plb_index(addr);
     unsigned int tag = plb_tag(addr);
-    // int pincount = 0;
+    int pincount = 0;
 
-    // for (int i = 0; i < PLB_WAY; i++)
-    // {
-    //     if (PLB[index][i].pinned)
-    //     {
-    //         pincount++;
-    //     }
-    // }
+    for (int i = 0; i < PLB_WAY; i++)
+    {
+        if (PLB[index][i].pinned)
+        {
+            pincount++;
+        }
+    }
     
-    // if (pincount < PLB_WAY-1)
-    // {
+    if (pincount < PLB_WAY-1)
+    {
         for (unsigned int j = 0; j < PLB_WAY; j++)
         {
             // exist
@@ -104,14 +107,15 @@ void plb_pin(unsigned int addr){
             {   
                 // printf("PLB LRU: %d\n", REP[index][j]);
                 REP[index][j] = PLB_WAY - 1;
-                // PLB[index][j].pinned = true;
+                PLB[index][j].pinned = true;
+                pinctr++;
                 return;    
             }        
         }
         // not exist ~~~> error
         printf("ERROR: plb pin block %d not found!\n", addr);
         exit(1);
-    // }
+    }
     
     
 
@@ -121,6 +125,7 @@ void plb_pin(unsigned int addr){
 void plb_unpin(unsigned int addr){
     unsigned int index = plb_index(addr);
     unsigned int tag = plb_tag(addr);
+
     
 
     for (unsigned int j = 0; j < PLB_WAY; j++)
@@ -130,6 +135,7 @@ void plb_unpin(unsigned int addr){
         {   
             PLB[index][j].pinned = false;
             update_REP(index, j);
+            unpinctr++;
             return;    
         }        
     }

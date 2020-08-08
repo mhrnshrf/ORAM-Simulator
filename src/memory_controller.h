@@ -79,7 +79,7 @@
 #define TIMING_INTERVAL 1000   // # cycles after each one oram access is initiated either real or dummy one
 
 // prefetching config
-#define PREFETCH_INPLACE 0
+#define PREFETCH_INPLACE 1
 #define PREFETCH_BUF_SIZE 32
 #define PREFETCH_STRIDE 1
 #define PREFETCH_TYPE COMBO

@@ -937,7 +937,7 @@ int main(int argc, char * argv[])
 							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
 							{
 								// pin idea for eraly wb
-								if (true)
+								if (EARLY_ENABLE)
 								{
 									if (opertype[numc] == 'W')
 									{
@@ -948,6 +948,12 @@ int main(int argc, char * argv[])
 											
 											plb_pin(posblk);
 										}
+										else
+										{
+											prefetch_access(posblk);
+											plb_pin(posblk);
+										}
+										
 									}
 								}
 								
@@ -1432,6 +1438,8 @@ printf("Early WB Pointer #       %d\n", dirty_pointctr);
 printf("Cache Dirty #            %d\n", cache_dirty);
 printf("ptr fail #               %d\n", ptr_fail);
 printf("search fail #            %d\n", search_fail);
+printf("pin ctr #                %d\n", pinctr);
+printf("unpin ctr #              %d\n", unpinctr);
       
 // print_plb_stat();
 

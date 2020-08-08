@@ -2555,7 +2555,7 @@ void early_writeback(){
     plb_print(posblk);
     if (plb_access(posblk))
     {
-      plb_print(posblk);
+      // plb_print(posblk);
       addr_target = LLC[i][j].addr;
       i_target = i;
       j_target = j;
@@ -2577,7 +2577,7 @@ void early_writeback(){
         if (LLC[i][j].valid && LLC[i][j].dirty)
         {
           posblk = pos_calc(block_addr(LLC[i][j].addr), 1);
-          plb_print(posblk);
+          // plb_print(posblk);
           if (plb_access(posblk))
           {
             addr_target = LLC[i][j].addr;
