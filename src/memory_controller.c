@@ -2552,7 +2552,7 @@ void early_writeback(){
   if (LLC[i][j].valid && LLC[i][j].dirty)
   {
     posblk = pos_calc(block_addr(LLC[i][j].addr), 1);
-    plb_print(posblk);
+    // plb_print(posblk);
     if (plb_access(posblk))
     {
       // plb_print(posblk);
