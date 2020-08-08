@@ -945,7 +945,7 @@ int main(int argc, char * argv[])
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
 										if (plb_contain(posblk))
 										{
-											printf("here\n");
+											
 											plb_pin(posblk);
 										}
 									}

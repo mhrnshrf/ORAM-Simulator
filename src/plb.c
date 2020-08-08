@@ -243,7 +243,22 @@ int plb_fill(unsigned int addr){
     return victim;  
 }
 
+void plb_print(int addr){
+    unsigned int index = plb_index(addr);
+    unsigned int tag = plb_tag(addr);
 
+    for (unsigned int j = 0; j < PLB_WAY; j++)
+    {
+        // hit
+        if (PLB[index][j].tag == tag && PLB[index][j].valid)
+        {   
+            printf("\naddr: %d   REP: %d\n", addr, REP[index][j]);
+        }        
+    }
+    // miss
+    printf("ERROR: plb print\n");
+    exit(1);
+}
 
 void plb_test(){
 

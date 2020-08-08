@@ -33,6 +33,7 @@ unsigned int plb_index(unsigned int addr);
 void plb_test();
 void plb_pin(unsigned int addr);
 void plb_unpin(unsigned int addr);
+void plb_print(int addr);
 // int plb_invalidate(unsigned int addr);
 // void plb_clean(int i, int j);
 
