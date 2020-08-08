@@ -92,7 +92,11 @@ void plb_pin(unsigned int addr){
 
     for (int i = 0; i < PLB_WAY; i++)
     {
-        if (PLB[index][i].pinned)
+        // if (PLB[index][i].pinned)
+        // {
+        //     pincount++;
+        // }
+        if (REP[index][i] >= PLB_WAY)
         {
             pincount++;
         }
@@ -107,7 +111,7 @@ void plb_pin(unsigned int addr){
             {   
                 // printf("PLB LRU: %d\n", REP[index][j]);
                 REP[index][j] = PLB_WAY;
-                PLB[index][j].pinned = true;
+                // PLB[index][j].pinned = true;
                 pinctr++;
                 return;    
             }        
