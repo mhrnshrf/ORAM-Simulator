@@ -1009,6 +1009,26 @@ int main(int argc, char * argv[])
 								// {
 								// 	reset_dirty_search();
 								// }
+
+								if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
+								{
+									if (opertype[numc] == 'W')
+									{
+										// reset_dirty_search();
+										int posblk = pos_calc(block_addr(addr[numc]), 1);
+										if (plb_contain(posblk))
+										{
+											
+											plb_pin(posblk);
+										}
+										// else
+										// {
+										// 	prefetch_access(posblk);
+										// 	plb_pin(posblk);
+										// }
+										
+									}
+								}
 			
 
 								if ( victim != -1)
