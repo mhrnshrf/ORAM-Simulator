@@ -946,14 +946,14 @@ int main(int argc, char * argv[])
 										// reset_dirty_search();
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
 										int pos2 = pos_calc(block_addr(addr[numc]), 2);
-										if (plb_contain(posblk))
+										if (plb_access(posblk))
 										{
 											
-											plb_pin(posblk);
+											// plb_pin(posblk);
 										}
 										else if(plb_contain(pos2))
 										{
-											// prefetch_access(posblk);
+											prefetch_access(posblk);
 											// plb_pin(posblk);
 											precase++;
 										}
@@ -1021,14 +1021,14 @@ int main(int argc, char * argv[])
 										// reset_dirty_search();
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
 										int pos2 = pos_calc(block_addr(addr[numc]), 2);
-										if (plb_contain(posblk))
+										if (plb_access(posblk))
 										{
 											
-											plb_pin(posblk);
+											// plb_pin(posblk);
 										}
 										else if(plb_contain(pos2))
 										{
-											// prefetch_access(posblk);
+											prefetch_access(posblk);
 											// plb_pin(posblk);
 											precase++;
 										}

@@ -149,7 +149,7 @@ void plb_unpin(unsigned int addr){
         if (PLB[index][j].tag == tag && PLB[index][j].valid)
         {   
             PLB[index][j].pinned = false;
-            update_REP(index, j);
+            // update_REP(index, j);
             unpinctr++;
             return;    
         }        
