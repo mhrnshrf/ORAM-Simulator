@@ -1,6 +1,7 @@
 //  Mehrnoosh:
 
 #include "cache.h"
+#include "memory_controller.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,7 +9,8 @@
 
 
 Cacheline LLC[NUM_SET][NUM_WAY];     // the last level cache
-char LRU[NUM_SET][NUM_WAY];          // an array to keep track of lru for eviction
+// char LRU[NUM_SET][NUM_WAY];          // an array to keep track of lru for eviction
+long long int LRU[NUM_SET][NUM_WAY];          // an array to keep track of lru for eviction
 int cache_dirty = 0;                 // # dirty blocks ever
 int dirty_coor[2] = {0};             // keep the coordinates of last dirty block llc[i][j] ~~~> dirty_coor[0] = i, dirty_coor[1] = j
 
@@ -28,19 +30,20 @@ void cache_init(){
 }
 
 void update_LRU(unsigned int index, unsigned int way){
-    if (LRU[index][way] >= NUM_WAY - 1)
-    {
-        LRU[index][way] = 0;
-    }
-    else
-    {
-        LRU[index][way]++;
-    } 
+    LRU[index][way] = CYCLE_VAL;
+    // if (LRU[index][way] >= NUM_WAY - 1)
+    // {
+    //     LRU[index][way] = 0;
+    // }
+    // else
+    // {
+    //     LRU[index][way]++;
+    // } 
 }
 
 void reset_LRU(unsigned int index, unsigned int way){
-    LRU[index][way] = 1;
-
+    LRU[index][way] = CYCLE_VAL;
+    // LRU[index][way] = 1;
 }
 
 
@@ -59,7 +62,8 @@ int find_spot(unsigned int index){
 // find the cacheline with the least recently used
 int find_victim(unsigned int index) {
     int victim = -1;
-    char min = NUM_WAY;
+    // char min = NUM_WAY;
+    long long int min = CYCLE_VAL;
     for (int j = 0; j < NUM_WAY; j++)
     {
         if (LRU[index][j] < min)
