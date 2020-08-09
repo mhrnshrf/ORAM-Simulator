@@ -83,7 +83,7 @@ int plb_find_victim(unsigned int index) {
     //         min = REP[index][j];
     //     }
     // }
-    long long int min = CYCLE_VAL;
+    long long int min = CYCLE_VAL+1;
     for (int j = 0; j < PLB_WAY; j++)
     {
         if (REP[index][j] < min && !PLB[index][j].pinned)
