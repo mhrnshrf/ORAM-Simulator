@@ -159,6 +159,7 @@ int pos1_access = 0;
 int pos2_access = 0;
 int ptr_fail = 0;
 int search_fail = 0;
+int precase = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -2542,20 +2543,21 @@ void early_writeback(){
 
   int i_target = 0;
   int j_target = 0;
-  int addr_target = -1;
+  int wb_cand = -1;
 
   int i = dirty_coor[0];
   int j = dirty_coor[1];
   int posblk;
+  int pref_cand = -1;
 
   if (LLC[i][j].valid && LLC[i][j].dirty)
   {
     posblk = pos_calc(block_addr(LLC[i][j].addr), 1);
     // plb_print(posblk);
-    if (plb_access(posblk))
+    if (plb_contain(posblk))
     {
       // plb_print(posblk);
-      addr_target = LLC[i][j].addr;
+      wb_cand = LLC[i][j].addr;
       i_target = i;
       j_target = j;
       dirty_pointctr++;
@@ -2563,7 +2565,12 @@ void early_writeback(){
     }
     else
     {
-      ptr_fail++;
+      int pospos = pos_calc(block_addr(LLC[i][j].addr), 2);
+      if(plb_contain(pospos))
+      {
+        pref_cand = posblk;
+        ptr_fail++;
+      }
     }
     
   }
@@ -2577,9 +2584,9 @@ void early_writeback(){
         {
           posblk = pos_calc(block_addr(LLC[i][j].addr), 1);
           // plb_print(posblk);
-          if (plb_access(posblk))
+          if (plb_contain(posblk))
           {
-            addr_target = LLC[i][j].addr;
+            wb_cand = LLC[i][j].addr;
             i_target = i;
             j_target = j;
             plb_unpin(posblk);
@@ -2587,12 +2594,17 @@ void early_writeback(){
           }
           else
           {
-            search_fail++;
+            int pospos = pos_calc(block_addr(LLC[i][j].addr), 2);
+            if(plb_contain(pospos) && pref_cand == -1)
+            {
+              pref_cand = posblk;
+              search_fail++;
+            }
           }
           
         }
       }
-      if(addr_target != -1)
+      if(wb_cand != -1)
       {
         break;
       }
@@ -2600,10 +2612,10 @@ void early_writeback(){
   }
   
 
-  if (addr_target != -1)
+  if (wb_cand != -1)
   {
     earlyctr++;
-    int addr = block_addr(addr_target);
+    int addr = block_addr(wb_cand);
     int label = PosMap[addr];
 
     switch_tree_to(ORAM);     // switch to oram tree 
@@ -2617,6 +2629,12 @@ void early_writeback(){
 
     // set_start = i_target;
     // way_start = j_target;
+  }
+  else if(pref_cand != -1)
+  {
+    prefetch_access(pref_cand);
+    precase++;
+    // reset_dirty_search();
   }
   else
   {

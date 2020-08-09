@@ -89,7 +89,7 @@ int fill_miss = 0;		// # miss on prefetch history table access
 
 int hit_nonmemops = 0;  // # nonmemops encountered during hit on llc
 int consec_dumctr = 0;
-int precase = 0;
+
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -945,19 +945,7 @@ int main(int argc, char * argv[])
 									{
 										// reset_dirty_search();
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
-										int pos2 = pos_calc(block_addr(addr[numc]), 2);
-										if (plb_access(posblk))
-										{
-											
-											// plb_pin(posblk);
-										}
-										else if(plb_contain(pos2))
-										{
-											prefetch_access(posblk);
-											// plb_pin(posblk);
-											precase++;
-										}
-										
+										plb_access(posblk);
 									}
 								}
 								
@@ -1020,19 +1008,7 @@ int main(int argc, char * argv[])
 									{
 										// reset_dirty_search();
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
-										int pos2 = pos_calc(block_addr(addr[numc]), 2);
-										if (plb_access(posblk))
-										{
-											
-											// plb_pin(posblk);
-										}
-										else if(plb_contain(pos2))
-										{
-											prefetch_access(posblk);
-											// plb_pin(posblk);
-											precase++;
-										}
-										
+										plb_access(posblk);
 									}
 								}
 			
