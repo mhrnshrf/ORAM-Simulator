@@ -1,6 +1,7 @@
 //  Mehrnoosh:
 
 #include "plb.h"
+#include "memory_controller.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,7 +9,8 @@
 
 
 PLB_Entry PLB[PLB_SET][PLB_WAY];     // the last level plb
-char REP[PLB_SET][PLB_WAY];          // an array to keep track of lru for eviction
+// char REP[PLB_SET][PLB_WAY];          // an array to keep track of lru for eviction
+long long int REP[PLB_SET][PLB_WAY];          // an array to keep track of lru for eviction
 
 int pinctr = 0;
 int unpinctr = 0;
@@ -28,27 +30,27 @@ void plb_init(){
 }
 
 void update_REP(unsigned int index, unsigned int way){
-
-    if (REP[index][way] >= PLB_WAY-1 )
-    {
-        if (!PLB[index][way].pinned)
-        {
-            REP[index][way] = 0;
-        }
+    REP[index][way] = CYCLE_VAL;
+    // if (REP[index][way] >= PLB_WAY-1 )
+    // {
+    //     if (!PLB[index][way].pinned)
+    //     {
+    //         REP[index][way] = 0;
+    //     }
         
-    }
-    else
-    {
-        if (!PLB[index][way].pinned)
-        {
-            REP[index][way]++;
-        }
-    } 
+    // }
+    // else
+    // {
+    //     if (!PLB[index][way].pinned)
+    //     {
+    //         REP[index][way]++;
+    //     }
+    // } 
 }
 
 void reset_REP(unsigned int index, unsigned int way){
-    REP[index][way] = 1;
-
+    // REP[index][way] = 1;
+    REP[index][way] = CYCLE_VAL;
 }
 
 
@@ -72,7 +74,16 @@ int plb_find_victim(unsigned int index) {
     }
     
     int victim = -1;
-    char min = PLB_WAY;
+    // char min = PLB_WAY;
+    // for (int j = 0; j < PLB_WAY; j++)
+    // {
+    //     if (REP[index][j] < min)
+    //     {
+    //         victim = j;
+    //         min = REP[index][j];
+    //     }
+    // }
+    long long int min = CYCLE_VAL;
     for (int j = 0; j < PLB_WAY; j++)
     {
         if (REP[index][j] < min)
@@ -262,7 +273,7 @@ void plb_print(int addr){
         // hit
         if (PLB[index][j].tag == tag && PLB[index][j].valid)
         {   
-            printf("\n\naddr: %d   REP: %d\n", addr, REP[index][j]);
+            printf("\n\naddr: %d   REP: %lld\n", addr, REP[index][j]);
         }        
     }
     // miss
@@ -282,7 +293,7 @@ void plb_test(){
 
     for (int i = 0; i < PLB_WAY; i++)
     {
-        printf("PLB[%d][%d]: %d     LRU: %d\n", index, i, PLB[index][i].tag, REP[index][i]);
+        printf("PLB[%d][%d]: %d     LRU: %lld\n", index, i, PLB[index][i].tag, REP[index][i]);
     }
 
     for (int i = 0; i < PLB_WAY; i++)
@@ -297,7 +308,7 @@ void plb_test(){
 
     for (int i = 0; i < PLB_WAY; i++)
     {
-        printf("PLB[%d][%d]: %d     LRU: %d\n", index, i, PLB[index][i].tag, REP[index][i]);
+        printf("PLB[%d][%d]: %d     LRU: %lld\n", index, i, PLB[index][i].tag, REP[index][i]);
     }
 
     int victim = plb_fill(base+PLB_WAY*PLB_SET);

@@ -13,7 +13,7 @@
 
 
 // Current Processor Cycle
-extern long long int CYCLE_VAL;
+// extern long long int CYCLE_VAL;
 extern long long int trace_clk;
 
 /////////////// Mehrnoosh:

@@ -29,7 +29,7 @@
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
-#define EARLY_ENABLE 1       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
+#define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -195,6 +195,8 @@ extern int pos1_access;
 extern int pos2_access;
 extern int ptr_fail;
 extern int search_fail;
+
+extern long long int CYCLE_VAL;
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
