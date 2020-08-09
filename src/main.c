@@ -946,6 +946,7 @@ int main(int argc, char * argv[])
 										// reset_dirty_search();
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
 										plb_access(posblk);
+										plb_pin(posblk);
 									}
 								}
 								
@@ -1009,6 +1010,7 @@ int main(int argc, char * argv[])
 										// reset_dirty_search();
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
 										plb_access(posblk);
+										plb_pin(posblk);
 									}
 								}
 			

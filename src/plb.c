@@ -86,7 +86,7 @@ int plb_find_victim(unsigned int index) {
     long long int min = CYCLE_VAL;
     for (int j = 0; j < PLB_WAY; j++)
     {
-        if (REP[index][j] < min)
+        if (REP[index][j] < min && !PLB[index][j].pinned)
         {
             victim = j;
             min = REP[index][j];
@@ -103,11 +103,7 @@ void plb_pin(unsigned int addr){
 
     for (int i = 0; i < PLB_WAY; i++)
     {
-        // if (PLB[index][i].pinned)
-        // {
-        //     pincount++;
-        // }
-        if (REP[index][i] >= PLB_WAY)
+        if (PLB[index][i].pinned)
         {
             pincount++;
         }
@@ -121,15 +117,15 @@ void plb_pin(unsigned int addr){
             if (PLB[index][j].tag == tag && PLB[index][j].valid)
             {   
                 // printf("PLB LRU: %d\n", REP[index][j]);
-                REP[index][j] = PLB_WAY;
-                // PLB[index][j].pinned = true;
+                // REP[index][j] = PLB_WAY;
+                PLB[index][j].pinned = true;
                 pinctr++;
                 return;    
             }        
         }
         // not exist ~~~> error
-        printf("ERROR: plb pin block %d not found!\n", addr);
-        exit(1);
+        // printf("ERROR: plb pin block %d not found!\n", addr);
+        // exit(1);
     }
     
     
