@@ -952,8 +952,8 @@ int main(int argc, char * argv[])
 										}
 										else if(plb_contain(pos2))
 										{
-											prefetch_access(posblk);
-											plb_pin(posblk);
+											// prefetch_access(posblk);
+											// plb_pin(posblk);
 											precase++;
 										}
 										
@@ -1027,8 +1027,8 @@ int main(int argc, char * argv[])
 										}
 										else if(plb_contain(pos2))
 										{
-											prefetch_access(posblk);
-											plb_pin(posblk);
+											// prefetch_access(posblk);
+											// plb_pin(posblk);
 											precase++;
 										}
 										
