@@ -30,7 +30,7 @@ void cache_init(){
 }
 
 void update_LRU(unsigned int index, unsigned int way){
-    LRU[index][way] = CYCLE_VAL;
+    LRU[index][way] = cache_clk;
     // if (LRU[index][way] >= NUM_WAY - 1)
     // {
     //     LRU[index][way] = 0;
@@ -42,7 +42,7 @@ void update_LRU(unsigned int index, unsigned int way){
 }
 
 void reset_LRU(unsigned int index, unsigned int way){
-    LRU[index][way] = CYCLE_VAL;
+    LRU[index][way] = cache_clk;
     // LRU[index][way] = 1;
 }
 
@@ -63,7 +63,7 @@ int find_spot(unsigned int index){
 int find_victim(unsigned int index) {
     int victim = -1;
     // char min = NUM_WAY;
-    long long int min = CYCLE_VAL;
+    long long int min = cache_clk;
     for (int j = 0; j < NUM_WAY; j++)
     {
         if (LRU[index][j] < min)

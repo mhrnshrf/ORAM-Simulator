@@ -883,6 +883,7 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while (no_miss_occured && !expt_done)
 				{
+					cache_clk++;
 					if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 						// printf("while readline trace ctr: %d  \n", tracectr);
 						if (fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]))

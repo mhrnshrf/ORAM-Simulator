@@ -29,8 +29,7 @@ extern long long int trace_clk;
 // long long int CYCLE_VAL = 0;
 
 
-
-
+long long int cache_clk = 0;
 
 long long int orig_addr;
 long long int orig_cycle; 
