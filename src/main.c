@@ -943,10 +943,8 @@ int main(int argc, char * argv[])
 								{
 									if (opertype[numc] == 'W')
 									{
-										// reset_dirty_search();
-										int posblk = pos_calc(block_addr(addr[numc]), 1);
+										// int posblk = pos_calc(block_addr(addr[numc]), 1);
 										// plb_access(posblk);
-										// plb_pin(posblk);
 									}
 								}
 								
@@ -998,19 +996,13 @@ int main(int argc, char * argv[])
 								
 								// first serve the evicted block then next time serve this trace
 								int victim = cache_fill(addr[numc], opertype[numc]);
-								// if (opertype[numc] == 'W')
-								// {
-								// 	reset_dirty_search();
-								// }
 
 								if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
 								{
 									if (opertype[numc] == 'W')
 									{
-										// reset_dirty_search();
-										int posblk = pos_calc(block_addr(addr[numc]), 1);
+										// int posblk = pos_calc(block_addr(addr[numc]), 1);
 										// plb_access(posblk);
-										// plb_pin(posblk);
 									}
 								}
 			
