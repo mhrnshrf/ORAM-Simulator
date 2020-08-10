@@ -939,14 +939,14 @@ int main(int argc, char * argv[])
 							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
 							{
 								// pin idea for eraly wb
-								if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
+								if ((EARLY_ENABLE || MOST_ENABLE) && tracectr > WARMUP_THRESHOLD)
 								{
 									if (opertype[numc] == 'W')
 									{
 										// reset_dirty_search();
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
 										plb_access(posblk);
-										plb_pin(posblk);
+										// plb_pin(posblk);
 									}
 								}
 								
@@ -1003,14 +1003,14 @@ int main(int argc, char * argv[])
 								// 	reset_dirty_search();
 								// }
 
-								if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
+								if ((EARLY_ENABLE || MOST_ENABLE) && tracectr > WARMUP_THRESHOLD)
 								{
 									if (opertype[numc] == 'W')
 									{
 										// reset_dirty_search();
 										int posblk = pos_calc(block_addr(addr[numc]), 1);
 										plb_access(posblk);
-										plb_pin(posblk);
+										// plb_pin(posblk);
 									}
 								}
 			

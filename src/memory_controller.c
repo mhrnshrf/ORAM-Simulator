@@ -2630,12 +2630,12 @@ void early_writeback(){
     // set_start = i_target;
     // way_start = j_target;
   }
-  else if(pref_cand != -1)
-  {
-    prefetch_access(pref_cand);
-    precase++;
-    // reset_dirty_search();
-  }
+  // else if(pref_cand != -1)
+  // {
+  //   prefetch_access(pref_cand);
+  //   precase++;
+  //   // reset_dirty_search();
+  // }
   else
   {
     dummy_access(ORAM);
