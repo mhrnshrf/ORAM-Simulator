@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define PLB_SIZE 64*1024  // in bytes ~~~> 64 KB
-#define PLB_WAY 4           //  ~~~> # way per set
+#define PLB_WAY 2           //  ~~~> # way per set
 #define PLB_BLOCK_SIZE 64       // bytes ~~~> plbline size
 
 
