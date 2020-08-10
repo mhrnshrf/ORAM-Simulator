@@ -30,7 +30,7 @@
 #define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
-#define MOST_ENABLE 1       
+#define MOST_ENABLE 0       
 
 // oram config
 #define H 4     // degree of recursion including data access
