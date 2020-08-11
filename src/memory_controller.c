@@ -1652,14 +1652,23 @@ void freecursive_access(int addr, char type){
         }
 
         // PLB[tag % PLB_SIZE] = tag;
-        int index = get_stash(tag);
-        if (index == -1)
+        if (!STT_ENABLE || !stt_contain(tag))
         {
-          printf("ERROR: freecursive: block not found in stash!\n");
-          exit(1);
+          int index = get_stash(tag);
+          if (index == -1)
+          {
+            printf("ERROR: freecursive: block not found in stash!\n");
+            exit(1);
+          }
+          
+          remove_from_stash(index);
+        } 
+        else
+        {
+          stt_invalidate(addr);
         }
         
-        remove_from_stash(index);
+        
       // }
       
       

@@ -165,6 +165,24 @@ bool stt_contain(unsigned int addr){
     return false;
 }
 
+void stt_invalidate(unsigned int addr){
+    unsigned int index = stt_index(addr);
+    unsigned int tag = stt_tag(addr);
+
+    for (unsigned int j = 0; j < STT_WAY; j++)
+    {
+        // hit
+        if (STT[index][j].tag == tag && STT[index][j].valid)
+        {   
+            STT[index][j].valid = false;
+            return;
+        }        
+    }
+    // miss
+    printf("ERROR: stt invalidate block not found!\n");
+    exit(1);
+}
+
 
 
 // try to fill the stt with new data, it may lead to eviction ~~~> is called when miss happens
