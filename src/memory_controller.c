@@ -1665,7 +1665,7 @@ void freecursive_access(int addr, char type){
         } 
         else
         {
-          printf("hereeeee blk: %d \n", tag);
+          // printf("hereeeee blk: %d \n", tag);
           stt_invalidate(tag);
         }
         
