@@ -1287,6 +1287,14 @@ bool stash_contain(int addr){
       return true;
     }
   }
+  if (STT_ENABLE && TREE_VAR == ORAM)
+  {
+    if (stt_access(addr))
+    {
+      return true;
+    }
+  }
+  
   return false;
 }
 
