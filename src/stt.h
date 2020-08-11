@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define STT_SIZE 4*1024      // in entries ~~~> 4 K
-#define STT_WAY 4           //  ~~~> # way per set
+#define STT_WAY 8           //  ~~~> # way per set
 // #define STT_BLOCK_SIZE 64   // bytes ~~~> sttline size
 
 
