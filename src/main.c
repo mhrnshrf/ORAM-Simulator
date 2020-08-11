@@ -1439,6 +1439,7 @@ printf("search fail #            %d\n", search_fail);
 printf("pin ctr #                %d\n", pinctr);
 printf("unpin ctr #              %d\n", unpinctr);
 printf("prefetch case #          %d\n", precase);
+printf("STT Cand #               %d\n", sttctr);
       
 // print_plb_stat();
 

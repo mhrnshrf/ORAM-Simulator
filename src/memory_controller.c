@@ -161,6 +161,7 @@ int pos2_access = 0;
 int ptr_fail = 0;
 int search_fail = 0;
 int precase = 0;
+int sttctr = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -976,6 +977,7 @@ void write_path(int label){
         {
           if (stt_cand != -1)
           {
+            sttctr++;
             GlobTree[index].slot[j].addr = stt_cand;
             GlobTree[index].slot[j].label = PosMap[stt_cand];
             GlobTree[index].slot[j].isReal = true;
@@ -1416,12 +1418,6 @@ void oram_access(int addr){
   remap_block(addr);
 
   write_path(label);
-
-  if (STT_ENABLE)
-  {
-    free_stash();
-  }
-    
 
 }
 
@@ -1908,6 +1904,11 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
 
  
   freecursive_access(addr, type);
+
+  if (STT_ENABLE && TREE_VAR == ORAM)
+  {
+    free_stash();
+  }
 }
 
 // capacity occupation analysis

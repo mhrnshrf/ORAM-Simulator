@@ -196,6 +196,7 @@ extern int pos2_access;
 extern int ptr_fail;
 extern int search_fail;
 extern int precase;
+extern int sttctr;
 
 extern long long int CYCLE_VAL;
 extern long long int cache_clk;
