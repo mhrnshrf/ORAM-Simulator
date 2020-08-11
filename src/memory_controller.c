@@ -162,6 +162,8 @@ int ptr_fail = 0;
 int search_fail = 0;
 int precase = 0;
 int sttctr = 0;
+int stash_leftover = 0;
+int stash_removed = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -831,6 +833,8 @@ void read_path(int label){
             else
             {
               printf("ERROR: read: stash overflow!  @ %d\n", stashctr);
+              printf("stash leftover %d\n", stash_leftover);
+              printf("stash removed %d\n", stash_removed);
               exit(1);
             }
           }
@@ -1401,8 +1405,10 @@ void free_stash(){
   {
     if (Stash[i].isReal)
     {
+      stash_leftover++;
       if (stt_fill(Stash[i].addr))
       {
+        stash_removed++;
         remove_from_stash(i);
       }
     }
