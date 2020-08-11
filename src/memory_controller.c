@@ -1652,7 +1652,7 @@ void freecursive_access(int addr, char type){
         }
 
         // PLB[tag % PLB_SIZE] = tag;
-        if (!STT_ENABLE)
+        if (!STT_ENABLE || !stt_contain(tag)) 
         {
           int index = get_stash(tag);
           if (index == -1)
@@ -1663,8 +1663,9 @@ void freecursive_access(int addr, char type){
           
           remove_from_stash(index);
         } 
-        else if(stt_contain(tag))
+        else
         {
+          printf("hereeeee blk: %d \n", tag);
           stt_invalidate(tag);
         }
         
