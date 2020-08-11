@@ -9,6 +9,7 @@
 #include "memory_controller.h"
 #include "scheduler.h"
 #include "params.h"
+#include "stt.h"
 
 #define MAXTRACELINESIZE 64
 long long int BIGNUM = 1000000;
@@ -283,6 +284,8 @@ int main(int argc, char * argv[])
 	cache_init();
 
 	plb_init();
+
+	stt_init();
 
 	table_init();
 	
