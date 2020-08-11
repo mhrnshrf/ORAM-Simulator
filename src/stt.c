@@ -9,11 +9,9 @@
 
 
 STT_Entry STT[STT_SET][STT_WAY];     // the last level stt
-// char PRO[STT_SET][STT_WAY];          // an array to keep track of lru for eviction
-long long int PRO[STT_SET][STT_WAY];          // an array to keep track of lru for eviction
+// char STT[STT_SET][STT_WAY];          // an array to keep track of lru for eviction
+// long long int STT[STT_SET][STT_WAY];          // an array to keep track of lru for eviction
 
-int pinctr = 0;
-int unpinctr = 0;
 
 // invalidate all stt blocks upon init
 void stt_init(){
@@ -24,17 +22,17 @@ void stt_init(){
             STT[i][j].valid = false;
             STT[i][j].pinned = false;
             
-            PRO[i][j] = 0;
+            STT[i][j].lru = 0;
         }
     }
 }
 
-void update_PRO(unsigned int index, unsigned int way){
-    PRO[index][way] = CYCLE_VAL;
+void update_ts(unsigned int index, unsigned int way){
+    STT[index][way].lru = CYCLE_VAL;
 }
 
-void reset_PRO(unsigned int index, unsigned int way){
-    PRO[index][way] = CYCLE_VAL;
+void reset_ts(unsigned int index, unsigned int way){
+    STT[index][way].lru = CYCLE_VAL;
 }
 
 
@@ -61,66 +59,63 @@ int stt_find_victim(unsigned int index) {
     long long int min = CYCLE_VAL;
     for (int j = 0; j < STT_WAY; j++)
     {
-        if (PRO[index][j] < min && !STT[index][j].pinned)
+        if (STT[index][j].lru < min && !STT[index][j].pinned)
         {
             victim = j;
-            min = PRO[index][j];
+            min = STT[index][j].lru;
         }
     }
 
     return victim;
 }
 
-void stt_pin(unsigned int addr){
-    unsigned int index = stt_index(addr);
-    unsigned int tag = stt_tag(addr);
-    int pincount = 0;
+// void stt_pin(unsigned int addr){
+//     unsigned int index = stt_index(addr);
+//     unsigned int tag = stt_tag(addr);
 
-    for (int i = 0; i < STT_WAY; i++)
-    {
-        if (STT[index][i].pinned)
-        {
-            pincount++;
-        }
-    }
+//     for (int i = 0; i < STT_WAY; i++)
+//     {
+//         if (STT[index][i].pinned)
+//         {
+//             pincount++;
+//         }
+//     }
     
-    if (pincount < STT_WAY-1)
-    {
-        for (unsigned int j = 0; j < STT_WAY; j++)
-        {
-            // exist
-            if (STT[index][j].tag == tag && STT[index][j].valid)
-            {   
-                STT[index][j].pinned = true;
-                pinctr++;
-                return;    
-            }        
-        }
-    }
-    
-    
+//     if (pincount < STT_WAY-1)
+//     {
+//         for (unsigned int j = 0; j < STT_WAY; j++)
+//         {
+//             // exist
+//             if (STT[index][j].tag == tag && STT[index][j].valid)
+//             {   
+//                 STT[index][j].pinned = true;
+//                 pinctr++;
+//                 return;    
+//             }        
+//         }
+//     }
 
-}
+// }
 
 
-void stt_unpin(unsigned int addr){
-    unsigned int index = stt_index(addr);
-    unsigned int tag = stt_tag(addr);
+// void stt_unpin(unsigned int addr){
+//     unsigned int index = stt_index(addr);
+//     unsigned int tag = stt_tag(addr);
 
-    for (unsigned int j = 0; j < STT_WAY; j++)
-    {
-        // exist
-        if (STT[index][j].tag == tag && STT[index][j].valid)
-        {   
-            STT[index][j].pinned = false;
-            unpinctr++;
-            return;    
-        }        
-    }
-    // not exist ~~~> error
-    printf("ERROR: stt pin block %d not found!\n", addr);
-    exit(1);
-}
+//     for (unsigned int j = 0; j < STT_WAY; j++)
+//     {
+//         // exist
+//         if (STT[index][j].tag == tag && STT[index][j].valid)
+//         {   
+//             STT[index][j].pinned = false;
+//             unpinctr++;
+//             return;    
+//         }        
+//     }
+//     // not exist ~~~> error
+//     printf("ERROR: stt pin block %d not found!\n", addr);
+//     exit(1);
+// }
 
 unsigned int stt_index(unsigned int addr){
     unsigned int index = addr % STT_SET;
@@ -145,7 +140,7 @@ bool stt_access(unsigned int addr){
         if (STT[index][j].tag == tag && STT[index][j].valid)
         {   if (STT_WAY != 1)
             {
-                update_PRO(index, j);  
+                update_ts(index, j);  
             }
             return true;    
         }        
@@ -173,27 +168,28 @@ bool stt_contain(unsigned int addr){
 
 
 // try to fill the stt with new data, it may lead to eviction ~~~> is called when miss happens
-int stt_fill(unsigned int addr){
+bool stt_fill(unsigned int addr){
     unsigned int index = stt_index(addr);
     unsigned int tag = stt_tag(addr);
 
-    int victim = -1;
+    // int victim = -1;
    
     // miss only
     int way = stt_find_spot(index);
 
     // miss & evict
-    if (way == -1)
-    {
-        way = stt_find_victim(index);
-        victim = STT[index][way].tag;
-    }
+    // if (way == -1)
+    // {
+    //     way = stt_find_victim(index);
+    //     victim = STT[index][way].tag;
+    // }
 
 
      if (way < 0)
     {
-        printf("ERROR: stt fill way: %d   index %d\n", way, index);
-        exit(1);
+        // printf("ERROR: stt fill way: %d   index %d\n", way, index);
+        // exit(1);
+        return false;
     }
 
     // sttline fill
@@ -201,9 +197,32 @@ int stt_fill(unsigned int addr){
     STT[index][way].tag = tag;
 
 
-    reset_PRO(index, way);  
+    update_ts(index, way);  
 
-    return victim;  
+    return true;  
+}
+
+
+int stt_candidate(int label, int level){
+    int mask = label>>(LEVEL-1-level);
+    for (int i = 0; i < STT_SET; i++)
+    {
+        for (int j = 0; j < STT_WAY; j++)
+        {
+            if (STT[i][j].valid)
+            {
+                int target = PosMap[STT[i][j].tag];
+                target = target>>(LEVEL-1-level);       
+                if (((target)^mask) == 0) 
+                {
+                   STT[i][j].valid = false;
+                   return STT[i][j].tag; 
+                }
+            }
+        }
+    }
+    
+    return -1;
 }
 
 void stt_print(int addr){
@@ -215,7 +234,7 @@ void stt_print(int addr){
         // hit
         if (STT[index][j].tag == tag && STT[index][j].valid)
         {   
-            printf("\n\naddr: %d   PRO: %lld\n", addr, PRO[index][j]);
+            printf("\n\naddr: %d   STT: %lld\n", addr, STT[index][j].lru);
         }        
     }
 }
@@ -232,7 +251,7 @@ void stt_test(){
 
     for (int i = 0; i < STT_WAY; i++)
     {
-        printf("STT[%d][%d]: %d     LRU: %lld\n", index, i, STT[index][i].tag, PRO[index][i]);
+        printf("STT[%d][%d]: %d     LRU: %lld\n", index, i, STT[index][i].tag, STT[index][i].lru);
     }
 
     for (int i = 0; i < STT_WAY; i++)
@@ -247,7 +266,7 @@ void stt_test(){
 
     for (int i = 0; i < STT_WAY; i++)
     {
-        printf("STT[%d][%d]: %d     LRU: %lld\n", index, i, STT[index][i].tag, PRO[index][i]);
+        printf("STT[%d][%d]: %d     LRU: %lld\n", index, i, STT[index][i].tag, STT[index][i].lru);
     }
 
     int victim = stt_fill(base+STT_WAY*STT_SET);

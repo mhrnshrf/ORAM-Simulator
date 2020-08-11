@@ -24,6 +24,7 @@ extern long long int trace_clk;
 #include "cache.h"
 #include "prefetcher.h"
 #include "plb.h"
+#include "stt.h"
 
 
 // long long int CYCLE_VAL = 0;
@@ -908,13 +909,19 @@ void write_path(int label){
       // {
       //   printf("write path: @ LEVEL: %d     candidate[0]: %d     candidate[1]: %d\n", i, candidate[0], candidate[1]);
       // }
-      
+      // bool stt_has_cand = false;
+      int stt_cand = -1;
 
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
 
-        if (candidate[j] == -1)
+        if (candidate[j] == -1) 
         {
+          if (STT_ENABLE && TREE_VAR == ORAM)
+          {
+            stt_cand = stt_candidate(label, i);
+          }
+          
           if (i >= TOP_CACHE_VAR)
           {
             // addr = SUBTREE_ENABLE ?  SubMap[index]+j : (index*Z_VAR+j);
@@ -965,6 +972,18 @@ void write_path(int label){
           
 
         }
+        if (STT_ENABLE && TREE_VAR == ORAM)
+        {
+          if (stt_cand != -1)
+          {
+            GlobTree[index].slot[j].addr = stt_cand;
+            GlobTree[index].slot[j].label = PosMap[stt_cand];
+            GlobTree[index].slot[j].isReal = true;
+            GlobTree[index].slot[j].isData = true;
+          }
+        }
+        
+
       }
     }
   }
@@ -1366,6 +1385,20 @@ void test_read_write(){
 
 }
 
+
+void free_stash(){
+  for (int i = 0; i < STASH_SIZE; i++)
+  {
+    if (Stash[i].isReal)
+    {
+      if (stt_fill(Stash[i].addr))
+      {
+        remove_from_stash(i);
+      }
+    }
+  }
+}
+
 // read the path, remap the block, write back the path
 void oram_access(int addr){
   oramctr++;
@@ -1384,6 +1417,11 @@ void oram_access(int addr){
 
   write_path(label);
 
+  if (STT_ENABLE)
+  {
+    free_stash();
+  }
+    
 
 }
 
