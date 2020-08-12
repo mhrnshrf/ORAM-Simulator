@@ -202,6 +202,9 @@ extern long long int CYCLE_VAL;
 extern long long int cache_clk;
 extern int stash_leftover;
 extern int stash_removed;
+extern int fillhit;
+extern int fillmiss;
+
 
 extern int PosMap[BLOCK];  
 

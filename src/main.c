@@ -1445,6 +1445,8 @@ printf("prefetch case #          %d\n", precase);
 printf("STT Cand #               %d\n", sttctr);
 printf("Stash leftover #         %d\n", stash_leftover);
 printf("Stash removed #          %d\n", stash_removed);
+printf("fill hit #               %d\n", fillhit);
+printf("fill miss #              %d\n", fillmiss);
       
 // print_plb_stat();
 

@@ -207,6 +207,7 @@ bool stt_fill(unsigned int addr){
     {
         // printf("ERROR: stt fill way: %d   index %d\n", way, index);
         // exit(1);
+        fillmiss++;
         return false;
     }
 
@@ -217,6 +218,7 @@ bool stt_fill(unsigned int addr){
 
     update_ts(index, way);  
 
+    fillhit++;
     return true;  
 }
 

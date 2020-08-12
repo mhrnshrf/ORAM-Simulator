@@ -165,6 +165,8 @@ int precase = 0;
 int sttctr = 0;
 int stash_leftover = 0;
 int stash_removed = 0;
+int fillhit = 0;
+int fillmiss = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -836,6 +838,8 @@ void read_path(int label){
               printf("ERROR: read: stash overflow!  @ %d\n", stashctr);
               printf("stash leftover %d\n", stash_leftover);
               printf("stash removed  %d\n", stash_removed);
+              printf("fill hit  %d\n", fillhit);
+              printf("fill miss  %d\n", fillmiss);
               exit(1);
             }
           }
