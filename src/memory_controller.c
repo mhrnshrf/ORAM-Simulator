@@ -1923,10 +1923,10 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
  
   freecursive_access(addr, type);
 
-  // if (STT_ENABLE && TREE_VAR == ORAM)
-  // {
-  //   free_stash();
-  // }
+  if (STT_ENABLE && TREE_VAR == ORAM)
+  {
+    free_stash();
+  }
 }
 
 // capacity occupation analysis
