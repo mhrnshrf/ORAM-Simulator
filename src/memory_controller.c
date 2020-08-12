@@ -1127,23 +1127,24 @@ void remap_block(int addr){
 
   int prevlabel = PosMap[addr];
 
-  if (RHO_ENABLE && (TREE_VAR == RHO))
-  {
-    if (ACCESS_VAR == REGULAR)
-    {
-      rho_update_tag_array(addr, label);
-    }
-    
-  }
-  else
-  {
-    PosMap[addr] = label;   // $$$ remember to exclude current path later on
-  }
 
   intended_addr = addr;
   
   if (!STT_ENABLE || TREE_VAR != ORAM || !stt_access(addr))
   {
+    if (RHO_ENABLE && (TREE_VAR == RHO))
+    {
+      if (ACCESS_VAR == REGULAR)
+      {
+        rho_update_tag_array(addr, label);
+      }
+      
+    }
+    else
+    {
+      PosMap[addr] = label;   // $$$ remember to exclude current path later on
+    }
+    
     int index = get_stash(addr);
 
     if (index == -1)
