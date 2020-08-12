@@ -15,6 +15,7 @@ STT_Entry STT[STT_SET][STT_WAY];     // the last level stt
 
 // invalidate all stt blocks upon init
 void stt_init(){
+    // printf("ex: %d\n", stt_index(0x95731af));
     for (unsigned int i = 0; i < STT_SET; i++)
     {
         for (unsigned int j = 0; j < STT_WAY; j++)
@@ -118,9 +119,11 @@ int stt_find_victim(unsigned int index) {
 // }
 
 unsigned int stt_index(unsigned int addr){
-    unsigned int index = addr >> 1;
+    unsigned int index;
+    int part1 = addr & 0b11111;
+    int part2 = (addr>>12) & 0b11111;
+    index = (part2<<5) | part1;
     return (index % STT_SET);
-
 }
 
 unsigned int stt_tag(unsigned int addr){
