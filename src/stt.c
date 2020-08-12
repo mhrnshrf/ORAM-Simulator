@@ -121,7 +121,7 @@ int stt_find_victim(unsigned int index) {
 unsigned int stt_index(unsigned int addr){
     unsigned int index;
     int part1 = addr & 0b11111;
-    int part2 = (addr>>12) & 0b11111;
+    int part2 = (addr>>10) & 0b11111;
     index = (part2<<5) | part1;
     return index;
 }

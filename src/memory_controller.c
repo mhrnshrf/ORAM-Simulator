@@ -835,7 +835,7 @@ void read_path(int label){
             }
             else
             {
-              printf("ERROR: read: stash overflow!  @ %d\n", stashctr);
+              printf("ERROR: read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
               printf("stash leftover %d\n", stash_leftover);
               printf("stash removed  %d\n", stash_removed);
               printf("fill hit  %d\n", fillhit);
