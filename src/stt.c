@@ -118,7 +118,7 @@ int stt_find_victim(unsigned int index) {
 // }
 
 unsigned int stt_index(unsigned int addr){
-    unsigned int index = addr >> 8;
+    unsigned int index = addr >> 4;
     return (index % STT_SET);
 
 }
