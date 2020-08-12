@@ -1187,13 +1187,13 @@ void remap_block(int addr){
 
 int add_to_stash(Slot s){
 
-  if (STT_ENABLE && TREE_VAR == ORAM)
-  {
-    if (stt_fill(s.addr))
-    {
-      return -2;
-    }
-  }
+  // if (STT_ENABLE && TREE_VAR == ORAM)
+  // {
+  //   if (stt_fill(s.addr))
+  //   {
+  //     return -2;
+  //   }
+  // }
   
   for(int i = 0; i < STASH_SIZE_VAR; i++ )
   {

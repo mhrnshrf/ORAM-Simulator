@@ -123,8 +123,8 @@ unsigned int stt_index(unsigned int addr){
     // int part1 = addr & 0b11111;
     // int part2 = (addr>>15) & 0b11111;
     // index = (part2<<5) | part1;
-    // index = PosMap[addr] % STT_SET;
-    index = addr % STT_SET;
+    index = PosMap[addr] % STT_SET;
+    // index = addr % STT_SET;
     return index;
 }
 
