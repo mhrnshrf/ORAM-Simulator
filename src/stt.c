@@ -233,7 +233,7 @@ int stt_candidate(int label, int level){
                 target = target>>(LEVEL-1-level);       
                 if (((target)^mask) == 0) 
                 {
-                   STT[i][j].valid = false;
+                //    STT[i][j].valid = false;
                    return STT[i][j].tag; 
                 }
             }

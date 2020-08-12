@@ -79,6 +79,7 @@ EntryBuf PreBuffer[PREFETCH_BUF_SIZE]; // prefetch buffer
 int SubMap[NODE];          // subtree address map
 
 int intended = -1;         // index of intended block in stash
+int intended_addr = -1;         // intended block in stash
 bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
 int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 int candidate[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
@@ -923,13 +924,14 @@ void write_path(int label){
         if (STT_ENABLE && TREE_VAR == ORAM)
         {
           stt_cand = stt_candidate(label, i);
-          if (stt_cand != -1)
+          if (stt_cand != -1 && stt_cand != intended_addr)  
           {
             sttctr++;
             GlobTree[index].slot[j].addr = stt_cand;
             GlobTree[index].slot[j].label = PosMap[stt_cand];
             GlobTree[index].slot[j].isReal = true;
             GlobTree[index].slot[j].isData = true;
+            stt_invalidate(stt_cand);
             continue;
           }
         }
@@ -1133,50 +1135,61 @@ void remap_block(int addr){
   {
     PosMap[addr] = label;   // $$$ remember to exclude current path later on
   }
+
+  intended_addr = addr;
   
-  
-
-  int index = get_stash(addr);
-
-
-  if (index == -1)
+  if (!STT_ENABLE || TREE_VAR != ORAM || !stt_access(addr))
   {
+    int index = get_stash(addr);
+
+    if (index == -1)
+    {
+      if (RHO_ENABLE && (TREE_VAR == RHO))
+      {
+        printf("ERROR: remap: @ trace %d  block %d not found in rho stash!\n", tracectr, addr);
+      }
+      else
+      {
+        printf("ERROR: remap: @ trace %d  block %d not found in stash!\n", tracectr, addr);
+        printf("remap:  previous Posmap[%d]: %d\n", addr, prevlabel);
+        printf("remap:  Posmap[%d]: %d\n", addr, PosMap[addr]);
+        printf("remap:  stashctr: %d    bkctr: %d\n", stashctr, bkctr);
+        // printf("remap:  PLB[%d]: %d\n", addr%PLB_SIZE, PLB[addr%PLB_SIZE]);
+      }
+      exit(1);
+    }
+
+    intended = index;
+
+    if (RHO_ENABLE && (TREE_VAR == RHO) && (ACCESS_VAR == EVICT) )
+    {
+      remove_from_stash(index);
+      return;
+    }
+    
     if (RHO_ENABLE && (TREE_VAR == RHO))
     {
-      printf("ERROR: remap: @ trace %d  block %d not found in rho stash!\n", tracectr, addr);
+      RhoStash[index].label = label;
     }
     else
     {
-      printf("ERROR: remap: @ trace %d  block %d not found in stash!\n", tracectr, addr);
-      printf("remap:  previous Posmap[%d]: %d\n", addr, prevlabel);
-      printf("remap:  Posmap[%d]: %d\n", addr, PosMap[addr]);
-      printf("remap:  stashctr: %d    bkctr: %d\n", stashctr, bkctr);
-      // printf("remap:  PLB[%d]: %d\n", addr%PLB_SIZE, PLB[addr%PLB_SIZE]);
+      Stash[index].label = label;
     }
-    exit(1);
-  }
-
-  intended = index;
-
-  if (RHO_ENABLE && (TREE_VAR == RHO) && (ACCESS_VAR == EVICT) )
-  {
-    remove_from_stash(index);
-    return;
   }
   
-  if (RHO_ENABLE && (TREE_VAR == RHO))
-  {
-    RhoStash[index].label = label;
-  }
-  else
-  {
-    Stash[index].label = label;
-  }
+
   
 }
 
 int add_to_stash(Slot s){
-  
+
+  if (STT_ENABLE && TREE_VAR == ORAM)
+  {
+    if (stt_fill(s.addr))
+    {
+      return -2;
+    }
+  }
   
   for(int i = 0; i < STASH_SIZE_VAR; i++ )
   {
