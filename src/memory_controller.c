@@ -882,74 +882,64 @@ void write_path(int label){
     int index = calc_index(label, i);
     int addr = 0;
     
-    int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
-    if (stashctr_var == 0)
-    {
-      if (RHO_ENABLE && (TREE_VAR == RHO))
-      {
-        // printf("write path: @ LEVEL: %d   stash got empty\n\n", i);
-      }
+    // int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
+    // if (stashctr_var == 0)
+    // {
+    //   if (RHO_ENABLE && (TREE_VAR == RHO))
+    //   {
+    //     // printf("write path: @ LEVEL: %d   stash got empty\n\n", i);
+    //   }
       
-      for (int g = 0; g < LZ_VAR[i]; g++)
-      {
-        if (i >= TOP_CACHE_VAR)
-        {
-          // addr = SUBTREE_ENABLE ?  SubMap[index]+g:(index*Z_VAR+g);
-          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+g): (TREE_VAR == ORAM)? SubMap[index]+g : RhoSubMap[index]+g;
+    //   for (int g = 0; g < LZ_VAR[i]; g++)
+    //   {
+    //     if (i >= TOP_CACHE_VAR)
+    //     {
+    //       // addr = SUBTREE_ENABLE ?  SubMap[index]+g:(index*Z_VAR+g);
+    //       addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+g): (TREE_VAR == ORAM)? SubMap[index]+g : RhoSubMap[index]+g;
 
-          // insert_write (addr, orig_cycle, orig_thread, orig_instr);
-          insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
-          // printf("insert oramq: %d\n", oramQ->size);
+    //       // insert_write (addr, orig_cycle, orig_thread, orig_instr);
+    //       insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+    //       // printf("insert oramq: %d\n", oramQ->size);
 
-        }
+    //     }
         
-      }
-    }
-    else
-    {
-      int index = calc_index(label, i);
+    //   }
+    // }
+    // else
+    // {
       reset_candidate();
       pick_candidate(index, label, i);
-      // if (TREE_VAR == RHO)
-      // {
-      //   printf("write path: @ LEVEL: %d     candidate[0]: %d     candidate[1]: %d\n", i, candidate[0], candidate[1]);
-      // }
-      // bool stt_has_cand = false;
       int stt_cand = -1;
 
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
+        if (i >= TOP_CACHE_VAR)
+        {
+          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+        }
 
-        if (candidate[j] == -1) 
+
+        if (candidate[j] == -1)
         {
           if (STT_ENABLE && TREE_VAR == ORAM)
           {
             stt_cand = stt_candidate(label, i);
-          }
-          
-          if (i >= TOP_CACHE_VAR)
-          {
-            // addr = SUBTREE_ENABLE ?  SubMap[index]+j : (index*Z_VAR+j);
-            addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-
-            // insert_write (addr, orig_cycle, orig_thread, orig_instr);
-            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
-            // printf("insert oramq: %d\n", oramQ->size);
-
+            if (stt_cand != -1)
+            {
+              sttctr++;
+              GlobTree[index].slot[j].addr = stt_cand;
+              GlobTree[index].slot[j].label = PosMap[stt_cand];
+              GlobTree[index].slot[j].isReal = true;
+              GlobTree[index].slot[j].isData = true;
+              continue;
+            }
           }
         }
-        else
+        
+
+        if (candidate[j] != -1) 
         {
-          if (i >= TOP_CACHE_VAR)
-          {
-            // addr = SUBTREE_ENABLE ?  SubMap[index]+j: (index*Z_VAR+j);
-            addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-
-            // insert_write (addr, orig_cycle, orig_thread, orig_instr);
-            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
-          // printf("insert oramq: %d\n", oramQ->size);
-
-          }
 
           if (RHO_ENABLE && (TREE_VAR == RHO))
           {
@@ -977,21 +967,11 @@ void write_path(int label){
           
 
         }
-        if (STT_ENABLE && TREE_VAR == ORAM)
-        {
-          if (stt_cand != -1)
-          {
-            sttctr++;
-            GlobTree[index].slot[j].addr = stt_cand;
-            GlobTree[index].slot[j].label = PosMap[stt_cand];
-            GlobTree[index].slot[j].isReal = true;
-            GlobTree[index].slot[j].isData = true;
-          }
-        }
+
         
 
       }
-    }
+    // }
   }
   
 }
