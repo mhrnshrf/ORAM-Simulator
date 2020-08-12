@@ -920,20 +920,17 @@ void write_path(int label){
         }
 
 
-        if (candidate[j] == -1)
+        if (STT_ENABLE && TREE_VAR == ORAM)
         {
-          if (STT_ENABLE && TREE_VAR == ORAM)
+          stt_cand = stt_candidate(label, i);
+          if (stt_cand != -1)
           {
-            stt_cand = stt_candidate(label, i);
-            if (stt_cand != -1)
-            {
-              sttctr++;
-              GlobTree[index].slot[j].addr = stt_cand;
-              GlobTree[index].slot[j].label = PosMap[stt_cand];
-              GlobTree[index].slot[j].isReal = true;
-              GlobTree[index].slot[j].isData = true;
-              continue;
-            }
+            sttctr++;
+            GlobTree[index].slot[j].addr = stt_cand;
+            GlobTree[index].slot[j].label = PosMap[stt_cand];
+            GlobTree[index].slot[j].isReal = true;
+            GlobTree[index].slot[j].isData = true;
+            continue;
           }
         }
         
