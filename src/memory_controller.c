@@ -928,7 +928,7 @@ void write_path(int label){
         if (STT_ENABLE && TREE_VAR == ORAM)
         {
           stt_cand = stt_candidate(label, i);
-          if (stt_cand != -1 && stt_cand != intended_addr)  
+          if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
           {
             sttctr++;
             GlobTree[index].slot[j].addr = stt_cand;
