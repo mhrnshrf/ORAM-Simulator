@@ -6,11 +6,11 @@ OBJS = $(OBJDIR)/main.o $(OBJDIR)/memory_controller.o $(OBJDIR)/scheduler.o $(OB
 CC = gcc
 DEBUG = -g
 CFLAGS = -std=c99 -Wall -c $(DEBUG) 
-LFLAGS = -Wall $(DEBUG)
+LFLAGS = -Wall $(DEBUG) 
 
 
 $(BINDIR)/$(OUT): $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) -o $(BINDIR)/$(OUT)	-lm 
+	$(CC) $(LFLAGS) $(OBJS) -o $(BINDIR)/$(OUT)	-lm -lcrypto -lssl
 	chmod 777 $(BINDIR)/$(OUT)
 
 $(OBJDIR)/main.o: main.c processor.h configfile.h memory_controller.h scheduler.h params.h cache.h prefetcher.h plb.h stt.h

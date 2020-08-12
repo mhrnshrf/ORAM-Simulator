@@ -4,6 +4,9 @@
 #include "memory_controller.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <openssl/md5.h>
+
 
 
 
@@ -15,7 +18,14 @@ STT_Entry STT[STT_SET][STT_WAY];     // the last level stt
 
 // invalidate all stt blocks upon init
 void stt_init(){
-    // printf("ex: %d\n", stt_index(0x95731af));
+
+    // for (int i = 0; i < 10; i++)
+    // {
+    //     int addr = rand() % BLOCK;
+    //     printf("ex: %d\n", stt_index(addr));
+    // }
+    
+
     for (unsigned int i = 0; i < STT_SET; i++)
     {
         for (unsigned int j = 0; j < STT_WAY; j++)
@@ -118,13 +128,49 @@ int stt_find_victim(unsigned int index) {
 //     exit(1);
 // }
 
+char *str2md5(const char *str, int length) {
+    int n;
+    MD5_CTX c;
+    unsigned char digest[16];
+    char *out = (char*)malloc(33);
+
+    MD5_Init(&c);
+
+    while (length > 0) {
+        if (length > 512) {
+            MD5_Update(&c, str, 512);
+        } else {
+            MD5_Update(&c, str, length);
+        }
+        length -= 512;
+        str += 512;
+    }
+
+    MD5_Final(digest, &c);
+
+    for (n = 0; n < 3; ++n) {
+        snprintf(&(out[n*2]), 16*2, "%02x", (unsigned int)digest[n]);
+    }
+
+    return out;
+}
+
+
 unsigned int stt_index(unsigned int addr){
     unsigned int index;
     // int part1 = addr & 0b11111;
     // int part2 = (addr>>15) & 0b11111;
     // index = (part2<<5) | part1;
-    index = PosMap[addr] % STT_SET;
+    // index = PosMap[addr] % STT_SET;
     // index = addr % STT_SET;
+
+    char mid[512];
+    sprintf(mid, "%d", addr);
+    char *str = str2md5(mid, strlen(mid));
+    int hashed;
+    sscanf(str, "%x", &hashed);
+    index = hashed % STT_SET;
+
     return index;
 }
 

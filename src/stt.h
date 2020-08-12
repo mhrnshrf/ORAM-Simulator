@@ -33,6 +33,7 @@ unsigned int stt_index(unsigned int addr);
 void stt_test();
 int stt_candidate(int label, int level);
 void stt_invalidate(unsigned int addr);
+char *str2md5(const char *str, int length);
 // void stt_pin(unsigned int addr);
 // void stt_unpin(unsigned int addr);
 // void stt_print(int addr);
