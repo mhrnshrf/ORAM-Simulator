@@ -799,7 +799,7 @@ void read_path(int label){
         {
           // int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
           int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-          insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+          // insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
           // printf("insert oramq: %d\n", oramQ->size);
         }
 
@@ -921,7 +921,7 @@ void write_path(int label){
         if (i >= TOP_CACHE_VAR)
         {
           addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+          // insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
         }
 
 
@@ -1299,7 +1299,7 @@ bool stash_contain(int addr){
 void test_read_write(){
   gettimeofday(&start, NULL);
 
-  for(int i = 0; i < TRACE_SIZE; i++)
+  for(int i = 0; i < 400000001; i++)
   {
     
 
@@ -1307,14 +1307,14 @@ void test_read_write(){
     int label = PosMap[addr];
 
 
-    if (i % 2000000 == 0)
+    if (i == 0 || i == 4000000 || i == 8000000 || i == 20000000 || i == 100000000 || i == 150000000 || i == 200000000 || i == 300000000 || i == 350000000 || i == 400000000  )
     {
-      printf("%d :\n", i);
+      printf("%dm\n\n",(int)(i/1000000));
       print_count_level();
-      printf("\n");
-      printf("bk evict rate: %f\n", (double)bkctr/i);
-      printf("\n");
-      printf("\n");
+      printf("\n\n\n\n");
+      // printf("bk evict rate: %f\n", (double)bkctr/i);
+      // printf("\n");
+      // printf("\n");
     }
     
 
@@ -1366,9 +1366,9 @@ void test_read_write(){
     // print_stash();
     // print_path(label);
     
-    if (BK_EVICTION)
+    if (bk_evict_needed())
     {
-      background_eviction(); 
+      printf("bk evict needed @ stash %d\n", stashctr);
     } 
 
 
