@@ -31,6 +31,7 @@
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 
+
 // oram config
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
