@@ -260,6 +260,13 @@ int main(int argc, char * argv[])
 	printf("Prefetch Enable     %s\n", PREFETCH_ENABLE?"On":"Off");
 	printf("Buffer Entry #      %d\n\n", PREFETCH_BUF_SIZE);
 
+
+	printf("\n....................................................\n");
+	printf("                 STT Config\n");
+	printf("....................................................\n");
+	printf("STT Enable     %s\n", STT_ENABLE?"On":"Off");
+	printf("STT Size       %d entry / %d-way\n\n", STT_SET*STT_WAY, STT_WAY);
+
 	
 	printf("....................................................\n\n\n\n\n");
 	// init_trace();
