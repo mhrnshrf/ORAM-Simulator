@@ -797,8 +797,8 @@ void read_path(int label){
       {
         if (i >= TOP_CACHE_VAR)
         {
-          // int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-          // insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+          int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
         }
 
         if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -918,8 +918,8 @@ void write_path(int label){
       {
         if (i >= TOP_CACHE_VAR)
         {
-          // addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-          // insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
         }
 
 
