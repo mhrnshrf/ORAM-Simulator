@@ -331,7 +331,7 @@ int main(int argc, char * argv[])
 	 }
 	 
 
-	 start = clock();
+	 
 
 	//   Mehrnoosh.
   
@@ -585,7 +585,7 @@ int main(int argc, char * argv[])
 	// Mehrnoosh:
 	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
 	// printf("\n@ trace %d	bkctr: %d \n", tracectr, bkctr);
-	
+	start = clock();
 
 	no_miss_occured = true;
 
@@ -593,6 +593,12 @@ int main(int argc, char * argv[])
 	{
 		break;
 	}
+
+	if (cpu_time_used >= 1500 && TIMEOUT_ENBALE)
+	{
+		break;
+	}
+	
 	
 	gettimeofday(&sday, NULL);
 
@@ -1322,6 +1328,8 @@ int main(int argc, char * argv[])
     period =  ((eday.tv_sec * 1000000 + eday.tv_usec) - (sday.tv_sec * 1000000 + sday.tv_usec))/ 1000000;
 	fflush(stdout);
 	
+	end = clock();
+	cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
 	// Mehrnoosh.
   }
 
@@ -1400,8 +1408,7 @@ int main(int argc, char * argv[])
 
 // Mehrnoosh:
 
-end = clock();
-cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
 
 // printf("\nPrefetch #               %d\n", prefetchctr);
 // printf("Pref pos1 #              %d\n", pos1ctr);
