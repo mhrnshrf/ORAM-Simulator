@@ -148,8 +148,10 @@ int main(int argc, char * argv[])
 	printf("Rho            %s\n", RHO_ENABLE?"Enabled":"No" );
 	printf("Timing         %s\n", TIMING_ENABLE?"Enabled":"No" );
 	printf("Prefetch       %s\n", PREFETCH_ENABLE?"Enabled":"No" );
-	printf("Early WB       %s\n\n", EARLY_ENABLE?"Enabled":"No" );
-
+	printf("Early WB       %s\n", EARLY_ENABLE?"Enabled":"No" );
+	printf("Snapshot       %s\n", SNAPSHOT_ENABLE?"Enabled":"No" );
+	printf("Timeout        %s\n\n", TIMEOUT_ENBALE?"Enabled":"No" );
+ 
 
 	printf("....................................................\n");
 	printf("             Simulation Parameters\n");
@@ -160,7 +162,8 @@ int main(int argc, char * argv[])
 	printf("L1 Latency    %d\n", L1_LATENCY);
 	printf("L2 Latency    %d\n", L2_LATENCY);
 	printf("Mem Latency   %d\n", MAINMEM_LATENCY);
-	printf("Warmup Thld   %dm\n\n", (int)(WARMUP_THRESHOLD/pow(10,6)));
+	printf("Warmup Thld   %dm\n", (int)(WARMUP_THRESHOLD/pow(10,6)));
+	printf("Warmup Thld   %d (s)\n\n", TIMEOUT_THRESHOLD);
 
 	printf("....................................................\n");
 	printf("                  ORAM Config\n");
@@ -592,7 +595,7 @@ int main(int argc, char * argv[])
 		break;
 	}
 
-	if (cpu_time_used >= 1500 && TIMEOUT_ENBALE)
+	if (TIMEOUT_ENBALE && cpu_time_used >= TIMEOUT_THRESHOLD)
 	{
 		break;
 	}

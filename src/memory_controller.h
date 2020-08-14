@@ -18,6 +18,7 @@
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
 #define MAINMEM_LATENCY 0       // L2 latency in terms of # cycles 
 #define WARMUP_THRESHOLD 3000000       // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
+#define TIMEOUT_THRESHOLD 4000       // time out threshold in seconds
 
 // enable/disable options config
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
@@ -26,12 +27,12 @@
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
-#define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
+#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
-#define SNAPSHOT_ENABLE 1    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
-#define TIMEOUT_ENBALE 0     // 0/1 flag to disable/enable finishing the program in case it get stuck
+#define SNAPSHOT_ENABLE 0    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
+#define TIMEOUT_ENBALE 1     // 0/1 flag to disable/enable finishing the program in case it get stuck
 
 // oram config
 #define H 4     // degree of recursion including data access
