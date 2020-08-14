@@ -27,7 +27,7 @@
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
+#define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 
@@ -77,7 +77,7 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 500   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 1000   // # cycles after each one oram access is initiated either real or dummy one
 
 
 // prefetching config
@@ -225,7 +225,7 @@ void background_eviction();
 void count_tree();
 void init_trace();
 void print_count_level();
-void test_read_write();
+void test_read_write(char * argv[]);
 void read_path(int label);
 void write_path(int label);
 void remap_block(int addr);

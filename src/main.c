@@ -302,7 +302,7 @@ int main(int argc, char * argv[])
 
 	oram_init();
 
-	test_read_write();
+	test_read_write(argv);
 	exit(0);
 
 	// switch_enqueue_to(HEAD);

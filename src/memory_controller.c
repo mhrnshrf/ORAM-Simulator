@@ -797,10 +797,8 @@ void read_path(int label){
       {
         if (i >= TOP_CACHE_VAR)
         {
-          // int  addr = SUBTREE_ENABLE ? index_to_addr(index, j) : (index*Z_VAR+j);
-          int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          // int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
           // insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
-          // printf("insert oramq: %d\n", oramQ->size);
         }
 
         if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -920,7 +918,7 @@ void write_path(int label){
       {
         if (i >= TOP_CACHE_VAR)
         {
-          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          // addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
           // insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
         }
 
@@ -1296,34 +1294,105 @@ bool stash_contain(int addr){
   return false;
 }
 
-void test_read_write(){
+void test_read_write(char * argv[]){
   gettimeofday(&start, NULL);
+
+  char newstr[64];
+
+  FILE *tif; 
+  FILE *tifrep; 
+  int nonmemops;
+  char opertype;
+  long long int taddr;
+  long long int instrpc;
+
+  // tif = (FILE **)malloc(sizeof(FILE *));
+  // tifrep = (FILE **)malloc(sizeof(FILE *));
+  // nonmemops = (int *)malloc(sizeof(int));
+  // opertype = (char *)malloc(sizeof(char));
+  // taddr = (long long int *)malloc(sizeof(long long int));
+  // instrpc = (long long int *)malloc(sizeof(long long int));
+
+  tif = fopen(argv[2], "r");
+  tifrep = fopen(argv[2], "r");
+
+  int addr;
+  int label;
 
   for(int i = 0; i < 400000001; i++)
   {
     
-
-    int addr = rand() % BLOCK;
-    int label = PosMap[addr];
-
-
-    if (i == 0 || i == 4000000 || i == 8000000 || i == 20000000 || i == 100000000 || i == 150000000 || i == 200000000 || i == 300000000 || i == 350000000 || i == 400000000  )
+    if (fgets(newstr,64,tif)) {
+      if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+        printf("Panic.  Poor trace format.\n");
+        exit(1);
+        }
+      addr = block_addr(byte_addr(taddr));
+    }
+    else if (fgets(newstr,64,tifrep)) {
+      if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+        printf("Panic.  Poor trace format.\n");
+        exit(1);
+        }
+      addr = block_addr(byte_addr(taddr));
+    }
+    else
     {
-      printf("%dm\n\n",(int)(i/1000000));
-      print_count_level();
-      printf("\n\n\n\n");
-      // printf("bk evict rate: %f\n", (double)bkctr/i);
-      // printf("\n");
-      // printf("\n");
+      addr = rand() % BLOCK;
+    }
+
+    label = PosMap[addr];
+  
+
+
+
+    // if (i == 0 || i == 4000000 || i == 8000000 || i == 20000000 || i == 100000000 || i == 150000000 || i == 200000000 || i == 300000000 || i == 350000000 || i == 400000000  )
+    // {
+    //   printf("%dm\n\n",(int)(i/1000000));
+    //   print_count_level();
+    //   printf("\n\n\n\n");
+    // }
+
+    if (i <= 10000000 )
+    {
+      if (i % 4000000 == 0 )
+      {
+        printf("%dm\n\n",(int)(i/1000000));
+        print_count_level();
+        printf("\n\n\n\n");
+      }
+    }
+    else if(i <= 90000000 )
+    {
+      if (i % 20000000 == 0 )
+      {
+        printf("%dm\n\n",(int)(i/1000000));
+        print_count_level();
+        printf("\n\n\n\n");
+      }
+    }
+    else if(i <= 300000000 )
+    {
+      if (i % 50000000 == 0 )
+      {
+        printf("%dm\n\n",(int)(i/1000000));
+        print_count_level();
+        printf("\n\n\n\n");
+      }
+    }
+    else if(i <= 400000000 )
+    {
+      if (i % 10000000 == 0 )
+      {
+        printf("%dm\n\n",(int)(i/1000000));
+        print_count_level();
+        printf("\n\n\n\n");
+      }
     }
     
+    
+    
 
-    // int addr = trace[i];
-    // printf("test rw: addr: %d\n", addr);
-    // int label = rand() % PATH;
-
-    // if (stashctr > OV_THRESHOLD)
-      // printf("i: %d  path: %d stashctr: %d\n", i, label, stashctr);
 
     stash_dist[stashctr]++;
 
@@ -1340,31 +1409,17 @@ void test_read_write(){
       exit(1);
     }
     
-    // printf("before read path...\n");
-    // print_tree();
-    // print_stash();
     
     read_path(label);
     
-    // printf("after read path...\n");
-    // print_stash();
-    // print_path(label);
-
-
     remap_block(addr);
-    // printf("after remap block...\n");
-    // print_stash();
+
+    write_path(label);
 
     // gettimeofday(&mid, NULL);
     // duration =  ((mid.tv_sec * 1000000 + mid.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
     // timeavg_mid = (timeavg_mid*i + duration)/(i+1);
     // printf("mid: %f ms\n", (double)timeavg_mid/1000);
-    
-    write_path(label);
-
-    // printf("after write path...\n");
-    // print_stash();
-    // print_path(label);
     
     if (bk_evict_needed())
     {
@@ -1388,7 +1443,8 @@ void test_read_write(){
   //   printf("%d\n",stash_dist[i]);
   // }
   // printf("bk evict #: %d\n", bkctr);
-  printf("bk evict rate: %f\n", (double)bkctr/TRACE_SIZE);
+  // printf("bk evict rate: %f\n", (double)bkctr/TRACE_SIZE);
+  printf("finished.\n");
   
 
 }
