@@ -29,8 +29,14 @@ extern long long int trace_clk;
 
 // long long int CYCLE_VAL = 0;
 
+double cpu_time_used = 0;
+
 
 long long int cache_clk = 0;
+
+int hitctr = 0;		// # hits on llc
+int missctr = 0;	// # misses on llc
+long long int mem_clk = 0;
 
 long long int orig_addr;
 long long int orig_cycle; 
@@ -437,7 +443,8 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   if (!added)
   {
     printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    trace: %d  stash: %d bkctr: %d\n", addr, oramQ->size, tracectr, stashctr, bkctr);
-    exit(1);
+    print_oram_stats();
+exit(1);
   }
 }
 
@@ -450,7 +457,8 @@ void insert_plbQ(int addr){
   if (!added)
   {
     printf("ERROR: insert plbQ: failed to enqueue block: %d    plbq size: %d\n", addr, plbQ->size);
-    exit(1);
+    print_oram_stats();
+exit(1);
   }
 
 }
@@ -815,7 +823,8 @@ void read_path(int label){
             else
             {
               printf("ERROR: read: rho stash overflow!  @ %d\n", rho_stashctr);
-              exit(1);
+              print_oram_stats();
+exit(1);
             }
           }
         }
@@ -838,7 +847,8 @@ void read_path(int label){
               printf("stash removed  %d\n", stash_removed);
               printf("fill hit  %d\n", fillhit);
               printf("fill miss  %d\n", fillmiss);
-              exit(1);
+              print_oram_stats();
+exit(1);
             }
           }
         }
@@ -1158,7 +1168,8 @@ void remap_block(int addr){
         printf("remap:  stashctr: %d    bkctr: %d\n", stashctr, bkctr);
         // printf("remap:  PLB[%d]: %d\n", addr%PLB_SIZE, PLB[addr%PLB_SIZE]);
       }
-      exit(1);
+      print_oram_stats();
+exit(1);
     }
 
     intended = index;
@@ -1319,14 +1330,16 @@ void test_read_write(char * argv[]){
     // if (fgets(newstr,64,tif)) {
     //   if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
     //     printf("Panic.  Poor trace format.\n");
-    //     exit(1);
+    //     print_oram_stats();
+exit(1);
     //     }
     //   addr = block_addr(byte_addr(taddr));
     // }
     // else if (fgets(newstr,64,tifrep)) {
     //   if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
     //     printf("Panic.  Poor trace format.\n");
-    //     exit(1);
+    //     print_oram_stats();
+exit(1);
     //     }
     //   addr = block_addr(byte_addr(taddr));
     // }
@@ -1400,7 +1413,8 @@ void test_read_write(char * argv[]){
     if (label == -1)
     {
       printf("ERROR: block label not found in pos map!\n");
-      exit(1);
+      print_oram_stats();
+exit(1);
     }
     
     
@@ -1468,7 +1482,8 @@ void oram_access(int addr){
   if (label == -1)
   {
     printf("ERROR: block label not found in pos map!\n");
-    exit(1);
+    print_oram_stats();
+exit(1);
   }
     
   read_path(label);
@@ -1553,7 +1568,8 @@ void freecursive_access(int addr, char type){
         //     {
         //       pos1conf++;
         //       //  printf("ERROR: freecursive: @trace %d pos1 & i %d don't match!\n", tracectr, i);
-        //       //  exit(1);
+        //       //  print_oram_stats();
+exit(1);
         //     }
             
         //   }
@@ -1565,7 +1581,8 @@ void freecursive_access(int addr, char type){
         //     {
         //       pos2conf++;
         //       //  printf("ERROR: freecursive: @trace %d pos2 & i %d don't match!\n", tracectr, i);
-        //       //  exit(1);
+        //       //  print_oram_stats();
+exit(1);
         //     }
         //   }
         // }
@@ -1627,7 +1644,8 @@ void freecursive_access(int addr, char type){
         // if (cache_invalidate(caddr) != -1)
         // {
         //   printf("ERROR: @trace %d  cache contained %x  tagged %x \n", tracectr, caddr, tag);
-        //   exit(1);
+        //   print_oram_stats();
+exit(1);
         // }
 
         cache_invalidate(caddr);
@@ -1685,14 +1703,16 @@ void freecursive_access(int addr, char type){
           if (stash_contain(s.addr))
           {
             printf("ERROR: freecursive: block %d already in stash!\n", s.addr);
-            exit(1);
+            print_oram_stats();
+exit(1);
           }
           else
           {
             si = add_to_stash(s);
             if(si == -1){
             printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
-            exit(1);
+            print_oram_stats();
+exit(1);
             }
             
           }
@@ -1708,7 +1728,8 @@ void freecursive_access(int addr, char type){
           if (index == -1)
           {
             printf("ERROR: freecursive: block not found in stash!\n");
-            exit(1);
+            print_oram_stats();
+exit(1);
           }
           
           remove_from_stash(index);
@@ -1773,7 +1794,8 @@ void test_oram(char * argv[]){
      printf("test oram: tif:  %s \n", argv[numc+2]);
      if (!tif[numc]) {
        printf("Missing input trace file %d.  Quitting. \n",numc);
-       exit(1);
+       print_oram_stats();
+exit(1);
      }
   }
 
@@ -1814,19 +1836,22 @@ void test_oram(char * argv[]){
             if (opertype[numc] == 'R') {
               if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
               printf("Panic.  Poor trace format.\n");
-              exit(1);
+              print_oram_stats();
+exit(1);
               }
             }
             else {
               if (opertype[numc] == 'W') {
                 if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
                   printf("Panic.  Poor trace format.\n");
-                  exit(1);
+                  print_oram_stats();
+exit(1);
                 }
               }
               else {
               printf("Panic.  Poor trace format.\n");
-              exit(1);
+              print_oram_stats();
+exit(1);
               }
             }
             if (cache_access(addr[numc], opertype[numc]) == HIT)
@@ -1853,7 +1878,8 @@ void test_oram(char * argv[]){
           }
           else {
             printf("Panic.  Poor trace format.\n");
-            exit(1);
+            print_oram_stats();
+exit(1);
           }
         
         }
@@ -1869,25 +1895,29 @@ void test_oram(char * argv[]){
 		  if (opertype[numc] == 'R') {
 		    if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
 		      printf("Panic.  Poor trace format.\n");
-		      exit(1);
+		      print_oram_stats();
+exit(1);
 		    }
 		  }
 		  else {
 		    if (opertype[numc] == 'W') {
 		      if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
 		        printf("Panic.  Poor trace format.\n");
-		        exit(1);
+		        print_oram_stats();
+exit(1);
 		      }
 		    }
 		    else {
 		      printf("Panic.  Poor trace format.\n");
-		      exit(1);
+		      print_oram_stats();
+exit(1);
 		    }
 		  }
 		}
 		else {
 		  printf("Panic.  Poor trace format.\n");
-		  exit(1);
+		  print_oram_stats();
+exit(1);
 		}
 	      }
 		}
@@ -2225,7 +2255,8 @@ void rho_insert(int physical_address){
   {
     printf("ERROR: rho insert: block %d is not added to rho stash\n", addr);
     printf("ERROR: rho insert: rho stash ctr: %d\n", rho_stashctr);
-    exit(1);
+    print_oram_stats();
+exit(1);
   }
 
   
@@ -2266,7 +2297,8 @@ void rho_insert(int physical_address){
     {
       printf("ERROR: rho insert: block %d is not added to oram stash\n", victim);
       printf("ERROR: rho insert: oram stash ctr: %d\n", stashctr);
-      exit(1);
+      print_oram_stats();
+exit(1);
     }
   }
   
@@ -2330,7 +2362,8 @@ int buffer_index(int addr){
   if (index == -1)
   {
     printf("ERROR: buffer index: @ trace %d  block %d does not exist!\n", tracectr, addr);
-    exit(1);
+    print_oram_stats();
+exit(1);
   }
 
   return index;
@@ -2350,7 +2383,8 @@ int buffer_find_victim(){
   if (index == -1)
   {
     printf("ERROR: buffer find victim failed!\n");
-    exit(1);
+    print_oram_stats();
+exit(1);
   }
   
   return index;
@@ -2373,14 +2407,16 @@ void insert_buffer(int addr){
       if (stash_contain(s.addr))
       {
         printf("ERROR: insert buffer: block %d already in stash!\n", s.addr);
-        exit(1);
+        print_oram_stats();
+exit(1);
       }
       else
       {
         int vi = add_to_stash(s);
         if(vi == -1){
           printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
-          exit(1);
+          print_oram_stats();
+exit(1);
         }
         
       }
@@ -2403,14 +2439,16 @@ void insert_buffer(int addr){
       if (stash_contain(s.addr))
       {
         printf("ERROR: insert buffer: block %d already in stash!\n", s.addr);
-        exit(1);
+        print_oram_stats();
+exit(1);
       }
       else
       {
         int vi = add_to_stash(s);
         if(vi == -1){
           printf("ERROR: insert buffer: stash overflow!   @ %d\n", stashctr); 
-          exit(1);
+          print_oram_stats();
+exit(1);
         }
         
       }
@@ -2430,7 +2468,8 @@ void insert_buffer(int addr){
   if (si == -1)
   {
     printf("ERROR: insert buffer: block not found in stash!\n");
-    exit(1);
+    print_oram_stats();
+exit(1);
   }
   
   remove_from_stash(si);
@@ -2445,7 +2484,8 @@ void prefetch_access(int addr){
   if (label == -1)
   {
     printf("ERROR: prefetch access: block %d label not found in pos map!\n", addr);
-    exit(1);
+    print_oram_stats();
+exit(1);
   }
 
   switch_tree_to(ORAM);     // switch to oram tree 
@@ -2753,6 +2793,50 @@ void early_writeback(){
 
 }
 
+
+void print_oram_stats(){
+printf("\n\n\n\n............... ORAM Stats ...............\n\n");
+printf("Execution Time (s)       %f\n", cpu_time_used);
+printf("Total Cycles             %lld \n", CYCLE_VAL);
+printf("Trace Size               %d\n", tracectr);
+printf("Mem Cycles #             %lld\n", mem_clk);
+printf("Invoke Mem #             %d\n", invokectr);
+printf("ORAM Access #            %d\n", oramctr);
+printf("ORAM Dummy #             %d\n", dummyctr);
+printf("Pos1 Access #            %d\n", pos1_access);
+printf("Pos2 Access #            %d\n", pos2_access);
+printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
+printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
+printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
+printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
+printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
+printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
+printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
+printf("oramQ Size               %d\n", oramQ->size);
+printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
+printf("Bk Evict #               %d\n", bkctr);
+printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
+printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
+printf("Rho Access #             %d\n", rhoctr);
+printf("Rho  Dummy #             %d\n", rho_dummyctr);
+printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
+printf("Early WB #               %d\n", earlyctr);
+printf("Early WB Pointer #       %d\n", dirty_pointctr);
+printf("Cache Dirty #            %d\n", cache_dirty);
+printf("ptr fail #               %d\n", ptr_fail);
+printf("search fail #            %d\n", search_fail);
+printf("pin ctr #                %d\n", pinctr);
+printf("unpin ctr #              %d\n", unpinctr);
+printf("prefetch case #          %d\n", precase);
+printf("STT Cand #               %d\n", sttctr);
+printf("Stash leftover #         %d\n", stash_leftover);
+printf("Stash removed #          %d\n", stash_removed);
+printf("fill hit #               %d\n", fillhit);
+printf("fill miss #              %d\n", fillmiss);
+}
 
 // Mehrnoosh.
 

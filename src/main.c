@@ -54,10 +54,10 @@ long int period = 0;
 int periodctr = 0;
 int nonmemctr = 0;
 int roundprev = 0;
-double cpu_time_used = 0;
+// double cpu_time_used = 0;
 // int tracectr = 0;	// # lines read from the trace file 
-int hitctr = 0;		// # hits on llc
-int missctr = 0;	// # misses on llc
+// int hitctr = 0;		// # hits on llc
+// int missctr = 0;	// # misses on llc
 int evictifctr = 0;
 int invokectr_prev = 0;
 int oram_path_length = 0;	// # slots along each path of oram
@@ -69,7 +69,7 @@ int maxreq = 0;				// max number for reqctr that is determined based of effectiv
 // int nomem_cycle = 0;		// # cycles passed in a timing interval	~~~> to keep track of cycles no oram access shall be issued  
 
 long long int trace_clk = 0;
-long long int mem_clk = 0;
+// long long int mem_clk = 0;
 
 bool oram_just_invoked = false;		// a flag raised when the current req from oramq is the first request of an freecursive oram access (an invokation of invoke_oram func)
 bool still_same_access = false;		// a flag that raised and maintained until a single oram access is dequeued from oramq ~> for timing enabled

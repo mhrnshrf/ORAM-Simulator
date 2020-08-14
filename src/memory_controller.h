@@ -27,7 +27,7 @@
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
+#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 
@@ -207,6 +207,11 @@ extern int stash_removed;
 extern int fillhit;
 extern int fillmiss;
 
+double cpu_time_used;
+extern int missctr;
+extern int hitctr;
+extern long long int mem_clk;
+
 
 extern int PosMap[BLOCK];  
 
@@ -279,6 +284,7 @@ unsigned int byte_addr(long long int physical_addr);
 void handle_sigint(int sig);
 bool bk_evict_needed();
 int pos_calc(int addr, int degree);
+void print_oram_stats();
 
 // Mehrnoosh.
 
