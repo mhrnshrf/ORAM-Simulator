@@ -599,6 +599,7 @@ int main(int argc, char * argv[])
 
 	if (TIMEOUT_ENBALE && cpu_time_used >= TIMEOUT_THRESHOLD)
 	{
+		printf("WARNING: reached timeout!\n\n");
 		break;
 	}
 	
