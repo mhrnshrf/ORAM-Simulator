@@ -2219,7 +2219,7 @@ void rho_access(int addr, int label){
 
   write_path(label);
 
-  if (RHO_BK_EVICTION)
+  if (RHO_BK_EVICTION && bk_evict_needed())
   {
     background_eviction();  
   } 
