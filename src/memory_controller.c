@@ -1297,24 +1297,18 @@ bool stash_contain(int addr){
 void test_read_write(char * argv[]){
   gettimeofday(&start, NULL);
 
-  char newstr[64];
+  // char newstr[64];
 
-  FILE *tif; 
-  FILE *tifrep; 
-  int nonmemops;
-  char opertype;
-  long long int taddr;
-  long long int instrpc;
+  // FILE *tif; 
+  // FILE *tifrep; 
+  // int nonmemops;
+  // char opertype;
+  // long long int taddr;
+  // long long int instrpc;
 
-  // tif = (FILE **)malloc(sizeof(FILE *));
-  // tifrep = (FILE **)malloc(sizeof(FILE *));
-  // nonmemops = (int *)malloc(sizeof(int));
-  // opertype = (char *)malloc(sizeof(char));
-  // taddr = (long long int *)malloc(sizeof(long long int));
-  // instrpc = (long long int *)malloc(sizeof(long long int));
 
-  tif = fopen(argv[2], "r");
-  tifrep = fopen(argv[2], "r");
+  // tif = fopen(argv[2], "r");
+  // tifrep = fopen(argv[2], "r");
 
   int addr;
   int label;
@@ -1322,24 +1316,24 @@ void test_read_write(char * argv[]){
   for(int i = 0; i < 400000001; i++)
   {
     
-    if (fgets(newstr,64,tif)) {
-      if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
-        printf("Panic.  Poor trace format.\n");
-        exit(1);
-        }
-      addr = block_addr(byte_addr(taddr));
-    }
-    else if (fgets(newstr,64,tifrep)) {
-      if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
-        printf("Panic.  Poor trace format.\n");
-        exit(1);
-        }
-      addr = block_addr(byte_addr(taddr));
-    }
-    else
-    {
+    // if (fgets(newstr,64,tif)) {
+    //   if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+    //     printf("Panic.  Poor trace format.\n");
+    //     exit(1);
+    //     }
+    //   addr = block_addr(byte_addr(taddr));
+    // }
+    // else if (fgets(newstr,64,tifrep)) {
+    //   if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+    //     printf("Panic.  Poor trace format.\n");
+    //     exit(1);
+    //     }
+    //   addr = block_addr(byte_addr(taddr));
+    // }
+    // else
+    // {
       addr = rand() % BLOCK;
-    }
+    // }
 
     label = PosMap[addr];
   
