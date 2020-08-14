@@ -698,6 +698,8 @@ int main(int argc, char * argv[])
 			
 			nonmemops_timing[numc] = (mem_cycle) ? 0 : 1;					 // # non mem ops shall be issued next, in case of mem cycle it would be none
 			dummy_tick = (mem_tick && (nonmemops[numc] > 0))? true : false;	 // whether this cycle it's time to make a dummy access 
+			
+			
 
 			dummy_oram = dummy_tick && oram_tick;							// whether the dummy access should be oram dummy
 			dummy_rho = dummy_tick && rho_tick;								// whether the dummy access should be rho dummy
@@ -707,6 +709,13 @@ int main(int argc, char * argv[])
 				// if the current available access is not what it's supposed to be, make a dummy access instead
 				dummy_oram = (oram_tick && oramQ->head->tree != ORAM) || dummy_oram;
 				dummy_rho = (rho_tick && oramQ->head->tree != RHO) || dummy_rho;
+			}
+
+			//  bk eviction for timing
+			if (!rho_tick && BK_EVICTION && bk_evict_needed())
+			{
+				dummy_tick = true;
+				dummy_oram = true;
 			}
 			
 			// if (dummy_tick)
