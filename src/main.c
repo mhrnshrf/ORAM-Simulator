@@ -163,7 +163,9 @@ int main(int argc, char * argv[])
 	printf("L2 Latency    %d\n", L2_LATENCY);
 	printf("Mem Latency   %d\n", MAINMEM_LATENCY);
 	printf("Warmup Thld   %dm\n", (int)(WARMUP_THRESHOLD/pow(10,6)));
-	printf("Warmup Thld   %d (s)\n\n", TIMEOUT_THRESHOLD);
+	printf("Timeout Thld  %d (s)\n", TIMEOUT_THRESHOLD);
+	printf("Top Boundry   %d\n", TOP_BOUNDRY);
+	printf("Mid Boundry   %d\n\n", MID_BOUNDRY);
 
 	printf("....................................................\n");
 	printf("                  ORAM Config\n");
@@ -1478,6 +1480,9 @@ printf("Stash leftover #         %d\n", stash_leftover);
 printf("Stash removed #          %d\n", stash_removed);
 printf("fill hit #               %d\n", fillhit);
 printf("fill miss #              %d\n", fillmiss);
+printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
       
 // print_plb_stat();
 

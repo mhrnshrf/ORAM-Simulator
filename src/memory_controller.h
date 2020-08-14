@@ -11,14 +11,16 @@
 
 #include <math.h>
 // other simulation parameter
-#define TRACE_SIZE 4000000  // # addr read from trace file
-#define QUEUE_SIZE 1000     // oramq capacity
-#define PAGE_SIZE 4096      // page size in byte ~~~> 4KB
-#define L1_LATENCY 3        // L1 latency in terms of # cycles 
-#define L2_LATENCY 10       // L2 latency in terms of # cycles 
-#define MAINMEM_LATENCY 0       // L2 latency in terms of # cycles 
-#define WARMUP_THRESHOLD 3000000       // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
-#define TIMEOUT_THRESHOLD 4000       // time out threshold in seconds
+#define TRACE_SIZE 4000000          // # addr read from trace file
+#define QUEUE_SIZE 1000             // oramq capacity
+#define PAGE_SIZE 4096              // page size in byte ~~~> 4KB
+#define L1_LATENCY 3                // L1 latency in terms of # cycles 
+#define L2_LATENCY 10               // L2 latency in terms of # cycles 
+#define MAINMEM_LATENCY 0           // L2 latency in terms of # cycles 
+#define WARMUP_THRESHOLD 3000000    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
+#define TIMEOUT_THRESHOLD 4000      // time out threshold in seconds
+#define TOP_BOUNDRY 10              // top region tree boundry
+#define MID_BOUNDRY 20              // middle region tree boundry
 
 // enable/disable options config
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
@@ -27,12 +29,12 @@
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
-#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
+#define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
-#define TIMEOUT_ENBALE 1     // 0/1 flag to disable/enable finishing the program in case it get stuck
+#define TIMEOUT_ENBALE 0     // 0/1 flag to disable/enable finishing the program in case it get stuck
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -42,17 +44,11 @@
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
-// #define PLB_SIZE 1024     // size of plb (# entry)
-// #define OV_THRESHOLD   STASH_SIZE - Z*(LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
-// #define EMPTY_TOP VOLCANO_ENABLE ? 10 : 0   // # top empty levels ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 16   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
-// #define Z1 VOLCANO_ENABLE ? 0 : 4   // # slots per bucket upto L1
-// #define Z2 VOLCANO_ENABLE ? 2 : 4   // # slots per bucket upto L2
-// #define Z3 VOLCANO_ENABLE ? 3 : 4   // # slots per bucket upto L3
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree config
@@ -201,6 +197,11 @@ extern int ptr_fail;
 extern int search_fail;
 extern int precase;
 extern int sttctr;
+
+extern long long int topctr;
+extern long long int midctr;
+extern long long int botctr;
+
 
 extern long long int CYCLE_VAL;
 extern long long int cache_clk;

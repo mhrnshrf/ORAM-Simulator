@@ -43,6 +43,7 @@ long long int orig_cycle;
 int orig_thread; 
 int orig_instr; 
 long long int orig_pc;
+int oram_acc_addr;
 
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
@@ -150,6 +151,9 @@ int rho_hit = 0;  // # hits on rho lookup
 
 int dummyctr = 0;
 int rho_dummyctr = 0;
+long long int topctr = 0;
+long long int midctr = 0;
+long long int botctr = 0;
 
 struct timeval start, end, mid;
 long int timeavg = 0;
@@ -865,6 +869,22 @@ void read_path(int label){
         {
           if(GlobTree[index].slot[j].isReal)
           {
+            if (GlobTree[index].slot[j].addr == oram_acc_addr)
+            {
+              if (i <= TOP_BOUNDRY)
+              {
+                topctr++;
+              }
+              else if (i <= MID_BOUNDRY)
+              {
+                midctr++;
+              }
+              else
+              {
+                botctr++;
+              }
+            }
+            
             
             if(add_to_stash(GlobTree[index].slot[j]) != -1)
             {
@@ -1479,6 +1499,8 @@ void free_stash(){
 void oram_access(int addr){
   oramctr++;
   stash_dist[stashctr]++;
+
+  oram_acc_addr = addr;
 
   int label = PosMap[addr];
   if (label == -1)
