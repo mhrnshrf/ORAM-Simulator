@@ -653,6 +653,8 @@ void oram_init_path(){
   switch_tree_to(ORAM);
 
   switch_sim_enable_to(true);
+  printf("oram init path done.\n");
+  fflush(stdout);
 }
 
 void print_count_level(){

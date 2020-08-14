@@ -300,15 +300,13 @@ int main(int argc, char * argv[])
 
 	rho_alloc();
 
-	
-	oram_init();
-	// oram_init_path();
-
 	if (SNAPSHOT_ENABLE)
 	{
+		oram_init_path();
 		take_snapshot(argv);
 	}
 	
+	oram_init();
 
 
 	// switch_enqueue_to(HEAD);
