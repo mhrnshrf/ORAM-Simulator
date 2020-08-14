@@ -198,6 +198,7 @@ int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var = POS2;
+bool SIM_ENABLE_VAR = true;
 
 int set_start = 0;
 int way_start = 0;
@@ -488,6 +489,10 @@ void switch_enqueue_to(EnqueueType enqueue){
   ENQUEUE_VAR = enqueue;
 }
 
+
+void switch_sim_enable_to(bool tf){
+  SIM_ENABLE_VAR = tf;
+}
 /***********************
   Utility Functions
 ************************/
@@ -595,17 +600,7 @@ void oram_alloc(){
 void oram_init(){
   for(int i = 0; i < BLOCK; i++)
   {
-    
-    // PosMap[i].addr = i;
-
-
     PosMap[i] =  assign_a_path(i);
-    // if (i == 0)
-    // {
-    //   printf("oram init:  Posmap[%d]: %d\n", i, PosMap[i]);
-    // }
-    
-
   }
 
   // initialize subtree addressing for oram tree
@@ -622,6 +617,42 @@ void oram_init(){
   }
   switch_tree_to(ORAM);
   
+}
+
+
+void oram_init_path(){
+  switch_sim_enable_to(false);
+
+  for(int i = 0; i < BLOCK; i++)
+  {
+    int label = rand() % PATH;
+    PosMap[i] = label;
+    Slot s = {.addr = i , .label = PosMap[i], .isReal = true, .isData = false};
+    add_to_stash(s);
+
+
+    read_path(label);
+    remap_block(i);
+    write_path(label);
+  }
+
+
+
+    // initialize subtree addressing for oram tree
+  for (int i = 0; i < NODE; i++)
+  {
+    SubMap[i] = index_to_addr(i);
+  }
+
+  // initialize subtree addressing for rho tree
+  switch_tree_to(RHO);
+  for (int i = 0; i < RHO_NODE; i++)
+  {
+    RhoSubMap[i] = index_to_addr(i);
+  }
+  switch_tree_to(ORAM);
+
+  switch_sim_enable_to(true);
 }
 
 void print_count_level(){
@@ -803,7 +834,7 @@ void read_path(int label){
       int index = calc_index(label, i);
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
-        if (i >= TOP_CACHE_VAR)
+        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
@@ -926,7 +957,7 @@ void write_path(int label){
 
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
-        if (i >= TOP_CACHE_VAR)
+        if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
         {
           addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
           insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
@@ -1305,21 +1336,21 @@ bool stash_contain(int addr){
   return false;
 }
 
-void test_read_write(char * argv[]){
-  gettimeofday(&start, NULL);
+void take_snapshot(char * argv[]){
+  switch_sim_enable_to(false);
 
-  // char newstr[64];
+  char newstr[64];
 
-  // FILE *tif; 
-  // FILE *tifrep; 
-  // int nonmemops;
-  // char opertype;
-  // long long int taddr;
-  // long long int instrpc;
+  FILE *tif; 
+  FILE *tifrep; 
+  int nonmemops;
+  char opertype;
+  long long int taddr;
+  long long int instrpc;
 
 
-  // tif = fopen(argv[2], "r");
-  // tifrep = fopen(argv[2], "r");
+  tif = fopen(argv[2], "r");
+  tifrep = fopen(argv[2], "r");
 
   int addr;
   int label;
@@ -1327,38 +1358,29 @@ void test_read_write(char * argv[]){
   for(int i = 0; i < 400000001; i++)
   {
     
-    // if (fgets(newstr,64,tif)) {
-    //   if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
-    //     printf("Panic.  Poor trace format.\n");
-    //     print_oram_stats();
-// exit(1);
-    //     }
-    //   addr = block_addr(byte_addr(taddr));
-    // }
-    // else if (fgets(newstr,64,tifrep)) {
-    //   if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
-    //     printf("Panic.  Poor trace format.\n");
-    //     print_oram_stats();
-// exit(1);
-    //     }
-    //   addr = block_addr(byte_addr(taddr));
-    // }
-    // else
-    // {
+    if (fgets(newstr,64,tif)) {
+      if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+        printf("Panic.  Poor trace format.\n");
+        print_oram_stats();
+        exit(1);
+        }
+      addr = block_addr(byte_addr(taddr));
+    }
+    else if (fgets(newstr,64,tifrep)) {
+      if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+        printf("Panic.  Poor trace format.\n");
+        print_oram_stats();
+        exit(1);
+        }
+      addr = block_addr(byte_addr(taddr));
+    }
+    else
+    {
       addr = rand() % BLOCK;
-    // }
+    }
 
     label = PosMap[addr];
   
-
-
-
-    // if (i == 0 || i == 4000000 || i == 8000000 || i == 20000000 || i == 100000000 || i == 150000000 || i == 200000000 || i == 300000000 || i == 350000000 || i == 400000000  )
-    // {
-    //   printf("%dm\n\n",(int)(i/1000000));
-    //   print_count_level();
-    //   printf("\n\n\n\n");
-    // }
 
     if (i <= 10000000 )
     {
@@ -1403,13 +1425,6 @@ void test_read_write(char * argv[]){
 
     stash_dist[stashctr]++;
 
-    
-
-
-    // printf("stashctr: %d\n", stashctr);
-    // count_tree();
-
-
     if (label == -1)
     {
       printf("ERROR: block label not found in pos map!\n");
@@ -1424,36 +1439,21 @@ void test_read_write(char * argv[]){
 
     write_path(label);
 
-    // gettimeofday(&mid, NULL);
-    // duration =  ((mid.tv_sec * 1000000 + mid.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-    // timeavg_mid = (timeavg_mid*i + duration)/(i+1);
-    // printf("mid: %f ms\n", (double)timeavg_mid/1000);
     
     if (bk_evict_needed())
     {
       printf("bk evict needed @ stash %d\n", stashctr);
     } 
 
-
     
-    gettimeofday(&end, NULL);
-    duration =  ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-    // timesum = duration/1000000;
-    // timeavg = (timeavg*i + duration)/(i+1);
-    // printf("end: %f ms\n", (double)timeavg/1000);
     fflush(stdout);
 
 
   }
 
-  // for (int i = 0; i < STASH_SIZE+1; i++)
-  // {
-  //   printf("%d\n",stash_dist[i]);
-  // }
-  // printf("bk evict #: %d\n", bkctr);
-  // printf("bk evict rate: %f\n", (double)bkctr/TRACE_SIZE);
   printf("finished.\n");
-  
+  switch_sim_enable_to(true);
+  exit(0);
 
 }
 

@@ -300,10 +300,15 @@ int main(int argc, char * argv[])
 
 	rho_alloc();
 
-	oram_init();
+	// oram_init();
+	oram_init_path();
 
-	// test_read_write(argv);
-	// exit(0);
+	if (SNAPSHOT_ENABLE)
+	{
+		take_snapshot(argv);
+	}
+	
+
 
 	// switch_enqueue_to(HEAD);
 	// test_queue();
@@ -712,7 +717,7 @@ int main(int argc, char * argv[])
 			}
 
 			//  bk eviction for timing
-			if (!rho_tick && BK_EVICTION && bk_evict_needed())
+			if (mem_tick && !rho_tick && BK_EVICTION && bk_evict_needed())
 			{
 				dummy_tick = true;
 				dummy_oram = true;

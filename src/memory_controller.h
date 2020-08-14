@@ -22,7 +22,7 @@
 // enable/disable options config
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE 1         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE 0         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
@@ -30,6 +30,7 @@
 #define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
+#define SNAPSHOT_ENABLE 1    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 
 
 // oram config
@@ -230,7 +231,7 @@ void background_eviction();
 void count_tree();
 void init_trace();
 void print_count_level();
-void test_read_write(char * argv[]);
+void take_snapshot(char * argv[]);
 void read_path(int label);
 void write_path(int label);
 void remap_block(int addr);
@@ -285,6 +286,8 @@ void handle_sigint(int sig);
 bool bk_evict_needed();
 int pos_calc(int addr, int degree);
 void print_oram_stats();
+void switch_sim_enable_to(bool tf);
+void oram_init_path();
 
 // Mehrnoosh.
 
