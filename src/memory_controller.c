@@ -111,7 +111,7 @@ typedef struct RhoBucket{
 RhoBucket RhoTree[RHO_NODE];      // rho tree
 int TagArray[RHO_SET][RHO_WAY];         // rho postion map that store tags ~~~> pararell to tag array label
 int TagArrayLabel[RHO_SET][RHO_WAY];     // rho postion map that store the corresponding label~~~>  parallel to tag array
-char TagArrayLRU[RHO_SET][RHO_WAY];      // rho lru policiy for eviction ~~~>  parallel to tag array
+long long int TagArrayLRU[RHO_SET][RHO_WAY];      // rho lru policiy for eviction ~~~>  parallel to tag array
 Slot RhoStash[RHO_STASH_SIZE];       // rho stash
 int RhoSubMap[NODE];              // rho subtree address map
 
@@ -2144,7 +2144,7 @@ int tag_array_find_spot(unsigned int index){
 
 int tag_array_find_victim(unsigned int index) {
     int victim = -1;
-    char min = RHO_WAY;
+    long long int min = CYCLE_VAL;
     for (unsigned int j = 0; j < RHO_WAY; j++)
     {
         if (TagArrayLRU[index][j] < min)
@@ -2158,19 +2158,20 @@ int tag_array_find_victim(unsigned int index) {
 
 
 void tag_array_update_LRU(unsigned int index, unsigned int way){
-    if (TagArrayLRU[index][way] >= RHO_WAY-1)
-    {
-        TagArrayLRU[index][way] = 0;
-    }
-    else
-    {
-        TagArrayLRU[index][way]++;
-    } 
+  TagArrayLRU[index][way] = CYCLE_VAL;
+    // if (TagArrayLRU[index][way] >= RHO_WAY-1)
+    // {
+    //     TagArrayLRU[index][way] = 0;
+    // }
+    // else
+    // {
+    //     TagArrayLRU[index][way]++;
+    // } 
 }
 
 void tag_array_reset_LRU(unsigned int index, unsigned int way){
-    TagArrayLRU[index][way] = 1;
-
+  TagArrayLRU[index][way] = CYCLE_VAL;
+    // TagArrayLRU[index][way] = 1;
 }
 
 
