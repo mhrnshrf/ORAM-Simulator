@@ -139,12 +139,12 @@ int main(int argc, char * argv[])
 	printf("\n....................................................\n");
 	printf("                     Options\n");
 	printf("....................................................\n");
+	printf("Cache          %s\n", CACHE_ENABLE?"Enabled":"No" );
+	printf("Subtree        %s\n", SUBTREE_ENABLE?"Enabled":"No" );
 	printf("Volcano        %s\n", VOLCANO_ENABLE?"Enabled":"No" );
 	printf("STT            %s\n", STT_ENABLE?"Enabled":"No" );
 	printf("STL            %s\n", STL_ENABLE?"Enabled":"No" );
-	printf("Cache          %s\n", CACHE_ENABLE?"Enabled":"No" );
 	printf("Write Bypass   %s\n", WRITE_BYPASS?"Enabled":"No" );
-	printf("Subtree        %s\n", SUBTREE_ENABLE?"Enabled":"No" );
 	printf("Rho            %s\n", RHO_ENABLE?"Enabled":"No" );
 	printf("Timing         %s\n", TIMING_ENABLE?"Enabled":"No" );
 	printf("Prefetch       %s\n", PREFETCH_ENABLE?"Enabled":"No" );

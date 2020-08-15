@@ -18,7 +18,7 @@
 #define L2_LATENCY 10               // L2 latency in terms of # cycles 
 #define MAINMEM_LATENCY 0           // L2 latency in terms of # cycles 
 #define WARMUP_THRESHOLD 3000000    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
-#define TIMEOUT_THRESHOLD 2000      // time out threshold in seconds
+#define TIMEOUT_THRESHOLD 3000      // time out threshold in seconds
 #define TOP_BOUNDRY 10              // top region tree boundry
 #define MID_BOUNDRY 20              // middle region tree boundry
 
