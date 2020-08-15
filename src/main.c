@@ -607,6 +607,7 @@ int main(int argc, char * argv[])
 	gettimeofday(&sday, NULL);
 
 	
+	
 	// if ((tracectr % 1000 == 0) /*&& tracectr > 9000 && tracectr != roundprev*/ )
 	// {
 	// 	// printf("\n...........................Partial Stat..............................\n");

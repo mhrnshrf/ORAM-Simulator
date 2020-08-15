@@ -1,7 +1,7 @@
 #!/bin/bash
 CONFIGFILE="$1"
 LOGNAME="$2"
-git reset --hard HEAD; git pull; rm bin/usimm; cd src; make; cd ..; 
+cd ../ORAM-Simulator; git reset --hard HEAD; git pull; rm bin/usimm; cd src; make; cd ..; 
 #bin/usimm input/"$CONFIGFILE.cfg" ../oram/trace/perlbench  > ../oram/log/"$LOGNAME-perlbench.txt" &
 bin/usimm input/"$CONFIGFILE.cfg" ../oram/trace/gcc  > ../oram/log/"$LOGNAME-gcc.txt" &
 bin/usimm input/"$CONFIGFILE.cfg" ../oram/trace/mcf  > ../oram/log/"$LOGNAME-mcf.txt" &
