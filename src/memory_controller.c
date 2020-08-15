@@ -2243,10 +2243,10 @@ void rho_access(int addr, int label){
 
   write_path(label);
 
-  // if (!TIMING_ENABLE && RHO_BK_EVICTION && bk_evict_needed())
-  // {
-  //   background_eviction();  
-  // } 
+  if (RHO_BK_EVICTION && bk_evict_needed())
+  {
+    background_eviction();  
+  } 
 
 }
 

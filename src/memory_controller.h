@@ -29,8 +29,8 @@
 #define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
 #define STL_ENABLE 0         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
-#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
+#define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
+#define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
@@ -44,7 +44,7 @@
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
-#define BK_EVICTION 0   // 0/1 flag to disable/enable background eviction
+#define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 16   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
@@ -62,7 +62,7 @@
 #define RHO_LEVEL 19    // # levels in rho
 #define RHO_Z 2  // # slots per bucket in rho
 #define RHO_OV_THRESHOLD   RHO_STASH_SIZE - RHO_Z*(RHO_LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
-#define RHO_BK_EVICTION 0   // 0/1 flag to disable/enable background eviction in rho
+#define RHO_BK_EVICTION 1   // 0/1 flag to disable/enable background eviction in rho
 #define RHO_L1 9  // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define RHO_L2 12   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define RHO_L3 14   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
@@ -75,7 +75,7 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 300   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 500   // # cycles after each one oram access is initiated either real or dummy one
 
 
 // prefetching config
@@ -290,7 +290,6 @@ int pos_calc(int addr, int degree);
 void print_oram_stats();
 void switch_sim_enable_to(bool tf);
 void oram_init_path();
-void switch_tree_to(TreeType tree);
 
 // Mehrnoosh.
 
