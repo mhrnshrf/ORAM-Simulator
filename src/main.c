@@ -607,7 +607,7 @@ int main(int argc, char * argv[])
 	gettimeofday(&sday, NULL);
 
 	
-	
+
 	// if ((tracectr % 1000 == 0) /*&& tracectr > 9000 && tracectr != roundprev*/ )
 	// {
 	// 	// printf("\n...........................Partial Stat..............................\n");
@@ -734,6 +734,17 @@ int main(int argc, char * argv[])
 				dummy_tick = true;
 				dummy_oram = true;
 			}
+			else if(rho_tick)
+			{
+				switch_tree_to(RHO);
+				if (RHO_BK_EVICTION && bk_evict_needed())
+				{
+					dummy_tick = true;
+					dummy_rho = true;
+				}
+				switch_tree_to(ORAM);
+			}
+			
 			
 			// if (dummy_tick)
 			// {
@@ -881,10 +892,23 @@ int main(int argc, char * argv[])
 
 		if (oramQ->size == 0)
 		{
-			if (!TIMING_ENABLE && BK_EVICTION && bk_evict_needed())
+			if (!TIMING_ENABLE)
 			{
-				background_eviction();
-				skip_invokation = true; 
+				if (BK_EVICTION && bk_evict_needed())
+				{
+					background_eviction();
+					skip_invokation = true; 
+				}
+				if (RHO_ENABLE)
+				{
+					switch_tree_to(RHO);
+					if (RHO_BK_EVICTION && bk_evict_needed())
+					{
+						background_eviction();
+						skip_invokation = true; 
+					}
+					switch_tree_to(ORAM);
+				}
 				
 			}
 			else if (TIMING_ENABLE && dummy_tick)
@@ -1181,11 +1205,23 @@ int main(int argc, char * argv[])
 		{
 			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
-			if (!TIMING_ENABLE && BK_EVICTION && bk_evict_needed())
+			if (!TIMING_ENABLE)
 			{
-				if (oramQ->size < QUEUE_SIZE - 2*oram_effective_pl)
+				if (oramQ->size < QUEUE_SIZE - 4*oram_effective_pl)
 				{
-					background_eviction();
+					if (BK_EVICTION && bk_evict_needed())
+					{
+						background_eviction();
+					}
+					if (RHO_ENABLE)
+					{
+						switch_tree_to(RHO);
+						if (RHO_BK_EVICTION && bk_evict_needed())
+						{
+							background_eviction();
+						}
+						switch_tree_to(ORAM);
+					}
 				}
 				
 			}
