@@ -29,8 +29,8 @@
 #define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
 #define STL_ENABLE 0         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
-#define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE 1      // 0/1 flag to disable/enable having timing channel security
+#define RHO_ENABLE 1         // 0/1 flag to disable/enable having rho
+#define TIMING_ENABLE 0      // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
@@ -111,7 +111,7 @@ enum{
   RHO_SLOT = RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1)),  // # free slots in rho
   RHO_BLOCK = (int)((long long int)floor(U*(RHO_Z1*((long long int)pow(2,RHO_L1+1)-1) + RHO_Z2*((long long int)pow(2,RHO_L2+1)-(long long int)pow(2,RHO_L1+1)) + RHO_Z3*((long long int)pow(2,RHO_L3+1)-(long long int)pow(2,RHO_L2+1)) + RHO_Z*((long long int)pow(2,RHO_LEVEL)-(long long int)pow(2,RHO_L3+1))))),  // # valid blocks in rho
   // RHO_SET = (int) ceil(RHO_BLOCK/10),
-  RHO_SET = 16000,
+  RHO_SET = 4000,
 };
 
 
