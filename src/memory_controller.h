@@ -18,7 +18,7 @@
 #define L2_LATENCY 10               // L2 latency in terms of # cycles 
 #define MAINMEM_LATENCY 0           // L2 latency in terms of # cycles 
 #define WARMUP_THRESHOLD 3000000    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
-#define TIMEOUT_THRESHOLD 6000      // time out threshold in seconds
+#define TIMEOUT_THRESHOLD 7000      // time out threshold in seconds
 #define TOP_BOUNDRY 10              // top region tree boundry
 #define MID_BOUNDRY 20              // middle region tree boundry
 
@@ -26,7 +26,7 @@
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
-#define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
+#define STT_ENABLE 1         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
 #define STL_ENABLE 1         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
@@ -47,7 +47,7 @@
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 16   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L2 13   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
