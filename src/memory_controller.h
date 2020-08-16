@@ -27,13 +27,13 @@
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE 0         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE 1         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 0     // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
-#define SNAPSHOT_ENABLE 1    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
+#define SNAPSHOT_ENABLE 0    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 #define TIMEOUT_ENBALE 0     // 0/1 flag to disable/enable finishing the program in case it get stuck
 
 
@@ -48,7 +48,7 @@
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 13   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L2 14   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
