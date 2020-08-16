@@ -32,7 +32,7 @@
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1     // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
-#define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
+#define EARLY_ENABLE 1       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 #define TIMEOUT_ENBALE 1     // 0/1 flag to disable/enable finishing the program in case it get stuck
 
@@ -76,7 +76,7 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 100   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 1000   // # cycles after each one oram access is initiated either real or dummy one
 
 
 // prefetching config
