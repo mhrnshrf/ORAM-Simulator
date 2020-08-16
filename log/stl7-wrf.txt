@@ -17,7 +17,7 @@ Timing         No
 Prefetch       No
 Early WB       No
 Snapshot       No
-Timeout        Enabled
+Timeout        No
 
 ....................................................
              Simulation Parameters
@@ -29,7 +29,7 @@ L1 Latency    3
 L2 Latency    10
 Mem Latency   0
 Warmup Thld   3m
-Timeout Thld  6000 (s)
+Timeout Thld  7000 (s)
 Top Boundry   10
 Mid Boundry   20
 
@@ -294,7 +294,7 @@ Energy Delay product (EDP) = 3.804115295 J.s
 
 ............... ORAM Stats ...............
 
-Execution Time (s)       2199.000000
+Execution Time (s)       2244.940000
 Total Cycles             1271447652 
 Trace Size               4000004
 Mem Cycles #             0
