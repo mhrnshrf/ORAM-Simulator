@@ -1,0 +1,33 @@
+			else if(rho_tick)
+			{
+				switch_tree_to(RHO);
+				if (RHO_BK_EVICTION && bk_evict_needed())
+				{
+					dummy_tick = true;
+					dummy_rho = true;
+				}
+				switch_tree_to(ORAM);
+				
+			}
+			
+			
+			
+						if (!TIMING_ENABLE)
+			{
+				if (BK_EVICTION && bk_evict_needed())
+				{
+					background_eviction();
+					skip_invokation = true; 
+				}
+				if (RHO_ENABLE)
+				{
+					switch_tree_to(RHO);
+					if (RHO_BK_EVICTION && bk_evict_needed())
+					{
+						background_eviction();
+						skip_invokation = true; 
+					}
+					switch_tree_to(ORAM);
+				}
+				
+			}
