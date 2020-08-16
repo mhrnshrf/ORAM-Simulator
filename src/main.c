@@ -82,6 +82,7 @@ bool dummy_oram = false;			// a flag to indicate whether at this cycle a dummy o
 bool dummy_rho = false;				// a flag to indicate whether at this cycle a dummy rho access should be made ~> for timing enabled
 bool skip_invokation = false;		// a flag to indicate whether oram invokation should be skipped, it is raised at dummy tick ~> for timing enabled
 bool dummy_already_made = false;	// a flag to indicate whether a dummy access has already been made ~> for timing enabled
+bool bk_already_made = false;	// a flag to indicate whether a bk evict access has already been made ~> for bk evict enabled
 
 int curr_access = -3; 	// the id of current access (oram or rho, real or dummy)
 
@@ -884,7 +885,7 @@ int main(int argc, char * argv[])
 			{
 				background_eviction();
 				skip_invokation = true; 
-				
+				bk_already_made = true;
 			}
 			else if (TIMING_ENABLE && dummy_tick)
 			{
@@ -1180,7 +1181,7 @@ int main(int argc, char * argv[])
 		{
 			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
-			if ((!TIMING_ENABLE || (TIMING_ENABLE && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed())
+			if ((!TIMING_ENABLE || (TIMING_ENABLE && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed() && !bk_already_made)
 			{
 				if (oramQ->size < QUEUE_SIZE - 2*oram_effective_pl)
 				{
@@ -1215,6 +1216,8 @@ int main(int argc, char * argv[])
 			{
 				dummy_already_made = false;
 			}
+
+			bk_already_made = false;
 			
 
 			if (!still_same_access)
