@@ -36,6 +36,7 @@
 #define SNAPSHOT_ENABLE 1    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 #define TIMEOUT_ENBALE 0     // 0/1 flag to disable/enable finishing the program in case it get stuck
 
+
 // oram config
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
