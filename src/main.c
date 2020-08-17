@@ -1561,8 +1561,9 @@ printf("fill miss #              %d\n", fillmiss);
 printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
 printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
 printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
-printf("Read MPKI                %f\n", rmpki);
-printf("Write MPKI               %f\n", wmpki);
+printf("R ctr                    %lld\n", rctr);
+printf("W ctr                    %lld\n", wctr);
+printf("Inst ctr                 %lld\n", instctr);
       
 // print_plb_stat();
 
