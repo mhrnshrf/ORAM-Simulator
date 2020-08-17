@@ -101,6 +101,8 @@ long long int instctr= 0;
 double rmpki;
 double wmpki;
 
+int TIMING_INTERVAL;
+
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
   bool valid;
@@ -434,30 +436,42 @@ char bench[20];
 	 if (strcmp(bench, "deepsjeng") == 0)
 	 {
 		 endpoint = 3248000;
+		 TIMING_INTERVAL = T2_INTERVAL;
+	 }
+	 else if (strcmp(bench, "bwaves") == 0)
+	 {
+		 endpoint = TRACE_SIZE;
+		 TIMING_INTERVAL = T2_INTERVAL;
 	 }
 	 else if (strcmp(bench, "lbm") == 0)
 	 {
 		 endpoint = 3492000;
+		 TIMING_INTERVAL = T2_INTERVAL;
 	 }
 	 else if (strcmp(bench, "cam4") == 0)
 	 {
 		 endpoint = 3382000;
+		 TIMING_INTERVAL = T2_INTERVAL;
 	 }
 	 else if (strcmp(bench, "imagick") == 0)
 	 {
 		 endpoint = 3620000;
+		 TIMING_INTERVAL = T1_INTERVAL;
 	 }
 	 else if (strcmp(bench, "fotonik3d") == 0)
 	 {
 		 endpoint = 3327000;
+		 TIMING_INTERVAL = T1_INTERVAL;
 	 }
 	 else if (strcmp(bench, "roms") == 0)
 	 {
 		 endpoint = 3772000;
+		 TIMING_INTERVAL = T2_INTERVAL;
 	 }
 	 else
 	 {
 		 endpoint = TRACE_SIZE;
+		 TIMING_INTERVAL = T1_INTERVAL;
 	 }
 	 
 	 
