@@ -94,6 +94,13 @@ int consec_dumctr = 0;
 
 int endpoint;
 
+long long int rctr = 0;
+long long int wctr = 0;
+long long int instctr= 0;
+
+double rmpki;
+double wmpki;
+
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
   bool valid;
@@ -1000,6 +1007,8 @@ char bench[20];
 								tracectr++;
 							if (opertype[numc] == 'R') {
 								if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
+									rctr++;
+									instctr += nonmemops[numc] + 1;
 								printf("Panic.  Poor trace format.\n");
 								return -4;
 								}
@@ -1007,6 +1016,8 @@ char bench[20];
 							else {
 								if (opertype[numc] == 'W') {
 									// reset_dirty_search();
+									wctr++;
+									instctr += nonmemops[numc] + 1;
 									if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
 										printf("Panic.  Poor trace format.\n");
 										return -3;
@@ -1463,7 +1474,7 @@ char bench[20];
 
 
 
-// printf("\nPrefetch #               %d\n", prefetchctr);
+// printf("\nPrefetch #             %d\n", prefetchctr);
 // printf("Pref pos1 #              %d\n", pos1ctr);
 // printf("Pref pos2 #              %d\n", pos2ctr);
 // printf("Pref pos1 hit            %f%%\n", 100*(double)pos1hit/pos1acc_ctr);
@@ -1488,6 +1499,9 @@ char bench[20];
 // printf("Stash pos1 #             %d\n", stashpos1);
 // printf("Buffer pos1 #            %d\n", bufferpos1);
 // printf("Nonmemops #              %d\n\n", nonmemctr);
+
+rmpki = (1000*rctr)/instctr;
+wmpki = (1000*wctr)/instctr;
 
 printf("\n\n\n\n............... ORAM Stats ...............\n\n");
 printf("Execution Time (s)       %f\n", cpu_time_used);
@@ -1533,6 +1547,8 @@ printf("fill miss #              %d\n", fillmiss);
 printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
 printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
 printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+printf("Read MPKI                %f\n", rmpki);
+printf("Write MPKI               %f\n", wmpki);
       
 // print_plb_stat();
 
