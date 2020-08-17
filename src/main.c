@@ -413,28 +413,38 @@ int main(int argc, char * argv[])
        printf("Missing input trace file %d.  Quitting. \n",numc);
        return -5;
      }
+	
+	char delim[] = "/";
+	char *ptr = strtok(argv[2], delim);
+	char bench[20];
 
-	 if (strcmp(argv[2], "deepsjeng") == 0)
+	while (ptr != NULL)
+	{
+		strcpy(bench, ptr);
+		ptr = strtok(NULL, delim);
+	}
+
+	 if (strcmp(bench, "deepsjeng") == 0)
 	 {
 		 endpoint = 3248000;
 	 }
-	 else if (strcmp(argv[2], "lbm") == 0)
+	 else if (strcmp(bench, "lbm") == 0)
 	 {
 		 endpoint = 3492000;
 	 }
-	 else if (strcmp(argv[2], "cam4") == 0)
+	 else if (strcmp(bench, "cam4") == 0)
 	 {
 		 endpoint = 3382000;
 	 }
-	 else if (strcmp(argv[2], "imagick") == 0)
+	 else if (strcmp(bench, "imagick") == 0)
 	 {
 		 endpoint = 3620000;
 	 }
-	 else if (strcmp(argv[2], "fotonik3d") == 0)
+	 else if (strcmp(bench, "fotonik3d") == 0)
 	 {
 		 endpoint = 3327000;
 	 }
-	 else if (strcmp(argv[2], "roms") == 0)
+	 else if (strcmp(bench, "roms") == 0)
 	 {
 		 endpoint = 3772000;
 	 }
