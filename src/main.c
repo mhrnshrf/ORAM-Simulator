@@ -593,7 +593,7 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE || oramctr >= (TRACE_SIZE - WARMUP_THRESHOLD) /*|| mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
+	if (tracectr >= TRACE_SIZE /* || oramctr >= (TRACE_SIZE - WARMUP_THRESHOLD) || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
 	{
 		break;
 	}
@@ -944,6 +944,7 @@ int main(int argc, char * argv[])
 							// printf("main: evicted if addr: %lld\n", addr[numc]);
 							if (tracectr >= WARMUP_THRESHOLD)
 							{
+								tracectr++;
 								break;
 							}
 							
