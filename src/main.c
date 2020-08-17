@@ -268,7 +268,9 @@ int main(int argc, char * argv[])
 	printf("                 Timing Config\n");
 	printf("....................................................\n");
 	printf("Timing Enable       %s\n", TIMING_ENABLE?"On":"Off");
-	printf("Timing Interval     %d cycles\n\n", TIMING_INTERVAL);
+	// printf("Timing Interval     %d cycles\n\n", TIMING_INTERVAL);
+	printf("T1 Interval         %d cycles\n", T1_INTERVAL);
+	printf("T2 Interval         %d cycles\n\n", T2_INTERVAL);
 
 	printf("\n....................................................\n");
 	printf("                 Prefetch Config\n");
@@ -646,8 +648,9 @@ char bench[20];
 
   printf("Starting simulation.\n");
 
-  printf("\nTrace      %s\n", bench);
-  printf("Endpoint   %d\n\n", endpoint);
+  printf("\nTrace         %s\n", bench);
+  printf("Endpoint        %d\n", endpoint);
+  printf("Timing Interval %d\n\n", TIMING_INTERVAL);
 	
 //   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
@@ -1020,9 +1023,9 @@ char bench[20];
 						if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
 								tracectr++;
 							if (opertype[numc] == 'R') {
+								rctr++;
+								instctr += nonmemops[numc] + 1;
 								if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-									rctr++;
-									instctr += nonmemops[numc] + 1;
 								printf("Panic.  Poor trace format.\n");
 								return -4;
 								}
@@ -1561,9 +1564,9 @@ printf("fill miss #              %d\n", fillmiss);
 printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
 printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
 printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
-printf("R ctr                    %lld\n", rctr);
-printf("W ctr                    %lld\n", wctr);
-printf("Inst ctr                 %lld\n", instctr);
+// printf("R ctr                    %lld\n", rctr);
+// printf("W ctr                    %lld\n", wctr);
+// printf("Inst ctr                 %lld\n", instctr);
       
 // print_plb_stat();
 
