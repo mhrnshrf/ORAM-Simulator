@@ -92,6 +92,7 @@ int fill_miss = 0;		// # miss on prefetch history table access
 int hit_nonmemops = 0;  // # nonmemops encountered during hit on llc
 int consec_dumctr = 0;
 
+int endpoint;
 
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
@@ -404,7 +405,8 @@ int main(int argc, char * argv[])
   shad_opertype = (char *)malloc(sizeof(char)*NUMCORES);
   shad_addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
   shad_instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
-  // Mehrnoosh.
+
+
   for (numc=0; numc < NUMCORES; numc++) {
      tif[numc] = fopen(argv[numc+2], "r");
      if (!tif[numc]) {
@@ -412,7 +414,38 @@ int main(int argc, char * argv[])
        return -5;
      }
 
-	// Mehrnoosh:
+	 if (strcmp(argv[2], "deepsjeng") == 0)
+	 {
+		 endpoint = 3248000;
+	 }
+	 else if (strcmp(argv[2], "lbm") == 0)
+	 {
+		 endpoint = 3492000;
+	 }
+	 else if (strcmp(argv[2], "cam4") == 0)
+	 {
+		 endpoint = 3382000;
+	 }
+	 else if (strcmp(argv[2], "imagick") == 0)
+	 {
+		 endpoint = 3620000;
+	 }
+	 else if (strcmp(argv[2], "fotonik3d") == 0)
+	 {
+		 endpoint = 3327000;
+	 }
+	 else if (strcmp(argv[2], "roms") == 0)
+	 {
+		 endpoint = 3772000;
+	 }
+	 else
+	 {
+		 endpoint = TRACE_SIZE;
+	 }
+	 
+	 
+
+
 	 shadtif[numc] = fopen(argv[numc+2], "r");
      if (!shadtif[numc]) {
        printf("Missing shadow input trace file %d.  Quitting. \n",numc);
@@ -593,7 +626,7 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE || ((missctr+evictctr) >= 2.5*(TRACE_SIZE - WARMUP_THRESHOLD)) /* || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
+	if (tracectr >= TRACE_SIZE || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
 	{
 		break;
 	}
