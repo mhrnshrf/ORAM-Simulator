@@ -58,6 +58,7 @@
 #define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
+
 // rho config
 #define RHO_STASH_SIZE 200  // size of rho stash
 #define RHO_LEVEL 19    // # levels in rho
