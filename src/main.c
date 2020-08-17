@@ -593,7 +593,7 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE || missctr+evictctr >= 2.5*(TRACE_SIZE - WARMUP_THRESHOLD) /* || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
+	if (tracectr >= TRACE_SIZE || ((missctr+evictctr) >= 2.5*(TRACE_SIZE - WARMUP_THRESHOLD)) /* || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
 	{
 		break;
 	}
