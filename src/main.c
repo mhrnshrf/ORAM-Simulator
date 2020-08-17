@@ -406,6 +406,7 @@ int main(int argc, char * argv[])
   shad_addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
   shad_instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
 
+char bench[20];
 
   for (numc=0; numc < NUMCORES; numc++) {
      tif[numc] = fopen(argv[numc+2], "r");
@@ -416,7 +417,6 @@ int main(int argc, char * argv[])
 	
 	char delim[] = "/";
 	char *ptr = strtok(argv[2], delim);
-	char bench[20];
 
 	while (ptr != NULL)
 	{
@@ -624,6 +624,9 @@ int main(int argc, char * argv[])
 
 
   printf("Starting simulation.\n");
+
+  printf("\nTrace      %s\n", bench);
+  printf("Endpoint   %d\n\n", endpoint);
 	
 //   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
