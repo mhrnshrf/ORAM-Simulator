@@ -76,7 +76,7 @@
 
 
 // timing channel security config
-#define TIMING_INTERVAL 1000   // # cycles after each one oram access is initiated either real or dummy one
+#define TIMING_INTERVAL 100   // # cycles after each one oram access is initiated either real or dummy one
 
 
 // prefetching config
