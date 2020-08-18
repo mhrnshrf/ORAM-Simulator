@@ -646,11 +646,11 @@ char bench[20];
   }
 
 
-  printf("Starting simulation.\n");
+  printf("Starting simulation.\n\n");
 
-  printf("\nTrace         %s\n", bench);
-  printf("Endpoint        %d\n", endpoint);
-  printf("Timing Interval %d\n\n", TIMING_INTERVAL);
+  printf("Trace            %s\n", bench);
+  printf("Endpoint         %d\n", endpoint);
+  printf("Timing Interval  %d\n\n", TIMING_INTERVAL);
 	
 //   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
