@@ -1520,6 +1520,7 @@ char bench[20];
 rmpki = (1000*rctr)/instctr;
 wmpki = (1000*wctr)/instctr;
 
+
 printf("\n\n\n\n............... ORAM Stats ...............\n\n");
 printf("Execution Time (s)       %f\n", cpu_time_used);
 printf("Total Cycles             %lld \n", CYCLE_VAL);
