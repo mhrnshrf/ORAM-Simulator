@@ -200,6 +200,7 @@ extern int ptr_fail;
 extern int search_fail;
 extern int precase;
 extern int sttctr;
+extern int stashctr;
 
 extern long long int topctr;
 extern long long int midctr;

@@ -225,7 +225,6 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 		// if needed to evict a block
 		if (victim != -1)
 		{
-            wctr++;
             unsigned int v = (unsigned int)victim;
 			fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, v,  ip, (double)(1000*wctr/(double)instctr));
             nonmemops = L2_LATENCY;
@@ -265,7 +264,6 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 		// if needed to evict a block
 		if (victim != -1)
 		{
-            wctr++;
             unsigned int v = (unsigned int)victim;
 			fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, v, ip, (double)(1000*wctr/(double)instctr));
             nonmemops = L2_LATENCY;

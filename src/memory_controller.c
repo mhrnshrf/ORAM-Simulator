@@ -2030,6 +2030,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   if (STT_ENABLE && TREE_VAR == ORAM)
   {
     free_stash();
+    printf("@> free stash: %d\n", stashctr);
   }
 }
 
