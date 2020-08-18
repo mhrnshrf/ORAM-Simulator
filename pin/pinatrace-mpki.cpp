@@ -227,12 +227,12 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 		{
             wctr++;
             unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, v,  ip, (double)(1000*wctr/instctr));
+			fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, v,  ip, (double)(1000*wctr/(double)instctr));
             nonmemops = L2_LATENCY;
 
 		}
         
-	    fprintf(trace,"%d R 0x%x %p  %f\n", nonmemops, addrval, ip, (double)(1000*rctr/instctr));
+	    fprintf(trace,"%d R 0x%x %p  %f\n", nonmemops, addrval, ip, (double)(1000*rctr/(double)instctr));
 
 	    nonmemops = 0;	
 	}
@@ -267,12 +267,12 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 		{
             wctr++;
             unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, v, ip, (double)(1000*wctr/instctr));
+			fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, v, ip, (double)(1000*wctr/(double)instctr));
             nonmemops = L2_LATENCY;
 		}
 
 
-	    fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, addrval, ip, (double)(1000*wctr/instctr));
+	    fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, addrval, ip, (double)(1000*wctr/(double)instctr));
 
 	    nonmemops = 0;	
 	}
