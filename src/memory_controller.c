@@ -1178,6 +1178,8 @@ void background_eviction(){
   write_path(label);
   switch_enqueue_to(TAIL);
 
+  // printf("@> bk evict  %d   %d\n", stashctr, tracectr);
+
 }
 
 // assign the block a new label and update in posmap and stash 
@@ -2030,7 +2032,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   if (STT_ENABLE && TREE_VAR == ORAM)
   {
     free_stash();
-    printf("@> free stash: %d\n", stashctr);
+    // printf("@> free stash: %d\n", stashctr);
   }
 }
 

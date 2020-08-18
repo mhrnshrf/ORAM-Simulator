@@ -803,7 +803,7 @@ char bench[20];
 			{
 				dummy_tick = true;
 				dummy_oram = true;
-				printf("@> mem tick  %d\n", stashctr);
+				// printf("@> mem tick  %d   trace %d\n", stashctr, tracectr);
 			}
 			
 			// if (dummy_tick)
