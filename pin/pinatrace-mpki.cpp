@@ -24,8 +24,8 @@
 #define NUM_WAY 2           // bytes ~~~> # way per set
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
-#define L1_LATENCY 3        // L1 latency in terms of # cycles 
-#define L2_LATENCY 10       // L2 latency in terms of # cycles 
+#define L1_LATENCY 0        // L1 latency in terms of # cycles 
+#define L2_LATENCY 0       // L2 latency in terms of # cycles 
 
 enum reqType {CREAD = 'R', CWRITE = 'W'};
 enum status {MISS = false, HIT = true};
@@ -201,6 +201,9 @@ FILE * trace;
 int nonmemops = 0;
 long long int access = 0;
 long long int hit = 0;
+long long int rctr = 0;
+long long int wctr = 0;
+long long int instctr = 0;
 
 // Print a memory read record
 VOID RecordMemRead(VOID * ip, VOID * addr)
@@ -216,18 +219,20 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 
 	if (!cache_access(addrval, 'R')) // miss
 	{
-	    // fprintf(trace,"%f\n", (double)100*hit/access);
-
+        rctr++;
+        instctr += nonmemops +1;
 		int victim = cache_fill(addrval, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
+            wctr++;
             unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
+			fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, v,  ip, (doube)(1000*wctr/instctr));
             nonmemops = L2_LATENCY;
+
 		}
         
-	    fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
+	    fprintf(trace,"%d R 0x%x %p  %f\n", nonmemops, addrval, ip, (doube)(1000*rctr/instctr));
 
 	    nonmemops = 0;	
 	}
@@ -252,19 +257,22 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 
 	if (!cache_access(addrval, 'W')) // miss
 	{
-	    // fprintf(trace,"%f\n", (double)100*hit/access);
+        wctr++;
+        instctr += nonmemops +1;
+
 
 		int victim = cache_fill(addrval, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
+            wctr++;
             unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v, ip);
+			fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, v, ip, (doube)(1000*wctr/instctr));
             nonmemops = L2_LATENCY;
 		}
 
 
-	    fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
+	    fprintf(trace,"%d W 0x%x %p  %f\n", nonmemops, addrval, ip, (doube)(1000*wctr/instctr));
 
 	    nonmemops = 0;	
 	}
