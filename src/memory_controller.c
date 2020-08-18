@@ -1178,6 +1178,8 @@ void background_eviction(){
   write_path(label);
   switch_enqueue_to(TAIL);
 
+  free_stash();
+
   // printf("@> bk evict  %d   %d\n", stashctr, tracectr);
 
 }

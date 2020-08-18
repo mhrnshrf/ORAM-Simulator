@@ -45,7 +45,7 @@
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
-#define BK_EVICTION 0   // 0/1 flag to disable/enable background eviction
+#define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
@@ -294,6 +294,7 @@ int pos_calc(int addr, int degree);
 void print_oram_stats();
 void switch_sim_enable_to(bool tf);
 void oram_init_path();
+void free_stash();
 
 // Mehrnoosh.
 
