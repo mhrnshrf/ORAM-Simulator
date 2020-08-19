@@ -1469,9 +1469,12 @@ void take_snapshot(char * argv[]){
     write_path(label);
 
     
-    if (bk_evict_needed())
+    while (BK_EVICTION && bk_evict_needed())
     {
-      printf("bk evict needed @ stash %d\n", stashctr);
+      // printf("bk evict needed @ stash %d\n", stashctr);
+      int randpath = rand() % PATH;
+      read_path(randpath);
+      write_path(randpath);
     } 
 
     
