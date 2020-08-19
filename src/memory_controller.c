@@ -634,27 +634,36 @@ void oram_init_path(){
     Slot s = {.addr = i , .label = PosMap[i], .isReal = true, .isData = false};
     add_to_stash(s);
 
-
     read_path(label);
     remap_block(i);
     write_path(label);
+
+    while (BK_EVICTION && bk_evict_needed())
+    {
+      // printf("\nbefore bk evict @ stash %d\n", stashctr);
+      int randpath = rand() % PATH;
+      read_path(randpath);
+      write_path(randpath);
+      // printf("after bk evict @ stash %d\n", stashctr);
+    } 
+
   }
 
 
 
-    // initialize subtree addressing for oram tree
-  for (int i = 0; i < NODE; i++)
-  {
-    SubMap[i] = index_to_addr(i);
-  }
+  //   // initialize subtree addressing for oram tree
+  // for (int i = 0; i < NODE; i++)
+  // {
+  //   SubMap[i] = index_to_addr(i);
+  // }
 
-  // initialize subtree addressing for rho tree
-  switch_tree_to(RHO);
-  for (int i = 0; i < RHO_NODE; i++)
-  {
-    RhoSubMap[i] = index_to_addr(i);
-  }
-  switch_tree_to(ORAM);
+  // // initialize subtree addressing for rho tree
+  // switch_tree_to(RHO);
+  // for (int i = 0; i < RHO_NODE; i++)
+  // {
+  //   RhoSubMap[i] = index_to_addr(i);
+  // }
+  // switch_tree_to(ORAM);
 
   switch_sim_enable_to(true);
   printf("oram init path done.\n");
@@ -1471,10 +1480,11 @@ void take_snapshot(char * argv[]){
     
     while (BK_EVICTION && bk_evict_needed())
     {
-      // printf("bk evict needed @ stash %d\n", stashctr);
+      // printf("\nbefore bk evict @ stash %d\n", stashctr);
       int randpath = rand() % PATH;
       read_path(randpath);
       write_path(randpath);
+      // printf("after bk evict @ stash %d\n", stashctr);
     } 
 
     
