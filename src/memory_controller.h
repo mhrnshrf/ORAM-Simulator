@@ -49,14 +49,14 @@
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 14   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L2 13   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree config
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
+#define NUM_CHANNELS_SUBTREE 4  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 // rho config
