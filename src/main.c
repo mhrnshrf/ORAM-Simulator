@@ -40,7 +40,6 @@ long long int total_time_done;
 float core_power=0;
 FILE **shadtif;  /* The handles to the trace input files. */
 
-
 // Mehrnoosh:
 #include <sys/time.h>
 #include <time.h>
@@ -103,6 +102,8 @@ double wmpki;
 
 int TIMING_INTERVAL;
 
+int path_access_latency = 0;
+double path_access_latency_avg = 0;
 // struct to keep info of one mem request that is issued from cahce rather than from trace file file
 typedef struct MemRequest{
   bool valid;
@@ -1301,6 +1302,7 @@ char bench[20];
 				curr_access = oramQ->head->oramid;
 				maxreq = (oramQ->head->tree == RHO) ? rho_effective_pl*2 : oram_effective_pl*2;
 				trace_clk++;
+				path_access_latency = CYCLE_VAL;
 				// printf("\nfetch:  req: %d   max: %d	oramq: %d, curr:%d\n", reqctr, maxreq, oramQ->size, curr_access);	
 			}
 			
@@ -1346,6 +1348,8 @@ char bench[20];
 			if (reqctr == maxreq-1)
 			{
 				still_same_access = false;
+				path_access_latency = CYCLE_VAL - path_access_latency;
+				path_access_latency_avg = ((double)path_access_latency+path_access_latency_avg*(oramctr+dummyctr-1))/(oramctr+dummyctr);
 				// printf("\ncurr access ended:  oramq: %d\n", oramQ->size);
 					
 			}
@@ -1566,6 +1570,7 @@ printf("fill miss #              %d\n", fillmiss);
 printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
 printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
 printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+printf("Path Latency Avg         %f\n", path_access_latency_avg);
 // printf("R ctr                    %lld\n", rctr);
 // printf("W ctr                    %lld\n", wctr);
 // printf("Inst ctr                 %lld\n", instctr);
