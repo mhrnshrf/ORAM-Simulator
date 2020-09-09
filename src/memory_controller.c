@@ -209,6 +209,8 @@ int way_start = 0;
 
 int dirty_pointctr = 0;
 
+int oram_effective_pl = 0;
+
 
 unsigned int byte_addr(long long int physical_addr){
   unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
@@ -843,15 +845,26 @@ void count_tree(){
 void read_path(int label){
 
     // printf("\nread path @ trace %d\n", tracectr);
+    int gi = -1;
 
     for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     {
       int index = calc_index(label, i);
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
+        gi++;
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+          {
+            int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
+            int i_prime = floor(gi_prime/Z) + 1 + L1;
+            int j_prime = gi_prime % Z;
+            int index_prime = calc_index(label, i_prime);
+            addr = SubMap[index_prime] + j_prime;
+          }
+          
           insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
         }
 
@@ -952,6 +965,8 @@ void write_path(int label){
 
     // printf("\nwrite path @ trace %d\n", tracectr);
   
+  int gi = -1;
+  
   for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
     int index = calc_index(label, i);
@@ -988,9 +1003,18 @@ void write_path(int label){
 
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
+        gi++;
         if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
         {
           addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+          {
+            int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
+            int i_prime = floor(gi_prime/Z) + 1 + L1;
+            int j_prime = gi_prime % Z;
+            int index_prime = calc_index(label, i_prime);
+            addr = SubMap[index_prime] + j_prime;
+          }
           insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
         }
 

@@ -27,13 +27,13 @@
 #define SUBTREE_ENABLE 1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define CACHE_ENABLE 1       // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE 0     // 0/1 flag to disable/enable having volcano idea both stt and stl
-#define STT_ENABLE 0         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE 0         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STT_ENABLE 1         // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
+#define STL_ENABLE 1         // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS 0       // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define RHO_ENABLE 0         // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE 1     // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0    // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
-#define EARLY_ENABLE 0       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
+#define EARLY_ENABLE 1       // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0    // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 
 
@@ -49,14 +49,14 @@
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 13   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
-#define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+#define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree config
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
+#define NUM_CHANNELS_SUBTREE 4  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 // rho config
@@ -95,8 +95,8 @@ enum{
   // main tree
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
   Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : 4,   // # slots per bucket upto L1
-  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 1 : 4,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : 4,   // # slots per bucket upto L3
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : 4,   // # slots per bucket upto L2
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : 4,   // # slots per bucket upto L3
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
@@ -222,6 +222,8 @@ extern long long int mem_clk;
 
 
 extern int PosMap[BLOCK];  
+
+extern int oram_effective_pl;
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
