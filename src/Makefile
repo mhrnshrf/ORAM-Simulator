@@ -5,7 +5,7 @@ OBJDIR = ../obj
 OBJS = $(OBJDIR)/main.o $(OBJDIR)/memory_controller.o $(OBJDIR)/scheduler.o $(OBJDIR)/cache.o $(OBJDIR)/prefetcher.o $(OBJDIR)/plb.o $(OBJDIR)/stt.o
 CC = gcc
 DEBUG = -g
-CFLAGS = -std=c99 -mcmodel=medium -Wall -c $(DEBUG) 
+CFLAGS = -std=c99 -mcmodel=large -Wall -c $(DEBUG) 
 LFLAGS = -Wall $(DEBUG) 
 
 
