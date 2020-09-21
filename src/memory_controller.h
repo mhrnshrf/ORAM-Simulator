@@ -39,12 +39,11 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 
 
-
 // oram config
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 8     // # slots per bucket
+#define Z 6     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
@@ -96,7 +95,7 @@
 // ring oram config
 #define RING_A 5
 #define RING_S 4
-#define RING_Z 4
+#define RING_Z 2
 
 
 enum{
