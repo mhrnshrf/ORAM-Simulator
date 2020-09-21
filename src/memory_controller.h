@@ -95,7 +95,7 @@
 // ring oram config
 #define RING_A 5
 #define RING_S 4
-#define RING_Z 4
+#define RING_Z 2
 
 
 enum{
