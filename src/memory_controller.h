@@ -39,6 +39,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 
 
+
 // oram config
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
