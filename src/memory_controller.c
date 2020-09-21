@@ -3039,6 +3039,11 @@ void ring_early_reshuffle(int label){
     {
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
+        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        {
+          int mem_addr = index*Z_VAR + j;
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+        }
         if(add_to_stash(GlobTree[index].slot[j]) != -1)
         {
           GlobTree[index].slot[j].isReal = false;
