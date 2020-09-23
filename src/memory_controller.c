@@ -182,6 +182,7 @@ int stash_leftover = 0;
 int stash_removed = 0;
 int fillhit = 0;
 int fillmiss = 0;
+int ring_evictctr = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -682,6 +683,7 @@ void oram_init_path(){
 }
 
 void print_count_level(){
+  printf("\n");
   for (int l = 0; l < LEVEL; l++)
   {
     int counter = 0;
@@ -1326,6 +1328,13 @@ int add_to_stash(Slot s){
   //     return -2;
   //   }
   // }
+
+  if (s.addr == 0)
+  {
+    printf("exiting due to 0 added to stash!\n");
+    // exit(1);
+  }
+  
   
   for(int i = 0; i < STASH_SIZE_VAR; i++ )
   {
@@ -2901,65 +2910,36 @@ void early_writeback(){
 }
 
 
-void print_oram_stats(){
-printf("\n\n\n\n............... ORAM Stats ...............\n\n");
-printf("Execution Time (s)       %f\n", cpu_time_used);
-printf("Total Cycles             %lld \n", CYCLE_VAL);
-printf("Trace Size               %d\n", tracectr);
-printf("Mem Cycles #             %lld\n", mem_clk);
-printf("Invoke Mem #             %d\n", invokectr);
-printf("ORAM Access #            %d\n", oramctr);
-printf("ORAM Dummy #             %d\n", dummyctr);
-printf("Pos1 Access #            %d\n", pos1_access);
-printf("Pos2 Access #            %d\n", pos2_access);
-printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
-printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
-printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
-printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
-printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
-printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
-printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
-printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
-printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
-printf("oramQ Size               %d\n", oramQ->size);
-printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
-printf("Bk Evict #               %d\n", bkctr);
-printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
-printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
-printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
-printf("Rho Access #             %d\n", rhoctr);
-printf("Rho  Dummy #             %d\n", rho_dummyctr);
-printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
-printf("Early WB #               %d\n", earlyctr);
-printf("Early WB Pointer #       %d\n", dirty_pointctr);
-printf("Cache Dirty #            %d\n", cache_dirty);
-printf("ptr fail #               %d\n", ptr_fail);
-printf("search fail #            %d\n", search_fail);
-printf("pin ctr #                %d\n", pinctr);
-printf("unpin ctr #              %d\n", unpinctr);
-printf("prefetch case #          %d\n", precase);
-printf("STT Cand #               %d\n", sttctr);
-printf("Stash leftover #         %d\n", stash_leftover);
-printf("Stash removed #          %d\n", stash_removed);
-printf("fill hit #               %d\n", fillhit);
-printf("fill miss #              %d\n", fillmiss);
-}
 
 void ring_access(int addr){
   int label = PosMap[addr];
 
+  // printf("\n@ ring access  trace %d\n", tracectr);
+
+
+  if (stash_contain(addr))
+  {
+    return;
+  }
+  
+
   ring_read_path(label, addr);
+  // printf("@> ring read path  trace %d\n\n", tracectr);
+  // print_stash();
 
   remap_block(addr);
+  // printf("@> remap block  trace %d\n", tracectr);
 
-  ring_round = ring_round + 1 % RING_A; // ??? to be defined
+  ring_round = (ring_round + 1) % RING_A; // ??? to be defined
 
   if (ring_round == 0)
   {
-    ring_evict_path();
+    ring_evict_path(label);
   }
+  // printf("@> evict path  trace %d\n", tracectr);
   
   ring_early_reshuffle(label);
+  // printf("@> reshuffle path  trace %d\n", tracectr);
 
 }
 
@@ -2970,27 +2950,17 @@ void ring_read_path(int label, int addr){
   {
     int index = calc_index(label, i);
     int offset = rand() % LZ_VAR[i]; // ??? should change to chose randomly from dummies
+    while (GlobTree[index].slot[offset].isReal)
+    {
+      offset = rand() % LZ_VAR[i];
+    }
+    
 
     for(int j = 0; j < LZ_VAR[i]; j++)
     {
       if (GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].addr == addr)
       {
         offset = j;
-        if(add_to_stash(GlobTree[index].slot[j]) != -1)
-        {
-          GlobTree[index].slot[j].isReal = false;
-          GlobTree[index].slot[j].addr = -1;
-          GlobTree[index].slot[j].label = -1;
-          GlobTree[index].dumnum++;
-        }
-        else
-        {
-          printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
-          print_oram_stats();
-          exit(1);
-        }
-
-        ring_invalidate(index, j);  // ??? to be implemented
 
         // profiling
         if (i <= TOP_BOUNDRY)
@@ -3006,8 +2976,38 @@ void ring_read_path(int label, int addr){
           botctr++;
         }
       }
-
     }
+
+    if (GlobTree[index].slot[offset].isReal)
+    {
+      // if (GlobTree[index].slot[offset].addr == 0)
+      // {
+
+      //   printf("\nZERO \n");
+        // printf("offset: %d\n", offset);
+        // printf("index: %d\n", index);
+        // printf("level: %d\n", i);
+        // printf("addr: %d\n", GlobTree[index].slot[offset].addr);
+        // printf("label: %d\n\n", GlobTree[index].slot[offset].label);
+      // }
+      
+      if(add_to_stash(GlobTree[index].slot[offset]) != -1)
+      {
+        GlobTree[index].slot[offset].isReal = false;
+        GlobTree[index].slot[offset].addr = -1;
+        GlobTree[index].slot[offset].label = -1;
+        GlobTree[index].dumnum++;
+      }
+      else
+      {
+        printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+        print_oram_stats();
+        exit(1);
+      }
+    }
+    
+
+    ring_invalidate(index, offset);  // ??? to be implemented
 
     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
@@ -3022,8 +3022,9 @@ void ring_read_path(int label, int addr){
 
 
 
-void ring_evict_path(){
-  int label = ring_G % PATH;
+void ring_evict_path(int label){
+  ring_evictctr++;
+  // int label = ring_G % PATH;
   ring_G++;
 
   read_path(label);
@@ -3045,19 +3046,28 @@ void ring_early_reshuffle(int label){
           int mem_addr = index*Z_VAR + j;
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
         }
-        if(add_to_stash(GlobTree[index].slot[j]) != -1)
+        if (GlobTree[index].slot[j].isReal)
         {
-          GlobTree[index].slot[j].isReal = false;
-          GlobTree[index].slot[j].addr = -1;
-          GlobTree[index].slot[j].label = -1;
-          GlobTree[index].dumnum++;
+          // printf("j: %d\n", j);
+          // printf("index: %d\n", index);
+          // printf("level: %d\n", i);
+          // printf("addr: %d\n", GlobTree[index].slot[j].addr);
+          // printf("label: %d\n\n", GlobTree[index].slot[j].label);
+          if(add_to_stash(GlobTree[index].slot[j]) != -1)
+          {
+            GlobTree[index].slot[j].isReal = false;
+            GlobTree[index].slot[j].addr = -1;
+            GlobTree[index].slot[j].label = -1;
+            GlobTree[index].dumnum++;
+          }
+          else
+          {
+            printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+            print_oram_stats();
+            exit(1);
+          }
         }
-        else
-        {
-          printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
-          print_oram_stats();
-          exit(1);
-        }
+        
       }
 
       reset_candidate();
@@ -3065,8 +3075,14 @@ void ring_early_reshuffle(int label){
 
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
-        if (GlobTree[index].dumnum > RING_S)
+        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
+          int mem_addr = index*Z_VAR + j;
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W');
+        }
+        if (candidate[j] != -1 && GlobTree[index].dumnum > RING_S)
+        {
+          // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
           GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
           GlobTree[index].slot[j].label = Stash[candidate[j]].label;
           GlobTree[index].slot[j].isReal = true;
@@ -3074,11 +3090,6 @@ void ring_early_reshuffle(int label){
           GlobTree[index].slot[j].valid = true;
           GlobTree[index].dumnum--;
 
-          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
-          {
-            int mem_addr = index*Z_VAR + j;
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W');
-          }
 
           remove_from_stash(candidate[j]);
         }
@@ -3096,6 +3107,90 @@ void ring_invalidate(int index, int offset){
   GlobTree[index].slot[offset].valid = false;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void print_oram_stats(){
+
+  print_count_level();
+
+  // print_stash();
+
+  printf("\n\n\n\n............... ORAM Stats ...............\n\n");
+  printf("Execution Time (s)       %f\n", cpu_time_used);
+  printf("Total Cycles             %lld \n", CYCLE_VAL);
+  printf("Trace Size               %d\n", tracectr);
+  printf("Mem Cycles #             %lld\n", mem_clk);
+  printf("Invoke Mem #             %d\n", invokectr);
+  printf("ORAM Access #            %d\n", oramctr);
+  printf("ORAM Dummy #             %d\n", dummyctr);
+  printf("Pos1 Access #            %d\n", pos1_access);
+  printf("Pos2 Access #            %d\n", pos2_access);
+  printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+  printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+  printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
+  printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
+  printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
+  printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
+  printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
+  printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
+  printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
+  printf("oramQ Size               %d\n", oramQ->size);
+  printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
+  printf("Bk Evict #               %d\n", bkctr);
+  printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
+  printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
+  printf("Rho Access #             %d\n", rhoctr);
+  printf("Rho  Dummy #             %d\n", rho_dummyctr);
+  printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
+  printf("Early WB #               %d\n", earlyctr);
+  printf("Early WB Pointer #       %d\n", dirty_pointctr);
+  printf("Cache Dirty #            %d\n", cache_dirty);
+  printf("ptr fail #               %d\n", ptr_fail);
+  printf("search fail #            %d\n", search_fail);
+  printf("pin ctr #                %d\n", pinctr);
+  printf("unpin ctr #              %d\n", unpinctr);
+  printf("prefetch case #          %d\n", precase);
+  printf("STT Cand #               %d\n", sttctr);
+  printf("Stash leftover #         %d\n", stash_leftover);
+  printf("Stash removed #          %d\n", stash_removed);
+  printf("fill hit #               %d\n", fillhit);
+  printf("fill miss #              %d\n", fillmiss);
+  printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+  printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+  printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+  printf("ring evict #             %d\n", ring_evictctr);
+  printf("Stash #                  %d\n", stashctr);
+  // printf("Path Latency Avg         %f\n", path_access_latency_avg);
+}
 
 
 // Mehrnoosh.

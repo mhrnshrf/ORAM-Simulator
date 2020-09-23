@@ -46,9 +46,9 @@
 #define Z 8     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
-#define STASH_SIZE_ORG 200     // original size of stash
-#define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
-#define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
+#define STASH_SIZE_ORG 2000     // original size of stash
+#define BK_EVICTION 0   // 0/1 flag to disable/enable background eviction
+#define TOP_CACHE 0   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
@@ -101,9 +101,9 @@
 enum{
   // main tree
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
-  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : 4,   // # slots per bucket upto L1
-  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : 4,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : 4,   // # slots per bucket upto L3
+  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : Z,   // # slots per bucket upto L1
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : Z,   // # slots per bucket upto L2
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : Z,   // # slots per bucket upto L3
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
@@ -209,6 +209,7 @@ extern int search_fail;
 extern int precase;
 extern int sttctr;
 extern int stashctr;
+extern int ring_evictctr;
 
 extern long long int topctr;
 extern long long int midctr;
@@ -307,7 +308,7 @@ void oram_init_path();
 void free_stash();
 void ring_access(int addr);
 void ring_read_path(int label, int addr);
-void ring_evict_path();
+void ring_evict_path(int label);
 void ring_early_reshuffle(int label);
 void ring_invalidate(int index, int offset);
 

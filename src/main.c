@@ -334,6 +334,7 @@ int main(int argc, char * argv[])
 
 
 	// test_oram(argv);
+	
 
 
 
@@ -652,6 +653,7 @@ char bench[20];
   printf("Trace            %s\n", bench);
   printf("Endpoint         %d\n", endpoint);
   printf("Timing Interval  %d\n\n", TIMING_INTERVAL);
+//   int cnt = 0;
 	
 //   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
@@ -659,7 +661,15 @@ char bench[20];
 
 	// Mehrnoosh:
 	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
-	// printf("\n@ trace %d	bkctr: %d \n", tracectr, bkctr);
+	// printf("\n@ trace %d\n", tracectr);
+	// print_count_level();
+	// cnt++;
+	// if (cnt > 1)
+	// {
+	// 	exit(1);
+	// }
+	
+
 	start = clock();
 
 	no_miss_occured = true;
@@ -756,6 +766,7 @@ char bench[20];
 
 
 	  // Mehrnoosh:
+	//   printf("@ while fetch trace\n");
 		// if (plbQ->size > 1)
 		// {
 		// 	printf("plb queue: %d @ 	trace: %d\n", plbQ->size, tracectr);
@@ -953,6 +964,7 @@ char bench[20];
 
 		if (oramQ->size == 0)
 		{
+			// printf("@ oramQ->size == 0\n");
 			if ((!TIMING_ENABLE || (dummy_oram && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed())
 			{
 				background_eviction();
@@ -989,6 +1001,7 @@ char bench[20];
 			// cache enabled:
 			else if(CACHE_ENABLE)
 			{
+				// printf("cache read\n");
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while (no_miss_occured && !expt_done)
 				{
@@ -1243,6 +1256,7 @@ char bench[20];
 			// skip if dummy tick but if it's dummy rho or dummy oram due to rho miss or hit, invoke the oram anyway in order not to lose the trace just read 
 			if (!skip_invokation)
 			{
+				// printf("invoke oram\n");
 				invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
 				oram_just_invoked = true;
 				curr_trace = addr[numc];
@@ -1525,52 +1539,54 @@ char bench[20];
 rmpki = (1000*rctr)/instctr;
 wmpki = (1000*wctr)/instctr;
 
+print_oram_stats();
 
-printf("\n\n\n\n............... ORAM Stats ...............\n\n");
-printf("Execution Time (s)       %f\n", cpu_time_used);
-printf("Total Cycles             %lld \n", CYCLE_VAL);
-printf("Trace Size               %d\n", tracectr);
-printf("Mem Cycles #             %lld\n", mem_clk);
-printf("Invoke Mem #             %d\n", invokectr);
-printf("ORAM Access #            %d\n", oramctr);
-printf("ORAM Dummy #             %d\n", dummyctr);
-printf("Pos1 Access #            %d\n", pos1_access);
-printf("Pos2 Access #            %d\n", pos2_access);
-printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
-printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
-printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
-printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
-printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
-printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
-printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
-printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
-printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
-printf("oramQ Size               %d\n", oramQ->size);
-printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
-printf("Bk Evict #               %d\n", bkctr);
-printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
-printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
-printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
-printf("Rho Access #             %d\n", rhoctr);
-printf("Rho  Dummy #             %d\n", rho_dummyctr);
-printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
-printf("Early WB #               %d\n", earlyctr);
-printf("Early WB Pointer #       %d\n", dirty_pointctr);
-printf("Cache Dirty #            %d\n", cache_dirty);
-printf("ptr fail #               %d\n", ptr_fail);
-printf("search fail #            %d\n", search_fail);
-printf("pin ctr #                %d\n", pinctr);
-printf("unpin ctr #              %d\n", unpinctr);
-printf("prefetch case #          %d\n", precase);
-printf("STT Cand #               %d\n", sttctr);
-printf("Stash leftover #         %d\n", stash_leftover);
-printf("Stash removed #          %d\n", stash_removed);
-printf("fill hit #               %d\n", fillhit);
-printf("fill miss #              %d\n", fillmiss);
-printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
-printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
-printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
-printf("Path Latency Avg         %f\n", path_access_latency_avg);
+
+// printf("\n\n\n\n............... ORAM Stats ...............\n\n");
+// printf("Execution Time (s)       %f\n", cpu_time_used);
+// printf("Total Cycles             %lld \n", CYCLE_VAL);
+// printf("Trace Size               %d\n", tracectr);
+// printf("Mem Cycles #             %lld\n", mem_clk);
+// printf("Invoke Mem #             %d\n", invokectr);
+// printf("ORAM Access #            %d\n", oramctr);
+// printf("ORAM Dummy #             %d\n", dummyctr);
+// printf("Pos1 Access #            %d\n", pos1_access);
+// printf("Pos2 Access #            %d\n", pos2_access);
+// printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+// printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+// printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
+// printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
+// printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
+// printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
+// printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
+// printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
+// printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
+// printf("oramQ Size               %d\n", oramQ->size);
+// printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
+// printf("Bk Evict #               %d\n", bkctr);
+// printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+// printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
+// printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
+// printf("Rho Access #             %d\n", rhoctr);
+// printf("Rho  Dummy #             %d\n", rho_dummyctr);
+// printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
+// printf("Early WB #               %d\n", earlyctr);
+// printf("Early WB Pointer #       %d\n", dirty_pointctr);
+// printf("Cache Dirty #            %d\n", cache_dirty);
+// printf("ptr fail #               %d\n", ptr_fail);
+// printf("search fail #            %d\n", search_fail);
+// printf("pin ctr #                %d\n", pinctr);
+// printf("unpin ctr #              %d\n", unpinctr);
+// printf("prefetch case #          %d\n", precase);
+// printf("STT Cand #               %d\n", sttctr);
+// printf("Stash leftover #         %d\n", stash_leftover);
+// printf("Stash removed #          %d\n", stash_removed);
+// printf("fill hit #               %d\n", fillhit);
+// printf("fill miss #              %d\n", fillmiss);
+// printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+// printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+// printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+// printf("Path Latency Avg         %f\n", path_access_latency_avg);
 // printf("R ctr                    %lld\n", rctr);
 // printf("W ctr                    %lld\n", wctr);
 // printf("Inst ctr                 %lld\n", instctr);
