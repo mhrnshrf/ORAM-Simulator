@@ -2088,6 +2088,11 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
 
   if (RING_ENABLE)
   {
+    if (RAND_ENABLE)
+    {
+      addr = rand() % BLOCK;
+    }
+    
     ring_access(addr);
     return;
   }
