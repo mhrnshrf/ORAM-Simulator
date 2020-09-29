@@ -315,6 +315,7 @@ void ring_evict_path(int label);
 void ring_early_reshuffle(int label);
 void ring_invalidate(int index, int offset);
 int reverse_lex(int n);
+void print_shuff_stat();
 
 // Mehrnoosh.
 

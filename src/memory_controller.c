@@ -195,6 +195,8 @@ int plb_trace[PLB_SIZE] = {[0 ... PLB_SIZE-1] = -1};
 int plb_interval[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
 int plb_temp[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
 
+int shuff[LEVEL] = {0};
+
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
 TreeType TREE_VAR = ORAM;
 int LEVEL_VAR = LEVEL;
@@ -3055,6 +3057,7 @@ void ring_early_reshuffle(int label){
     int index = calc_index(label, i);
     if (GlobTree[index].count >= RING_S)
     {
+      shuff[i]++;
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
@@ -3123,7 +3126,13 @@ void ring_invalidate(int index, int offset){
   GlobTree[index].slot[offset].valid = false;
 }
 
-
+void print_shuff_stat(){
+  printf("\nreshuffle count of each level \n");
+  for (int i = 0; i < LEVEL; i++)
+  {
+    printf("%d\n", shuff[i]);
+  }
+}
 
 int reverse_lex(int n){
 	int rev = 0;
@@ -3169,6 +3178,7 @@ void print_oram_stats(){
 
   print_count_level();
 
+  print_shuff_stat();
   // print_stash();
 
   printf("\n\n\n\n............... ORAM Stats ...............\n\n");
