@@ -43,10 +43,10 @@
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 8     // # slots per bucket
+#define Z 12     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
-#define STASH_SIZE_ORG 2000     // original size of stash
+#define STASH_SIZE_ORG 200     // original size of stash
 #define BK_EVICTION 0   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 0   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
@@ -94,8 +94,9 @@
 
 // ring oram config
 #define RING_A 5
-#define RING_S 4
-#define RING_Z 2
+#define RING_S 7
+#define RING_Z 5
+#define INT_BITS LEVEL - 1 
 
 
 enum{
@@ -107,7 +108,9 @@ enum{
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
-  BLOCK = (RING_ENABLE) ? (long long int)((RING_Z*SLOT*U)/Z):((long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1))))),  // # valid blocks in oram tree
+  // BLOCK = (RING_ENABLE) ? (long long int)((RING_Z*SLOT*U)/Z):((long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1))))),  // # valid blocks in oram tree
+  BLOCK = 33260542, 
+  // BLOCK = 16777215, 
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
   STASH_SIZE = (VOLCANO_ENABLE /*|| STT_ENABLE*/) ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,
   OV_THRESHOLD = STASH_SIZE - Z*(LEVEL+1),   // overflow threshold for background eviction; C - Z(L+1)
@@ -311,6 +314,7 @@ void ring_read_path(int label, int addr);
 void ring_evict_path(int label);
 void ring_early_reshuffle(int label);
 void ring_invalidate(int index, int offset);
+int reverse_lex(int n);
 
 // Mehrnoosh.
 

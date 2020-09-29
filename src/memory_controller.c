@@ -183,6 +183,7 @@ int stash_removed = 0;
 int fillhit = 0;
 int fillmiss = 0;
 int ring_evictctr = 0;
+int stash_cont = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -2914,16 +2915,24 @@ void early_writeback(){
 void ring_access(int addr){
   int label = PosMap[addr];
 
-  // printf("\n@ ring access  trace %d\n", tracectr);
 
+  // if (tracectr % 100000 == 0)
+  // {
+  //   printf("\n@ ring access  trace %d\n", tracectr);
+  //   print_count_level();
+  // }
+  
 
   if (stash_contain(addr))
   {
+    stash_cont++;
     return;
   }
   
 
+  // printf("\nb4 read stash %d  trace %d\n", stashctr, tracectr);
   ring_read_path(label, addr);
+  // printf("af read stash %d  trace %d\n", stashctr, tracectr);
   // printf("@> ring read path  trace %d\n\n", tracectr);
   // print_stash();
 
@@ -2934,12 +2943,15 @@ void ring_access(int addr){
 
   if (ring_round == 0)
   {
+  //  printf("\n@- evict  trace %d  stash %d\n", tracectr, stashctr);
     ring_evict_path(label);
+  //  printf("@> evict  trace %d  stash %d\n\n", tracectr, stashctr);
   }
   // printf("@> evict path  trace %d\n", tracectr);
   
+  // printf("\n@- reshuffle  trace %d  stash %d\n", tracectr, stashctr);
   ring_early_reshuffle(label);
-  // printf("@> reshuffle path  trace %d\n", tracectr);
+  // printf("@> reshuffle trace %d   stash %d\n", tracectr, stashctr);
 
 }
 
@@ -2960,6 +2972,7 @@ void ring_read_path(int label, int addr){
     {
       if (GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].addr == addr)
       {
+        // printf("\n offset trace %d\n", tracectr);
         offset = j;
 
         // profiling
@@ -2980,6 +2993,8 @@ void ring_read_path(int label, int addr){
 
     if (GlobTree[index].slot[offset].isReal)
     {
+        // printf("\n is real trace %d\n", tracectr);
+
       // if (GlobTree[index].slot[offset].addr == 0)
       // {
 
@@ -3025,6 +3040,7 @@ void ring_read_path(int label, int addr){
 void ring_evict_path(int label){
   ring_evictctr++;
   // int label = ring_G % PATH;
+  label = reverse_lex(ring_G);
   ring_G++;
 
   read_path(label);
@@ -3109,6 +3125,18 @@ void ring_invalidate(int index, int offset){
 
 
 
+int reverse_lex(int n){
+	int rev = 0;
+	int i = 0;
+	while(n > 0)
+	{
+		int bit = n & 1;
+		rev += bit*pow(2,INT_BITS-1-i);
+		n = n >> 1;
+		i++;
+	}
+	return rev;
+}
 
 
 
@@ -3189,6 +3217,7 @@ void print_oram_stats(){
   printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
   printf("ring evict #             %d\n", ring_evictctr);
   printf("Stash #                  %d\n", stashctr);
+  printf("Stash Contain            %d\n", stash_cont);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 

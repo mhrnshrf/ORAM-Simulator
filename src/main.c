@@ -135,6 +135,8 @@ void print_req_symbols(){
 
 
 
+
+
 // Mehrnoosh.
 
 int main(int argc, char * argv[])
@@ -307,6 +309,9 @@ int main(int argc, char * argv[])
 	// plb_test();
 
 	
+
+	fflush(stdout);
+	
 	cache_init();
 
 	plb_init();
@@ -327,6 +332,7 @@ int main(int argc, char * argv[])
 	
 	oram_init();
 
+	fflush(stdout);
 
 	// switch_enqueue_to(HEAD);
 	// test_queue();
@@ -338,7 +344,6 @@ int main(int argc, char * argv[])
 
 
 
-	fflush(stdout);
 	
 	 clock_t start, end;
      
@@ -668,6 +673,7 @@ char bench[20];
 	// {
 	// 	exit(1);
 	// }
+
 	
 
 	start = clock();
@@ -1001,10 +1007,10 @@ char bench[20];
 			// cache enabled:
 			else if(CACHE_ENABLE)
 			{
-				// printf("cache read\n");
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while (no_miss_occured && !expt_done)
 				{
+					// printf("cache read trace %d\n", tracectr);
 					cache_clk++;
 					if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 						// printf("while readline trace ctr: %d  \n", tracectr);
@@ -1019,6 +1025,7 @@ char bench[20];
 						
 						if (waited_for_evicted[numc].valid)
 						{
+							// printf("evicted trace %d\n", tracectr);
 							nonmemops[numc] = waited_for_evicted[numc].nonmemops;
 							opertype[numc] = waited_for_evicted[numc].opertype;
 							addr[numc] = waited_for_evicted[numc].addr;
@@ -1036,6 +1043,7 @@ char bench[20];
 						
 
 						if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+							// printf("new trace %d\n", tracectr);
 								tracectr++;
 							if (opertype[numc] == 'R') {
 								rctr++;
@@ -1256,7 +1264,13 @@ char bench[20];
 			// skip if dummy tick but if it's dummy rho or dummy oram due to rho miss or hit, invoke the oram anyway in order not to lose the trace just read 
 			if (!skip_invokation)
 			{
-				// printf("invoke oram\n");
+				// printf("invoke oram trace %d addr %lld\n", tracectr, addr[numc]);
+				if (invokectr % 10000 == 0)
+				{
+					printf("\n@ while exp  trace %d\n", tracectr);
+					print_count_level();
+				}
+
 				invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
 				oram_just_invoked = true;
 				curr_trace = addr[numc];
