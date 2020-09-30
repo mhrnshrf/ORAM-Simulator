@@ -1,0 +1,993 @@
+---------------------------------------------
+-- USIMM: the Utah SImulated Memory Module --
+--              Version: 1.3               --
+---------------------------------------------
+
+....................................................
+                     Options
+....................................................
+Cache          Enabled
+Subtree        No
+Volcano        No
+STT            No
+STL            No
+Write Bypass   No
+Rho            No
+Timing         No
+Prefetch       No
+Early WB       No
+Snapshot       No
+Timeout        Enabled
+
+....................................................
+             Simulation Parameters
+....................................................
+Trace Size    4m
+Queue Size    2000
+Page Size     4 KB
+L1 Latency    3
+L2 Latency    10
+Mem Latency   0
+Warmup Thld   3m
+Timeout Thld  10000 (s)
+Top Boundry   10
+Mid Boundry   20
+
+....................................................
+                  ORAM Config
+....................................................
+Level           24
+Path            8388608
+Node            16777215
+Slot            201326580
+Block           33260542
+Z               12
+U               0.500000
+OV Threshold    -100
+Stash Size      200
+PLB Size        64 KB / 1-way
+BK Eviction     0
+Empty Top       0
+Top Cache       0
+
+L1  9       Z1  12
+L2  15      Z2  12
+L3  18      Z3  12
+
+LZ 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 
+= 288 ~> oram path length
+  288 ~> oram effective path length
+
+
+....................................................
+                  Cache Config
+....................................................
+Cache Enable   On
+LLC Size       2 MB / 8-way
+Write Bypass   0
+
+....................................................
+                 Subtree Config
+....................................................
+Subtree Enable 	   Off
+Subtree Channels   4
+Subtree Size       32768
+Subtree Slot	   512
+Subtree Bucket     41
+Subtree Level      6
+
+....................................................
+                   RHO Config
+....................................................
+Rho Enable          Off
+Rho Level           19
+Rho Path            262144
+Rho Node            524287
+Rho Slot            1048574
+Rho Block           524287
+Rho Set             16000
+Rho Way             10
+Rho Z               2
+Rho OV Threshold    160
+Rho Stash Size      200
+Rho BK Eviction     0
+Rho Empty Top       0
+Rho Top Cache       6
+
+Rho   L1  9     Z1  2
+Rho   L2  12    Z2  2
+Rho   L3  14    Z3  2
+
+Rho LZ 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+= 38 ~> rho path length
+  26 ~> rho effective path length
+
+
+....................................................
+                 Timing Config
+....................................................
+Timing Enable       Off
+T1 Interval         1000 cycles
+T2 Interval         100 cycles
+
+
+....................................................
+                 Prefetch Config
+....................................................
+Prefetch Enable     Off
+Buffer Entry #      32
+
+
+....................................................
+                 STT Config
+....................................................
+STT Enable     Off
+STT Size       4096 entry / 4-way
+
+....................................................
+
+
+
+
+Initializing.
+Core 0: Input trace file .. : Addresses will have prefix 0
+Reading vi file: 1Gb_x4.vi	
+16 Chips per Rank
+----------------------------------------------------------------------------------------
+------------------------
+- SIMULATOR PARAMETERS -
+------------------------
+
+-------------
+- PROCESSOR -
+-------------
+PROCESSOR_CLK_MULTIPLIER:        4
+ROBSIZE:                       128
+MAX_FETCH:                       4
+MAX_RETIRE:                      2
+PIPELINEDEPTH:                  10
+
+---------------
+- DRAM Config -
+---------------
+NUM_CHANNELS:                    1
+NUM_RANKS:                       2
+NUM_BANKS:                       8
+NUM_ROWS:                    32768
+NUM_COLUMNS:                   128
+
+---------------
+- DRAM Timing -
+---------------
+T_RCD:                          44
+T_RP:                           44
+T_CAS:                          44
+T_RC:                          156
+T_RAS:                         112
+T_RRD:                          20
+T_FAW:                         128
+T_WR:                           48
+T_WTR:                          24
+T_RTP:                          24
+T_CCD:                          16
+T_RFC:                         352
+T_REFI:                      24960
+T_CWD:                          20
+T_RTRS:                          8
+T_PD_MIN:                       16
+T_XP:                           20
+T_XP_DLL:                       80
+T_DATA_TRANS:                   16
+
+---------------------------
+- DRAM Idd Specifications -
+---------------------------
+VDD:                        01.50
+IDD0:                       70.00
+IDD2P0:                     12.00
+IDD2P1:                     30.00
+IDD2N:                      45.00
+IDD3P:                      35.00
+IDD3N:                      45.00
+IDD4R:                      140.00
+IDD4W:                      145.00
+IDD5:                       170.00
+
+-------------------
+- DRAM Controller -
+-------------------
+WQ_CAPACITY:                    64
+ADDRESS_MAPPING:                 1
+WQ_LOOKUP_LATENCY:              10
+
+----------------------------------------------------------------------------------------
+Starting simulation.
+
+Trace            fotonik3d
+Endpoint         3327000
+Timing Interval  1000
+
+
+@ while exp  trace 3000132
+
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000043
+0.002918
+0.064802
+0.297278
+
+@ while exp  trace 3017035
+
+0.250000
+0.166667
+0.187500
+0.208333
+0.213542
+0.182292
+0.220052
+0.212240
+0.222331
+0.207194
+0.207357
+0.097493
+0.025879
+0.006053
+0.001460
+0.000376
+0.000106
+0.000025
+0.000005
+0.000002
+0.000043
+0.002911
+0.064738
+0.297212
+
+@ while exp  trace 3032577
+
+0.166667
+0.208333
+0.208333
+0.229167
+0.223958
+0.260417
+0.221354
+0.205729
+0.216797
+0.213542
+0.212972
+0.205078
+0.099609
+0.024963
+0.006007
+0.001396
+0.000417
+0.000093
+0.000023
+0.000005
+0.000044
+0.002905
+0.064671
+0.297148
+
+@ while exp  trace 3047472
+
+0.083333
+0.333333
+0.187500
+0.218750
+0.223958
+0.203125
+0.207031
+0.236979
+0.209961
+0.217936
+0.211833
+0.209106
+0.174235
+0.056559
+0.013997
+0.003398
+0.000904
+0.000212
+0.000056
+0.000013
+0.000046
+0.002899
+0.064605
+0.297084
+
+@ while exp  trace 3062170
+
+0.166667
+0.208333
+0.270833
+0.187500
+0.208333
+0.242188
+0.233073
+0.225260
+0.225260
+0.218262
+0.215088
+0.208700
+0.203125
+0.099131
+0.024806
+0.006068
+0.001588
+0.000412
+0.000100
+0.000024
+0.000048
+0.002893
+0.064540
+0.297019
+
+@ while exp  trace 3077197
+
+0.250000
+0.125000
+0.250000
+0.208333
+0.244792
+0.229167
+0.199219
+0.213542
+0.215495
+0.210612
+0.213786
+0.213379
+0.208191
+0.142771
+0.038406
+0.009595
+0.002391
+0.000637
+0.000151
+0.000036
+0.000052
+0.002888
+0.064475
+0.296955
+
+@ while exp  trace 3092419
+
+0.166667
+0.333333
+0.208333
+0.135417
+0.203125
+0.200521
+0.227865
+0.209635
+0.211914
+0.216634
+0.218180
+0.210775
+0.209167
+0.171763
+0.053274
+0.013168
+0.003300
+0.000852
+0.000213
+0.000051
+0.000055
+0.002884
+0.064419
+0.296898
+
+@ while exp  trace 3107343
+
+0.166667
+0.250000
+0.270833
+0.218750
+0.223958
+0.205729
+0.231771
+0.208984
+0.221680
+0.220866
+0.212240
+0.211344
+0.208374
+0.187408
+0.069148
+0.017161
+0.004345
+0.001118
+0.000281
+0.000068
+0.000058
+0.002880
+0.064367
+0.296848
+
+@ while exp  trace 3123019
+
+0.333333
+0.291667
+0.229167
+0.187500
+0.213542
+0.205729
+0.203125
+0.215495
+0.221354
+0.219401
+0.220866
+0.213379
+0.209513
+0.192495
+0.082372
+0.020439
+0.005245
+0.001346
+0.000342
+0.000083
+0.000060
+0.002877
+0.064327
+0.296809
+
+@ while exp  trace 3138654
+
+0.250000
+0.166667
+0.166667
+0.260417
+0.244792
+0.221354
+0.223958
+0.207682
+0.214193
+0.219889
+0.219076
+0.216634
+0.210042
+0.193858
+0.094488
+0.023872
+0.006050
+0.001541
+0.000393
+0.000098
+0.000064
+0.002875
+0.064292
+0.296776
+
+@ while exp  trace 3153998
+
+0.083333
+0.250000
+0.166667
+0.239583
+0.223958
+0.236979
+0.205729
+0.242188
+0.211914
+0.220540
+0.220296
+0.215983
+0.208252
+0.194489
+0.105586
+0.027514
+0.007037
+0.001797
+0.000441
+0.000108
+0.000067
+0.002873
+0.064259
+0.296742
+
+@ while exp  trace 3169507
+
+0.333333
+0.166667
+0.083333
+0.239583
+0.234375
+0.221354
+0.205729
+0.235677
+0.210286
+0.216471
+0.217936
+0.215698
+0.209717
+0.194733
+0.114492
+0.031977
+0.008041
+0.002062
+0.000493
+0.000124
+0.000071
+0.002871
+0.064227
+0.296709
+
+@ while exp  trace 3184796
+
+0.250000
+0.250000
+0.166667
+0.197917
+0.234375
+0.200521
+0.235677
+0.214844
+0.217122
+0.216960
+0.212158
+0.217692
+0.212016
+0.195516
+0.121862
+0.036435
+0.009212
+0.002353
+0.000555
+0.000141
+0.000074
+0.002868
+0.064194
+0.296675
+
+@ while exp  trace 3200858
+
+0.250000
+0.166667
+0.166667
+0.229167
+0.208333
+0.200521
+0.217448
+0.220703
+0.217773
+0.219727
+0.214844
+0.210897
+0.212667
+0.196798
+0.127625
+0.041120
+0.010585
+0.002686
+0.000642
+0.000156
+0.000079
+0.002866
+0.064161
+0.296642
+
+@ while exp  trace 3216763
+
+0.333333
+0.291667
+0.250000
+0.187500
+0.250000
+0.226562
+0.207031
+0.192708
+0.217448
+0.222005
+0.210612
+0.218628
+0.211243
+0.194865
+0.133128
+0.046260
+0.011990
+0.003035
+0.000725
+0.000176
+0.000083
+0.002864
+0.064128
+0.296609
+
+@ while exp  trace 3232087
+
+0.250000
+0.125000
+0.270833
+0.156250
+0.265625
+0.231771
+0.208333
+0.218750
+0.217122
+0.220540
+0.211914
+0.214559
+0.210795
+0.195679
+0.135900
+0.052233
+0.013406
+0.003389
+0.000815
+0.000200
+0.000088
+0.002862
+0.064095
+0.296576
+
+@ while exp  trace 3247900
+
+0.333333
+0.250000
+0.250000
+0.166667
+0.223958
+0.221354
+0.234375
+0.223307
+0.229818
+0.213542
+0.218099
+0.210897
+0.211202
+0.195923
+0.137039
+0.058523
+0.014871
+0.003784
+0.000916
+0.000223
+0.000092
+0.002860
+0.064063
+0.296542
+
+@ while exp  trace 3263225
+
+0.166667
+0.250000
+0.229167
+0.260417
+0.223958
+0.216146
+0.225260
+0.227214
+0.218750
+0.220866
+0.215495
+0.213257
+0.211446
+0.194499
+0.137904
+0.064766
+0.016510
+0.004173
+0.001019
+0.000251
+0.000100
+0.002858
+0.064029
+0.296510
+
+@ while exp  trace 3279267
+
+0.166667
+0.291667
+0.270833
+0.125000
+0.213542
+0.242188
+0.230469
+0.204427
+0.218099
+0.217936
+0.221191
+0.217082
+0.212789
+0.194956
+0.136627
+0.071065
+0.018153
+0.004602
+0.001133
+0.000278
+0.000107
+0.002858
+0.063996
+0.296477
+
+@ while exp  trace 3294906
+
+0.250000
+0.166667
+0.270833
+0.197917
+0.203125
+0.195312
+0.234375
+0.218099
+0.208008
+0.222168
+0.211833
+0.217122
+0.213420
+0.193227
+0.137533
+0.074760
+0.019230
+0.004822
+0.001209
+0.000293
+0.000113
+0.002856
+0.063975
+0.296458
+
+@ while exp  trace 3310491
+
+0.166667
+0.208333
+0.208333
+0.166667
+0.234375
+0.216146
+0.201823
+0.220052
+0.223307
+0.216309
+0.221436
+0.214030
+0.213298
+0.193166
+0.137705
+0.075002
+0.019199
+0.004843
+0.001215
+0.000295
+0.000114
+0.002856
+0.063974
+0.296456
+
+@ while exp  trace 3326202
+
+0.333333
+0.041667
+0.250000
+0.208333
+0.229167
+0.164062
+0.248698
+0.214193
+0.218424
+0.212565
+0.214844
+0.219157
+0.212952
+0.192464
+0.137777
+0.074821
+0.019290
+0.004855
+0.001227
+0.000297
+0.000115
+0.002856
+0.063974
+0.296456
+Done with loop. Printing stats.
+Cycles 588673059
+Done: Core 0: Fetched 103504808 : Committed 103504680 : At time : 588673059
+Sum of execution times for all programs: 588673059
+Num reads merged: 415189
+Num writes merged: 0
+-------- Channel 0 Stats-----------
+Total Reads Serviced :          18343547
+Total Writes Serviced :         13707566
+Average Read Latency :          1519.85548
+Average Read Queue Latency :    1459.85548
+Average Write Latency :         1477.04770
+Average Write Queue Latency :   1413.04770
+Read Page Hit Rate :            0.55610
+Write Page Hit Rate :           0.88482
+------------------------------------
+
+#-----------------------------Simulated Cycles Break-Up-------------------------------------------
+Note:  1.(Read Cycles + Write Cycles + Read Other + Write Other) should add up to % cycles during which
+          the channel is busy. This should be the same for all Ranks on a Channel
+       2.(PRE_PDN_FAST + PRE_PDN_SLOW + ACT_PDN + ACT_STBY + PRE_STBY) should add up to 100%
+       3.Power Down means Clock Enable, CKE = 0. In Standby mode, CKE = 1
+#-------------------------------------------------------------------------------------------------
+Total Simulation Cycles                        588673059
+---------------------------------------------------------------
+
+Channel 0 Rank 0 Read Cycles(%)                0.31 # % cycles the Rank performed a Read
+Channel 0 Rank 0 Write Cycles(%)               0.23 # % cycles the Rank performed a Write
+Channel 0 Rank 0 Read Other(%)                 0.19 # % cycles other Ranks on the channel performed a Read
+Channel 0 Rank 0 Write Other(%)                0.14 # % cycles other Ranks on the channel performed a Write
+Channel 0 Rank 0 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 0 Rank 0 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 0 Rank 0 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 0 Rank 0 ACT_STBY(%)                   0.98 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 0 Rank 0 PRE_STBY(%)                   0.02 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+Channel 0 Rank 1 Read Cycles(%)                0.19 # % cycles the Rank performed a Read
+Channel 0 Rank 1 Write Cycles(%)               0.14 # % cycles the Rank performed a Write
+Channel 0 Rank 1 Read Other(%)                 0.31 # % cycles other Ranks on the channel performed a Read
+Channel 0 Rank 1 Write Other(%)                0.23 # % cycles other Ranks on the channel performed a Write
+Channel 0 Rank 1 PRE_PDN_FAST(%)               0.00 # % cycles the Rank was in Fast Power Down and all Banks were Precharged
+Channel 0 Rank 1 PRE_PDN_SLOW(%)               0.00 # % cycles the Rank was in Slow Power Down and all Banks were Precharged
+Channel 0 Rank 1 ACT_PDN(%)                    0.00 # % cycles the Rank was in Active Power Down and atleast one Bank was Active
+Channel 0 Rank 1 ACT_STBY(%)                   0.98 # % cycles the Rank was in Standby and atleast one bank was Active
+Channel 0 Rank 1 PRE_STBY(%)                   0.02 # % cycles the Rank was in Standby and all Banks were Precharged
+---------------------------------------------------------------
+
+
+#-------------------------------------- Power Stats ----------------------------------------------
+Note:  1. termRoth/termWoth is the power dissipated in the ODT resistors when Read/Writes terminate 
+          in other ranks on the same channel
+#-------------------------------------------------------------------------------------------------
+
+Channel 0 Rank 0 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
+Channel 0 Rank 0 Act(mW)                     51.69 # power spend bringing data to the row buffer
+Channel 0 Rank 0 Read(mW)                    43.55 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 0 Write(mW)                   34.64 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 0 Read Terminate(mW)           9.78 # power dissipated in ODT resistors during Read
+Channel 0 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 0 Rank 0 termRoth(mW)                48.04 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 0 termWoth(mW)                32.40 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 0 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 0 Rank 0 Total Rank Power(mW)      4644.09 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+Channel 0 Rank 1 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
+Channel 0 Rank 1 Act(mW)                     44.92 # power spend bringing data to the row buffer
+Channel 0 Rank 1 Read(mW)                    27.49 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 1 Write(mW)                   21.24 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 1 Read Terminate(mW)           6.17 # power dissipated in ODT resistors during Read
+Channel 0 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
+Channel 0 Rank 1 termRoth(mW)                76.10 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 1 termWoth(mW)                52.84 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 1 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
+---------------------------------------------------------------
+Channel 0 Rank 1 Total Rank Power(mW)      4782.67 # (Sum of above components)*(num chips in each Rank)
+---------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------------------------
+Total memory system power = 9.426762 W
+Miscellaneous system power = 10 W  # Processor uncore power, disk, I/O, cooling, etc.
+Processor core power = 5.000000 W  # Assuming that each core consumes 5 W
+Total system power = 24.426762 W # Sum of the previous three lines
+Energy Delay product (EDP) = 0.826635897 J.s
+
+0.333333
+0.208333
+0.229167
+0.229167
+0.197917
+0.234375
+0.196615
+0.223958
+0.216146
+0.215983
+0.214193
+0.220418
+0.212687
+0.192495
+0.137700
+0.074773
+0.019285
+0.004856
+0.001226
+0.000298
+0.000115
+0.002856
+0.063974
+0.296456
+
+reshuffle count of each level 
+0
+3828
+7401
+8755
+9356
+9725
+9899
+10002
+10016
+9858
+9909
+9708
+9540
+8837
+7779
+5583
+1714
+150
+7
+0
+0
+0
+0
+0
+
+
+
+
+............... ORAM Stats ...............
+
+Execution Time (s)       1496.610000
+Total Cycles             588673059 
+Trace Size               3327000
+Mem Cycles #             0
+Invoke Mem #             210468
+ORAM Access #            0
+ORAM Dummy #             0
+Pos1 Access #            0
+Pos2 Access #            0
+PLB pos0 hit             -nan%
+PLB pos1 hit             -nan%
+PLB pos2 hit             -nan%
+PLB pos0 hit #           0
+PLB pos1 hit #           0
+PLB pos2 hit #           0
+PLB pos0 acc #           0
+PLB pos1 acc #           0
+PLB pos2 acc #           0
+oramQ Size               23
+Bk Evict                 -nan%
+Bk Evict #               0
+Cache Hit                67.333739%
+Cache Evict              97.033299%
+Rho Hit                  0.000000%
+Rho Access #             0
+Rho  Dummy #             0
+Rho Bk Evict             -nan%
+Early WB #               0
+Early WB Pointer #       0
+Cache Dirty #            204456
+ptr fail #               0
+search fail #            0
+pin ctr #                0
+unpin ctr #              0
+prefetch case #          0
+STT Cand #               0
+Stash leftover #         0
+Stash removed #          0
+fill hit #               0
+fill miss #              0
+Top hit                  0.000950%
+Mid hit                  39.381284%
+Bot hit                  60.617766%
+ring evict #             42093
+Stash #                  3
+Stash Contain            0

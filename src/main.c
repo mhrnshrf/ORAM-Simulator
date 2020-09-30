@@ -1265,11 +1265,11 @@ char bench[20];
 			if (!skip_invokation)
 			{
 				// printf("invoke oram trace %d addr %lld\n", tracectr, addr[numc]);
-				if (invokectr % 10000 == 0)
-				{
-					printf("\n@ while exp  trace %d\n", tracectr);
-					print_count_level();
-				}
+				// if (invokectr % 10000 == 0)
+				// {
+				// 	printf("\n@ while exp  trace %d\n", tracectr);
+				// 	print_count_level();
+				// }
 
 				invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
 				oram_just_invoked = true;
