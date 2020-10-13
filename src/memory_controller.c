@@ -3246,6 +3246,13 @@ void print_oram_stats(){
   // print_shuff_stat();
   // print_stash();
 
+  int shuffctr = 0; 
+  for (int i = 0; i < LEVEL; i++)
+  {
+    shuffctr += shuff[i];
+  }
+  
+
   printf("\n\n\n\n............... ORAM Stats ...............\n\n");
   printf("Execution Time (s)       %f\n", cpu_time_used);
   printf("Total Cycles             %lld \n", CYCLE_VAL);
@@ -3294,6 +3301,7 @@ void print_oram_stats(){
   printf("Stash #                  %d\n", stashctr);
   printf("Stash Contain            %d\n", stash_cont);
   printf("Linger Discard           %d\n", linger_discard);
+  printf("Shuff #                  %d\n", shuffctr);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
