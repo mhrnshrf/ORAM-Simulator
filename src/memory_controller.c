@@ -184,6 +184,7 @@ int fillhit = 0;
 int fillmiss = 0;
 int ring_evictctr = 0;
 int stash_cont = 0;
+int linger_discard = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -1336,6 +1337,7 @@ int add_to_stash(Slot s){
   {
     if (s.label != PosMap[s.addr])
     {
+      linger_discard++;
       return STASH_SIZE_ORG;
     }
   }
@@ -3229,9 +3231,9 @@ int reverse_lex(int n){
 
 void print_oram_stats(){
 
-  print_count_level();
+  // print_count_level();
 
-  print_shuff_stat();
+  // print_shuff_stat();
   // print_stash();
 
   printf("\n\n\n\n............... ORAM Stats ...............\n\n");
@@ -3281,6 +3283,7 @@ void print_oram_stats(){
   printf("ring evict #             %d\n", ring_evictctr);
   printf("Stash #                  %d\n", stashctr);
   printf("Stash Contain            %d\n", stash_cont);
+  printf("Linger Discard           %d\n", linger_discard);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
