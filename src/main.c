@@ -680,7 +680,7 @@ char bench[20];
 
 	no_miss_occured = true;
 
-	if (invokectr >= 535293/* tracectr >= TRACE_SIZE || tracectr >= endpoint  || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
+	if (tracectr >= TRACE_SIZE || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
 	{
 		break;
 	}

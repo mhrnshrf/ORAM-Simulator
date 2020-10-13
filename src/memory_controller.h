@@ -37,7 +37,8 @@
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
-#define RAND_ENABLE     1     // 0/1 flag to disable/enable rand address instead of trace addr
+#define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
+#define WRITE_LINGER    1     // 0/1 flag to disable/enable write linger feature for ring oram
 
 
 // oram config

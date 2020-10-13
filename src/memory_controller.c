@@ -1762,7 +1762,14 @@ void freecursive_access(int addr, char type){
         // reset_dirty_search();
         
         pinOn();
-        oram_access(tag);
+        if (RING_ENABLE)
+        {
+          ring_access(tag);
+        }
+        else
+        {
+          oram_access(tag);
+        }
         pinOff();
 
         if (i_saved == 1)
@@ -1860,7 +1867,15 @@ void freecursive_access(int addr, char type){
   }
 
   // printf("freecursuve: b4 last oram access (data): %d\n", addr);
-  oram_access(addr);  // STEP 3   Data block access
+  // oram_access(addr);  // STEP 3   Data block access
+  if (RING_ENABLE)
+  {
+    ring_access(addr);
+  }
+  else
+  {
+    oram_access(addr);
+  }
 }
 
 void test_oram(char * argv[]){
@@ -2086,16 +2101,16 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   // printf("invoke oram: physical addr: %lld\n", addr);
   // printf("invoke oram: b4 freecursive call addr: %d\n", addr);
 
-  if (RING_ENABLE)
-  {
-    if (RAND_ENABLE)
-    {
-      addr = rand() % BLOCK;
-    }
+  // if (RING_ENABLE)
+  // {
+  //   if (RAND_ENABLE)
+  //   {
+  //     addr = rand() % BLOCK;
+  //   }
     
-    ring_access(addr);
-    return;
-  }
+  //   ring_access(addr);
+  //   return;
+  // }
   
 
   if (RHO_ENABLE)
