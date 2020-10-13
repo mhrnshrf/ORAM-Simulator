@@ -1332,6 +1332,16 @@ int add_to_stash(Slot s){
   //   }
   // }
 
+  if (RING_ENABLE && WRITE_LINGER)
+  {
+    if (s.label != PosMap[s.addr])
+    {
+      return STASH_SIZE_ORG;
+    }
+  }
+  
+  
+
   if (s.addr == 0)
   {
     printf("exiting due to 0 added to stash!\n");
@@ -1870,7 +1880,30 @@ void freecursive_access(int addr, char type){
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
   {
-    ring_access(addr);
+    if (WRITE_LINGER && type == 'W')
+    {
+      int cur = PosMap[addr];
+      while (PosMap[addr] == cur)
+      {
+        PosMap[addr] = rand() % PATH;
+      }
+      
+      Slot s = {.addr = addr , .label = PosMap[addr], .isReal = true, .isData = true};
+      int si = add_to_stash(s);
+      if (si == -1)
+      {
+        printf("ERROR: freecursive: write linger: stash overflow!   @ %d\n", stashctr); 
+        print_oram_stats();
+        exit(1);
+      }
+      
+    }
+    else
+    {
+      ring_access(addr);
+    }
+    
+    
   }
   else
   {
