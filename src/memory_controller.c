@@ -80,6 +80,7 @@ typedef struct EntryBuf{
 
 Queue *oramQ;
 Queue *plbQ;
+Queue *pathQ;
 
 
 
@@ -612,6 +613,7 @@ void oram_alloc(){
 
   oramQ = ConstructQueue(QUEUE_SIZE);
   plbQ = ConstructQueue(128);
+  pathQ = ConstructQueue(RING_A);
 
 }
 
@@ -3014,6 +3016,9 @@ void ring_access(int addr){
 
 
 void ring_read_path(int label, int addr){
+  Element *pN = (Element*) malloc(sizeof (Element));
+  pN->addr = label;
+  Enqueue(pathQ, pN);
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -3097,7 +3102,12 @@ void ring_read_path(int label, int addr){
 void ring_evict_path(int label){
   ring_evictctr++;
   // int label = ring_G % PATH;
-  label = reverse_lex(ring_G);
+
+  // label = reverse_lex(ring_G);
+
+  Element *pN = Dequeue(pathQ);
+  label = pN->addr;
+
   ring_G++;
 
   read_path(label);
