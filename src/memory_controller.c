@@ -3119,7 +3119,7 @@ void ring_evict_path(int label){
   
 
   // printf("\npath %d\n", label);
-  for (int i = LEVEL-15; i >= 9; i--)
+  for (int i = LEVEL-6; i >= 18; i--)
   {
     if (revarr[ring_G] == label)
     {
