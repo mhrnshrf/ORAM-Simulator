@@ -3109,7 +3109,7 @@ void ring_evict_path(int label){
   // label = pN->addr;
 
 
-  for (int i = LEVEL-1; i >= 1; i--)
+  for (int i = LEVEL-6; i >= 10; i--)
   {
     int mask = 1<<(LEVEL-i-1);
     int bit = (label&mask)>>(LEVEL-i-1);
