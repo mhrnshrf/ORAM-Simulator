@@ -82,6 +82,8 @@ Queue *oramQ;
 Queue *plbQ;
 Queue *pathQ;
 
+int revarr[512];
+
 
 
 Bucket GlobTree[NODE];      // global oram tree
@@ -614,6 +616,12 @@ void oram_alloc(){
   oramQ = ConstructQueue(QUEUE_SIZE);
   plbQ = ConstructQueue(128);
   pathQ = ConstructQueue(RING_A);
+
+  for (int i = 0; i < pow(2,9); i++)
+  {
+    revarr[i] = reverse_lex(i);
+  }
+  
 
 }
 
@@ -3108,20 +3116,39 @@ void ring_evict_path(int label){
   // Element *pN = Dequeue(pathQ);
   // label = pN->addr;
 
+  
 
-  // for (int i = LEVEL-6; i >= 18; i--)
-  // {
-  //   int mask = 1<<(LEVEL-i-1);
-  //   int bit = (label&mask)>>(LEVEL-i-1);
-  //   int index = calc_index(label,i);
-  //   int adjacent = (bit == 1) ? index-1 : index+1;
+  // printf("\npath %d\n", label);
+  for (int i = LEVEL-15; i >= 9; i--)
+  {
+    if (revarr[ring_G] == label)
+    {
+      int mask = 1<<(LEVEL-i-1);
+      int bit = (label&mask)>>(LEVEL-i-1);
+      int index = calc_index(label,i);
+      int adjacent = (bit == 1) ? index-1 : index+1;
 
-  //   if (GlobTree[adjacent].count > GlobTree[index].count)
-  //   {
-  //     label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
-  //   }
+      // printf("mask %d\n", mask);
+      // printf("bit %d\n", bit);
+      // printf("index %d\n", index);
+      // printf("adjacent %d\n", adjacent);
+
+      if (GlobTree[adjacent].count > GlobTree[index].count)
+      {
+        label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
+      }
+      // printf("label %d\n", adjacent);
+    }
+    else
+    {
+      int temp = revarr[ring_G];
+      revarr[ring_G] = label;
+      label = temp;
+    }
+    
+    
       
-  // }
+  }
   
 
   ring_G++;
