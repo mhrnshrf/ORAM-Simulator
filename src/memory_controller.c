@@ -82,7 +82,7 @@ Queue *oramQ;
 Queue *plbQ;
 Queue *pathQ;
 
-int revarr[512];
+int revarr[RING_REV];
 
 
 
@@ -617,7 +617,7 @@ void oram_alloc(){
   plbQ = ConstructQueue(128);
   pathQ = ConstructQueue(RING_A);
 
-  for (int i = 0; i < pow(2,9); i++)
+  for (int i = 0; i < RING_REV; i++)
   {
     revarr[i] = reverse_lex(i);
   }
@@ -3119,9 +3119,10 @@ void ring_evict_path(int label){
   
 
   // printf("\npath %d\n", label);
-  for (int i = LEVEL-6; i >= 18; i--)
+  for (int i = LEVEL-15; i >= 9; i--)
   {
-    if (revarr[ring_G] == label)
+    int gi = calc_index(ring_G, i);
+    if (revarr[gi] == label)
     {
       int mask = 1<<(LEVEL-i-1);
       int bit = (label&mask)>>(LEVEL-i-1);
@@ -3141,8 +3142,8 @@ void ring_evict_path(int label){
     }
     else
     {
-      int temp = revarr[ring_G];
-      revarr[ring_G] = label;
+      int temp = revarr[gi];
+      revarr[gi] = label;
       label = temp;
     }
     

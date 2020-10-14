@@ -99,6 +99,8 @@
 #define RING_S 7
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 
+#define RING_REV 512
+
 
 
 enum{
