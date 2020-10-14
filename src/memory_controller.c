@@ -3134,7 +3134,8 @@ void ring_evict_path(int label){
       // printf("index %d\n", index);
       // printf("adjacent %d\n", adjacent);
 
-      if (GlobTree[adjacent].count > GlobTree[index].count)
+      // if (GlobTree[adjacent].count > GlobTree[index].count)
+      if ((GlobTree[adjacent].count > GlobTree[index].count) && (GlobTree[adjacent].count >= RING_S-1))
       {
         label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
       }
