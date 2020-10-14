@@ -3018,7 +3018,7 @@ void ring_access(int addr){
 void ring_read_path(int label, int addr){
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = label;
-  Enqueue(pathQ, pN);
+  // Enqueue(pathQ, pN);
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -3103,10 +3103,26 @@ void ring_evict_path(int label){
   ring_evictctr++;
   // int label = ring_G % PATH;
 
-  // label = reverse_lex(ring_G);
+  label = reverse_lex(ring_G);
 
-  Element *pN = Dequeue(pathQ);
-  label = pN->addr;
+  // Element *pN = Dequeue(pathQ);
+  // label = pN->addr;
+
+
+  for (int i = LEVEL-1; i >= 0; i--)
+  {
+    int mask = 1<<(LEVEL-i-1);
+    int bit = (label&mask)>>(LEVEL-i-1);
+    int index = calc_index(label,i);
+    int adjacent = (bit == 1) ? index-1 : index+1;
+
+    if (GlobTree[adjacent].count > GlobTree[index].count)
+    {
+      label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
+    }
+      
+  }
+  
 
   ring_G++;
 
