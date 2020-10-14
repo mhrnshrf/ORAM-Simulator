@@ -3109,19 +3109,19 @@ void ring_evict_path(int label){
   // label = pN->addr;
 
 
-  for (int i = LEVEL-6; i >= 18; i--)
-  {
-    int mask = 1<<(LEVEL-i-1);
-    int bit = (label&mask)>>(LEVEL-i-1);
-    int index = calc_index(label,i);
-    int adjacent = (bit == 1) ? index-1 : index+1;
+  // for (int i = LEVEL-6; i >= 18; i--)
+  // {
+  //   int mask = 1<<(LEVEL-i-1);
+  //   int bit = (label&mask)>>(LEVEL-i-1);
+  //   int index = calc_index(label,i);
+  //   int adjacent = (bit == 1) ? index-1 : index+1;
 
-    if (GlobTree[adjacent].count > GlobTree[index].count)
-    {
-      label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
-    }
+  //   if (GlobTree[adjacent].count > GlobTree[index].count)
+  //   {
+  //     label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
+  //   }
       
-  }
+  // }
   
 
   ring_G++;
