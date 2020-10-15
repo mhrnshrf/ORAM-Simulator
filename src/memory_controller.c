@@ -3119,11 +3119,11 @@ void ring_evict_path(int label){
   
 
   // printf("\npath %d\n", label);
-  for (int i = LEVEL-6; i >= 18; i--)
+  for (int i = LEVEL-15; i >= 9; i--)
   {
-    int gi = calc_index(ring_G, i);
-    if (revarr[gi] == label)
-    {
+    // int gi = calc_index(ring_G, i);
+    // if (revarr[gi] == label)
+    // {
       int mask = 1<<(LEVEL-i-1);
       int bit = (label&mask)>>(LEVEL-i-1);
       int index = calc_index(label,i);
@@ -3138,15 +3138,16 @@ void ring_evict_path(int label){
       if ((GlobTree[adjacent].count > GlobTree[index].count) && (GlobTree[adjacent].count >= RING_S-1))
       {
         label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
+        ring_G--;
       }
       // printf("label %d\n", adjacent);
-    }
-    else
-    {
-      int temp = revarr[gi];
-      revarr[gi] = label;
-      label = temp;
-    }
+    // }
+    // else
+    // {
+    //   int temp = revarr[gi];
+    //   revarr[gi] = label;
+    //   label = temp;
+    // }
     
     
       
