@@ -3148,8 +3148,6 @@ void ring_evict_path(int label){
     //   revarr[gi] = label;
     //   label = temp;
     // }
-    
-    
       
   }
   
@@ -3289,7 +3287,7 @@ void print_oram_stats(){
 
   // print_count_level();
 
-  // print_shuff_stat();
+  print_shuff_stat();
   // print_stash();
 
   int shuffctr = 0; 
