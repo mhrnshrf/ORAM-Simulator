@@ -188,6 +188,7 @@ int fillmiss = 0;
 int ring_evictctr = 0;
 int stash_cont = 0;
 int linger_discard = 0;
+int ringctr = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -2980,6 +2981,7 @@ void early_writeback(){
 
 
 void ring_access(int addr){
+  ringctr++;
   int label = PosMap[addr];
 
 
@@ -3119,37 +3121,37 @@ void ring_evict_path(int label){
   
 
   // printf("\npath %d\n", label);
-  for (int i = LEVEL-15; i >= 9; i--)
-  {
-    // int gi = calc_index(ring_G, i);
-    // if (revarr[gi] == label)
-    // {
-      int mask = 1<<(LEVEL-i-1);
-      int bit = (label&mask)>>(LEVEL-i-1);
-      int index = calc_index(label,i);
-      int adjacent = (bit == 1) ? index-1 : index+1;
+  // for (int i = LEVEL-15; i >= 9; i--)
+  // {
+  //   // int gi = calc_index(ring_G, i);
+  //   // if (revarr[gi] == label)
+  //   // {
+  //     int mask = 1<<(LEVEL-i-1);
+  //     int bit = (label&mask)>>(LEVEL-i-1);
+  //     int index = calc_index(label,i);
+  //     int adjacent = (bit == 1) ? index-1 : index+1;
 
-      // printf("mask %d\n", mask);
-      // printf("bit %d\n", bit);
-      // printf("index %d\n", index);
-      // printf("adjacent %d\n", adjacent);
+  //     // printf("mask %d\n", mask);
+  //     // printf("bit %d\n", bit);
+  //     // printf("index %d\n", index);
+  //     // printf("adjacent %d\n", adjacent);
 
-      // if (GlobTree[adjacent].count > GlobTree[index].count)
-      if ((GlobTree[adjacent].count > GlobTree[index].count) && (GlobTree[adjacent].count >= RING_S-1))
-      {
-        label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
-        ring_G--;
-      }
-      // printf("label %d\n", adjacent);
-    // }
-    // else
-    // {
-    //   int temp = revarr[gi];
-    //   revarr[gi] = label;
-    //   label = temp;
-    // }
+  //     // if (GlobTree[adjacent].count > GlobTree[index].count)
+  //     if ((GlobTree[adjacent].count > GlobTree[index].count) && (GlobTree[adjacent].count >= RING_S-1))
+  //     {
+  //       label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
+  //       ring_G--;
+  //     }
+  //     // printf("label %d\n", adjacent);
+  //   // }
+  //   // else
+  //   // {
+  //   //   int temp = revarr[gi];
+  //   //   revarr[gi] = label;
+  //   //   label = temp;
+  //   // }
       
-  }
+  // }
   
 
   ring_G++;
@@ -3341,11 +3343,12 @@ void print_oram_stats(){
   printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
   printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
   printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
-  printf("ring evict #             %d\n", ring_evictctr);
-  printf("Stash #                  %d\n", stashctr);
+  printf("Ring evict               %d\n", ring_evictctr);
+  printf("Stash occ                %d\n", stashctr);
   printf("Stash Contain            %d\n", stash_cont);
   printf("Linger Discard           %d\n", linger_discard);
-  printf("Shuff #                  %d\n", shuffctr);
+  printf("Ring shuff               %d\n", shuffctr);
+  printf("Ring acc                 %d\n", ringctr);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
