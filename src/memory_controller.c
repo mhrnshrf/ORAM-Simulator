@@ -28,6 +28,7 @@ extern long long int trace_clk;
 
 long long int ring_G = 0;
 long long int ring_round = 0;
+int ep_round = 0;
 
 // long long int CYCLE_VAL = 0;
 
@@ -3115,8 +3116,15 @@ void ring_evict_path(int label){
 
   label = reverse_lex(ring_G);
 
-  // Element *pN = Dequeue(pathQ);
-  // label = pN->addr;
+  Element *pN = Dequeue(pathQ);
+
+  ep_round = (ep_round + 1) % EP_TURN;
+
+  if (ep_round == 0)
+  {
+    label = pN->addr;
+  }
+  
 
   
 

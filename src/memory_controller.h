@@ -100,6 +100,7 @@
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 
 #define RING_REV 512
+#define EP_TURN 2
 
 
 
