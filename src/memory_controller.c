@@ -3029,7 +3029,7 @@ void ring_access(int addr){
 void ring_read_path(int label, int addr){
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = label;
-  // Enqueue(pathQ, pN);
+  Enqueue(pathQ, pN);
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -3120,9 +3120,10 @@ void ring_evict_path(int label){
 
   ep_round = (ep_round + 1) % EP_TURN;
 
-  if (ep_round == 0)
+  if (ep_round == 0 && pN != NULL)
   {
     label = pN->addr;
+    ring_G--;
   }
   
 
