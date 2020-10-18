@@ -28,7 +28,8 @@ extern long long int trace_clk;
 
 long long int ring_G = 0;
 long long int ring_round = 0;
-int ep_round = 0;
+long long int ep_round = 0;
+long long int touchcount = 0;
 
 // long long int CYCLE_VAL = 0;
 
@@ -3029,7 +3030,7 @@ void ring_access(int addr){
 void ring_read_path(int label, int addr){
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = label;
-  Enqueue(pathQ, pN);
+  // Enqueue(pathQ, pN);
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -3114,17 +3115,27 @@ void ring_evict_path(int label){
   ring_evictctr++;
   // int label = ring_G % PATH;
 
+  ep_round++;
+
+  if ((ep_round % RING_REV) == 0)
+  {
+    int diff = shuff[9] - touchcount; 
+    printf("%d \n", diff);
+    touchcount = shuff[9];
+  }
+  
+
   label = reverse_lex(ring_G);
 
-  Element *pN = Dequeue(pathQ);
+  // Element *pN = Dequeue(pathQ);
 
-  ep_round = (ep_round + 1) % EP_TURN;
+  // ep_round = (ep_round + 1) % EP_TURN;
 
-  if (ep_round == 0 && pN != NULL)
-  {
-    label = pN->addr;
-    ring_G--;
-  }
+  // if (ep_round == 0 && pN != NULL)
+  // {
+  //   label = pN->addr;
+  //   ring_G--;
+  // }
   
 
   
