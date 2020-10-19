@@ -113,7 +113,7 @@ enum{
   // main tree
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
   Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1
-  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 :(RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 :(RING_ENABLE && RSTL_ENABLE)? Z+1: Z,   // # slots per bucket upto L2
   Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : (RING_ENABLE &&RSTL_ENABLE)? Z-3:Z,   // # slots per bucket upto L3
   Z4 = (RING_ENABLE) ? Z3 : Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
