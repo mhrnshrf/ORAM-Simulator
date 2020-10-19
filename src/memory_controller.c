@@ -807,7 +807,7 @@ int assign_a_path(int addr){
       {
         if(!GlobTree[index].slot[j].isReal)
         {
-          if (!RING_ENABLE || GlobTree[index].dumnum > RING_S)
+          if (!RING_ENABLE || GlobTree[index].dumnum > LS[i])
           {
             GlobTree[index].slot[j].addr = addr;
             GlobTree[index].slot[j].label = label;
@@ -1062,7 +1062,7 @@ void write_path(int label){
           stt_cand = stt_candidate(label, i);
           if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
           {
-            if (!RING_ENABLE || GlobTree[index].dumnum > RING_S)
+            if (!RING_ENABLE || GlobTree[index].dumnum > LS[i])
             {
               sttctr++;
               GlobTree[index].slot[j].addr = stt_cand;
@@ -1081,7 +1081,7 @@ void write_path(int label){
 
         if (candidate[j] != -1) 
         {
-          if (!RING_ENABLE || GlobTree[index].dumnum > RING_S)
+          if (!RING_ENABLE || GlobTree[index].dumnum > LS[i])
           {
             if (RHO_ENABLE && (TREE_VAR == RHO))
             {
@@ -3157,7 +3157,7 @@ void ring_evict_path(int label){
   //     // printf("adjacent %d\n", adjacent);
 
   //     // if (GlobTree[adjacent].count > GlobTree[index].count)
-  //     if ((GlobTree[adjacent].count > GlobTree[index].count) && (GlobTree[adjacent].count >= RING_S-1))
+  //     if ((GlobTree[adjacent].count > GlobTree[index].count) && (GlobTree[adjacent].count >= LS[i]-1))
   //     {
   //       label = (bit == 1) ? label-(1<<(LEVEL-i-1)) : label+(1<<(LEVEL-i-1));
   //       ring_G--;
@@ -3186,7 +3186,7 @@ void ring_early_reshuffle(int label){
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
-    if (GlobTree[index].count >= RING_S)
+    if (GlobTree[index].count >= LS[i])
     {
       shuff[i]++;
       for (int j = 0; j < LZ_VAR[i]; j++)
@@ -3230,7 +3230,7 @@ void ring_early_reshuffle(int label){
           int mem_addr = index*Z_VAR + j;
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W');
         }
-        if (candidate[j] != -1 && GlobTree[index].dumnum > RING_S)
+        if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
         {
           // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
           GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
