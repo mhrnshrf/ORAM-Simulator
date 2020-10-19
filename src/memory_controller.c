@@ -213,7 +213,7 @@ int OV_THRESHOLD_VAR = OV_THRESHOLD;
 int BK_EVICTION_VAR = BK_EVICTION;
 int EMPTY_TOP_VAR = EMPTY_TOP;
 int TOP_CACHE_VAR = TOP_CACHE;
-int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  
+int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4}; 
 int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
@@ -1346,6 +1346,8 @@ int add_to_stash(Slot s){
   //   }
   // }
 
+  
+
   if (RING_ENABLE && WRITE_LINGER)
   {
     if (s.label != PosMap[s.addr])
@@ -1391,6 +1393,13 @@ int add_to_stash(Slot s){
         Stash[i].isData = true;
         
         stashctr++;
+
+        if (!s.isReal)
+        {
+          printf("ERROR: add to stash: dummy added @ trace %d\n", tracectr);
+          print_stash();
+          exit(1);
+        }
         return i;
       }
     }
@@ -2986,6 +2995,8 @@ void ring_access(int addr){
   ringctr++;
   int label = PosMap[addr];
 
+  printf("\n@ ring access  trace %d\n", tracectr);
+  print_stash();
 
   // if (tracectr % 100000 == 0)
   // {
@@ -3004,25 +3015,25 @@ void ring_access(int addr){
   // printf("\nb4 read stash %d  trace %d\n", stashctr, tracectr);
   ring_read_path(label, addr);
   // printf("af read stash %d  trace %d\n", stashctr, tracectr);
-  // printf("@> ring read path  trace %d\n\n", tracectr);
+  printf("@> ring read path  trace %d\n\n", tracectr);
   // print_stash();
 
   remap_block(addr);
-  // printf("@> remap block  trace %d\n", tracectr);
+  printf("@> remap block  trace %d\n", tracectr);
 
   ring_round = (ring_round + 1) % RING_A; // ??? to be defined
 
   if (ring_round == 0)
   {
-  //  printf("\n@- evict  trace %d  stash %d\n", tracectr, stashctr);
+   printf("\n@- evict  trace %d  stash %d\n", tracectr, stashctr);
     ring_evict_path(label);
-  //  printf("@> evict  trace %d  stash %d\n\n", tracectr, stashctr);
+   printf("@> evict  trace %d  stash %d\n\n", tracectr, stashctr);
   }
-  // printf("@> evict path  trace %d\n", tracectr);
+  printf("@> evict path  trace %d\n", tracectr);
   
-  // printf("\n@- reshuffle  trace %d  stash %d\n", tracectr, stashctr);
+  printf("\n@- reshuffle  trace %d  stash %d\n", tracectr, stashctr);
   ring_early_reshuffle(label);
-  // printf("@> reshuffle trace %d   stash %d\n", tracectr, stashctr);
+  printf("@> reshuffle trace %d   stash %d\n", tracectr, stashctr);
 
 }
 
