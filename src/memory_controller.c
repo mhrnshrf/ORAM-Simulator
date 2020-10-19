@@ -2995,8 +2995,8 @@ void ring_access(int addr){
   ringctr++;
   int label = PosMap[addr];
 
-  printf("\n@ ring access  trace %d\n", tracectr);
-  print_stash();
+  // printf("\n@ ring access  trace %d\n", tracectr);
+  // print_stash();
 
   // if (tracectr % 100000 == 0)
   // {
@@ -3015,25 +3015,25 @@ void ring_access(int addr){
   // printf("\nb4 read stash %d  trace %d\n", stashctr, tracectr);
   ring_read_path(label, addr);
   // printf("af read stash %d  trace %d\n", stashctr, tracectr);
-  printf("@> ring read path  trace %d\n\n", tracectr);
+  // printf("@> ring read path  trace %d\n\n", tracectr);
   // print_stash();
 
   remap_block(addr);
-  printf("@> remap block  trace %d\n", tracectr);
+  // printf("@> remap block  trace %d\n", tracectr);
 
   ring_round = (ring_round + 1) % RING_A; // ??? to be defined
 
   if (ring_round == 0)
   {
-   printf("\n@- evict  trace %d  stash %d\n", tracectr, stashctr);
+  //  printf("\n@- evict  trace %d  stash %d\n", tracectr, stashctr);
     ring_evict_path(label);
-   printf("@> evict  trace %d  stash %d\n\n", tracectr, stashctr);
+  //  printf("@> evict  trace %d  stash %d\n\n", tracectr, stashctr);
   }
-  printf("@> evict path  trace %d\n", tracectr);
+  // printf("@> evict path  trace %d\n", tracectr);
   
-  printf("\n@- reshuffle  trace %d  stash %d\n", tracectr, stashctr);
+  // printf("\n@- reshuffle  trace %d  stash %d\n", tracectr, stashctr);
   ring_early_reshuffle(label);
-  printf("@> reshuffle trace %d   stash %d\n", tracectr, stashctr);
+  // printf("@> reshuffle trace %d   stash %d\n", tracectr, stashctr);
 
 }
 
