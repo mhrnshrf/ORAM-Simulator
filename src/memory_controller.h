@@ -39,7 +39,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 #define WRITE_LINGER    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable write stl feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable write stl feature for ring oram
 
 
 // oram config
@@ -112,9 +112,10 @@
 enum{
   // main tree
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
-  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1
-  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 :(RSTL_ENABLE)? Z+2: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : (RSTL_ENABLE)? Z-3:Z,   // # slots per bucket upto L3
+  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 :(RING_ENABLE && RSTL_ENABLE)? Z+2: Z,   // # slots per bucket upto L2
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : (RING_ENABLE &&RSTL_ENABLE)? Z-3:Z,   // # slots per bucket upto L3
+  Z4 = (RING_ENABLE) ? Z3 : Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
@@ -137,9 +138,10 @@ enum{
   // RHO_SET = (int) ceil(RHO_BLOCK/10),
   RHO_SET = 16000,
   // ring oram
-  S1 = (RSTL_ENABLE) ? Z1-RING_Z : RING_S,   // # dummy slots per bucket upto SL1
-  S2 = (RSTL_ENABLE) ? Z2-RING_Z : RING_S,   // # dummy slots per bucket upto SL2
-  S3 = (RSTL_ENABLE) ? Z3-RING_Z : RING_S,   // # dummy slots per bucket upto SL3
+  S1 = (RING_ENABLE && RSTL_ENABLE) ? Z1-RING_Z : RING_S,   // # dummy slots per bucket upto SL1
+  S2 = (RING_ENABLE && RSTL_ENABLE) ? Z2-RING_Z : RING_S,   // # dummy slots per bucket upto SL2
+  S3 = (RING_ENABLE && RSTL_ENABLE) ? Z3-RING_Z : RING_S,   // # dummy slots per bucket upto SL3
+  S4 = S3,
 
 };
 
@@ -251,9 +253,9 @@ extern int PosMap[BLOCK];
 
 extern int oram_effective_pl;
 
-static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z};  // array of different Z for different levels in oram
+static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
-static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = RING_S};  // array of different S for different levels in  ring oram
+static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
 
 
 

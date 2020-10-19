@@ -165,6 +165,7 @@ int main(int argc, char * argv[])
 	printf("Early WB       %s\n", EARLY_ENABLE?"Enabled":"No" );
 	printf("Snapshot       %s\n", SNAPSHOT_ENABLE?"Enabled":"No" );
 	printf("Timeout        %s\n\n", TIMEOUT_ENBALE?"Enabled":"No" );
+	printf("Ring           %s\n\n", RING_ENABLE?"Enabled":"No" );
  
 
 	printf("....................................................\n");
@@ -288,8 +289,29 @@ int main(int argc, char * argv[])
 	printf("STT Enable     %s\n", STT_ENABLE?"On":"Off");
 	printf("STT Size       %d entry / %d-way\n\n", STT_SET*STT_WAY, STT_WAY);
 
+
+	printf("\n....................................................\n");
+	printf("                 Ring Config\n");
+	printf("....................................................\n");
+	printf("Ring Enable     %s\n", RING_ENABLE?"On":"Off");
+	printf("Ring A	        %d\n", RING_A);
+	printf("Ring S	        %d\n", RING_S);
+	printf("Ring Z	        %d\n", RING_Z);
+	printf("Write Linger    %s\n", WRITE_LINGER?"On":"Off");
+	printf("Ring STL        %s\n", RSTL_ENABLE?"On":"Off");
+	printf("Ring   SL1  %d     Z1  %d\n", SL1, S1);
+	printf("Ring   SL2  %d    Z2  %d\n", SL2, S2);
+	printf("Ring   SL3  %d    Z3  %d\n\n", SL3, S3);
+	printf("Ring LS \n");
+	for (int i = 0; i < LEVEL; i++)
+	{
+		printf("%d ", LS[i]);
+	}
+	// printf("\n= %d ~> ring oram s\n", ring_oram_path_length);
+	// printf("  %d ~> ring oram effective s\n\n", ring_oram_effective_pl);
+
 	
-	printf("....................................................\n\n\n\n\n");
+	printf("\n....................................................\n\n\n\n\n");
 	// init_trace();
 
 	
