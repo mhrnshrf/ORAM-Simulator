@@ -299,9 +299,9 @@ int main(int argc, char * argv[])
 	printf("Ring Z	        %d\n", RING_Z);
 	printf("Write Linger    %s\n", WRITE_LINGER?"On":"Off");
 	printf("Ring STL        %s\n", RSTL_ENABLE?"On":"Off");
-	printf("Ring   SL1  %d     Z1  %d\n", SL1, S1);
-	printf("Ring   SL2  %d    Z2  %d\n", SL2, S2);
-	printf("Ring   SL3  %d    Z3  %d\n\n", SL3, S3);
+	printf("Ring   SL1  %d     S1  %d\n", SL1, S1);
+	printf("Ring   SL2  %d    S2  %d\n", SL2, S2);
+	printf("Ring   SL3  %d    S3  %d\n\n", SL3, S3);
 	printf("Ring LS \n");
 	for (int i = 0; i < LEVEL; i++)
 	{
