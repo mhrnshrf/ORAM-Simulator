@@ -1006,7 +1006,7 @@ void write_path(int label){
   {
     int index = calc_index(label, i);
     int addr = 0;
-    // GlobTree[index].count = 0; // for ring oram evict path
+    GlobTree[index].count = 0; // for ring oram evict path
     
     // int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
     // if (stashctr_var == 0)
@@ -3186,11 +3186,17 @@ void ring_evict_path(int label){
   
 
   ring_G++;
+  if (ep_round % 2 == 0)
+  {
+    read_path(label);
+    write_path(label);
+  }
+  else
+  {
+    ring_early_reshuffle(label);
+  }
+  
 
-  read_path(label);
-  write_path(label);
-
-  // ring_early_reshuffle(label);
 
 }
 
