@@ -42,6 +42,7 @@
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable write stl feature for ring oram
 
 
+
 // oram config
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
