@@ -46,7 +46,7 @@
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 14     // # slots per bucket
+#define Z 12     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
@@ -96,7 +96,7 @@
 
 
 // ring oram config
-#define RING_A 1
+#define RING_A 5
 #define RING_S 7
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 
