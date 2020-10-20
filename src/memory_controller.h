@@ -39,7 +39,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 #define WRITE_LINGER    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     1     // 0/1 flag to disable/enable write stl feature for ring oram
+#define RSTL_ENABLE     0     // 0/1 flag to disable/enable write stl feature for ring oram
 
 
 // oram config
@@ -96,7 +96,7 @@
 
 
 // ring oram config
-#define RING_A 5
+#define RING_A 1
 #define RING_S 7
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 
