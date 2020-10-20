@@ -3128,12 +3128,12 @@ void ring_evict_path(int label){
 
   ep_round++;
 
-  if ((ep_round % RING_REV) == 0)
-  {
-    int diff = shuff[9] - touchcount; 
-    printf("%d \n", diff);
-    touchcount = shuff[9];
-  }
+  // if ((ep_round % RING_REV) == 0)
+  // {
+  //   int diff = shuff[9] - touchcount; 
+  //   printf("%d \n", diff);
+  //   touchcount = shuff[9];
+  // }
   
 
   label = reverse_lex(ring_G);
@@ -3186,17 +3186,11 @@ void ring_evict_path(int label){
   
 
   ring_G++;
-  if (ep_round % 2 == 0)
-  {
-    read_path(label);
-    write_path(label);
-  }
-  else
-  {
-    ring_early_reshuffle(label);
-  }
-  
 
+  read_path(label);
+  write_path(label);
+
+  // ring_early_reshuffle(label);
 
 }
 
