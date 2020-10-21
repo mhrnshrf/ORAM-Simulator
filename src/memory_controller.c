@@ -3200,11 +3200,11 @@ void ring_evict_path(int label){
     }
   }
 
-  if (max_ind != gi)
+  if (max_ind != gi && injcount < 120)
   {
-    // label = label & 0b00000000011111111111111;
-    // label = label | (max_ind<<14);
-    // ring_G--;
+    label = label & 0b00000000011111111111111;
+    label = label | (max_ind<<14);
+    ring_G--;
     injcount++;
   }
   
