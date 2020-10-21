@@ -191,6 +191,7 @@ int ring_evictctr = 0;
 int stash_cont = 0;
 int linger_discard = 0;
 int ringctr = 0;
+int injcount = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -3128,12 +3129,14 @@ void ring_evict_path(int label){
 
   ep_round++;
 
-  // if ((ep_round % RING_REV) == 0)
-  // {
-  //   int diff = shuff[9] - touchcount; 
-  //   printf("%d \n", diff);
-  //   touchcount = shuff[9];
-  // }
+  if ((ep_round % RING_REV) == 0)
+  {
+    // int diff = shuff[9] - touchcount; 
+    // printf("%d \n", diff);
+    // touchcount = shuff[9];
+    printf("%d \n", injcount);
+    injcount = 0;
+  }
   
 
   label = reverse_lex(ring_G);
@@ -3197,8 +3200,14 @@ void ring_evict_path(int label){
     }
   }
 
-  label = label & 0b00000000011111111111111;
-  label = label | (max_ind<<14);
+  if (max_ind != gi)
+  {
+    label = label & 0b00000000011111111111111;
+    label = label | (max_ind<<14);
+    ring_G--;
+    injcount++;
+  }
+  
   
   
 
