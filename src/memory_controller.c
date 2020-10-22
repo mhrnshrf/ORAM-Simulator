@@ -3187,26 +3187,26 @@ void ring_evict_path(int label){
       
   // }
 
-  // int gi = calc_index(ring_G, 9);
-  // int max = GlobTree[gi].count;
-  // int max_ind = gi;
+  int gi = calc_index(ring_G, 9);
+  int max = GlobTree[gi].count;
+  int max_ind = gi;
 
-  // for (int i = 0; i < RING_REV; i++)
-  // {
-  //   if (GlobTree[i].count > max && GlobTree[i].count >= RING_S-1)
-  //   {
-  //     max = GlobTree[i].count;
-  //     max_ind = i;
-  //   }
-  // }
+  for (int i = gi-255; i < RING_REV; i++)
+  {
+    if (GlobTree[i].count > max && GlobTree[i].count >= RING_S-1)
+    {
+      max = GlobTree[i].count;
+      max_ind = i;
+    }
+  }
 
-  // if (max_ind != gi && injcount < 50)
-  // {
-  //   label = label & 0b00000000011111111111111;
-  //   label = label | (max_ind<<14);
-  //   ring_G--;
-  //   injcount++;
-  // }
+  if (max_ind != gi && injcount < 120)
+  {
+    label = label & 0b00000000011111111111111;
+    label = label | (max_ind<<14);
+    ring_G--;
+    injcount++;
+  }
   
   
   
