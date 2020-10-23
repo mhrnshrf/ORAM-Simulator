@@ -3213,8 +3213,8 @@ void ring_evict_path(int label){
 
   ring_G++;
 
-  read_path(label);
-  write_path(label);
+  // read_path(label);
+  // write_path(label);
 
   // ring_early_reshuffle(label);
 
