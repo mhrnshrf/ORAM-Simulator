@@ -97,7 +97,7 @@
 
 
 // ring oram config
-#define RING_A 12
+#define RING_A 10
 #define RING_S 3
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 
