@@ -884,23 +884,37 @@ void read_path(int label){
 
     for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     {
+      // printf("\nread path %d level %d\n", label, i);
+      // print_path(0);
       int index = calc_index(label, i);
+      // if (RING_ENABLE)
+      // {
+        int reqmade = 0;
+        int dum_cand[Z] = {0};
+        int cand_ind = 0;
+      // }
+      
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
         gi++;
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
-          int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-          if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+          if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
           {
-            int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
-            int i_prime = floor(gi_prime/Z) + 1 + L1;
-            int j_prime = gi_prime % Z;
-            int index_prime = calc_index(label, i_prime);
-            addr = SubMap[index_prime] + j_prime;
+            int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+            if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+            {
+              int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
+              int i_prime = floor(gi_prime/Z) + 1 + L1;
+              int j_prime = gi_prime % Z;
+              int index_prime = calc_index(label, i_prime);
+              addr = SubMap[index_prime] + j_prime;
+            }
+            
+            insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+            reqmade++;
+            // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
           }
-          
-          insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
         }
 
         if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -962,12 +976,32 @@ void read_path(int label){
               exit(1);
             }
           }
+          else if(GlobTree[index].slot[j].valid)
+          {
+            // printf("\ncand ind %d\n", cand_ind);
+            dum_cand[cand_ind] = j;
+            cand_ind++;
+          }
         }
         
-        
-
-
-
+      }
+      if (RING_ENABLE && i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+      {
+        for (int k = 0; k < RING_Z-reqmade; k++)
+        {
+          int ri = -1;
+          int sd = -1;
+          while (sd == -1)
+          {
+            ri = rand() % cand_ind;
+            sd = dum_cand[ri];
+          }
+          
+          int mem_addr = index*Z_VAR + sd;
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+          // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
+          dum_cand[ri] = -1;
+        }
       }
     }
 
@@ -1037,6 +1071,7 @@ void write_path(int label){
       reset_candidate();
       pick_candidate(index, label, i);
       int stt_cand = -1;
+
       
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
@@ -1135,7 +1170,7 @@ void print_path(int label){
       }
       else
       {
-        printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d real: %d\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label, GlobTree[index].slot[j].isReal);
+        printf("LOG: path: %d level:%d  slot: %d  addr:%d  label: %d real: %d  valid: %d\n", label, i,j, GlobTree[index].slot[j].addr, GlobTree[index].slot[j].label, GlobTree[index].slot[j].isReal, GlobTree[index].slot[j].valid);
       }
     }
   }
@@ -3225,16 +3260,23 @@ void ring_early_reshuffle(int label){
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
+    int reqmade = 0;
+    int dum_cand[Z] = {0};
+    int cand_ind = 0;
     if (GlobTree[index].count >= LS[i])
     {
+      // printf("\nlevel %d reshuffle\n", i);
       shuff[i]++;
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
-        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR && GlobTree[index].slot[j].isReal)
         {
           int mem_addr = index*Z_VAR + j;
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+          // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
+          reqmade++;
         }
+        
         if (GlobTree[index].slot[j].isReal)
         {
           // printf("j: %d\n", j);
@@ -3256,8 +3298,32 @@ void ring_early_reshuffle(int label){
             exit(1);
           }
         }
-        
+        else if(GlobTree[index].slot[j].valid)
+        {
+          // printf("\ncand ind %d\n", cand_ind);
+          dum_cand[cand_ind] = j;
+          cand_ind++;
+        }
       }
+      if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+      {
+        for (int k = 0; k < RING_Z-reqmade; k++)
+        {
+          int ri = -1;
+          int sd = -1;
+          while (sd == -1)
+          {
+            ri = rand() % cand_ind;
+            sd = dum_cand[ri];
+          }
+           
+          int mem_addr = index*Z_VAR + sd;
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+          // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
+          dum_cand[ri] = -1;
+        }
+      }
+      
 
       reset_candidate();
       pick_candidate(index, label, i);
