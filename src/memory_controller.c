@@ -192,6 +192,7 @@ int stash_cont = 0;
 int linger_discard = 0;
 int ringctr = 0;
 int injcount = 0;
+int wbctr = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -3252,9 +3253,10 @@ void ring_evict_path(int label){
   
 
   ring_G++;
-
+  int b4 = stashctr;
   read_path(label);
   write_path(label);
+  wbctr += stashctr - b4;
 
   // ring_early_reshuffle(label);
 
@@ -3480,6 +3482,7 @@ void print_oram_stats(){
   printf("Linger Discard           %d\n", linger_discard);
   printf("Ring shuff               %d\n", shuffctr);
   printf("Ring acc                 %d\n", ringctr);
+  printf("EP writeback             %d\n", wbctr);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
