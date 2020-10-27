@@ -896,6 +896,7 @@ void read_path(int label){
       
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
+        // printf("j: %d \n", j);
         gi++;
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
@@ -980,6 +981,7 @@ void read_path(int label){
           {
             // printf("\ncand ind %d\n", cand_ind);
             dum_cand[cand_ind] = j;
+            // printf("dum cand %d\n", dum_cand[cand_ind]);
             cand_ind++;
           }
         }
@@ -995,6 +997,7 @@ void read_path(int label){
           {
             ri = rand() % cand_ind;
             sd = dum_cand[ri];
+            // printf("level %d   count %d\n", i, GlobTree[index].count);
           }
           
           int mem_addr = index*Z_VAR + sd;
@@ -3159,6 +3162,8 @@ void ring_read_path(int label, int addr){
 
 
 void ring_evict_path(int label){
+  // printf("\nevict path trace %d\n", tracectr);
+
   ring_evictctr++;
   // int label = ring_G % PATH;
 
@@ -3257,6 +3262,7 @@ void ring_evict_path(int label){
 
 
 void ring_early_reshuffle(int label){
+  // printf("reshuffle trace %d\n", tracectr);
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
@@ -3330,6 +3336,7 @@ void ring_early_reshuffle(int label){
 
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
+        GlobTree[index].slot[j].valid = true;
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           int mem_addr = index*Z_VAR + j;
@@ -3342,7 +3349,6 @@ void ring_early_reshuffle(int label){
           GlobTree[index].slot[j].label = Stash[candidate[j]].label;
           GlobTree[index].slot[j].isReal = true;
           GlobTree[index].slot[j].isData = true;
-          GlobTree[index].slot[j].valid = true;
           GlobTree[index].dumnum--;
 
 
