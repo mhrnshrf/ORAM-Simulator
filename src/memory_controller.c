@@ -3256,7 +3256,7 @@ void ring_evict_path(int label){
   int b4 = stashctr;
   read_path(label);
   write_path(label);
-  wbctr += stashctr - b4;
+  wbctr += b4 - stashctr;
 
   // ring_early_reshuffle(label);
 
