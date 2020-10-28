@@ -205,6 +205,7 @@ int plb_interval[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1};
 int plb_temp[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
 
 int shuff[LEVEL] = {0};
+int wb[LEVEL] = {0};
 
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
 TreeType TREE_VAR = ORAM;
@@ -1076,7 +1077,6 @@ void write_path(int label){
       pick_candidate(index, label, i);
       int stt_cand = -1;
 
-      
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
          GlobTree[index].slot[j].valid = true;  // added for ring oram
@@ -3271,7 +3271,7 @@ void ring_early_reshuffle(int label){
     int reqmade = 0;
     int dum_cand[Z] = {0};
     int cand_ind = 0;
-    if (GlobTree[index].count >= LS[i])
+    if (GlobTree[index].count >= LS[i] || i < TOP_CACHE)
     {
       // printf("\nlevel %d reshuffle\n", i);
       shuff[i]++;
@@ -3426,7 +3426,7 @@ void print_oram_stats(){
   // print_stash();
 
   int shuffctr = 0; 
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE; i < LEVEL; i++)
   {
     shuffctr += shuff[i];
   }
@@ -3480,7 +3480,7 @@ void print_oram_stats(){
   printf("Stash occ                %d\n", stashctr);
   printf("Stash Contain            %d\n", stash_cont);
   printf("Linger Discard           %d\n", linger_discard);
-  printf("Ring shuff               %d\n", shuffctr);
+  printf("Ring shuff 10+           %d\n", shuffctr);
   printf("Ring acc                 %d\n", ringctr);
   printf("EP writeback             %d\n", wbctr);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
