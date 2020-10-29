@@ -106,6 +106,7 @@
 #define SL1 L1
 #define SL2 L2
 #define SL3 L3
+#define LINGER_LIMIT 5
 
 
 
