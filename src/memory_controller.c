@@ -889,126 +889,131 @@ void read_path(int label){
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
-      int index = calc_index(label, i);
-      // if (RING_ENABLE)
-      // {
-        int reqmade = 0;
-        int dum_cand[Z] = {0};
-        int cand_ind = 0;
-      // }
-      
-      for(int j = 0; j < LZ_VAR[i]; j++)
+      if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
       {
-        // printf("j: %d \n", j);
-        gi++;
-        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        int index = calc_index(label, i);
+        // if (RING_ENABLE)
+        // {
+          int reqmade = 0;
+          int dum_cand[Z] = {0};
+          int cand_ind = 0;
+        // }
+        
+        for(int j = 0; j < LZ_VAR[i]; j++)
         {
-          if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
+          // printf("j: %d \n", j);
+          gi++;
+          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-            int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-            if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+            if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
             {
-              int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
-              int i_prime = floor(gi_prime/Z) + 1 + L1;
-              int j_prime = gi_prime % Z;
-              int index_prime = calc_index(label, i_prime);
-              addr = SubMap[index_prime] + j_prime;
-            }
-            
-            insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
-            reqmade++;
-            // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
-          }
-        }
-
-        if (RHO_ENABLE && (TREE_VAR == RHO))
-        {
-          if(RhoTree[index].slot[j].isReal)
-          {
-            
-            if(add_to_stash(RhoTree[index].slot[j]) != -1)
-            {
-              RhoTree[index].slot[j].isReal = false;
-              RhoTree[index].slot[j].addr = -1;
-              RhoTree[index].slot[j].label = -1;
-            }
-            else
-            {
-              printf("ERROR: read: rho stash overflow!  @ %d\n", rho_stashctr);
-              print_oram_stats();
-              exit(1);
-            }
-          }
-        }
-        else
-        {
-          if(GlobTree[index].slot[j].isReal)
-          {
-            if (GlobTree[index].slot[j].addr == oram_acc_addr)
-            {
-              if (i <= TOP_BOUNDRY)
+              int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+              if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
               {
-                topctr++;
+                int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
+                int i_prime = floor(gi_prime/Z) + 1 + L1;
+                int j_prime = gi_prime % Z;
+                int index_prime = calc_index(label, i_prime);
+                addr = SubMap[index_prime] + j_prime;
               }
-              else if (i <= MID_BOUNDRY)
+              
+              insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+              reqmade++;
+              // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
+            }
+          }
+
+          if (RHO_ENABLE && (TREE_VAR == RHO))
+          {
+            if(RhoTree[index].slot[j].isReal)
+            {
+              
+              if(add_to_stash(RhoTree[index].slot[j]) != -1)
               {
-                midctr++;
+                RhoTree[index].slot[j].isReal = false;
+                RhoTree[index].slot[j].addr = -1;
+                RhoTree[index].slot[j].label = -1;
               }
               else
               {
-                botctr++;
+                printf("ERROR: read: rho stash overflow!  @ %d\n", rho_stashctr);
+                print_oram_stats();
+                exit(1);
               }
             }
-            
-            
-            if(add_to_stash(GlobTree[index].slot[j]) != -1)
-            {
-              GlobTree[index].slot[j].isReal = false;
-              GlobTree[index].slot[j].addr = -1;
-              GlobTree[index].slot[j].label = -1;
-              cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]--;
-              GlobTree[index].dumnum++;
-            }
-            else
-            {
-              printf("ERROR: read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
-              printf("stash leftover %d\n", stash_leftover);
-              printf("stash removed  %d\n", stash_removed);
-              printf("fill hit  %d\n", fillhit);
-              printf("fill miss  %d\n", fillmiss);
-              print_oram_stats();
-              exit(1);
-            }
           }
-          else if(GlobTree[index].slot[j].valid)
+          else
           {
-            // printf("\ncand ind %d\n", cand_ind);
-            dum_cand[cand_ind] = j;
-            // printf("dum cand %d\n", dum_cand[cand_ind]);
-            cand_ind++;
-          }
-        }
-        
-      }
-      if (RING_ENABLE && i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
-      {
-        for (int k = 0; k < RING_Z-reqmade; k++)
-        {
-          int ri = -1;
-          int sd = -1;
-          while (sd == -1)
-          {
-            ri = rand() % cand_ind;
-            sd = dum_cand[ri];
-            // printf("level %d   count %d\n", i, GlobTree[index].count);
+            if(GlobTree[index].slot[j].isReal)
+            {
+              if (GlobTree[index].slot[j].addr == oram_acc_addr)
+              {
+                if (i <= TOP_BOUNDRY)
+                {
+                  topctr++;
+                }
+                else if (i <= MID_BOUNDRY)
+                {
+                  midctr++;
+                }
+                else
+                {
+                  botctr++;
+                }
+              }
+              
+              
+              if(add_to_stash(GlobTree[index].slot[j]) != -1)
+              {
+                GlobTree[index].slot[j].isReal = false;
+                GlobTree[index].slot[j].addr = -1;
+                GlobTree[index].slot[j].label = -1;
+                cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]--;
+                GlobTree[index].dumnum++;
+              }
+              else
+              {
+                printf("ERROR: read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+                printf("stash leftover %d\n", stash_leftover);
+                printf("stash removed  %d\n", stash_removed);
+                printf("fill hit  %d\n", fillhit);
+                printf("fill miss  %d\n", fillmiss);
+                print_oram_stats();
+                exit(1);
+              }
+            }
+            else if(GlobTree[index].slot[j].valid)
+            {
+              // printf("\ncand ind %d\n", cand_ind);
+              dum_cand[cand_ind] = j;
+              // printf("dum cand %d\n", dum_cand[cand_ind]);
+              cand_ind++;
+            }
           }
           
-          int mem_addr = index*Z_VAR + sd;
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
-          // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
-          dum_cand[ri] = -1;
         }
+        if (RING_ENABLE && i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        {
+          for (int k = 0; k < RING_Z-reqmade; k++)
+          {
+            int ri = -1;
+            int sd = -1;
+            while (sd == -1)
+            {
+              ri = rand() % cand_ind;
+              sd = dum_cand[ri];
+              // printf("level %d   count %d\n", i, GlobTree[index].count);
+            }
+            
+            int mem_addr = index*Z_VAR + sd;
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+            // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
+            dum_cand[ri] = -1;
+          }
+        }
+
       }
+      
     }
 
 }
@@ -1045,120 +1050,126 @@ void write_path(int label){
   
   for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
-    int index = calc_index(label, i);
-    int addr = 0;
-    GlobTree[index].count = 0; // for ring oram evict path
-    
-    // int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
-    // if (stashctr_var == 0)
-    // {
-    //   if (RHO_ENABLE && (TREE_VAR == RHO))
-    //   {
-    //     // printf("write path: @ LEVEL: %d   stash got empty\n\n", i);
-    //   }
+    if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
+    {
+      int index = calc_index(label, i);
+      int addr = 0;
+      GlobTree[index].count = 0; // for ring oram evict path
       
-    //   for (int g = 0; g < LZ_VAR[i]; g++)
-    //   {
-    //     if (i >= TOP_CACHE_VAR)
-    //     {
-    //       // addr = SUBTREE_ENABLE ?  SubMap[index]+g:(index*Z_VAR+g);
-    //       addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+g): (TREE_VAR == ORAM)? SubMap[index]+g : RhoSubMap[index]+g;
-
-    //       // insert_write (addr, orig_cycle, orig_thread, orig_instr);
-    //       insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
-    //       // printf("insert oramq: %d\n", oramQ->size);
-
-    //     }
+      // int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
+      // if (stashctr_var == 0)
+      // {
+      //   if (RHO_ENABLE && (TREE_VAR == RHO))
+      //   {
+      //     // printf("write path: @ LEVEL: %d   stash got empty\n\n", i);
+      //   }
         
-    //   }
-    // }
-    // else
-    // {
-      reset_candidate();
-      pick_candidate(index, label, i);
-      int stt_cand = -1;
+      //   for (int g = 0; g < LZ_VAR[i]; g++)
+      //   {
+      //     if (i >= TOP_CACHE_VAR)
+      //     {
+      //       // addr = SUBTREE_ENABLE ?  SubMap[index]+g:(index*Z_VAR+g);
+      //       addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+g): (TREE_VAR == ORAM)? SubMap[index]+g : RhoSubMap[index]+g;
 
-      for(int j = 0; j < LZ_VAR[i]; j++)
-      {
-         GlobTree[index].slot[j].valid = true;  // added for ring oram
+      //       // insert_write (addr, orig_cycle, orig_thread, orig_instr);
+      //       insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+      //       // printf("insert oramq: %d\n", oramQ->size);
 
-        gi++;
-        if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
+      //     }
+          
+      //   }
+      // }
+      // else
+      // {
+        reset_candidate();
+        pick_candidate(index, label, i);
+        int stt_cand = -1;
+
+        for(int j = 0; j < LZ_VAR[i]; j++)
         {
-          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-          if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+          GlobTree[index].slot[j].valid = true;  // added for ring oram
+
+          gi++;
+          if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
           {
-            int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
-            int i_prime = floor(gi_prime/Z) + 1 + L1;
-            int j_prime = gi_prime % Z;
-            int index_prime = calc_index(label, i_prime);
-            addr = SubMap[index_prime] + j_prime;
+            addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+            if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+            {
+              int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
+              int i_prime = floor(gi_prime/Z) + 1 + L1;
+              int j_prime = gi_prime % Z;
+              int index_prime = calc_index(label, i_prime);
+              addr = SubMap[index_prime] + j_prime;
+            }
+            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
           }
-          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
-        }
 
 
-        if (STT_ENABLE && TREE_VAR == ORAM)
-        {
-          stt_cand = stt_candidate(label, i);
-          if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
+          if (STT_ENABLE && TREE_VAR == ORAM)
+          {
+            stt_cand = stt_candidate(label, i);
+            if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
+            {
+              if (!RING_ENABLE || GlobTree[index].dumnum > LS[i])
+              {
+                sttctr++;
+                GlobTree[index].slot[j].addr = stt_cand;
+                GlobTree[index].slot[j].label = PosMap[stt_cand];
+                GlobTree[index].slot[j].isReal = true;
+                GlobTree[index].slot[j].isData = true;
+                stt_invalidate(stt_cand);
+
+                GlobTree[index].dumnum--;
+
+                continue;
+              }
+            }
+          }
+          
+
+          if (candidate[j] != -1) 
           {
             if (!RING_ENABLE || GlobTree[index].dumnum > LS[i])
             {
-              sttctr++;
-              GlobTree[index].slot[j].addr = stt_cand;
-              GlobTree[index].slot[j].label = PosMap[stt_cand];
-              GlobTree[index].slot[j].isReal = true;
-              GlobTree[index].slot[j].isData = true;
-              stt_invalidate(stt_cand);
+              if (RHO_ENABLE && (TREE_VAR == RHO))
+              {
+                RhoTree[index].slot[j].addr = RhoStash[candidate[j]].addr;
+                RhoTree[index].slot[j].label = RhoStash[candidate[j]].label;
+                RhoTree[index].slot[j].isReal = true;
+                RhoTree[index].slot[j].isData = true;
+              }
+              
+              else
+              {
+                GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
+                GlobTree[index].slot[j].label = Stash[candidate[j]].label;
+                GlobTree[index].slot[j].isReal = true;
+                GlobTree[index].slot[j].isData = true;
+                cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]++;
 
-              GlobTree[index].dumnum--;
+                GlobTree[index].dumnum--;
+              }
 
-              continue;
+              remove_from_stash(candidate[j]);
             }
-          }
-        }
-        
 
-        if (candidate[j] != -1) 
-        {
-          if (!RING_ENABLE || GlobTree[index].dumnum > LS[i])
-          {
-            if (RHO_ENABLE && (TREE_VAR == RHO))
-            {
-              RhoTree[index].slot[j].addr = RhoStash[candidate[j]].addr;
-              RhoTree[index].slot[j].label = RhoStash[candidate[j]].label;
-              RhoTree[index].slot[j].isReal = true;
-              RhoTree[index].slot[j].isData = true;
-            }
+            // if ((TREE_VAR == RHO) /*&& (tracectr_test == 7911) && (j == 1)*/)
+            // {
+            //   printf("write path: @ LEVEL %d after stash removal @ trace: %d stash is   %d   full\n", i,  tracectr_test, rho_stashctr);
+            //   // print_stash();
+            // }
             
-            else
-            {
-              GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
-              GlobTree[index].slot[j].label = Stash[candidate[j]].label;
-              GlobTree[index].slot[j].isReal = true;
-              GlobTree[index].slot[j].isData = true;
-              cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]++;
 
-              GlobTree[index].dumnum--;
-            }
-
-            remove_from_stash(candidate[j]);
           }
-
-          // if ((TREE_VAR == RHO) /*&& (tracectr_test == 7911) && (j == 1)*/)
-          // {
-          //   printf("write path: @ LEVEL %d after stash removal @ trace: %d stash is   %d   full\n", i,  tracectr_test, rho_stashctr);
-          //   // print_stash();
-          // }
-          
 
         }
 
-        
 
-      }
+    }
+
+
     // }
+
   }
   
 }
@@ -1688,7 +1699,7 @@ void freecursive_access(int addr, char type){
     return;
   }
 
-/*
+// /*
   // if write bypass feature is on and there is write req hit in the cache
   if (WRITE_BYPASS && write_cache_hit && type == 'W')
   {
@@ -1940,7 +1951,7 @@ void freecursive_access(int addr, char type){
     }
 
   }
-*/
+// */
   // printf("freecursuve: b4 last oram access (data): %d\n", addr);
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
