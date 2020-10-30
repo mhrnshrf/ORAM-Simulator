@@ -3286,7 +3286,7 @@ void ring_early_reshuffle(int label){
     int reqmade = 0;
     int dum_cand[Z] = {0};
     int cand_ind = 0;
-    if (GlobTree[index].count >= LS[i] /*|| i < TOP_CACHE || i >= LEVEL-2 */)
+    if (GlobTree[index].count >= LS[i] || i < TOP_CACHE /* || i >= LEVEL-2 */)
     {
       // printf("\nlevel %d reshuffle\n", i);
       shuff[i]++;
