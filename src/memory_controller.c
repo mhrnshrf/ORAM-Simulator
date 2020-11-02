@@ -1699,7 +1699,12 @@ void freecursive_access(int addr, char type){
     return;
   }
 
-// /*
+/*
+  // if (WRITE_LINGER)
+  // {
+
+  // }
+
   // if write bypass feature is on and there is write req hit in the cache
   if (WRITE_BYPASS && write_cache_hit && type == 'W')
   {
@@ -1951,12 +1956,12 @@ void freecursive_access(int addr, char type){
     }
 
   }
-// */
+*/
   // printf("freecursuve: b4 last oram access (data): %d\n", addr);
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
   {
-    if (WRITE_LINGER && type == 'W'  && lingered < LINGER_LIMIT)
+    if (WRITE_LINGER && type == 'R'  && lingered < LINGER_LIMIT)
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
@@ -3286,7 +3291,7 @@ void ring_early_reshuffle(int label){
     int reqmade = 0;
     int dum_cand[Z] = {0};
     int cand_ind = 0;
-    if (GlobTree[index].count >= LS[i] || i < TOP_CACHE /* || i >= LEVEL-2 */)
+    if (GlobTree[index].count >= LS[i] /* || i < TOP_CACHE  || i >= LEVEL-2 */)
     {
       // printf("\nlevel %d reshuffle\n", i);
       shuff[i]++;
