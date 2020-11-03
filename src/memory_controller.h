@@ -24,10 +24,10 @@
 
 // enable/disable options config
 #define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
-#define SUBTREE_ENABLE  0     // 0/1 flag to diable/enable having subtree adddressing scheme
+#define SUBTREE_ENABLE  1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define CACHE_ENABLE    1     // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
-#define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
+#define STT_ENABLE      1     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
 #define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
@@ -36,9 +36,9 @@
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 
-#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
-#define WRITE_LINGER    1     // 0/1 flag to disable/enable write linger feature for ring oram
+#define WRITE_LINGER    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 
@@ -62,7 +62,7 @@
 // subtree config
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-#define NUM_CHANNELS_SUBTREE 4  // # memory channel used for subtree calculation
+#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 // rho config
