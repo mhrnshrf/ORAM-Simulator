@@ -23,12 +23,12 @@
 #define MID_BOUNDRY 20              // middle region tree boundry
 
 // enable/disable options config
-#define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
-#define SUBTREE_ENABLE  1     // 0/1 flag to diable/enable having subtree adddressing scheme
+#define TIMEOUT_ENBALE  0     // 0/1 flag to disable/enable finishing the program in case it get stuck
+#define SUBTREE_ENABLE  0     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define CACHE_ENABLE    1     // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE      1     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE   0     // 0/1 flag to disable/enable having timing channel security
@@ -36,10 +36,10 @@
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 
-#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
-#define WRITE_LINGER    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
+#define WRITE_LINGER    1     // 0/1 flag to disable/enable write linger feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 
 
@@ -48,15 +48,15 @@
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 4     // # slots per bucket
+#define Z 12     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
-#define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
+#define BK_EVICTION 0   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 13   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
-#define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+#define L2 17   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L3 22   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree config
