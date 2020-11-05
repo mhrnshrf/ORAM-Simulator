@@ -1699,264 +1699,264 @@ void freecursive_access(int addr, char type){
     return;
   }
 
-/*
-  // if (WRITE_LINGER)
-  // {
-
-  // }
-
-  // if write bypass feature is on and there is write req hit in the cache
-  if (WRITE_BYPASS && write_cache_hit && type == 'W')
+// /*
+  if (!RING_ENABLE || !WRITE_LINGER)
   {
-    write_cache_hit = false;
-    // if the intended block is in plb return now & skip the oram access
-    if (plb_contain(addr))
+    // if write bypass feature is on and there is write req hit in the cache
+    if (WRITE_BYPASS && write_cache_hit && type == 'W')
     {
-      return;
-    }
-    
-  }
-  else
-  {
-    int i_saved = -1;  // STEP 1   PLB lookup 
-    for (int i = 0; i <= H-2; i++)
-    {
-      plbaccess[i]++;
-      // reading form PLB if miss then proceed to access ORAM tree
-      int ai = addr/pow(X,i);
-      int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
-
-      // printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
-
-
-      // profiling:
-
-      // if ((PLB[tag % PLB_SIZE] != tag) && i != 0)
-      // {
-      //     if (i == 1)
-      //     {
-      //       // int pos1_diff = ai - pos1_recent;
-      //       // printf("%d\n", pos1_diff);
-      //       // pos1_recent = ai;
-      //       pos1acc_ctr++;
-      //     }
-      //     else if (i == 2)
-      //     {
-      //       // int pos2_diff = ai - pos2_recent;
-      //       // printf("%d\n", pos2_diff);
-      //       // pos2_recent = ai;
-      //       pos2acc_ctr++;
-      //     }
-      // }
-
-      
-      // profiling.
-      
-      if (plb_access(tag) || buffer_contain(tag))  // PLB hit
-      {
-        
-        // profiling:
-        // if (buffer_contain(tag))
-        // {
-        //   // int pi = buffer_index(tag);
-        //   int pi = tag % PREFETCH_BUF_SIZE;
-
-        //   if (i == 1)
-        //   {
-        //     // printf("%lld\n", trace_clk - PreBuffer[pi].timestamp);
-        //     pos1hit++;
-        //     if (PreBuffer[pi].type != POS1)
-        //     {
-        //       pos1conf++;
-        //       //  printf("ERROR: freecursive: @trace %d pos1 & i %d don't match!\n", tracectr, i);
-        //       //  print_oram_stats();
-// exit(1);
-        //     }
-            
-        //   }
-        //   else if (i == 2)
-        //   {
-        //     // printf("%lld\n", trace_clk - PreBuffer[pi].timestamp);
-        //     pos2hit++;
-        //     if (PreBuffer[pi].type != POS2)
-        //     {
-        //       pos2conf++;
-        //       //  printf("ERROR: freecursive: @trace %d pos2 & i %d don't match!\n", tracectr, i);
-        //       //  print_oram_stats();
-// exit(1);
-        //     }
-        //   }
-        // }
-        // else
-        // {
-        //   plb_hit[i]++;
-        // }
-          plb_hit[i]++;
-        
-       // profiling.
-        
-        if (i == 0)   // if the intended block is originally a posmap block itself terminate!
-        {
-          return;
-        }
-        
-        i_saved = i-1;
-        break;
-      }
-      else if(i == H-2)  // PLB miss (retval == 0) & it's last iteration
-      {
-        i_saved = H-2;
-      }
-    }
-
-    // profiling:
-    pos1_recent = addr/pow(X,1);
-    pos2_recent = addr/pow(X,2);
-    // profiling.
-
-    while(i_saved >= 1)   // STEP 2  PosMap block access
-    {
-      int ai = addr/pow(X,i_saved);
-      int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
-      // printf("@ trace %d  i saved: %d   ai: %x    tag: %x\n", tracectr, i_saved, ai, tag);
-
-      if (tag == addr)
+      write_cache_hit = false;
+      // if the intended block is in plb return now & skip the oram access
+      if (plb_contain(addr))
       {
         return;
       }
-    
-      // profiling:
-      // if (tag == plb_evict[tag % PLB_SIZE])
-      // {
-      //   plb_hist[tag % PLB_SIZE]++;
-      //   // plb_trace[tag % PLB_SIZE]
-      //   if (plb_interval[tag % PLB_SIZE] == -1 && plb_trace[tag % PLB_SIZE] != -1)
-      //   {
-      //     plb_interval[tag % PLB_SIZE] = tracectr - plb_trace[tag % PLB_SIZE];
-      //   }
-        
-
-      // }
       
-      // profiling.
-      if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
+    }
+    else
+    {
+      int i_saved = -1;  // STEP 1   PLB lookup 
+      for (int i = 0; i <= H-2; i++)
       {
-        unsigned int caddr = tag << ((unsigned int) log2(BLOCK_SIZE));
-        // if (cache_invalidate(caddr) != -1)
+        plbaccess[i]++;
+        // reading form PLB if miss then proceed to access ORAM tree
+        int ai = addr/pow(X,i);
+        int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
+
+        // printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
+
+
+        // profiling:
+
+        // if ((PLB[tag % PLB_SIZE] != tag) && i != 0)
         // {
-        //   printf("ERROR: @trace %d  cache contained %x  tagged %x \n", tracectr, caddr, tag);
-        //   print_oram_stats();
-// exit(1);
+        //     if (i == 1)
+        //     {
+        //       // int pos1_diff = ai - pos1_recent;
+        //       // printf("%d\n", pos1_diff);
+        //       // pos1_recent = ai;
+        //       pos1acc_ctr++;
+        //     }
+        //     else if (i == 2)
+        //     {
+        //       // int pos2_diff = ai - pos2_recent;
+        //       // printf("%d\n", pos2_diff);
+        //       // pos2_recent = ai;
+        //       pos2acc_ctr++;
+        //     }
         // }
 
-        cache_invalidate(caddr);
-        // reset_dirty_search();
         
-        pinOn();
-        if (RING_ENABLE)
-        {
-          ring_access(tag);
-        }
-        else
-        {
-          oram_access(tag);
-        }
-        pinOff();
-
-        if (i_saved == 1)
-        {
-          pos1_access++;
-        }
-        else if (i_saved == 2)
-        {
-          pos2_access++;
-        }
+        // profiling.
         
-        
-      }
-      // if (i_saved == 1)
-      // {
-
-        int si;
-        int victim = plb_fill(tag);
-        if( victim != -1)
+        if (plb_access(tag) || buffer_contain(tag))  // PLB hit
         {
-
+          
           // profiling:
-          // if (plbQ->size < plbQ->limit)
+          // if (buffer_contain(tag))
           // {
-          //   insert_plbQ(victim);
+          //   // int pi = buffer_index(tag);
+          //   int pi = tag % PREFETCH_BUF_SIZE;
+
+          //   if (i == 1)
+          //   {
+          //     // printf("%lld\n", trace_clk - PreBuffer[pi].timestamp);
+          //     pos1hit++;
+          //     if (PreBuffer[pi].type != POS1)
+          //     {
+          //       pos1conf++;
+          //       //  printf("ERROR: freecursive: @trace %d pos1 & i %d don't match!\n", tracectr, i);
+          //       //  print_oram_stats();
+  // exit(1);
+          //     }
+              
+          //   }
+          //   else if (i == 2)
+          //   {
+          //     // printf("%lld\n", trace_clk - PreBuffer[pi].timestamp);
+          //     pos2hit++;
+          //     if (PreBuffer[pi].type != POS2)
+          //     {
+          //       pos2conf++;
+          //       //  printf("ERROR: freecursive: @trace %d pos2 & i %d don't match!\n", tracectr, i);
+          //       //  print_oram_stats();
+  // exit(1);
+          //     }
+          //   }
+          // }
+          // else
+          // {
+          //   plb_hit[i]++;
+          // }
+            plb_hit[i]++;
+          
+        // profiling.
+          
+          if (i == 0)   // if the intended block is originally a posmap block itself terminate!
+          {
+            return;
+          }
+          
+          i_saved = i-1;
+          break;
+        }
+        else if(i == H-2)  // PLB miss (retval == 0) & it's last iteration
+        {
+          i_saved = H-2;
+        }
+      }
+
+      // profiling:
+      pos1_recent = addr/pow(X,1);
+      pos2_recent = addr/pow(X,2);
+      // profiling.
+
+      while(i_saved >= 1)   // STEP 2  PosMap block access
+      {
+        int ai = addr/pow(X,i_saved);
+        int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
+        // printf("@ trace %d  i saved: %d   ai: %x    tag: %x\n", tracectr, i_saved, ai, tag);
+
+        if (tag == addr)
+        {
+          return;
+        }
+      
+        // profiling:
+        // if (tag == plb_evict[tag % PLB_SIZE])
+        // {
+        //   plb_hist[tag % PLB_SIZE]++;
+        //   // plb_trace[tag % PLB_SIZE]
+        //   if (plb_interval[tag % PLB_SIZE] == -1 && plb_trace[tag % PLB_SIZE] != -1)
+        //   {
+        //     plb_interval[tag % PLB_SIZE] = tracectr - plb_trace[tag % PLB_SIZE];
+        //   }
+          
+
+        // }
+        
+        // profiling.
+        if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
+        {
+          unsigned int caddr = tag << ((unsigned int) log2(BLOCK_SIZE));
+          // if (cache_invalidate(caddr) != -1)
+          // {
+          //   printf("ERROR: @trace %d  cache contained %x  tagged %x \n", tracectr, caddr, tag);
+          //   print_oram_stats();
+  // exit(1);
           // }
 
-          // if (plb_evict[victim % PLB_SIZE] == -1)
-          // {
-          //   plb_evict[victim % PLB_SIZE] = victim;
-          //   plb_trace[victim % PLB_SIZE] = tracectr;
-          //   // plb_hist[victim % PLB_SIZE] = 1;
-          // }
-          // // else if(plb_evict[victim % PLB_SIZE] == victim)
-          // // {
-          // //   plb_hist[victim % PLB_SIZE]++;
-          // // }
-          // else if(plb_evict[victim % PLB_SIZE] != victim)
-          // {
-          //   plb_conflict[victim % PLB_SIZE]++;
-          // }
-          // profiling.
+          cache_invalidate(caddr);
+          // reset_dirty_search();
           
-          
-          Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
-          
-          
-          if (stash_contain(s.addr))
+          pinOn();
+          if (RING_ENABLE)
           {
-            printf("ERROR: freecursive: block %d already in stash!\n", s.addr);
-            print_oram_stats();
-            exit(1);
+            ring_access(tag);
           }
           else
           {
-            si = add_to_stash(s);
-            if(si == -1){
-            printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
-            print_oram_stats();
-            exit(1);
+            oram_access(tag);
+          }
+          pinOff();
+
+          if (i_saved == 1)
+          {
+            pos1_access++;
+          }
+          else if (i_saved == 2)
+          {
+            pos2_access++;
+          }
+          
+          
+        }
+        // if (i_saved == 1)
+        // {
+
+          int si;
+          int victim = plb_fill(tag);
+          if( victim != -1)
+          {
+
+            // profiling:
+            // if (plbQ->size < plbQ->limit)
+            // {
+            //   insert_plbQ(victim);
+            // }
+
+            // if (plb_evict[victim % PLB_SIZE] == -1)
+            // {
+            //   plb_evict[victim % PLB_SIZE] = victim;
+            //   plb_trace[victim % PLB_SIZE] = tracectr;
+            //   // plb_hist[victim % PLB_SIZE] = 1;
+            // }
+            // // else if(plb_evict[victim % PLB_SIZE] == victim)
+            // // {
+            // //   plb_hist[victim % PLB_SIZE]++;
+            // // }
+            // else if(plb_evict[victim % PLB_SIZE] != victim)
+            // {
+            //   plb_conflict[victim % PLB_SIZE]++;
+            // }
+            // profiling.
+            
+            
+            Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+            
+            
+            if (stash_contain(s.addr))
+            {
+              printf("ERROR: freecursive: block %d already in stash!\n", s.addr);
+              print_oram_stats();
+              exit(1);
+            }
+            else
+            {
+              si = add_to_stash(s);
+              if(si == -1){
+              printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
+              print_oram_stats();
+              exit(1);
+              }
+              
             }
             
+            
+
           }
-          
-          
 
-        }
-
-        // PLB[tag % PLB_SIZE] = tag;
-        if (!STT_ENABLE || !stt_contain(tag)) 
-        {
-          int index = get_stash(tag);
-          if (index == -1)
+          // PLB[tag % PLB_SIZE] = tag;
+          if (!STT_ENABLE || !stt_contain(tag)) 
           {
-            printf("ERROR: freecursive: block not found in stash!\n");
-            print_oram_stats();
-            exit(1);
+            int index = get_stash(tag);
+            if (index == -1)
+            {
+              printf("ERROR: freecursive: block not found in stash!\n");
+              print_oram_stats();
+              exit(1);
+            }
+            
+            remove_from_stash(index);
+          } 
+          else
+          {
+            // printf("hereeeee blk: %d \n", tag);
+            stt_invalidate(tag);
           }
           
-          remove_from_stash(index);
-        } 
-        else
-        {
-          // printf("hereeeee blk: %d \n", tag);
-          stt_invalidate(tag);
-        }
+          
+        // }
         
         
-      // }
-      
-      
-      i_saved--;
+        i_saved--;
+      }
+
     }
 
   }
-*/
+
+// */
   // printf("freecursuve: b4 last oram access (data): %d\n", addr);
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
