@@ -1293,9 +1293,12 @@ char bench[20];
 				// 	print_count_level();
 				// }
 
-				invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
-				oram_just_invoked = true;
-				curr_trace = addr[numc];
+				if (!NONSEC_ENABLE)
+				{
+					invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
+					oram_just_invoked = true;
+					curr_trace = addr[numc];
+				}
 
 			}
 			skip_invokation = false;

@@ -35,6 +35,7 @@
 #define PREFETCH_ENABLE 0     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
+#define NONSEC_ENABLE   1     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 
 #define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
