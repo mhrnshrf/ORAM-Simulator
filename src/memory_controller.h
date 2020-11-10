@@ -56,8 +56,8 @@
 #define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 13   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
-#define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+#define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree config
@@ -120,8 +120,8 @@ enum{
   // main tree
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
   Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1
-  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 1 :(RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE &&RSTL_ENABLE)? Z-4:Z,   // # slots per bucket upto L3
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 :(RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : (RING_ENABLE &&RSTL_ENABLE)? Z-4:Z,   // # slots per bucket upto L3
   Z4 = (RING_ENABLE) ? Z3 : Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
