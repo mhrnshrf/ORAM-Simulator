@@ -194,6 +194,8 @@ int ringctr = 0;
 int injcount = 0;
 int wbctr = 0;
 int lingered = 0;
+int readctr = 0;
+int writectr = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -2211,6 +2213,17 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
+  if (type == 'W')
+  {
+    writectr++;
+  }
+  else if(type == 'R')
+  {
+    readctr++;
+  }
+  
+  
+
   // int addr = (int)(physical_address & (BLOCK-1));
   unsigned int addr = block_addr(physical_address);
   // printf("invoke oram: physical addr: %lld\n", addr);
@@ -3503,6 +3516,8 @@ void print_oram_stats(){
   printf("Ring shuff 10+           %d\n", shuffctr);
   printf("Ring acc                 %d\n", ringctr);
   printf("EP writeback             %d\n", wbctr);
+  printf("W request                %d\n", writectr);
+  printf("R request                %d\n", readctr);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
