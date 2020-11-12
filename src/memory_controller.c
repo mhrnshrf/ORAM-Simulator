@@ -196,6 +196,7 @@ int wbctr = 0;
 int lingered = 0;
 int readctr = 0;
 int writectr = 0;
+int wskip = 0;
 
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -1980,6 +1981,7 @@ void freecursive_access(int addr, char type){
         exit(1);
       }
       lingered++;
+      wskip++;
       
     }
     else
@@ -3517,7 +3519,8 @@ void print_oram_stats(){
   printf("Ring acc                 %d\n", ringctr);
   printf("EP writeback             %d\n", wbctr);
   printf("W request                %d\n", writectr);
-  printf("R request                %d\n", readctr);
+  // printf("R request                %d\n", readctr);
+  printf("W skipped                %d\n", wskip);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
