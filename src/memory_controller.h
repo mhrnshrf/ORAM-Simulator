@@ -46,6 +46,8 @@
 
 
 
+
+
 // oram config
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
