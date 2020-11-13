@@ -992,6 +992,11 @@ char bench[20];
 
 		if (oramQ->size == 0)
 		{
+			if (invokectr != 0)
+			{
+				mem_req_latencies += CYCLE_VAL - mem_req_start;
+			}
+			
 			// printf("@ oramQ->size == 0\n");
 			if ((!TIMING_ENABLE || (dummy_oram && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed())
 			{
@@ -1298,6 +1303,7 @@ char bench[20];
 					invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
 					oram_just_invoked = true;
 					curr_trace = addr[numc];
+					mem_req_start = CYCLE_VAL;
 				}
 
 			}

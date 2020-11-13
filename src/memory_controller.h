@@ -258,6 +258,10 @@ extern int hitctr;
 extern long long int mem_clk;
 
 
+long long int mem_req_start;
+long long int mem_req_latencies;
+
+
 extern int PosMap[BLOCK];  
 
 extern int oram_effective_pl;

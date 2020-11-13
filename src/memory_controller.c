@@ -198,6 +198,9 @@ int readctr = 0;
 int writectr = 0;
 int wskip = 0;
 
+long long int mem_req_start = 0;
+long long int mem_req_latencies = 0;
+
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
 long long int plbaccess[H-1] = {0};   // # total plb access (hits + misses)
@@ -2215,11 +2218,11 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  int flip = rand() % 2;
-  if (flip)
-  {
-    type = 'R';
-  }
+  // int flip = rand() % 2;
+  // if (flip)
+  // {
+  //   type = 'R';
+  // }
   
 
   if (type == 'W')
@@ -3528,6 +3531,7 @@ void print_oram_stats(){
   printf("W request                %d\n", writectr);
   // printf("R request                %d\n", readctr);
   printf("W skipped                %d\n", wskip);
+  printf("Mem req latency          %f\n", (double)mem_req_latencies/(invokectr));
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
