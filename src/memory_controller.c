@@ -2215,6 +2215,13 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
+  int flip = rand() % 2;
+  if (flip)
+  {
+    type = 'R';
+  }
+  
+
   if (type == 'W')
   {
     writectr++;
