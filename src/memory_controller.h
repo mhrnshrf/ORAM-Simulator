@@ -35,7 +35,7 @@
 #define PREFETCH_ENABLE 0     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
-#define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
+#define NONSEC_ENABLE   1     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 
 #define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
@@ -273,6 +273,7 @@ static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO
 static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
 
 extern bool last_read_served;
+extern long long int nonmemops_sum;
  
 
 

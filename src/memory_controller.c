@@ -239,6 +239,8 @@ int dirty_pointctr = 0;
 
 int oram_effective_pl = 0;
 
+long long int nonmemops_sum = 0;
+
 
 unsigned int byte_addr(long long int physical_addr){
   unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
@@ -3557,9 +3559,9 @@ void print_oram_stats(){
   printf("Ring acc                 %d\n", ringctr);
   printf("EP writeback             %d\n", wbctr);
   printf("W request                %d\n", writectr);
-  // printf("R request                %d\n", readctr);
   printf("W skipped                %d\n", wskip);
   printf("Mem req latency          %f\n", (double)mem_req_latencies/(invokectr));
+  printf("Nonmemops                %lld\n", nonmemops_sum);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 

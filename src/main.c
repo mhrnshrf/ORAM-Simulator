@@ -1189,6 +1189,7 @@ char bench[20];
 
 								nonmemops[numc] += hit_nonmemops;
 								hit_nonmemops = 0;
+								nonmemops_sum += nonmemops[numc];
 
 								
 
