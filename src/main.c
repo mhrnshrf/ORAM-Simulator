@@ -995,7 +995,7 @@ char bench[20];
 	      /* Done consuming one line of the trace file.  Read in the next. */
 		// Mehrnoosh:
 
-		if (oramQ->size == 0 && last_read_served)
+		if (oramQ->size == 0 /*&& last_read_served*/)
 		{
 			if (invokectr != 0)
 			{
@@ -1317,7 +1317,7 @@ char bench[20];
 			
 			
 		} 
-		if (oramQ->size != 0 && last_read_served)
+		if (oramQ->size != 0 /*&& last_read_served*/)
 		{
 			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
