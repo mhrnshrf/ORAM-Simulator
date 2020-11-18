@@ -871,7 +871,7 @@ char bench[20];
 		else
 		{
 			nonmemops_timing[numc] = nonmemops[numc];
-			printf("nonmemops:  %d\n", nonmemops_timing[numc]);
+			// printf("nonmemops:  %d\n", nonmemops_timing[numc]);
 		}
 		
 	  // Mehrnoosh.
