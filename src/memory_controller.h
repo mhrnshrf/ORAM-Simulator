@@ -24,7 +24,7 @@
 
 // enable/disable options config
 #define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
-#define SUBTREE_ENABLE  0     // 0/1 flag to diable/enable having subtree adddressing scheme
+#define SUBTREE_ENABLE  1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define CACHE_ENABLE    1     // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
@@ -37,12 +37,12 @@
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 
-#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 #define WRITE_LINGER    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
-#define LINGER_BASE     1     // 0/1 flag to disable/enable write linger baseline for ring oram
+#define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 
 
 
@@ -178,6 +178,7 @@ typedef struct Element_t{
   char type;
   int oramid;
   TreeType tree;
+  bool last_read;
   long long int orig_addr;
   struct Element_t *prev; 
 }Element;
@@ -271,7 +272,8 @@ static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3]
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
 static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
 
-
+extern bool last_read_served;
+ 
 
 
 
@@ -314,7 +316,7 @@ bool Enqueue(Queue *pQueue, Element *item);
 Element *Dequeue(Queue *pQueue);
 bool isEmpty(Queue* pQueue);
 void test_queue();
-void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type);
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read);
 void test_subtree();
 void dummy_access(TreeType tree);
 void switch_enqueue_to(EnqueueType enqueue);
@@ -420,6 +422,8 @@ typedef struct req
   // Mehrnoosh:
   int oramid;       // oram access id to whcih the request belongs to
   TreeType tree;    // which tree the request belongs to oram or rho
+  bool last_read;   // 0/1 flag to indicate whether the request is the last read request in oram read phase
+
   // Mehrnoosh.
 } request_t;
 

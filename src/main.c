@@ -83,6 +83,8 @@ bool skip_invokation = false;		// a flag to indicate whether oram invokation sho
 bool dummy_already_made = false;	// a flag to indicate whether a dummy access has already been made ~> for timing enabled
 bool bk_already_made = false;	// a flag to indicate whether a bk evict access has already been made ~> for bk evict enabled
 
+
+
 int curr_access = -3; 	// the id of current access (oram or rho, real or dummy)
 
 int fill_access = 0;	// # prefetch history table access
@@ -141,7 +143,7 @@ void print_req_symbols(){
 
 int main(int argc, char * argv[])
 {
-
+	last_read_served = true;
   
   printf("---------------------------------------------\n");
   printf("-- USIMM: the Utah SImulated Memory Module --\n");
@@ -404,6 +406,7 @@ int main(int argc, char * argv[])
   long long int *shad_instrpc;
   int *oramid;
   int *tree;
+  bool *last_read;
   int *nonmemops_timing;
   char shadstr[MAXTRACELINESIZE];
   // Mehrnoosh.
@@ -440,6 +443,7 @@ int main(int argc, char * argv[])
   shadtif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
   oramid = (int *)malloc(sizeof(int)*NUMCORES);
   tree = (int *)malloc(sizeof(int)*NUMCORES);
+  last_read = (bool *)malloc(sizeof(bool)*NUMCORES);
   nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
   shad_nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
   shad_opertype = (char *)malloc(sizeof(char)*NUMCORES);
@@ -867,6 +871,7 @@ char bench[20];
 		else
 		{
 			nonmemops_timing[numc] = nonmemops[numc];
+			printf("nonmemops:  %d\n", nonmemops_timing[numc]);
 		}
 		
 	  // Mehrnoosh.
@@ -990,7 +995,7 @@ char bench[20];
 	      /* Done consuming one line of the trace file.  Read in the next. */
 		// Mehrnoosh:
 
-		if (oramQ->size == 0)
+		if (oramQ->size == 0 && last_read_served)
 		{
 			if (invokectr != 0)
 			{
@@ -1312,7 +1317,7 @@ char bench[20];
 			
 			
 		} 
-		if (oramQ->size != 0)
+		if (oramQ->size != 0 && last_read_served)
 		{
 			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
@@ -1385,6 +1390,12 @@ char bench[20];
 			opertype[numc] = pN->type;
 			oramid[numc] = pN->oramid;
 			tree[numc] = pN->tree;
+			last_read[numc] = pN->last_read;
+			if (pN->last_read)
+			{
+				last_read_served = false;
+			}
+			
 			
 			// nonmemops[numc] = 0; // ??? not sure about this one ~~~> guess resolved
 			

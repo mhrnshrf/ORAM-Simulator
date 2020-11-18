@@ -86,6 +86,8 @@ Queue *pathQ;
 
 int revarr[RING_REV];
 
+bool last_read_served;
+
 
 
 Bucket GlobTree[NODE];      // global oram tree
@@ -450,7 +452,7 @@ void test_queue(){
 	exit(0);
 }
 
-void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type) {
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read) {
   addr = addr << (int)log2(BLOCK_SIZE);
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = addr;
@@ -463,6 +465,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->oramid = (ENQUEUE_VAR == HEAD) ? -1 : pN->oramid;   // in case of dummy access set oram id to -1
   pN->tree = TREE_VAR;
   pN->orig_addr = orig_addr;
+  pN->last_read = last_read;
   bool added = false;
   if (ENQUEUE_VAR == TAIL)
   {
@@ -890,6 +893,7 @@ void read_path(int label){
 
     // printf("\nread path @ trace %d\n", tracectr);
     int gi = -1;
+    bool last_read = false;
 
     for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     {
@@ -922,8 +926,13 @@ void read_path(int label){
                 int index_prime = calc_index(label, i_prime);
                 addr = SubMap[index_prime] + j_prime;
               }
+              if (i == EMPTY_TOP_VAR && j == LZ_VAR[i] - 1)
+              {
+                last_read = true;
+              }
               
-              insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+              
+              insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
               reqmade++;
               // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
             }
@@ -1010,9 +1019,15 @@ void read_path(int label){
               sd = dum_cand[ri];
               // printf("level %d   count %d\n", i, GlobTree[index].count);
             }
+
+            if (i == EMPTY_TOP_VAR && k == RING_Z-reqmade - 1)
+            {
+              last_read = true;
+            }
+            
             
             int mem_addr = index*Z_VAR + sd;
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
             dum_cand[ri] = -1;
           }
@@ -1107,7 +1122,7 @@ void write_path(int label){
               int index_prime = calc_index(label, i_prime);
               addr = SubMap[index_prime] + j_prime;
             }
-            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
+            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false);
           }
 
 
@@ -3192,10 +3207,17 @@ void ring_read_path(int label, int addr){
 
     ring_invalidate(index, offset);  // ??? to be implemented
 
+    bool last_read = false;
+    // if (i == )
+    // {
+    //   last_read = true;
+    // }
+    
+
     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
       int mem_addr = index*Z_VAR + offset;
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
     }
      GlobTree[index].count++;
   }
@@ -3310,6 +3332,7 @@ void ring_evict_path(int label){
 
 void ring_early_reshuffle(int label){
   // printf("reshuffle trace %d\n", tracectr);
+  bool last_read = false;
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
@@ -3325,7 +3348,12 @@ void ring_early_reshuffle(int label){
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR && GlobTree[index].slot[j].isReal)
         {
           int mem_addr = index*Z_VAR + j;
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+          if (i == LEVEL - 1 && j == LZ_VAR[i] -1)
+          {
+            last_read = true;
+          }
+          
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
           // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
           reqmade++;
         }
@@ -3371,7 +3399,7 @@ void ring_early_reshuffle(int label){
           }
            
           int mem_addr = index*Z_VAR + sd;
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R');
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false);
           // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
           dum_cand[ri] = -1;
         }
@@ -3387,7 +3415,7 @@ void ring_early_reshuffle(int label){
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           int mem_addr = index*Z_VAR + j;
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W');
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
         }
         if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
         {
@@ -4323,6 +4351,12 @@ issue_request_command (request_t * request)
       request->latency = request->completion_time - request->arrival_time;
       request->dispatch_time = CYCLE_VAL;
       request->request_served = 1;
+      // Mehrnoosh:
+      if (request->last_read)
+			{
+				last_read_served = true;
+			}
+      // Mehrnoosh.
 
       // update the ROB with the completion time
       ROB[request->thread_id].comptime[request->instruction_id] =
