@@ -1722,7 +1722,7 @@ void freecursive_access(int addr, char type){
     return;
   }
 
-/*
+// /*
   if (!RING_ENABLE || !WRITE_LINGER)
   {
     // if write bypass feature is on and there is write req hit in the cache
@@ -1979,7 +1979,7 @@ void freecursive_access(int addr, char type){
 
   }
 
-*/
+// */
   // printf("freecursuve: b4 last oram access (data): %d\n", addr);
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
