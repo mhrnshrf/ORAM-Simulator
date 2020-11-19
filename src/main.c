@@ -1189,7 +1189,7 @@ char bench[20];
 									opertype[numc] = 'W';
 								}
 
-								nonmemops[numc] += hit_nonmemops;
+								nonmemops[numc] += hit_nonmemops + L2_LATENCY;
 								hit_nonmemops = 0;
 								nonmemops_sum += nonmemops[numc];
 
