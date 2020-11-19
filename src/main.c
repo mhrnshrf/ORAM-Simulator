@@ -1207,6 +1207,7 @@ char bench[20];
 								missctr = 0;
 								evictctr = 0;
 								cache_dirty = 0;
+								nonmemops_sum = 0;
 							}
 						}
 						else {
