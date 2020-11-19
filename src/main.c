@@ -871,7 +871,7 @@ char bench[20];
 		else
 		{
 			nonmemops_timing[numc] = nonmemops[numc];
-			// printf("nonmemops:  %d\n", nonmemops_timing[numc]);
+			// printf("nonmemops:  %d    cycle %lld\n", nonmemops_timing[numc], CYCLE_VAL);
 		}
 		
 	  // Mehrnoosh.
@@ -911,6 +911,8 @@ char bench[20];
 	    fetched[numc]++;
 	    num_fetch++;
 		// Mehrnoosh:
+		// printf("nonmemops:  %d    cycle %lld\n", nonmemops_timing[numc], CYCLE_VAL);
+
 		trace_clk++;
 
 		// printf("nonmemops: %d\n", nonmemops[numc]);
