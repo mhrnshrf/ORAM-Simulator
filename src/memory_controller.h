@@ -16,7 +16,7 @@
 #define PAGE_SIZE 4096              // page size in byte ~~~> 4KB
 #define L1_LATENCY 3                // L1 latency in terms of # cycles 
 #define L2_LATENCY 10               // L2 latency in terms of # cycles 
-#define MAINMEM_LATENCY 10           // mem latency in terms of # cycles 
+#define MAINMEM_LATENCY 200           // mem latency in terms of # cycles 
 #define WARMUP_THRESHOLD 3000000    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 #define TIMEOUT_THRESHOLD 10000      // time out threshold in seconds
 #define TOP_BOUNDRY 10              // top region tree boundry
@@ -67,7 +67,7 @@
 // subtree config
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
+#define NUM_CHANNELS_SUBTREE 4  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 // rho config
