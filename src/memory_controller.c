@@ -3564,7 +3564,7 @@ void print_oram_stats(){
   printf("Mem req latency          %f\n", (double)mem_req_latencies/(invokectr));
   printf("Nonmemops                %lld\n", nonmemops_sum);
   printf("Miss L1 wb               %lld\n", missl1wb);
-  printf("Miss L1 wb ratio         %f%%\n", 100*(double)missl1wb/invokectr);
+  printf("Miss L1 wb ratio         %f%%\n", 100*(double)missl1wb/missctr);
   // printf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
