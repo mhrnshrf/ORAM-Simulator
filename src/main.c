@@ -1074,6 +1074,7 @@ char bench[20];
 							}
 							next_trace = shad_addr[numc];
 						}
+						// printf("newstr: %s		shad: %s\n", newstr, shadstr);
 						// printf("newstr: %s\n", newstr);
 						// printf("shadstr: %s\n", shadstr);
 						
@@ -1192,7 +1193,7 @@ char bench[20];
 								victim = cache_fill(addr[numc], opertype[numc]);
 								// printf("shad: %d\n", shad_nonmemops[numc]);
 
-								if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' /*&& victim != -1*/)
+								if (shad_nonmemops[numc] == 10 /*&& opertype[numc] == 'W' && victim != -1*/)
 								{
 									missl1wb++;
 								}
