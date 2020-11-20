@@ -354,8 +354,14 @@ int main(int argc, char * argv[])
 		oram_init_path();
 		take_snapshot(argv);
 	}
+		
+	if (!NONSEC_ENABLE)
+	{
+		oram_init();
+		/* code */
+	}
 	
-	oram_init();
+
 
 	fflush(stdout);
 
@@ -454,6 +460,13 @@ int main(int argc, char * argv[])
 char bench[20];
 
   for (numc=0; numc < NUMCORES; numc++) {
+	 shadtif[numc] = fopen(argv[numc+2], "r");
+     if (!shadtif[numc]) {
+       printf("Missing shadow input trace file %d.  Quitting. \n",numc);
+       return -5;
+     }
+
+
      tif[numc] = fopen(argv[numc+2], "r");
      if (!tif[numc]) {
        printf("Missing input trace file %d.  Quitting. \n",numc);
@@ -513,11 +526,7 @@ char bench[20];
 	 
 
 
-	 shadtif[numc] = fopen(argv[numc+2], "r");
-     if (!shadtif[numc]) {
-       printf("Missing shadow input trace file %d.  Quitting. \n",numc);
-       return -5;
-     }
+
 	// Mehrnoosh.
 
      /* The addresses in each trace are given a prefix that equals
@@ -644,6 +653,8 @@ char bench[20];
 			  // Mehrnoosh:
 			  fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]);
 			  fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]);
+			//   printf("newstr: %s\n", newstr);
+			//   printf("shadstr: %s\n", shadstr);
 			  // Mehrnoosh:
 	        if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
 		  if (opertype[numc] == 'R') {
@@ -1063,6 +1074,8 @@ char bench[20];
 							}
 							next_trace = shad_addr[numc];
 						}
+						// printf("newstr: %s\n", newstr);
+						// printf("shadstr: %s\n", shadstr);
 						
 						if (waited_for_evicted[numc].valid)
 						{
@@ -1177,6 +1190,7 @@ char bench[20];
 								// first serve the evicted block then next time serve this trace
 								int victim;
 								victim = cache_fill(addr[numc], opertype[numc]);
+								// printf("shad: %d\n", shad_nonmemops[numc]);
 
 								if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' && victim != -1)
 								{
