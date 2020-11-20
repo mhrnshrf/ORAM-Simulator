@@ -16,7 +16,7 @@
 #define PAGE_SIZE 4096              // page size in byte ~~~> 4KB
 #define L1_LATENCY 3                // L1 latency in terms of # cycles 
 #define L2_LATENCY 10               // L2 latency in terms of # cycles 
-#define MAINMEM_LATENCY 300           // mem latency in terms of # cycles 
+#define MAINMEM_LATENCY 0           // mem latency in terms of # cycles 
 #define WARMUP_THRESHOLD 3000000    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 #define TIMEOUT_THRESHOLD 10000      // time out threshold in seconds
 #define TOP_BOUNDRY 10              // top region tree boundry
@@ -596,7 +596,7 @@ int read_matches_write_or_read_queue(long long int physical_address);
 int write_exists_in_write_queue(long long int physical_address);
 
 // enqueue a read into the corresponding read queue (returns ptr to new node)
-request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree);
+request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read);
 
 // enqueue a write into the corresponding write queue (returns ptr to new_node)
 request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree);

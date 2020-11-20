@@ -3841,7 +3841,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   void *
 init_new_node (long long int physical_address, long long int arrival_time,
     optype_t type, int thread_id, int instruction_id,
-    long long int instruction_pc, int oramid, TreeType tree) 
+    long long int instruction_pc, int oramid, TreeType tree, bool last_read) 
 {
   request_t * new_node = NULL;
   new_node = (request_t *) malloc (sizeof (request_t));
@@ -3858,6 +3858,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     // Mehrnoosh:
     new_node->oramid = oramid;
     new_node->tree = tree;
+    new_node->last_read = last_read;
     // Mehrnoosh.
 
 
@@ -3957,7 +3958,7 @@ write_exists_in_write_queue (long long int physical_address)
 // Insert a new read to the read queue
 request_t * insert_read (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc, int oramid, TreeType tree) 
+    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read) 
 {
   optype_t this_op = READ;
 
@@ -3968,7 +3969,7 @@ request_t * insert_read (long long int physical_address,
   stats_reads_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, instruction_pc, oramid, tree);
+        instruction_id, instruction_pc, oramid, tree, last_read);
   LL_APPEND (read_queue_head[channel], new_node);
   read_queue_length[channel]++;
 
@@ -3989,7 +3990,7 @@ request_t * insert_write (long long int physical_address,
   stats_writes_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, 0, oramid, tree);
+        instruction_id, 0, oramid, tree, false);
   LL_APPEND (write_queue_head[channel], new_node);
   write_queue_length[channel]++;
 

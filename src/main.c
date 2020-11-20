@@ -790,7 +790,7 @@ char bench[20];
     for (numc = 0; numc < NUMCORES; numc++) {
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
-        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) {
+        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull) && last_read_served) {
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
@@ -941,7 +941,13 @@ char bench[20];
 			// Mehrnoosh:
 
 			// start = clock();
-			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc]);
+			if (NONSEC_ENABLE)
+			{
+				last_read[numc] = true;
+				last_read_served = false;
+			}
+			
+			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc]);
 
 			// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
 
@@ -1103,10 +1109,10 @@ char bench[20];
 								}
 							}
 							addr[numc] = byte_addr(addr[numc]);
-							if (nonmemops[numc] == 10)
-							{
-								nonmemops[numc] = 200;
-							}
+							// if (nonmemops[numc] == 10)
+							// {
+							// 	nonmemops[numc] = 200;
+							// }
 							
 							// hit
 							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
