@@ -1178,7 +1178,7 @@ char bench[20];
 								int victim;
 								victim = cache_fill(addr[numc], opertype[numc]);
 
-								if (nonmemops[numc] == 10 )
+								if (nonmemops[numc] == 10 && victim != -1)
 								{
 									missl1wb++;
 								}
