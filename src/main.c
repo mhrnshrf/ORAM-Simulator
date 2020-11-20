@@ -1105,7 +1105,7 @@ char bench[20];
 							addr[numc] = byte_addr(addr[numc]);
 							if (nonmemops[numc] == 10)
 							{
-								nonmemops[numc] = 20;
+								nonmemops[numc] = 200;
 							}
 							
 							// hit
