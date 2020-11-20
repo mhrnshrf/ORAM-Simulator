@@ -1192,7 +1192,7 @@ char bench[20];
 								victim = cache_fill(addr[numc], opertype[numc]);
 								// printf("shad: %d\n", shad_nonmemops[numc]);
 
-								if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' && victim != -1)
+								if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' /*&& victim != -1*/)
 								{
 									missl1wb++;
 								}
