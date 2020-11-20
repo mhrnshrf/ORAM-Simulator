@@ -35,7 +35,7 @@
 #define PREFETCH_ENABLE 0     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
-#define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
+#define NONSEC_ENABLE   1     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 
 #define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
@@ -68,7 +68,7 @@
 // subtree config
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-#define NUM_CHANNELS_SUBTREE 4  // # memory channel used for subtree calculation
+#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 // rho config

@@ -1103,6 +1103,11 @@ char bench[20];
 								}
 							}
 							addr[numc] = byte_addr(addr[numc]);
+							if (nonmemops[numc] == 10)
+							{
+								nonmemops[numc] = 20;
+							}
+							
 							// hit
 							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
 							{
