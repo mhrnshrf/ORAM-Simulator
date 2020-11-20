@@ -166,8 +166,9 @@ int main(int argc, char * argv[])
 	printf("Prefetch       %s\n", PREFETCH_ENABLE?"Enabled":"No" );
 	printf("Early WB       %s\n", EARLY_ENABLE?"Enabled":"No" );
 	printf("Snapshot       %s\n", SNAPSHOT_ENABLE?"Enabled":"No" );
-	printf("Timeout        %s\n\n", TIMEOUT_ENBALE?"Enabled":"No" );
-	printf("Ring           %s\n\n", RING_ENABLE?"Enabled":"No" );
+	printf("Timeout        %s\n", TIMEOUT_ENBALE?"Enabled":"No" );
+	printf("Ring           %s\n", RING_ENABLE?"Enabled":"No" );
+	printf("Nonsecure      %s\n\n", NONSEC_ENABLE?"Enabled":"No" );
  
 
 	printf("....................................................\n");
@@ -1174,7 +1175,16 @@ char bench[20];
 
 								
 								// first serve the evicted block then next time serve this trace
-								int victim = cache_fill(addr[numc], opertype[numc]);
+								int victim;
+								victim = cache_fill(addr[numc], opertype[numc]);
+
+								if (nonmemops[numc] == 10 )
+								{
+									missl1wb++;
+								}
+								
+								
+								
 
 								if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
 								{
