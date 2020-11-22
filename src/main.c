@@ -38,7 +38,7 @@ int *prefixtable;
 long long int *time_done;
 long long int total_time_done;
 float core_power=0;
-FILE **shadtif;  /* The handles to the trace input files. */
+// FILE **shadtif;  /* The handles to the trace input files. */
 
 // Mehrnoosh:
 #include <sys/time.h>
@@ -407,15 +407,15 @@ int main(int argc, char * argv[])
   long long int *instrpc;
   int chips_per_rank=-1;
   // Mehrnoosh:
-  int *shad_nonmemops;
-  char *shad_opertype;
-  long long int *shad_addr;
-  long long int *shad_instrpc;
+//   int *shad_nonmemops;
+//   char *shad_opertype;
+//   long long int *shad_addr;
+//   long long int *shad_instrpc;
+//   char shadstr[MAXTRACELINESIZE];
   int *oramid;
   int *tree;
   bool *last_read;
   int *nonmemops_timing;
-  char shadstr[MAXTRACELINESIZE];
   // Mehrnoosh.
 
   /* Initialization code. */
@@ -447,24 +447,24 @@ int main(int argc, char * argv[])
   prefixtable = (int *)malloc(sizeof(int)*NUMCORES);
   currMTapp = -1;
   // Mehrnoosh:
-  shadtif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
+//   shadtif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
   oramid = (int *)malloc(sizeof(int)*NUMCORES);
   tree = (int *)malloc(sizeof(int)*NUMCORES);
   last_read = (bool *)malloc(sizeof(bool)*NUMCORES);
   nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
-  shad_nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
-  shad_opertype = (char *)malloc(sizeof(char)*NUMCORES);
-  shad_addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
-  shad_instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+//   shad_nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
+//   shad_opertype = (char *)malloc(sizeof(char)*NUMCORES);
+//   shad_addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+//   shad_instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
 
 char bench[20];
 
   for (numc=0; numc < NUMCORES; numc++) {
-	 shadtif[numc] = fopen(argv[numc+2], "r");
-     if (!shadtif[numc]) {
-       printf("Missing shadow input trace file %d.  Quitting. \n",numc);
-       return -5;
-     }
+	//  shadtif[numc] = fopen(argv[numc+2], "r");
+    //  if (!shadtif[numc]) {
+    //    printf("Missing shadow input trace file %d.  Quitting. \n",numc);
+    //    return -5;
+    //  }
 
 
      tif[numc] = fopen(argv[numc+2], "r");
@@ -651,8 +651,8 @@ char bench[20];
   {
 	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 			  // Mehrnoosh:
-			  fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]);
-			  fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]);
+			//   fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]);
+			//   fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]);
 			//   printf("newstr: %s\n", newstr);
 			//   printf("shadstr: %s\n", shadstr);
 			  // Mehrnoosh:

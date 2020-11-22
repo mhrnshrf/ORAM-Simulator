@@ -226,22 +226,24 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
     unsigned int addrval;
     sscanf(str,"%x", &addrval);
 
-        rctr++;
 	if (!cache_access(addrval, 'R')) // miss
 	{
-
+        rctr++;
 		int victim = cache_fill(addrval, 'R');
 
 		// if needed to evict a block
 		if (victim != -1)
 		{
+            if (nonmemops != 11 && nonmemops != 12 && nonmemops != 18 && nonmemops != 6){
             unsigned int v = (unsigned int)victim;
 			fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v,  ip, (double)(1000*wctr/(double)instctr));
+            }
             nonmemops = L2_LATENCY;
 		}
         
+        if (nonmemops != 11 && nonmemops != 12 && nonmemops != 18 && nonmemops != 6){
 	    fprintf(trace,"%d R 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr));
-
+        }
 	    nonmemops = 0;	
 	}
 	else	// hit
@@ -267,33 +269,26 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
         unsigned int addrval;
         sscanf(str,"%x", &addrval);
 
-            wctr++;
         if (!cache_access(addrval, 'W')) // miss
         {
 
+            wctr++;
             int victim = cache_fill(addrval, 'W');
             // if needed to evict a block
             if (victim != -1)
             {
-                if (nonmemops != 10 && nonmemops != 15){
+                // if (nonmemops != 10 && nonmemops != 15){
                 unsigned int v = (unsigned int)victim;
                 fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v, ip, (double)(1000*wctr/(double)instctr));
-                }
-                // else
-                // {
-                //     cache_clk--;
-                //     access--;
-                //     instctr--;
-                //     wctr--;
                 // }
             
                 
                 nonmemops = L2_LATENCY;
             }
 
-            if (nonmemops != 10 && nonmemops != 15){
+            // if (nonmemops != 10 && nonmemops != 15){
             fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
-            }
+            // }
 
             nonmemops = 0;	
         }
