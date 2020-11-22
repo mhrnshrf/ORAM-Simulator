@@ -27,6 +27,9 @@ alias runfot='runcpu --config=new.cfg --action=onlyrun 649.fotonik3d_s'
 alias runrom='runcpu --config=new.cfg --action=onlyrun 654.roms_s'
 
 
-alias makepin='pin; make obj-intel64/pinatrace.so'
+alias mpin='pin; make obj-intel64/pinatrace.so'
 
 alias wcl='wc -l pinatrace.out'
+
+alias headp='head -n 100 pinatrace.out'
+alias tailp='tail -n 100 pinatrace.out'

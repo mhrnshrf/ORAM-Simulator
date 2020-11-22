@@ -217,6 +217,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 {
     cache_clk++;
     access++;
+    instctr++;
     nonmemops += L1_LATENCY;
 
     // get pointer value and store it in an usigned int
@@ -225,19 +226,17 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
     unsigned int addrval;
     sscanf(str,"%x", &addrval);
 
+        rctr++;
 	if (!cache_access(addrval, 'R')) // miss
 	{
-	    // fprintf(trace,"%f\n", (double)100*hit/access);
-        rctr++;
-        instctr += nonmemops +1;
 
 		int victim = cache_fill(addrval, 'R');
+
 		// if needed to evict a block
 		if (victim != -1)
 		{
             unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v,  ip, (double)(1000*rctr/(double)instctr));
-			// fprintf(trace,"%d W 0x%x %p         %lld\n", nonmemops, v,  ip,  viclru);
+			fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v,  ip, (double)(1000*wctr/(double)instctr));
             nonmemops = L2_LATENCY;
 		}
         
@@ -255,48 +254,64 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 // Print a memory write record
 VOID RecordMemWrite(VOID * ip, VOID * addr)
 {
-    cache_clk++;
-    access++;
-    nonmemops += L1_LATENCY;
+    // if (nonmemops != 12)
+    // {
+        cache_clk++;
+        access++;
+        instctr++;
+        nonmemops += L1_LATENCY;
 
-    // get pointer value and store it in an usigned int
-    char str[100];
-    sprintf(str, "%p\n", addr);
-    unsigned int addrval;
-    sscanf(str,"%x", &addrval);
+        // get pointer value and store it in an usigned int
+        char str[100];
+        sprintf(str, "%p\n", addr);
+        unsigned int addrval;
+        sscanf(str,"%x", &addrval);
 
-	if (!cache_access(addrval, 'W')) // miss
-	{
-	    // fprintf(trace,"%f\n", (double)100*hit/access);
-        wctr++;
-        instctr += nonmemops +1;
+            wctr++;
+        if (!cache_access(addrval, 'W')) // miss
+        {
 
-		int victim = cache_fill(addrval, 'W');
-		// if needed to evict a block
-		if (victim != -1)
-		{
-            unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v, ip, (double)(1000*wctr/(double)instctr));
-			// fprintf(trace,"%d W 0x%x %p         %lld\n", nonmemops, v, ip, viclru);
-            nonmemops = L2_LATENCY;
-		}
+            int victim = cache_fill(addrval, 'W');
+            // if needed to evict a block
+            if (victim != -1)
+            {
+                if (nonmemops != 10 && nonmemops != 15){
+                unsigned int v = (unsigned int)victim;
+                fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v, ip, (double)(1000*wctr/(double)instctr));
+                }
+                // else
+                // {
+                //     cache_clk--;
+                //     access--;
+                //     instctr--;
+                //     wctr--;
+                // }
+            
+                
+                nonmemops = L2_LATENCY;
+            }
 
+            if (nonmemops != 10 && nonmemops != 15){
+            fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
+            }
 
-	    fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
-
-	    nonmemops = 0;	
-	}
-	else // hit
-	{
-        hit++;
-	}
+            nonmemops = 0;	
+        }
+        else // hit
+        {
+            hit++;
+        }
+        /* code */
+    // }
+    
 }
 
 
 // Print other instruction that are not mem type
 VOID RecordOtherInst(VOID * ip, VOID * addr)
 {
-    //fprintf(trace,"%p: N %p\n", ip, addr);
+    // fprintf(trace,"%lld N %p %p\n", instctr, addr, ip);
+    instctr++;
     cache_clk++;
     nonmemops++;
 }
