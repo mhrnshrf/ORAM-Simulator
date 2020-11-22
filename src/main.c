@@ -1066,14 +1066,14 @@ char bench[20];
 					cache_clk++;
 					if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 						// printf("while readline trace ctr: %d  \n", tracectr);
-						if (fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]))
-						{
-							if (sscanf(shadstr,"%d %c %Lx %Lx",&shad_nonmemops[numc],&shad_opertype[numc],&shad_addr[numc],&shad_instrpc[numc]) < 1) {
-										printf("SHADOW Panic.  Poor trace format.\n");
-										return -3;
-							}
-							next_trace = shad_addr[numc];
-						}
+						// if (fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]))
+						// {
+						// 	if (sscanf(shadstr,"%d %c %Lx %Lx",&shad_nonmemops[numc],&shad_opertype[numc],&shad_addr[numc],&shad_instrpc[numc]) < 1) {
+						// 				printf("SHADOW Panic.  Poor trace format.\n");
+						// 				return -3;
+						// 	}
+						// 	next_trace = shad_addr[numc];
+						// }
 						// printf("newstr: %s		shad: %s\n", newstr, shadstr);
 						// printf("newstr: %s\n", newstr);
 						// printf("shadstr: %s\n", shadstr);
@@ -1193,10 +1193,10 @@ char bench[20];
 								victim = cache_fill(addr[numc], opertype[numc]);
 								// printf("shad: %d\n", shad_nonmemops[numc]);
 
-								if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' /*&& victim != -1*/)
-								{
-									missl1wb++;
-								}
+								// if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' /*&& victim != -1*/)
+								// {
+								// 	missl1wb++;
+								// }
 								
 								
 								
