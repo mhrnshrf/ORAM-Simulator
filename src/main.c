@@ -11,7 +11,7 @@
 #include "params.h"
 #include "stt.h"
 
-#define MAXTRACELINESIZE 64
+#define MAXTRACELINESIZE 164
 long long int BIGNUM = 1000000;
 
 
