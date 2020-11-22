@@ -659,25 +659,25 @@ char bench[20];
 	        if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
 		  if (opertype[numc] == 'R') {
 		    if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-		      printf("Panic.  Poor trace format.\n");
+		      printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 		      return -4;
 		    }
 		  }
 		  else {
 		    if (opertype[numc] == 'W') {
 		      if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
-		        printf("Panic.  Poor trace format.\n");
+		        printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 		        return -3;
 		      }
 		    }
 		    else {
-		      printf("Panic.  Poor trace format.\n");
+		      printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 		      return -2;
 		    }
 		  }
 		}
 		else {
-		  printf("Panic.  Poor trace format.\n");
+		  printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 		  return -1;
 		}
 	      }
@@ -1281,18 +1281,18 @@ char bench[20];
 			else {
 				if (opertype[numc] == 'W') {
 				if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
-					printf("Panic.  Poor trace format.\n");
+					printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 					return -3;
 				}
 				}
 				else {
-				printf("Panic.  Poor trace format.\n");
+				printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 				return -2;
 				}
 			}
 				}
 				else {
-				printf("Panic.  Poor trace format.\n");
+				printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 				return -1;
 				}
 				}
