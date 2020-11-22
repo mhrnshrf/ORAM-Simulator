@@ -31,6 +31,9 @@ enum reqType {CREAD = 'R', CWRITE = 'W'};
 enum status {MISS = false, HIT = true};
 enum eviction{NO_EVICT = -1};
 
+long long int cache_clk = 0;
+long long int viclru = 0;
+
 
 enum{
   NUM_SET = (unsigned int)(CACHE_SIZE/BLOCK_SIZE)/NUM_WAY,  // # sets
@@ -50,7 +53,7 @@ typedef struct Cacheline{
 
 
 Cacheline L1[NUM_SET][NUM_WAY];     // the cache
-char LRU[NUM_SET][NUM_WAY];                  // a array to keep track of lru for eviction
+long long int LRU[NUM_SET][NUM_WAY];                 // a array to keep track of lru for eviction
 
 // invalidate all cahce blocks upon init
 void cache_init(){
@@ -68,19 +71,20 @@ void cache_init(){
 }
 
 void update_LRU(unsigned int index, unsigned int way){
-    if (LRU[index][way] >= NUM_WAY-1)
-    {
-        LRU[index][way] = 0;
-    }
-    else
-    {
-        LRU[index][way]++;
-    } 
+    LRU[index][way] = cache_clk;
+    // if (LRU[index][way] >= NUM_WAY - 1)
+    // {
+    //     LRU[index][way] = 0;
+    // }
+    // else
+    // {
+    //     LRU[index][way]++;
+    // } 
 }
 
 void reset_LRU(unsigned int index, unsigned int way){
-    LRU[index][way] = 1;
-
+    LRU[index][way] = cache_clk;
+    // LRU[index][way] = 1;
 }
 
 
@@ -99,7 +103,8 @@ int find_spot(unsigned int index){
 // find the cacheline with the least recently used
 int find_victim(unsigned int index) {
     int victim = -1;
-    char min = NUM_WAY;
+    // char min = NUM_WAY;
+    long long int min = cache_clk;
     for (int j = 0; j < NUM_WAY; j++)
     {
         if (LRU[index][j] < min)
@@ -109,7 +114,7 @@ int find_victim(unsigned int index) {
 
         }
     }
-
+    
     return victim;
 }
 
@@ -165,6 +170,7 @@ int cache_fill(unsigned int addr,  char type){
     if (way == -1)
     {
         way = find_victim(index);
+        viclru = LRU[index][way];
         if (L1[index][way].dirty)
         {
             victim = L1[index][way].addr;
@@ -202,9 +208,14 @@ int nonmemops = 0;
 long long int access = 0;
 long long int hit = 0;
 
+long long int rctr = 0;
+long long int wctr = 0;
+long long int instctr = 0;
+
 // Print a memory read record
 VOID RecordMemRead(VOID * ip, VOID * addr)
 {
+    cache_clk++;
     access++;
     nonmemops += L1_LATENCY;
 
@@ -217,17 +228,20 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 	if (!cache_access(addrval, 'R')) // miss
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
+        rctr++;
+        instctr += nonmemops +1;
 
 		int victim = cache_fill(addrval, 'R');
 		// if needed to evict a block
 		if (victim != -1)
 		{
             unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
+			fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v,  ip, (double)(1000*rctr/(double)instctr));
+			// fprintf(trace,"%d W 0x%x %p         %lld\n", nonmemops, v,  ip,  viclru);
             nonmemops = L2_LATENCY;
 		}
         
-	    fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
+	    fprintf(trace,"%d R 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr));
 
 	    nonmemops = 0;	
 	}
@@ -241,6 +255,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 // Print a memory write record
 VOID RecordMemWrite(VOID * ip, VOID * addr)
 {
+    cache_clk++;
     access++;
     nonmemops += L1_LATENCY;
 
@@ -253,18 +268,21 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 	if (!cache_access(addrval, 'W')) // miss
 	{
 	    // fprintf(trace,"%f\n", (double)100*hit/access);
+        wctr++;
+        instctr += nonmemops +1;
 
 		int victim = cache_fill(addrval, 'W');
 		// if needed to evict a block
 		if (victim != -1)
 		{
             unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p\n", nonmemops, v, ip);
+			fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v, ip, (double)(1000*wctr/(double)instctr));
+			// fprintf(trace,"%d W 0x%x %p         %lld\n", nonmemops, v, ip, viclru);
             nonmemops = L2_LATENCY;
 		}
 
 
-	    fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
+	    fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
 
 	    nonmemops = 0;	
 	}
@@ -279,6 +297,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 VOID RecordOtherInst(VOID * ip, VOID * addr)
 {
     //fprintf(trace,"%p: N %p\n", ip, addr);
+    cache_clk++;
     nonmemops++;
 }
 
