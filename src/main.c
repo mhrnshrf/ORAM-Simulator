@@ -1274,7 +1274,7 @@ char bench[20];
 					tracectr++;
 			if (opertype[numc] == 'R') {
 				if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-				printf("Panic.  Poor trace format.\n");
+				printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 				return -4;
 				}
 			}
