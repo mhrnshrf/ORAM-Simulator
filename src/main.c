@@ -1003,7 +1003,7 @@ char bench[20];
 		      }
 		}
 		else {
-		  printf("Panic.  Poor trace format. \n");
+		  printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 		  return -1;
 		}
 	      }
@@ -1104,7 +1104,7 @@ char bench[20];
 								rctr++;
 								instctr += nonmemops[numc] + 1;
 								if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-								printf("Panic.  Poor trace format.\n");
+								printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 								return -4;
 								}
 							}
@@ -1114,12 +1114,12 @@ char bench[20];
 									wctr++;
 									instctr += nonmemops[numc] + 1;
 									if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-										printf("Panic.  Poor trace format.\n");
+										printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 										return -3;
 									}
 								}
 								else {
-								printf("Panic.  Poor trace format.\n");
+								printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 								return -2;
 								}
 							}
@@ -1248,7 +1248,7 @@ char bench[20];
 							}
 						}
 						else {
-							printf("Panic.  Poor trace format.\n");
+							printf("Panic.  Poor trace format. newstr: %s\n", newstr);
 							return -1;
 						}
 					
