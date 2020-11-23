@@ -26,8 +26,8 @@
 #define ADDR_WIDTH 32       // bits
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
-// #define SKIP_THRESH 100000000       // skip threshold for dumping trace
-#define SKIP_THRESH 0       // skip threshold for dumping trace
+#define SKIP_THRESH 500000000       // skip threshold for dumping trace
+// #define SKIP_THRESH 0       // skip threshold for dumping trace
 #define CLK_PRINT 0       // 0/1 flag to print cache clk
 
 enum reqType {CREAD = 'R', CWRITE = 'W'};
@@ -228,27 +228,30 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
     sprintf(str, "%p\n", addr);
     unsigned int addrval;
     sscanf(str,"%x", &addrval);
+    int victim = -1;
+    unsigned int v = 0;
+    bool skip = false;
 
 	if (!cache_access(addrval, 'R')) // miss
 	{
         rctr++;
-		int victim = cache_fill(addrval, 'R');
+		victim = cache_fill(addrval, 'R');
 
-        bool skip = false;
 
 		// if needed to evict a block
-		if (victim != -1)
-		{
-            if (cache_clk > SKIP_THRESH){
-            unsigned int v = (unsigned int)victim;
-			fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
-            }
-            else
+        if (cache_clk > SKIP_THRESH)
+        {
+            if (victim != -1)
             {
-                skip = true;
-            }
-            nonmemops = L2_LATENCY;
-		}
+                v = (unsigned int)victim;
+                fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
+                }
+                nonmemops = L2_LATENCY;
+        }
+        else
+        {
+            skip = true;
+        }
         
         if (!skip){
 	    fprintf(trace,"%d R 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr));
@@ -277,28 +280,30 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
         sprintf(str, "%p\n", addr);
         unsigned int addrval;
         sscanf(str,"%x", &addrval);
+        int victim = -1;
+        unsigned int v = 0;
+        bool skip = false;
 
         if (!cache_access(addrval, 'W')) // miss
         {
 
             wctr++;
-            int victim = cache_fill(addrval, 'W');
+            victim = cache_fill(addrval, 'W');
 
-            bool skip = false;
             // if needed to evict a block
-            if (victim != -1)
-            {
-                if (cache_clk > SKIP_THRESH){
-                unsigned int v = (unsigned int)victim;
-                fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, v, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
-                }
-                else
+            if (cache_clk > SKIP_THRESH){
+                if (victim != -1)
                 {
-                    skip = true;
-                }
-            
+                    v = (unsigned int)victim;
+                    fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, v, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
                 
-                nonmemops = L2_LATENCY;
+                    
+                    nonmemops = L2_LATENCY;
+                }
+            }
+            else
+            {
+                skip = true;
             }
 
             if (!skip){
@@ -306,7 +311,7 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             }
 
             nonmemops = 0;	
-            if (CLK_PRINT)
+            if (CLK_PRINT && cache_clk > SKIP_THRESH)
             {
                 fprintf(trace,"%lld\n", cache_clk);
             }
