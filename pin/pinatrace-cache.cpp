@@ -26,6 +26,7 @@
 #define ADDR_WIDTH 32       // bits
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
+#define SKIP_THRESH 200000000       // skip threshold for dumping trace
 
 enum reqType {CREAD = 'R', CWRITE = 'W'};
 enum status {MISS = false, HIT = true};
@@ -231,17 +232,23 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
         rctr++;
 		int victim = cache_fill(addrval, 'R');
 
+        bool skip = false;
+
 		// if needed to evict a block
 		if (victim != -1)
 		{
-            if (nonmemops != 11 && nonmemops != 12 && nonmemops != 18 && nonmemops != 6){
+            if (cache_clk > SKIP_THRESH){
             unsigned int v = (unsigned int)victim;
 			fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v,  ip, (double)(1000*wctr/(double)instctr));
+            }
+            else
+            {
+                skip = true;
             }
             nonmemops = L2_LATENCY;
 		}
         
-        if (nonmemops != 11 && nonmemops != 12 && nonmemops != 18 && nonmemops != 6){
+        if (!skip){
 	    fprintf(trace,"%d R 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr));
         }
 	    nonmemops = 0;	
@@ -274,28 +281,36 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
 
             wctr++;
             int victim = cache_fill(addrval, 'W');
+
+            bool skip = false;
             // if needed to evict a block
             if (victim != -1)
             {
-                // if (nonmemops != 10 && nonmemops != 15){
+                if (cache_clk > SKIP_THRESH){
                 unsigned int v = (unsigned int)victim;
                 fprintf(trace,"%d W 0x%x %p     %f\n", nonmemops, v, ip, (double)(1000*wctr/(double)instctr));
-                // }
+                }
+                else
+                {
+                    skip = true;
+                }
             
                 
                 nonmemops = L2_LATENCY;
             }
 
-            // if (nonmemops != 10 && nonmemops != 15){
+            if (!skip){
             fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
-            // }
+            }
 
             nonmemops = 0;	
+            // fprintf(trace,"%lld\n", cache_clk);
         }
         else // hit
         {
             hit++;
         }
+
         /* code */
     // }
     
