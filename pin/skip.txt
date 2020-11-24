@@ -1,0 +1,40 @@
+//worked 
+
+mcf 
+?
+
+dee
+if (nonmemops != 10 && nonmemops !=15)
+
+
+cam
+if (nonmemops != 30 && nonmemops !=128 && nonmemops !=70 && nonmemops !=32 && nonmemops !=150 && nonmemops !=56 && nonmemops != 10)
+
+
+wrf
+if (nonmemops != 118 && nonmemops !=119)
+
+fot
+if (nonmemops != 10 && nonmemops != 3 && nonmemops !=1507 && nonmemops !=1088)
+
+
+
+
+
+
+// did not work
+
+ima
+if (nonmemops != 10 && nonmemops !=43 && nonmemops !=41 && nonmemops !=11 && nonmemops !=6 && nonmemops !=56 && nonmemops !=3304)
+
+
+lbm
+if (nonmemops != 116 && nonmemops !=28 && nonmemops !=24 && nonmemops !=22 && nonmemops !=31 && nonmemops !=10 && nonmemops != 13 && nonmemops != 46)
+
+
+rom
+if (nonmemops != 10 && nonmemops !=4 && nonmemops !=12 && nonmemops !=25 && nonmemops != 6 && nonmemops != 18 && nonmemops != 17 && nonmemops != 11)
+
+
+bwa
+if (nonmemops != 3 && nonmemops != 6 && nonmemops != 9 && nonmemops != 15 && nonmemops != 13 && nonmemops != 12)

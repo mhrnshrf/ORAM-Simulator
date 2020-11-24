@@ -26,7 +26,7 @@
 #define ADDR_WIDTH 32       // bits
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
-// #define SKIP_THRESH 300000000       // skip threshold for dumping trace
+//#define SKIP_THRESH 500000000       // skip threshold for dumping trace
 #define SKIP_THRESH 0       // skip threshold for dumping trace
 #define CLK_PRINT 0       // 0/1 flag to print cache clk
 
@@ -291,7 +291,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             victim = cache_fill(addrval, 'W');
 
             // if needed to evict a block
-            if (cache_clk > SKIP_THRESH){
+            if (nonmemops != 10 && nonmemops !=43 && nonmemops !=41 && nonmemops !=11 && nonmemops !=6 && nonmemops !=56 && nonmemops !=3304 && nonmemops !=5604 && nonmemops !=3630 && nonmemops !=1652 && nonmemops !=3952)
+			{
                 if (victim != -1)
                 {
                     v = (unsigned int)victim;
