@@ -517,6 +517,11 @@ char bench[20];
 		 endpoint = 3772000;
 		 TIMING_INTERVAL = T2_INTERVAL;
 	 }
+	 else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
+	 {
+		 endpoint = 3327000;
+		 TIMING_INTERVAL = T2_INTERVAL;
+	 }
 	 else
 	 {
 		 endpoint = TRACE_SIZE;
