@@ -802,7 +802,7 @@ char bench[20];
     for (numc = 0; numc < NUMCORES; numc++) {
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
-        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull) /* && last_read_served */) {
+        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)  && last_read_served ) { /* && last_read_served */
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
