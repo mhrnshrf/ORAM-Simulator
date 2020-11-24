@@ -14,6 +14,7 @@ if (nonmemops != 30 && nonmemops !=128 && nonmemops !=70 && nonmemops !=32 && no
 wrf
 if (nonmemops != 118 && nonmemops !=119)
 
+
 fot
 if (nonmemops != 10 && nonmemops != 3 && nonmemops !=1507 && nonmemops !=1088)
 
@@ -28,8 +29,18 @@ ima
 if (nonmemops != 10 && nonmemops !=43 && nonmemops !=41 && nonmemops !=11 && nonmemops !=6 && nonmemops !=56 && nonmemops !=3304)
 
 
+
 lbm
 if (nonmemops != 116 && nonmemops !=28 && nonmemops !=24 && nonmemops !=22 && nonmemops !=31 && nonmemops !=10 && nonmemops != 13 && nonmemops != 46)
+
+
+if (nonmemops !=28 && nonmemops !=24 && nonmemops !=10)
+
+
+
+
+
+
 
 
 rom
