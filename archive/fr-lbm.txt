@@ -6,27 +6,34 @@
 ....................................................
                      Options
 ....................................................
+Cache          Enabled
+Subtree        Enabled
 Volcano        No
 STT            No
 STL            No
-Cache          Enabled
 Write Bypass   No
-Subtree        Enabled
 Rho            No
 Timing         No
 Prefetch       No
 Early WB       No
+Snapshot       No
+Timeout        Enabled
+
+Ring           No
 
 ....................................................
              Simulation Parameters
 ....................................................
 Trace Size    4m
-Queue Size    1000
+Queue Size    2000
 Page Size     4 KB
 L1 Latency    3
 L2 Latency    10
 Mem Latency   0
 Warmup Thld   3m
+Timeout Thld  10000 (s)
+Top Boundry   10
+Mid Boundry   20
 
 ....................................................
                   ORAM Config
@@ -35,7 +42,7 @@ Level           24
 Path            8388608
 Node            16777215
 Slot            67108860
-Block           33554430
+Block           33260542
 Z               4
 U               0.500000
 OV Threshold    100
@@ -47,7 +54,7 @@ Top Cache       10
 
 L1  9       Z1  4
 L2  17      Z2  4
-L3  18      Z3  4
+L3  22      Z3  4
 
 LZ 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
 = 96 ~> oram path length
@@ -85,9 +92,9 @@ Rho Way             10
 Rho Z               2
 Rho OV Threshold    160
 Rho Stash Size      200
-Rho BK Eviction     1
+Rho BK Eviction     0
 Rho Empty Top       0
-Rho Top Cache       0
+Rho Top Cache       6
 
 Rho   L1  9     Z1  2
 Rho   L2  12    Z2  2
@@ -95,14 +102,15 @@ Rho   L3  14    Z3  2
 
 Rho LZ 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
 = 38 ~> rho path length
-  38 ~> rho effective path length
+  26 ~> rho effective path length
 
 
 ....................................................
                  Timing Config
 ....................................................
 Timing Enable       Off
-Timing Interval     1000 cycles
+T1 Interval         1000 cycles
+T2 Interval         100 cycles
 
 
 ....................................................
@@ -118,13 +126,29 @@ Buffer Entry #      32
 STT Enable     Off
 STT Size       4096 entry / 4-way
 
+
+....................................................
+                 Ring Config
+....................................................
+Ring Enable     Off
+Ring A	        5
+Ring S	        7
+Ring Z	        5
+Write Linger    Off
+Ring STL        Off
+Ring   SL1  9     S1  7
+Ring   SL2  17    S2  7
+Ring   SL3  22    S3  7
+
+Ring LS 
+7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 
 ....................................................
 
 
 
 
 Initializing.
-Core 0: Input trace file ../oram/trace/lbm : Addresses will have prefix 0
+Core 0: Input trace file .. : Addresses will have prefix 0
 Reading vi file: 1Gb_x4.vi	
 16 Chips per Rank
 ----------------------------------------------------------------------------------------
@@ -196,21 +220,26 @@ WQ_LOOKUP_LATENCY:              10
 
 ----------------------------------------------------------------------------------------
 Starting simulation.
+
+Trace            lbm
+Endpoint         3492000
+Timing Interval  100
+
 Done with loop. Printing stats.
-Cycles 1885782385
-Done: Core 0: Fetched 119215820 : Committed 119215708 : At time : 1885782385
-Sum of execution times for all programs: 1885782385
-Num reads merged: 6277
-Num writes merged: 4964
+Cycles 1881565997
+Done: Core 0: Fetched 118951872 : Committed 118951768 : At time : 1881565997
+Sum of execution times for all programs: 1881565997
+Num reads merged: 6497
+Num writes merged: 4957
 -------- Channel 0 Stats-----------
-Total Reads Serviced :          55993565
-Total Writes Serviced :         55994861
-Average Read Latency :          1842.81115
-Average Read Queue Latency :    1782.81115
-Average Write Latency :         1220.04051
-Average Write Queue Latency :   1156.04051
+Total Reads Serviced :          55869375
+Total Writes Serviced :         55870884
+Average Read Latency :          1842.66533
+Average Read Queue Latency :    1782.66533
+Average Write Latency :         1220.19822
+Average Write Queue Latency :   1156.19822
 Read Page Hit Rate :            0.87471
-Write Page Hit Rate :           0.93737
+Write Page Hit Rate :           0.93739
 ------------------------------------
 
 #-----------------------------Simulated Cycles Break-Up-------------------------------------------
@@ -219,7 +248,7 @@ Note:  1.(Read Cycles + Write Cycles + Read Other + Write Other) should add up t
        2.(PRE_PDN_FAST + PRE_PDN_SLOW + ACT_PDN + ACT_STBY + PRE_STBY) should add up to 100%
        3.Power Down means Clock Enable, CKE = 0. In Standby mode, CKE = 1
 #-------------------------------------------------------------------------------------------------
-Total Simulation Cycles                       1885782385
+Total Simulation Cycles                       1881565997
 ---------------------------------------------------------------
 
 Channel 0 Rank 0 Read Cycles(%)                0.24 # % cycles the Rank performed a Read
@@ -251,66 +280,92 @@ Note:  1. termRoth/termWoth is the power dissipated in the ODT resistors when Re
 #-------------------------------------------------------------------------------------------------
 
 Channel 0 Rank 0 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
-Channel 0 Rank 0 Act(mW)                     16.30 # power spend bringing data to the row buffer
-Channel 0 Rank 0 Read(mW)                    33.84 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 0 Act(mW)                     16.31 # power spend bringing data to the row buffer
+Channel 0 Rank 0 Read(mW)                    33.83 # power spent doing a Read  after the Row Buffer is open
 Channel 0 Rank 0 Write(mW)                   35.62 # power spent doing a Write after the Row Buffer is open
 Channel 0 Rank 0 Read Terminate(mW)           7.60 # power dissipated in ODT resistors during Read
 Channel 0 Rank 0 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
-Channel 0 Rank 0 termRoth(mW)                59.17 # power dissipated in ODT resistors during Reads  in other ranks
-Channel 0 Rank 0 termWoth(mW)                54.37 # power dissipated in ODT resistors during Writes in other ranks
+Channel 0 Rank 0 termRoth(mW)                59.18 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 0 termWoth(mW)                54.38 # power dissipated in ODT resistors during Writes in other ranks
 Channel 0 Rank 0 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
 ---------------------------------------------------------------
-Channel 0 Rank 0 Total Rank Power(mW)      4432.63 # (Sum of above components)*(num chips in each Rank)
+Channel 0 Rank 0 Total Rank Power(mW)      4432.87 # (Sum of above components)*(num chips in each Rank)
 ---------------------------------------------------------------
 
 Channel 0 Rank 1 Background(mw)              67.50 # depends only on Power Down time and time all banks were precharged
-Channel 0 Rank 1 Act(mW)                     16.34 # power spend bringing data to the row buffer
-Channel 0 Rank 1 Read(mW)                    33.86 # power spent doing a Read  after the Row Buffer is open
-Channel 0 Rank 1 Write(mW)                   35.64 # power spent doing a Write after the Row Buffer is open
+Channel 0 Rank 1 Act(mW)                     16.33 # power spend bringing data to the row buffer
+Channel 0 Rank 1 Read(mW)                    33.87 # power spent doing a Read  after the Row Buffer is open
+Channel 0 Rank 1 Write(mW)                   35.65 # power spent doing a Write after the Row Buffer is open
 Channel 0 Rank 1 Read Terminate(mW)           7.60 # power dissipated in ODT resistors during Read
 Channel 0 Rank 1 Write Terminate(mW)          0.00 # power dissipated in ODT resistors during Write
-Channel 0 Rank 1 termRoth(mW)                59.13 # power dissipated in ODT resistors during Reads  in other ranks
+Channel 0 Rank 1 termRoth(mW)                59.12 # power dissipated in ODT resistors during Reads  in other ranks
 Channel 0 Rank 1 termWoth(mW)                54.33 # power dissipated in ODT resistors during Writes in other ranks
 Channel 0 Rank 1 Refresh(mW)                  2.64 # depends on frequency of Refresh (tREFI)
 ---------------------------------------------------------------
-Channel 0 Rank 1 Total Rank Power(mW)      4432.84 # (Sum of above components)*(num chips in each Rank)
+Channel 0 Rank 1 Total Rank Power(mW)      4432.66 # (Sum of above components)*(num chips in each Rank)
 ---------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------------------------
-Total memory system power = 8.865469 W
+Total memory system power = 8.865524 W
 Miscellaneous system power = 10 W  # Processor uncore power, disk, I/O, cooling, etc.
 Processor core power = 5.000000 W  # Assuming that each core consumes 5 W
-Total system power = 23.865469 W # Sum of the previous three lines
-Energy Delay product (EDP) = 8.288065910 J.s
+Total system power = 23.865524 W # Sum of the previous three lines
+Energy Delay product (EDP) = 8.251064301 J.s
+
+reshuffle count of each level 
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
 
 
 
 
 ............... ORAM Stats ...............
 
-Execution Time (s)       3186.820000
-Total Cycles             1885782385 
-Trace Size               3493112
+Execution Time (s)       3813.810000
+Total Cycles             1881565997 
+Trace Size               3492000
 Mem Cycles #             0
-Invoke Mem #             696097
-ORAM Access #            1000000
+Invoke Mem #             694505
+ORAM Access #            997786
 ORAM Dummy #             0
-Pos1 Access #            286183
-Pos2 Access #            17720
+Pos1 Access #            285602
+Pos2 Access #            17679
 PLB pos0 hit             0.000000%
-PLB pos1 hit             58.879725%
-PLB pos2 hit             93.808976%
+PLB pos1 hit             58.867971%
+PLB pos2 hit             93.810211%
 PLB pos0 hit #           0
-PLB pos1 hit #           409860
-PLB pos2 hit #           268516
-PLB pos0 acc #           696097
-PLB pos1 acc #           696097
-PLB pos2 acc #           286237
+PLB pos1 hit #           408841
+PLB pos2 hit #           267982
+PLB pos0 acc #           694505
+PLB pos1 acc #           694505
+PLB pos2 acc #           285664
 oramQ Size               223
 Bk Evict                 0.000000%
 Bk Evict #               0
-Cache Hit                29.418004%
+Cache Hit                29.420265%
 Cache Evict              100.000000%
 Rho Hit                  0.000000%
 Rho Access #             0
@@ -318,7 +373,7 @@ Rho  Dummy #             0
 Rho Bk Evict             -nan%
 Early WB #               0
 Early WB Pointer #       0
-Cache Dirty #            493113
+Cache Dirty #            492001
 ptr fail #               0
 search fail #            0
 pin ctr #                0
@@ -329,3 +384,13 @@ Stash leftover #         0
 Stash removed #          0
 fill hit #               0
 fill miss #              0
+Top hit                  17.974295%
+Mid hit                  39.493338%
+Bot hit                  42.532367%
+Ring evict               0
+Stash occ                0
+Stash Contain            0
+Linger Discard           0
+Ring shuff 10+           0
+Ring acc                 0
+EP writeback             0

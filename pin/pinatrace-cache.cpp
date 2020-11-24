@@ -26,8 +26,8 @@
 #define ADDR_WIDTH 32       // bits
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
-#define SKIP_THRESH 500000000       // skip threshold for dumping trace
-// #define SKIP_THRESH 0       // skip threshold for dumping trace
+// #define SKIP_THRESH 300000000       // skip threshold for dumping trace
+#define SKIP_THRESH 0       // skip threshold for dumping trace
 #define CLK_PRINT 0       // 0/1 flag to print cache clk
 
 enum reqType {CREAD = 'R', CWRITE = 'W'};
