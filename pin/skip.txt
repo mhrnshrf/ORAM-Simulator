@@ -19,6 +19,20 @@ fot
 if (nonmemops != 10 && nonmemops != 3 && nonmemops !=1507 && nonmemops !=1088)
 
 
+lbm
+if ((double)(1000*wctr/(double)instctr) > 150) // iteration 10
+
+
+rom
+if ((double)(1000*wctr/(double)instctr) > 50) 
+
+
+bwa
+if ((double)(1000*wctr/(double)instctr) < 200 &&(double)(1000*wctr/(double)instctr) > 94 && nonmemops != 3 && nonmemops != 6 && nonmemops != 9) 
+
+
+wrf
+if ((double)(1000*wctr/(double)instctr) > 10) 
 
 
 
@@ -28,18 +42,12 @@ if (nonmemops != 10 && nonmemops != 3 && nonmemops !=1507 && nonmemops !=1088)
 ima
 if (nonmemops != 10 && nonmemops !=43 && nonmemops !=41 && nonmemops !=11 && nonmemops !=6 && nonmemops !=56 && nonmemops !=3304)
 
-
-
 lbm
 if (nonmemops != 116 && nonmemops !=28 && nonmemops !=24 && nonmemops !=22 && nonmemops !=31 && nonmemops !=10 && nonmemops != 13 && nonmemops != 46)
 
 
+lbm
 if (nonmemops !=28 && nonmemops !=24 && nonmemops !=10)
-
-
-
-
-
 
 
 

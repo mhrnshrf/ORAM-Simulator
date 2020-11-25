@@ -504,7 +504,7 @@ char bench[20];
 	 }
 	 else if (strcmp(bench, "imagick") == 0)
 	 {
-		 endpoint = 3620000;
+		 endpoint = 3327000;
 		 TIMING_INTERVAL = T1_INTERVAL;
 	 }
 	 else if (strcmp(bench, "fotonik3d") == 0)
@@ -518,6 +518,11 @@ char bench[20];
 		 TIMING_INTERVAL = T2_INTERVAL;
 	 }
 	 else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
+	 {
+		 endpoint = 3327000;
+		 TIMING_INTERVAL = T2_INTERVAL;
+	 }
+	else if (strcmp(bench, "bwaves") == 0) // this added for nonsec exp
 	 {
 		 endpoint = 3327000;
 		 TIMING_INTERVAL = T2_INTERVAL;
