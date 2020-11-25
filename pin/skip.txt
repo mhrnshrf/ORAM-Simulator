@@ -32,7 +32,7 @@ if ((double)(1000*wctr/(double)instctr) < 200 &&(double)(1000*wctr/(double)instc
 
 
 wrf
-if ((double)(1000*wctr/(double)instctr) > 10) 
+if ((double)(1000*wctr/(double)instctr) > 8) 
 
 
 
