@@ -3288,21 +3288,27 @@ void ring_evict_path(int label){
   {
     lastpath = label;
   }
-  
-  int min = LEVEL;
-  for (int i = 0; i < pathQ->size; i++)
-  {
-    Element *pN = Dequeue(pathQ);
-    int temp = pN->addr;
-    int ov = calc_overlap(temp, lastpath);
-    if ( ov < min)
-    {
-      min = ov;
-      lastpath = temp;
-    }
-  }
 
-  label = lastpath;
+  if (stashctr < 100)
+  {
+    int min = LEVEL;
+    for (int i = 0; i < pathQ->size; i++)
+    {
+      Element *pN = Dequeue(pathQ);
+      int temp = pN->addr;
+      int ov = calc_overlap(temp, lastpath);
+      printf("%d\n", ov);
+      if ( ov < min)
+      {
+        min = ov;
+        lastpath = temp;
+      }
+    }
+
+    label = lastpath;
+  }
+  
+  
   
 
   // ep_round = (ep_round + 1) % EP_TURN;
