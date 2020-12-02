@@ -3241,7 +3241,8 @@ void ring_read_path(int label, int addr){
 
 int calc_overlap(int pathA, int pathB){
   int count = 0;
-  for (int i = LEVEL-1-1; i >= 0; i--)
+  int rootpos = LEVEL-1;
+  for (int i = rootpos-1-1; i >= 0; i--)
   {
     int a = (pathA>>i)&0x01;
     int b = (pathB>>i)&0x01;
