@@ -16,7 +16,7 @@
 #define PAGE_SIZE 4096              // page size in byte ~~~> 4KB
 #define L1_LATENCY 3                // L1 latency in terms of # cycles 
 #define L2_LATENCY 10               // L2 latency in terms of # cycles 
-#define MAINMEM_LATENCY 200           // mem latency in terms of # cycles 
+#define MAINMEM_LATENCY 0           // mem latency in terms of # cycles 
 #define WARMUP_THRESHOLD 3000000    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 #define TIMEOUT_THRESHOLD 10000      // time out threshold in seconds
 #define TOP_BOUNDRY 10              // top region tree boundry
@@ -24,7 +24,7 @@
 
 // enable/disable options config
 #define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
-#define SUBTREE_ENABLE  1     // 0/1 flag to diable/enable having subtree adddressing scheme
+#define SUBTREE_ENABLE  0     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define CACHE_ENABLE    1     // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
@@ -35,11 +35,12 @@
 #define PREFETCH_ENABLE 0     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
-#define NONSEC_ENABLE   1    // 0/1 flag to disable/enable oram simulation if off usimm runs normally
+#define NONSEC_ENABLE   0    // 0/1 flag to disable/enable oram simulation if off usimm runs normally
+#define BK_EVICTION     0   // 0/1 flag to disable/enable background eviction
 
 
 
-#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 #define WRITE_LINGER    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
@@ -56,11 +57,10 @@
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 4     // # slots per bucket
+#define Z 12     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
-#define BK_EVICTION 1   // 0/1 flag to disable/enable background eviction
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
@@ -70,7 +70,7 @@
 // subtree config
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
-#define NUM_CHANNELS_SUBTREE 4  // # memory channel used for subtree calculation
+#define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
 // rho config

@@ -714,7 +714,7 @@ char bench[20];
 
 	// Mehrnoosh:
 	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
-	// printf("\n@ trace %d\n", tracectr);
+	// printf("@ trace %d\n", tracectr);
 	// print_count_level();
 	// cnt++;
 	// if (cnt > 1)
@@ -810,9 +810,11 @@ char bench[20];
     }
 
     for (numc = 0; numc < NUMCORES; numc++) {
+		// printf("in for\n");
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
-        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)  && last_read_served ) { /* && last_read_served */
+        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) { /* && last_read_served */
+		// printf("in while\n");
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
@@ -1035,6 +1037,7 @@ char bench[20];
 			// printf("@ oramQ->size == 0\n");
 			if ((!TIMING_ENABLE || (dummy_oram && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed())
 			{
+				// printf("bk evict\n");
 				background_eviction();
 				skip_invokation = true; 
 				bk_already_made = true;

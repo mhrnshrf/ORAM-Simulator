@@ -25,6 +25,7 @@ extern long long int trace_clk;
 #include "prefetcher.h"
 #include "plb.h"
 #include "stt.h"
+#include <string.h>
 
 long long int ring_G = 0;
 long long int ring_round = 0;
@@ -242,6 +243,7 @@ int oram_effective_pl = 0;
 
 long long int nonmemops_sum = 0;
 
+long long int lastpath = 0;
 
 unsigned int byte_addr(long long int physical_addr){
   unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
@@ -3138,11 +3140,21 @@ void ring_access(int addr){
 
 }
 
+void bin(unsigned int n)
+{
+    unsigned i;
+    for (i = 1 << (LEVEL-1); i > 0; i = i / 2)
+        (n & i) ? printf("1") : printf("0");
+}
+
 
 void ring_read_path(int label, int addr){
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = label;
-  // Enqueue(pathQ, pN);
+  Enqueue(pathQ, pN);
+
+  // bin((unsigned int)label);
+  // printf ("\n");
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -3227,6 +3239,24 @@ void ring_read_path(int label, int addr){
 }
 
 
+int calc_overlap(int pathA, int pathB){
+  int count = 0;
+  for (int i = LEVEL-1-1; i >= 0; i--)
+  {
+    int a = (pathA>>i)&0x01;
+    int b = (pathB>>i)&0x01;
+    if (a == b)
+    {
+      count++;
+    }
+    else
+    {
+      return count;
+    }
+  }
+  return count;
+}
+
 
 
 
@@ -3252,7 +3282,28 @@ void ring_evict_path(int label){
 
   label = reverse_lex(ring_G);
 
-  // Element *pN = Dequeue(pathQ);
+
+
+  if (ring_evictctr == 1)
+  {
+    lastpath = label;
+  }
+  
+  int min = LEVEL;
+  for (int i = 0; i < pathQ->size; i++)
+  {
+    Element *pN = Dequeue(pathQ);
+    int temp = pN->addr;
+    int ov = calc_overlap(temp, lastpath);
+    if ( ov < min)
+    {
+      min = ov;
+      lastpath = temp;
+    }
+  }
+
+  label = lastpath;
+  
 
   // ep_round = (ep_round + 1) % EP_TURN;
 
