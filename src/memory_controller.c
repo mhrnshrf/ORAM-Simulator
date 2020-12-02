@@ -3297,7 +3297,7 @@ void ring_evict_path(int label){
       Element *pN = Dequeue(pathQ);
       int temp = pN->addr;
       int ov = calc_overlap(temp, lastpath);
-      printf("%d\n", ov);
+      // printf("%d\n", ov);
       if ( ov < min)
       {
         min = ov;
