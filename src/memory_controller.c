@@ -3511,18 +3511,24 @@ void ring_invalidate(int index, int offset){
 
 void print_shuff_stat(){
   printf("\nreshuffle count of each level \n");
+  int sum = 0;
   for (int i = 0; i < LEVEL; i++)
   {
     printf("%d\n", shuff[i]);
+    sum += shuff[i];
   }
+  printf("\n%d\n", sum);
 }
 
 void print_ref_close_stat(){
-  printf("\n refresh close to threshold count of each level \n");
+  printf("\nrefresh close to threshold count of each level \n");
+  int sum = 0;
   for (int i = 0; i < LEVEL; i++)
   {
-    printf("%d\n", shuff[i]);
+    printf("%d\n", ref_close[i]);
+    sum += ref_close[i];
   }
+  printf("\n%d\n", sum);
 }
 
 int reverse_lex(int n){
