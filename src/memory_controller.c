@@ -3290,29 +3290,29 @@ void ring_evict_path(int label){
 
 
 
-  if (ring_evictctr == 1)
-  {
-    lastpath = label;
-  }
+  // if (ring_evictctr == 1)
+  // {
+  //   lastpath = label;
+  // }
 
-  if (stashctr < 100)
-  {
-    int min = LEVEL;
-    for (int i = 0; i < pathQ->size; i++)
-    {
-      Element *pN = Dequeue(pathQ);
-      int temp = pN->addr;
-      int ov = calc_overlap(temp, lastpath);
-      // printf("%d\n", ov);
-      if ( ov < min)
-      {
-        min = ov;
-        lastpath = temp;
-      }
-    }
+  // if (stashctr < 100)
+  // {
+  //   int min = LEVEL;
+  //   for (int i = 0; i < pathQ->size; i++)
+  //   {
+  //     Element *pN = Dequeue(pathQ);
+  //     int temp = pN->addr;
+  //     int ov = calc_overlap(temp, lastpath);
+  //     // printf("%d\n", ov);
+  //     if ( ov < min)
+  //     {
+  //       min = ov;
+  //       lastpath = temp;
+  //     }
+  //   }
 
-    label = lastpath;
-  }
+  //   label = lastpath;
+  // }
   
   
   
