@@ -43,7 +43,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 #define WRITE_LINGER    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 
@@ -60,7 +60,7 @@
 #define Z 12     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
-#define STASH_SIZE_ORG 500     // original size of stash
+#define STASH_SIZE_ORG 200     // original size of stash
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 17   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
@@ -106,7 +106,7 @@
 
 
 // ring oram config
-#define RING_A 6
+#define RING_A 5
 #define RING_S 7
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 

@@ -217,6 +217,7 @@ int plb_temp[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1};
 
 int shuff[LEVEL] = {0};
 int wb[LEVEL] = {0};
+int ref_close[LEVEL] = {0};
 
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
 TreeType TREE_VAR = ORAM;
@@ -1080,6 +1081,10 @@ void write_path(int label){
     {
       int index = calc_index(label, i);
       int addr = 0;
+      if (GlobTree[index].count >= LS[i]-1)
+      {
+        ref_close[i]++;
+      }
       GlobTree[index].count = 0; // for ring oram evict path
       
       // int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
@@ -3512,6 +3517,14 @@ void print_shuff_stat(){
   }
 }
 
+void print_ref_close_stat(){
+  printf("\n refresh close to threshold count of each level \n");
+  for (int i = 0; i < LEVEL; i++)
+  {
+    printf("%d\n", shuff[i]);
+  }
+}
+
 int reverse_lex(int n){
 	int rev = 0;
 	int i = 0;
@@ -3557,6 +3570,8 @@ void print_oram_stats(){
   // print_count_level();
 
   print_shuff_stat();
+
+  print_ref_close_stat();
   // print_stash();
 
   int shuffctr = 0; 
