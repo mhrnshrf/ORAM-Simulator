@@ -3129,19 +3129,31 @@ void ring_access(int addr){
   remap_block(addr);
   // printf("@> remap block  trace %d\n", tracectr);
 
-  ring_round = (ring_round + 1) % RING_A; // ??? to be defined
+  ring_round = (ring_round + 1) % RING_A; 
+
+  int rl;
 
   if (ring_round == 0)
   {
-  //  printf("\n@- evict  trace %d  stash %d\n", tracectr, stashctr);
-    ring_evict_path(label);
-  //  printf("@> evict  trace %d  stash %d\n\n", tracectr, stashctr);
+    // ring_evict_path(label);
+    
+    // to be removed
+    ring_evictctr++;
+    rl = reverse_lex(ring_G);
+    read_path(rl);
+
+
   }
-  // printf("@> evict path  trace %d\n", tracectr);
   
-  // printf("\n@- reshuffle  trace %d  stash %d\n", tracectr, stashctr);
   ring_early_reshuffle(label);
-  // printf("@> reshuffle trace %d   stash %d\n", tracectr, stashctr);
+
+
+  // to be removed
+  if (ring_round == 0)
+  {
+    write_path(rl);
+    ring_G++;
+  }
 
 }
 
