@@ -3411,7 +3411,7 @@ void ring_evict_path(int label){
 void ring_early_reshuffle(int label){
   // printf("reshuffle trace %d\n", tracectr);
   bool last_read = false;
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = LEVEL-1; i >= 0; i--)
   {
     int index = calc_index(label, i);
     int reqmade = 0;
