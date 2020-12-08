@@ -3594,6 +3594,8 @@ void print_oram_stats(){
   print_ref_close_stat();
   // print_stash();
 
+  print_wb_stat();
+
   int shuffctr = 0; 
   for (int i = TOP_CACHE; i < LEVEL; i++)
   {
