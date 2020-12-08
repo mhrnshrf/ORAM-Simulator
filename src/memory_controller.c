@@ -3405,6 +3405,7 @@ void ring_early_reshuffle(int label){
     int reqmade = 0;
     int dum_cand[Z] = {0};
     int cand_ind = 0;
+    int stashb4 = stashctr;
     if (GlobTree[index].count >= LS[i] /* || i < TOP_CACHE  || i >= LEVEL-2 */)
     {
       // printf("\nlevel %d reshuffle\n", i);
@@ -3498,6 +3499,7 @@ void ring_early_reshuffle(int label){
       }
       
       GlobTree[index].count = 0;
+      wb[i] = stashb4 - stashctr;
     }
     
   }
@@ -3527,6 +3529,18 @@ void print_ref_close_stat(){
   {
     printf("%d\n", ref_close[i]);
     sum += ref_close[i];
+  }
+  printf("\n%d\n", sum);
+}
+
+
+void print_wb_stat(){
+  printf("\nwb during reshuffle of each level \n");
+  int sum = 0;
+  for (int i = 0; i < LEVEL; i++)
+  {
+    printf("%d\n", wb[i]);
+    sum += wb[i];
   }
   printf("\n%d\n", sum);
 }
