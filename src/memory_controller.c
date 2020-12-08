@@ -3100,6 +3100,8 @@ void early_writeback(){
 
 
 void ring_access(int addr){
+  // int before = stashctr;
+  
   ringctr++;
   int label = PosMap[addr];
 
@@ -3131,16 +3133,16 @@ void ring_access(int addr){
 
   ring_round = (ring_round + 1) % RING_A; 
 
-  int rl;
+  // int rl;
 
   if (ring_round == 0)
   {
-    // ring_evict_path(label);
+    ring_evict_path(label);
     
     // to be removed
-    ring_evictctr++;
-    rl = reverse_lex(ring_G);
-    read_path(rl);
+    // ring_evictctr++;
+    // rl = reverse_lex(ring_G);
+    // read_path(rl);
 
 
   }
@@ -3149,11 +3151,18 @@ void ring_access(int addr){
 
 
   // to be removed
-  if (ring_round == 0)
-  {
-    write_path(rl);
-    ring_G++;
-  }
+  // if (ring_round == 0)
+  // {
+  //   write_path(rl);
+  //   ring_G++;
+  // }
+
+  // int diff = stashctr - before;
+  // if (diff > 1)
+  // {
+  //   printf("%d\n", diff);
+  // }
+  
 
 }
 
@@ -3411,7 +3420,7 @@ void ring_evict_path(int label){
 void ring_early_reshuffle(int label){
   // printf("reshuffle trace %d\n", tracectr);
   bool last_read = false;
-  for (int i = LEVEL-1; i >= 0; i--)
+  for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
     int reqmade = 0;
