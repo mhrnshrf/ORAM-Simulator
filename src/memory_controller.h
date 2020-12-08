@@ -60,7 +60,7 @@
 #define Z 12     // # slots per bucket
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
-#define STASH_SIZE_ORG 200     // original size of stash
+#define STASH_SIZE_ORG 400     // original size of stash
 #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 17   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
