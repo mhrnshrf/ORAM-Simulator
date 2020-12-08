@@ -3499,7 +3499,7 @@ void ring_early_reshuffle(int label){
       }
       
       GlobTree[index].count = 0;
-      wb[i] = stashb4 - stashctr;
+      wb[i] += stashb4 - stashctr;
     }
     
   }
