@@ -32,6 +32,7 @@ long long int ring_round = 0;
 long long int ep_round = 0;
 long long int touchcount = 0;
 long long int missl1wb = 0;
+long long int shuff_dist[LEVEL] = {0};
 
 // long long int CYCLE_VAL = 0;
 
@@ -3420,6 +3421,7 @@ void ring_evict_path(int label){
 void ring_early_reshuffle(int label){
   // printf("reshuffle trace %d\n", tracectr);
   bool last_read = false;
+  int shufcount = 0;
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
@@ -3431,6 +3433,7 @@ void ring_early_reshuffle(int label){
     {
       // printf("\nlevel %d reshuffle\n", i);
       shuff[i]++;
+      shufcount++;
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR && GlobTree[index].slot[j].isReal)
@@ -3524,6 +3527,13 @@ void ring_early_reshuffle(int label){
     }
     
   }
+  
+  shuff_dist[shufcount % LEVEL]++;
+
+  // if (shufcount > 0)
+  // {
+  //   printf("%d\n", shufcount);
+  // }
   
 
 }
@@ -3681,7 +3691,7 @@ void print_oram_stats(){
   printf("Nonmemops                %lld\n", nonmemops_sum);
   printf("Miss L1    shad          %lld\n", missl1wb);
   printf("Miss L1    ratio         %f%%\n", 100*(double)missl1wb/missctr);
-  // printf("Path Latency Avg         %f\n", path_access_latency_avg);
+  // prinf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
 
