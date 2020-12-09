@@ -3639,6 +3639,8 @@ void print_oram_stats(){
 
   print_wb_stat();
 
+  print_shuff_dist();
+
   int shuffctr = 0; 
   for (int i = TOP_CACHE; i < LEVEL; i++)
   {
