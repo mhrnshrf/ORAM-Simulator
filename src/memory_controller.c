@@ -32,7 +32,7 @@ long long int ring_round = 0;
 long long int ep_round = 0;
 long long int touchcount = 0;
 long long int missl1wb = 0;
-long long int shuff_dist[LEVEL] = {0};
+int shuff_dist[LEVEL] = {0};
 
 // long long int CYCLE_VAL = 0;
 
@@ -3575,6 +3575,18 @@ void print_wb_stat(){
   }
   printf("\n%d\n", sum);
 }
+
+void print_shuff_dist(){
+  printf("\ndistribution of each reshuffle count \n");
+  int sum = 0;
+  for (int i = 0; i < LEVEL; i++)
+  {
+    printf("%d\n", shuff_dist[i]);
+    sum += shuff_dist[i];
+  }
+  printf("\n%d\n", sum);
+}
+
 
 int reverse_lex(int n){
 	int rev = 0;
