@@ -51,6 +51,7 @@ int orig_thread;
 int orig_instr; 
 long long int orig_pc;
 int oram_acc_addr;
+int wbshuff = 0;
 
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
@@ -3559,10 +3560,10 @@ void ring_early_reshuffle(int label){
       }
       
       GlobTree[index].count = 0;
-      wb[i] += stashb4 - stashctr;
     }
   }
   
+  wbshuff += stashb4 - stashctr;
   shuff_dist[shufcount % LEVEL]++;
 
   // if (shufcount > 0)
@@ -3740,6 +3741,7 @@ void print_oram_stats(){
   printf("Nonmemops                %lld\n", nonmemops_sum);
   printf("Miss L1    shad          %lld\n", missl1wb);
   printf("Miss L1    ratio         %f%%\n", 100*(double)missl1wb/missctr);
+  printf("Shuff wb                 %d\n", wbshuff);
   // prinf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
