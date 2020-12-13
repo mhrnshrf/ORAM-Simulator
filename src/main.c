@@ -1027,7 +1027,15 @@ char bench[20];
 	      /* Done consuming one line of the trace file.  Read in the next. */
 		// Mehrnoosh:
 
-		if (oramQ->size == 0 /*&& last_read_served*/)
+		ring_dummy = (stashctr >= DUMMY_TH) ? true : false;
+
+		if (DUMMY_ENABLE && ring_dummy)
+		{
+			ring_access(-1);
+		}
+		
+
+		if (oramQ->size == 0  && (!DUMMY_ENABLE || !ring_dummy)/*&& last_read_served*/)
 		{
 			if (invokectr != 0)
 			{

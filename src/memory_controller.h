@@ -46,6 +46,7 @@
 #define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
+#define DUMMY_ENABLE    1     // 0/1 flag to disable/enable write linger baseline for ring oram
 
 
 
@@ -118,6 +119,8 @@
 #define LINGER_LIMIT 100
 #define SKIP_L1 10
 #define SKIP_L2 14
+#define DUMMY_TH 100
+
 
 
 
@@ -244,6 +247,7 @@ extern int precase;
 extern int sttctr;
 extern int stashctr;
 extern int ring_evictctr;
+extern bool ring_dummy;
 
 extern long long int topctr;
 extern long long int midctr;

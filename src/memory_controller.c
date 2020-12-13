@@ -203,6 +203,7 @@ int lingered = 0;
 int readctr = 0;
 int writectr = 0;
 int wskip = 0;
+int ringdumctr = 0;
 
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
@@ -247,6 +248,8 @@ int oram_effective_pl = 0;
 long long int nonmemops_sum = 0;
 
 long long int lastpath = 0;
+
+bool ring_dummy = false;
 
 unsigned int byte_addr(long long int physical_addr){
   unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
@@ -3103,9 +3106,22 @@ void early_writeback(){
 
 void ring_access(int addr){
   // int before = stashctr;
+
+  int label;
+
   
-  ringctr++;
-  int label = PosMap[addr];
+  if (ring_dummy)
+  {
+    ringdumctr++;
+    label = rand() % PATH;
+  }
+  else
+  {
+    ringctr++;
+    label = PosMap[addr];
+  }
+  
+  
 
   // printf("\n@ ring access  trace %d\n", tracectr);
   // print_stash();
@@ -3130,7 +3146,11 @@ void ring_access(int addr){
   // printf("@> ring read path  trace %d\n\n", tracectr);
   // print_stash();
 
-  remap_block(addr);
+  if (!ring_dummy)
+  {
+    remap_block(addr);
+  }
+
   // printf("@> remap block  trace %d\n", tracectr);
 
   ring_round = (ring_round + 1) % RING_A; 
@@ -3181,9 +3201,6 @@ void ring_read_path(int label, int addr){
   pN->addr = label;
   Enqueue(pathQ, pN);
 
-  // bin((unsigned int)label);
-  // printf ("\n");
-
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
@@ -3193,68 +3210,54 @@ void ring_read_path(int label, int addr){
       offset = rand() % LZ_VAR[i];
     }
     
-
-    for(int j = 0; j < LZ_VAR[i]; j++)
+    if (!ring_dummy)
     {
-      if (GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].addr == addr)
+      for(int j = 0; j < LZ_VAR[i]; j++)
       {
-        // printf("\n offset trace %d\n", tracectr);
-        offset = j;
+        if (GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].addr == addr)
+        {
+          // printf("\n offset trace %d\n", tracectr);
+          offset = j;
 
-        // profiling
-        if (i <= TOP_BOUNDRY)
-        {
-          topctr++;
+          // profiling
+          if (i <= TOP_BOUNDRY)
+          {
+            topctr++;
+          }
+          else if (i <= MID_BOUNDRY)
+          {
+            midctr++;
+          }
+          else
+          {
+            botctr++;
+          }
         }
-        else if (i <= MID_BOUNDRY)
+      }
+
+      if (GlobTree[index].slot[offset].isReal)
+      {
+        
+        if(add_to_stash(GlobTree[index].slot[offset]) != -1)
         {
-          midctr++;
+          GlobTree[index].slot[offset].isReal = false;
+          GlobTree[index].slot[offset].addr = -1;
+          GlobTree[index].slot[offset].label = -1;
+          GlobTree[index].dumnum++;
         }
         else
         {
-          botctr++;
+          printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+          print_oram_stats();
+          exit(1);
         }
-      }
-    }
-
-    if (GlobTree[index].slot[offset].isReal)
-    {
-        // printf("\n is real trace %d\n", tracectr);
-
-      // if (GlobTree[index].slot[offset].addr == 0)
-      // {
-
-      //   printf("\nZERO \n");
-        // printf("offset: %d\n", offset);
-        // printf("index: %d\n", index);
-        // printf("level: %d\n", i);
-        // printf("addr: %d\n", GlobTree[index].slot[offset].addr);
-        // printf("label: %d\n\n", GlobTree[index].slot[offset].label);
-      // }
-      
-      if(add_to_stash(GlobTree[index].slot[offset]) != -1)
-      {
-        GlobTree[index].slot[offset].isReal = false;
-        GlobTree[index].slot[offset].addr = -1;
-        GlobTree[index].slot[offset].label = -1;
-        GlobTree[index].dumnum++;
-      }
-      else
-      {
-        printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
-        print_oram_stats();
-        exit(1);
       }
     }
     
 
-    ring_invalidate(index, offset);  // ??? to be implemented
+    ring_invalidate(index, offset);  
 
     bool last_read = false;
-    // if (i == )
-    // {
-    //   last_read = true;
-    // }
     
 
     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
@@ -3743,6 +3746,7 @@ void print_oram_stats(){
   printf("Miss L1    shad          %lld\n", missl1wb);
   printf("Miss L1    ratio         %f%%\n", 100*(double)missl1wb/missctr);
   printf("Shuff wb                 %d\n", wbshuff);
+  printf("Ring dummy               %d\n", ringdumctr);
   // prinf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
