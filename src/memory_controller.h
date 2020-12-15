@@ -58,7 +58,7 @@
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 15     // # slots per bucket // z17
+#define Z 14     // # slots per bucket // z17
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
@@ -128,9 +128,9 @@
 enum{
   // main tree
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
-  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z-3: Z,   // # slots per bucket upto L1    Z-5
+  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z-2: Z,   // # slots per bucket upto L1    Z-5
   Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 :(RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : (RING_ENABLE &&RSTL_ENABLE)? Z-6:Z,   // # slots per bucket upto L3   Z-10
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : (RING_ENABLE &&RSTL_ENABLE)? Z-4:Z,   // # slots per bucket upto L3   Z-10
   Z4 = (RING_ENABLE) ? Z3 : Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
