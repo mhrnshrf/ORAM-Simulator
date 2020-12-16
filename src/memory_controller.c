@@ -3107,7 +3107,7 @@ void early_writeback(){
 
 int shuf_calc(){
   int sum = 0;
-  for (int i = 10; i < LEVEL; i++)
+  for (int i = 0; i < 10; i++)
   {
     sum += shuff[i];
   }
@@ -3177,7 +3177,7 @@ void ring_access(int addr){
   // int rl;
 
   // if (ring_round == 0)
-  if (shuf_dif >= 5)
+  if (shuf_dif >= 6)
   {
     ring_evict_path(label);
     
