@@ -3177,7 +3177,7 @@ void ring_access(int addr){
   // int rl;
 
   // if (ring_round == 0)
-  if (shuf_dif >= 8)
+  if (shuf_dif >= 7)
   {
     ring_evict_path(label);
     
