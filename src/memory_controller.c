@@ -33,6 +33,9 @@ long long int ep_round = 0;
 long long int touchcount = 0;
 long long int missl1wb = 0;
 int shuff_dist[LEVEL] = {0};
+int shuf_dif = 0;
+int shuf_prev = 0;
+int ringacc = 0;
 
 // long long int CYCLE_VAL = 0;
 
@@ -3102,10 +3105,26 @@ void early_writeback(){
 
 }
 
-
+int shuf_calc(){
+  int sum = 0;
+  for (int i = 0; i < 10; i++)
+  {
+    sum += shuff[i];
+  }
+  return sum;
+}
 
 void ring_access(int addr){
   // int before = stashctr;
+
+  int shuf_cur = shuf_calc();
+  shuf_dif = shuf_cur - shuf_prev;
+
+  // printf("%d\n", shuf_dif);
+
+  ringacc++;
+
+  
 
   int label;
 
@@ -3157,7 +3176,8 @@ void ring_access(int addr){
 
   // int rl;
 
-  if (ring_round == 0)
+  // if (ring_round == 0)
+  if (shuf_dif >= 5)
   {
     ring_evict_path(label);
     
@@ -3166,6 +3186,8 @@ void ring_access(int addr){
     // rl = reverse_lex(ring_G);
     // read_path(rl);
 
+    // printf("%d\n", ringacc);
+    shuf_prev = shuf_cur;
 
   }
   
@@ -3292,8 +3314,16 @@ int calc_overlap(int pathA, int pathB){
 
 
 
+
+
 void ring_evict_path(int label){
   // printf("\nevict path trace %d\n", tracectr);
+
+
+
+
+
+  
 
   lingered--;
 
@@ -3577,6 +3607,8 @@ void ring_early_reshuffle(int label){
   
 
 }
+
+
 
 void ring_invalidate(int index, int offset){
   GlobTree[index].slot[offset].valid = false;
