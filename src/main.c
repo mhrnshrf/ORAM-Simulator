@@ -297,11 +297,14 @@ int main(int argc, char * argv[])
 	printf("                 Ring Config\n");
 	printf("....................................................\n");
 	printf("Ring Enable     %s\n", RING_ENABLE?"On":"Off");
+	printf("Ring STL        %s\n", RSTL_ENABLE?"On":"Off");
+	printf("Write Linger    %s\n", WRITE_LINGER?"On":"Off");
+	printf("Dummy Enable    %s\n", DUMMY_ENABLE?"On":"Off");
+	printf("Dynamic EP      %s\n", DYNAMIC_EP?"On":"Off");
+	printf("DEP TH          %d\n", DEP_TH);
 	printf("Ring A	        %d\n", RING_A);
 	printf("Ring S	        %d\n", RING_S);
 	printf("Ring Z	        %d\n", RING_Z);
-	printf("Write Linger    %s\n", WRITE_LINGER?"On":"Off");
-	printf("Ring STL        %s\n", RSTL_ENABLE?"On":"Off");
 	printf("Ring   SL1  %d     S1  %d\n", SL1, S1);
 	printf("Ring   SL2  %d    S2  %d\n", SL2, S2);
 	printf("Ring   SL3  %d    S3  %d\n\n", SL3, S3);
