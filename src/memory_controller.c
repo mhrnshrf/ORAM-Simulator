@@ -1739,8 +1739,8 @@ void freecursive_access(int addr, char type){
   }
 
 // /*
-  if (!RING_ENABLE || !WRITE_LINGER)
-  {
+  // if (!RING_ENABLE || !WRITE_LINGER)
+  // {
     // if write bypass feature is on and there is write req hit in the cache
     if (WRITE_BYPASS && write_cache_hit && type == 'W')
     {
@@ -1993,7 +1993,7 @@ void freecursive_access(int addr, char type){
 
     }
 
-  }
+  // }
 
 // */
   // printf("freecursuve: b4 last oram access (data): %d\n", addr);
@@ -3176,8 +3176,10 @@ void ring_access(int addr){
 
   // int rl;
 
+  bool ep_cond = DYNAMIC_EP ? (shuf_dif >= DEP_TH) : (ring_round == 0);
+
   // if (ring_round == 0)
-  if (shuf_dif >= 6)
+  if (ep_cond)
   {
     ring_evict_path(label);
     
