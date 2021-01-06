@@ -3534,42 +3534,6 @@ void ring_early_reshuffle(int label){
       }
       
 
-      // reset_candidate();
-      // pick_candidate(index, label, i);
-
-      // for (int j = 0; j < LZ_VAR[i]; j++)
-      // {
-      //   GlobTree[index].slot[j].valid = true;
-      //   if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
-      //   {
-      //     int mem_addr = index*Z_VAR + j;
-      //     insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
-      //   }
-      //   if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
-      //   {
-      //     // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
-      //     GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
-      //     GlobTree[index].slot[j].label = Stash[candidate[j]].label;
-      //     GlobTree[index].slot[j].isReal = true;
-      //     GlobTree[index].slot[j].isData = true;
-      //     GlobTree[index].dumnum--;
-
-
-      //     remove_from_stash(candidate[j]);
-      //   }
-      // }
-      
-      // GlobTree[index].count = 0;
-      // wb[i] += stashb4 - stashctr;
-
-    }
-  }
-
-  for (int i = LEVEL-1; i > 0; i--)
-  {
-    int index = calc_index(label, i);
-    if (GlobTree[index].count >= LS[i] /* || i < TOP_CACHE  || i >= LEVEL-2 */)
-    {
       reset_candidate();
       pick_candidate(index, label, i);
 
@@ -3596,16 +3560,48 @@ void ring_early_reshuffle(int label){
       }
       
       GlobTree[index].count = 0;
+      wb[i] += stashb4 - stashctr;
+
     }
   }
-  
-  wbshuff += stashb4 - stashctr;
-  shuff_dist[shufcount % LEVEL]++;
 
-  // if (shufcount > 0)
+  // for (int i = LEVEL-1; i > 0; i--)
   // {
-  //   printf("%d\n", shufcount);
+  //   int index = calc_index(label, i);
+  //   if (GlobTree[index].count >= LS[i] /* || i < TOP_CACHE  || i >= LEVEL-2 */)
+  //   {
+  //     reset_candidate();
+  //     pick_candidate(index, label, i);
+
+  //     for (int j = 0; j < LZ_VAR[i]; j++)
+  //     {
+  //       GlobTree[index].slot[j].valid = true;
+  //       if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+  //       {
+  //         int mem_addr = index*Z_VAR + j;
+  //         insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
+  //       }
+  //       if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
+  //       {
+  //         // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
+  //         GlobTree[index].slot[j].addr = Stash[candidate[j]].addr;
+  //         GlobTree[index].slot[j].label = Stash[candidate[j]].label;
+  //         GlobTree[index].slot[j].isReal = true;
+  //         GlobTree[index].slot[j].isData = true;
+  //         GlobTree[index].dumnum--;
+
+
+  //         remove_from_stash(candidate[j]);
+  //       }
+  //     }
+      
+  //     GlobTree[index].count = 0;
+  //   }
   // }
+  
+  // wbshuff += stashb4 - stashctr;
+  // shuff_dist[shufcount % LEVEL]++;
+
   
 
 }
