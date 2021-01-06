@@ -3129,7 +3129,7 @@ void ring_access(int addr){
   int label;
 
   
-  if (ring_dummy)
+  if (ring_dummy && DUMMY_ENABLE)
   {
     ringdumctr++;
     label = rand() % PATH;
