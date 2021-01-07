@@ -252,6 +252,9 @@ long long int nonmemops_sum = 0;
 
 long long int lastpath = 0;
 
+
+int  wl_pos[H-1] = {0};
+
 bool ring_dummy = false;
 
 unsigned int byte_addr(long long int physical_addr){
@@ -1906,6 +1909,10 @@ void freecursive_access(int addr, char type){
           else if (i_saved == 2)
           {
             pos2_access++;
+          }
+          if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT)
+          {
+            wl_pos[i_saved]++;
           }
           
           
@@ -3777,6 +3784,8 @@ void print_oram_stats(){
   printf("Miss L1    ratio         %f%%\n", 100*(double)missl1wb/missctr);
   printf("Shuff wb                 %d\n", wbshuff);
   printf("Ring dummy               %d\n", ringdumctr);
+  printf("WL Pos1 acc              %d\n", wl_pos[1]);
+  printf("WL Pos2 acc              %d\n", wl_pos[2]);
   // prinf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
