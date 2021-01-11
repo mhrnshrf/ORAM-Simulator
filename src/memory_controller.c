@@ -1910,7 +1910,7 @@ void freecursive_access(int addr, char type){
           {
             pos2_access++;
           }
-          if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT)
+          if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT-1)
           {
             wl_pos[i_saved]++;
           }
