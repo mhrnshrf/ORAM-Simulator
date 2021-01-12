@@ -46,12 +46,8 @@
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
-#define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
-#define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
-
-
-
-
+#define DUMMY_ENABLE    1     // 0/1 flag to disable/enable dummy enable baseline for ring oram
+#define DYNAMIC_EP      1     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
 
 
 

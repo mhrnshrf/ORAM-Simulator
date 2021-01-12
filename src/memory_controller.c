@@ -1912,7 +1912,7 @@ void freecursive_access(int addr, char type){
           {
             pos2_access++;
           }
-          if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT-1 && wl_occ < WL_CAP)
+          if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT-1 /*&& wl_occ < WL_CAP*/)
           {
             wl_pos[i_saved]++;
           }
@@ -2009,7 +2009,7 @@ void freecursive_access(int addr, char type){
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
   {
-    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT && wl_occ < WL_CAP)
+    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT /*&& wl_occ < WL_CAP*/)
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
