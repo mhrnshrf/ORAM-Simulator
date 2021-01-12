@@ -36,6 +36,7 @@ int shuff_dist[LEVEL] = {0};
 int shuf_dif = 0;
 int shuf_prev = 0;
 int ringacc = 0;
+int wl_occ = 0;
 
 // long long int CYCLE_VAL = 0;
 
@@ -1447,6 +1448,7 @@ int add_to_stash(Slot s){
     if (s.label != PosMap[s.addr])
     {
       linger_discard++;
+      wl_occ--;
       return STASH_SIZE_ORG;
     }
   }
@@ -1910,7 +1912,7 @@ void freecursive_access(int addr, char type){
           {
             pos2_access++;
           }
-          if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT-1)
+          if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT-1 && wl_occ < WL_CAP)
           {
             wl_pos[i_saved]++;
           }
@@ -2007,7 +2009,7 @@ void freecursive_access(int addr, char type){
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
   {
-    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT)
+    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT && wl_occ < WL_CAP)
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
@@ -2025,6 +2027,7 @@ void freecursive_access(int addr, char type){
       }
       lingered++;
       wskip++;
+      wl_occ++;
       
     }
     else

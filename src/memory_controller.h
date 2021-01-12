@@ -122,6 +122,7 @@
 #define SKIP_L2 14
 #define DUMMY_TH 100
 #define DEP_TH 5        // threshold on # reshuffle for dynamic ep 
+#define WL_CAP 100        // cap on wl feature
 
 
 
