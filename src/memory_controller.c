@@ -1737,6 +1737,7 @@ void oram_access(int addr){
 // Freecursive 4.2.4 ORAM access algorithm
 void freecursive_access(int addr, char type){
   
+  bool posneeded = false;
 
   if (stash_contain(addr))      // check if the block is already in the stash
   {
@@ -1857,6 +1858,7 @@ void freecursive_access(int addr, char type){
 
       while(i_saved >= 1)   // STEP 2  PosMap block access
       {
+        posneeded = true;
         int ai = addr/pow(X,i_saved);
         int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
         // printf("@ trace %d  i saved: %d   ai: %x    tag: %x\n", tracectr, i_saved, ai, tag);
@@ -2009,7 +2011,7 @@ void freecursive_access(int addr, char type){
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
   {
-    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT /*&& wl_occ < WL_CAP*/)
+    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT && !posneeded /*&& wl_occ < WL_CAP*/)
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
