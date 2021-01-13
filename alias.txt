@@ -39,3 +39,5 @@ alias oram='cd ~/oram'
 alias h5='head -n 5000000 pinatrace.out'
 
 alias t5='tail -n 5000000 pinatrace.out'
+
+alias kas='killall screen'

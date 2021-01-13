@@ -113,7 +113,7 @@
 #define SL1 L1
 #define SL2 L2
 #define SL3 L3
-#define LINGER_LIMIT 30
+#define LINGER_LIMIT 60
 #define SKIP_L1 10
 #define SKIP_L2 14
 #define DUMMY_TH 100
