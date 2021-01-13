@@ -35,14 +35,14 @@
 #define PREFETCH_ENABLE 0     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
-#define NONSEC_ENABLE   0    // 0/1 flag to disable/enable oram simulation if off usimm runs normally
-#define BK_EVICTION     0   // 0/1 flag to disable/enable background eviction
+#define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
+#define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
 
 
 
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
-#define WRITE_LINGER    0     // 0/1 flag to disable/enable write linger feature for ring oram
+#define WRITE_LINGER    1     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
@@ -113,7 +113,7 @@
 #define SL1 L1
 #define SL2 L2
 #define SL3 L3
-#define LINGER_LIMIT 60
+#define LINGER_LIMIT 30
 #define SKIP_L1 10
 #define SKIP_L2 14
 #define DUMMY_TH 100
