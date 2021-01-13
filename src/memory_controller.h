@@ -43,11 +43,11 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 #define WRITE_LINGER    1     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
-#define DUMMY_ENABLE    1     // 0/1 flag to disable/enable dummy enable baseline for ring oram
-#define DYNAMIC_EP      1     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
+#define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
+#define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
 
 
 
@@ -55,7 +55,7 @@
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 12     // # slots per bucket // z17
+#define Z 14     // # slots per bucket // z17
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
