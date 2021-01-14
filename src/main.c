@@ -435,7 +435,8 @@ int main(int argc, char * argv[])
     return -4;
   }
 
-  NUMCORES = argc-2;
+//   NUMCORES = argc-2;
+  NUMCORES = argc-3;
 
 
   ROB = (struct robstructure *)malloc(sizeof(struct robstructure)*NUMCORES);
