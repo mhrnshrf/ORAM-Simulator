@@ -3701,6 +3701,7 @@ void export_csv(char * argv[]){
 
   fp = fopen(filename,"w+");
 
+  fprintf(fp,"bench,%s\n", bench);
   fprintf(fp,"cpu_time_used,%f\n", cpu_time_used);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);

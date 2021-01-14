@@ -34,7 +34,7 @@ alias wcl='wc -l pinatrace.out'
 alias headp='head -n 100 pinatrace.out'
 alias tailp='tail -n 100 pinatrace.out'
 
-alias oram='cd ~/oram'
+alias oram='cd ~/oram; screen'
 
 alias h5='head -n 5000000 pinatrace.out'
 
