@@ -460,7 +460,7 @@ int main(int argc, char * argv[])
 //   shad_addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
 //   shad_instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
 
-char bench[20];
+
 
   for (numc=0; numc < NUMCORES; numc++) {
 	//  shadtif[numc] = fopen(argv[numc+2], "r");
@@ -1660,6 +1660,7 @@ rmpki = (1000*rctr)/instctr;
 wmpki = (1000*wctr)/instctr;
 
 print_oram_stats();
+export_csv(argv);
 
 
 // printf("\n\n\n\n............... ORAM Stats ...............\n\n");

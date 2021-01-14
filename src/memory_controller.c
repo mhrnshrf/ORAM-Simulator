@@ -27,6 +27,8 @@ extern long long int trace_clk;
 #include "stt.h"
 #include <string.h>
 
+char bench[20];
+
 long long int ring_G = 0;
 long long int ring_round = 0;
 long long int ep_round = 0;
@@ -3690,7 +3692,20 @@ int reverse_lex(int n){
 
 
 
+void export_csv(char * argv[]){
+  FILE *fp;
+  char *filename;
 
+  filename = "";
+  sprintf(filename,"%s-%s.csv",argv[3], bench);
+
+  fp = fopen(filename,"w+");
+
+  fprintf(fp,"cpu_time_used,%f\n", cpu_time_used);
+  fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
+  fprintf(fp,"tracectr,%d\n", tracectr);
+
+}
 
 
 

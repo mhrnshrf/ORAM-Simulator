@@ -284,6 +284,7 @@ extern bool last_read_served;
 extern long long int nonmemops_sum;
  
 extern long long int missl1wb;
+extern char bench[20];
 
 
 void oram_alloc();
@@ -359,6 +360,7 @@ void ring_early_reshuffle(int label);
 void ring_invalidate(int index, int offset);
 int reverse_lex(int n);
 void print_shuff_stat();
+void export_csv(char * argv[]);
 
 // Mehrnoosh.
 
