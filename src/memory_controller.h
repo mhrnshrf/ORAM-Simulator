@@ -262,7 +262,7 @@ extern int stash_removed;
 extern int fillhit;
 extern int fillmiss;
 
-double cpu_time_used;
+double exe_time;
 extern int missctr;
 extern int hitctr;
 extern long long int mem_clk;

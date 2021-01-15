@@ -42,7 +42,7 @@ int wl_occ = 0;
 
 // long long int CYCLE_VAL = 0;
 
-double cpu_time_used = 0;
+double exe_time = 0;
 
 
 long long int cache_clk = 0;
@@ -3696,20 +3696,84 @@ void export_csv(char * argv[]){
   FILE *fp;
   char *filename;
 
-  filename = "";
-  filename = strcat(argv[3], "-");
+  filename = "../oram/log/";
+  filename = strcat(filename, argv[3]);
+  filename = strcat(filename, "-");
   filename = strcat(filename, bench);
   filename = strcat(filename, ".csv");
 
-  printf("file: %s\n", filename);
+  // printf("file: %s\n", filename);
   // sprintf(filename,"%s-%s.csv",argv[3], bench);
 
   fp = fopen(filename,"w+");
 
+  int shuffctr = 0; 
+  for (int i = TOP_CACHE; i < LEVEL; i++)
+  {
+    shuffctr += shuff[i];
+  }
+
   fprintf(fp,"Benchmark,%s\n", bench);
-  fprintf(fp,"cpu_time_used,%f\n", cpu_time_used);
+  fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
+  fprintf(fp, "mem_clk,%lld\n", mem_clk);
+  fprintf(fp, "invokectr,%d\n", invokectr);
+  fprintf(fp, "oramctr,%d\n", oramctr);
+  fprintf(fp, "dummyctr,%d\n", dummyctr);
+  fprintf(fp, "pos1_access,%d\n", pos1_access);
+  fprintf(fp, "pos2_access,%d\n", pos2_access);
+  fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+  fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+  fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
+  fprintf(fp, "plb_hit0,%lld\n", plb_hit[0]);
+  fprintf(fp, "plb_hit1,%lld\n", plb_hit[1]);
+  fprintf(fp, "plb_hit2,%lld\n", plb_hit[2]);
+  fprintf(fp, "plbaccess0,%lld\n", plbaccess[0]);
+  fprintf(fp, "plbaccess1,%lld\n", plbaccess[1]);
+  fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
+  fprintf(fp, "oramQ_size,%d\n", oramQ->size);
+  fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/oramctr);
+  fprintf(fp, "Bk_Evict,%d\n", bkctr);
+  fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
+  fprintf(fp, "rho_hit,%f%%\n", 100*(double)rho_hit/(invokectr));
+  fprintf(fp, "rhoctr,%d\n", rhoctr);
+  fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
+  fprintf(fp, "rho_bkctr,%f%%\n", 100*(double)rho_bkctr/rho_hit);
+  fprintf(fp, "earlyctr,%d\n", earlyctr);
+  fprintf(fp, "dirty_pointctr,%d\n", dirty_pointctr);
+  fprintf(fp, "cache_dirty,%d\n", cache_dirty);
+  fprintf(fp, "ptr_fail,%d\n", ptr_fail);
+  fprintf(fp, "search_fail,%d\n", search_fail);
+  fprintf(fp, "pinctr,%d\n", pinctr);
+  fprintf(fp, "unpinctr,%d\n", unpinctr);
+  fprintf(fp, "precase,%d\n", precase);
+  fprintf(fp, "sttctr,%d\n", sttctr);
+  fprintf(fp, "stash_leftover,%d\n", stash_leftover);
+  fprintf(fp, "stash_removed,%d\n", stash_removed);
+  fprintf(fp, "fillhit,%d\n", fillhit);
+  fprintf(fp, "fillmiss,%d\n", fillmiss);
+  fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+  fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+  fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+  fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
+  fprintf(fp, "stashctr,%d\n", stashctr);
+  fprintf(fp, "stash_cont,%d\n", stash_cont);
+  fprintf(fp, "linger_discard,%d\n", linger_discard);
+  fprintf(fp, "shuffctr,%d\n", shuffctr);
+  fprintf(fp, "ringctr,%d\n", ringctr);
+  fprintf(fp, "wbctr,%d\n", wbctr);
+  fprintf(fp, "writectr,%d\n", writectr);
+  fprintf(fp, "wskip,%d\n", wskip);
+  fprintf(fp, "mem_req_late,%f\n", (double)mem_req_latencies/(invokectr));
+  fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
+  fprintf(fp, "missl1wb,%lld\n", missl1wb);
+  fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
+  fprintf(fp, "wbshuff,%d\n", wbshuff);
+  fprintf(fp, "ringdumctr,%d\n", ringdumctr);
+  fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
+  fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
   fclose(fp);
 }
 
@@ -3752,7 +3816,7 @@ void print_oram_stats(){
   
 
   printf("\n\n\n\n............... ORAM Stats ...............\n\n");
-  printf("Execution Time (s)       %f\n", cpu_time_used);
+  printf("Execution Time (s)       %f\n", exe_time);
   printf("Total Cycles             %lld \n", CYCLE_VAL);
   printf("Trace Size               %d\n", tracectr);
   printf("Mem Cycles #             %lld\n", mem_clk);

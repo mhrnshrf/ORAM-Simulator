@@ -53,7 +53,7 @@ long int period = 0;
 int periodctr = 0;
 int nonmemctr = 0;
 int roundprev = 0;
-// double cpu_time_used = 0;
+// double exe_time = 0;
 // int tracectr = 0;	// # lines read from the trace file 
 // int hitctr = 0;		// # hits on llc
 // int missctr = 0;	// # misses on llc
@@ -336,7 +336,7 @@ int main(int argc, char * argv[])
 
 	// plb_test();
 
-	
+	export_csv(argv);
 
 	fflush(stdout);
 	
@@ -737,7 +737,7 @@ int main(int argc, char * argv[])
 		break;
 	}
 
-	if (TIMEOUT_ENBALE && cpu_time_used >= TIMEOUT_THRESHOLD)
+	if (TIMEOUT_ENBALE && exe_time >= TIMEOUT_THRESHOLD)
 	{
 		printf("WARNING: reached timeout!\n\n");
 		break;
@@ -980,7 +980,7 @@ int main(int argc, char * argv[])
 			// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
 
 			// end = clock();
-			// cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
+			// exe_time += ((double) (end - start)) / CLOCKS_PER_SEC;
 
 			
 			// Mehrnoosh.
@@ -1005,7 +1005,7 @@ int main(int argc, char * argv[])
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
 				// end = clock();
-				// cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
+				// exe_time += ((double) (end - start)) / CLOCKS_PER_SEC;
 			}
 			// Mehrnoosh.
 
@@ -1550,7 +1550,7 @@ int main(int argc, char * argv[])
 	fflush(stdout);
 	
 	end = clock();
-	cpu_time_used += ((double) (end - start)) / CLOCKS_PER_SEC;
+	exe_time += ((double) (end - start)) / CLOCKS_PER_SEC;
 	// Mehrnoosh.
   }
 
@@ -1665,7 +1665,7 @@ export_csv(argv);
 
 
 // printf("\n\n\n\n............... ORAM Stats ...............\n\n");
-// printf("Execution Time (s)       %f\n", cpu_time_used);
+// printf("Execution Time (s)       %f\n", exe_time);
 // printf("Total Cycles             %lld \n", CYCLE_VAL);
 // printf("Trace Size               %d\n", tracectr);
 // printf("Mem Cycles #             %lld\n", mem_clk);
@@ -1734,7 +1734,7 @@ export_csv(argv);
 // { 
 //     printf("Caught signal %d\n", sig);
 // 	printf("\n\n\n\n............... ORAM Stats ...............\n\n");
-// 	printf("Execution Time           %f s\n", cpu_time_used);
+// 	printf("Execution Time           %f s\n", exe_time);
 // 	printf("Trace Size               %d\n", tracectr);
 // 	printf("Mem Cycles #             %lld\n", mem_clk);
 // 	printf("Invoke Mem #             %d\n", invokectr);
