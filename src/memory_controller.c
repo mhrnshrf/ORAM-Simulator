@@ -2021,7 +2021,7 @@ void freecursive_access(int addr, char type){
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
   {
-    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT && !posneeded /*&& wl_occ < WL_CAP*/)
+    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT /*&& !posneeded && wl_occ < WL_CAP*/)
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
