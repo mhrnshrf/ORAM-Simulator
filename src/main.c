@@ -1661,7 +1661,7 @@ rmpki = (1000*rctr)/instctr;
 wmpki = (1000*wctr)/instctr;
 
 print_oram_stats();
-export_csv(argv);
+// export_csv(argv);
 
 
 // printf("\n\n\n\n............... ORAM Stats ...............\n\n");

@@ -90,6 +90,11 @@ typedef struct EntryBuf{
 }EntryBuf;
 
 
+typedef struct EntryMet{
+  int stale[STALE_CAP];
+
+}EntryMet;
+
 Queue *oramQ;
 Queue *plbQ;
 Queue *pathQ;
@@ -99,7 +104,9 @@ int revarr[RING_REV];
 bool last_read_served;
 
 
-// Metadata[NODE];      // meta data tree for ring oram 
+// EntryMet Metadata[NODE];      // meta data tree for ring oram 
+
+// Slot StaleBuffer[STALE_BUF_SIZE];
 
 Bucket GlobTree[NODE];      // global oram tree
 int PosMap[BLOCK];          // position map

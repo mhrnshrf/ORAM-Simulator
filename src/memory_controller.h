@@ -119,6 +119,8 @@
 #define DUMMY_TH 100
 #define DEP_TH 5        // threshold on # reshuffle for dynamic ep 
 #define WL_CAP 100000        // cap on wl feature
+#define STALE_CAP 4        // cap on stale for each 5 levels
+#define STALE_BUF_SIZE 100        //size of stale buffer
 
 
 
