@@ -5,7 +5,8 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define PLB_SIZE 64*1024  // in bytes ~~~> 64 KB
+// #define PLB_SIZE 64*1024  // in bytes ~~~> 64 KB
+#define PLB_SIZE 64*2048  // in bytes ~~~> 128 KB
 #define PLB_WAY 1           //  ~~~> # way per set
 #define PLB_BLOCK_SIZE 64       // bytes ~~~> plbline size
 

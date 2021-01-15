@@ -99,6 +99,7 @@ int revarr[RING_REV];
 bool last_read_served;
 
 
+// Metadata[NODE];      // meta data tree for ring oram 
 
 Bucket GlobTree[NODE];      // global oram tree
 int PosMap[BLOCK];          // position map
