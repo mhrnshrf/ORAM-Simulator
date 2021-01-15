@@ -3699,7 +3699,7 @@ void export_csv(char * argv[]){
   filename = "../oram/log/";
   filename = strcat(filename, argv[3]);
   filename = strcat(filename, "-");
-  filename = strcat(filename, bench);
+  filename = strcat(filename, "bench");
   filename = strcat(filename, ".csv");
 
   // printf("file: %s\n", filename);
