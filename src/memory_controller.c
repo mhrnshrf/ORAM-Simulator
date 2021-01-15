@@ -3697,15 +3697,20 @@ void export_csv(char * argv[]){
   char *filename;
 
   filename = "";
-  sprintf(filename,"%s-%s.csv",argv[3], bench);
+  filename = strcat(argv[3], "-");
+  filename = strcat(filename, bench);
+  filename = strcat(filename, ".csv");
+
+  printf("file: %s\n", filename);
+  // sprintf(filename,"%s-%s.csv",argv[3], bench);
 
   fp = fopen(filename,"w+");
 
-  fprintf(fp,"bench,%s\n", bench);
+  fprintf(fp,"Benchmark,%s\n", bench);
   fprintf(fp,"cpu_time_used,%f\n", cpu_time_used);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
-
+  fclose(fp);
 }
 
 
