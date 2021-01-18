@@ -91,7 +91,8 @@ typedef struct EntryBuf{
 
 
 typedef struct EntryMet{
-  int stale[STALE_CAP];
+  int stale_addr[STALE_CAP];
+  int stale_path[STALE_CAP];
 
 }EntryMet;
 
@@ -104,9 +105,10 @@ int revarr[RING_REV];
 bool last_read_served;
 
 
-// EntryMet Metadata[NODE];      // meta data tree for ring oram 
+EntryMet Metadata[NODE];      // meta data tree for ring oram 
 
-// Slot StaleBuffer[STALE_BUF_SIZE];
+Slot StaleBuffer[STALE_BUF_SIZE];
+
 
 Bucket GlobTree[NODE];      // global oram tree
 int PosMap[BLOCK];          // position map
@@ -1747,7 +1749,7 @@ void oram_access(int addr){
 // Freecursive 4.2.4 ORAM access algorithm
 void freecursive_access(int addr, char type){
   
-  bool posneeded = false;
+  // bool posneeded = false;
 
   if (stash_contain(addr))      // check if the block is already in the stash
   {
@@ -1868,7 +1870,7 @@ void freecursive_access(int addr, char type){
 
       while(i_saved >= 1)   // STEP 2  PosMap block access
       {
-        posneeded = true;
+        // posneeded = true;
         int ai = addr/pow(X,i_saved);
         int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
         // printf("@ trace %d  i saved: %d   ai: %x    tag: %x\n", tracectr, i_saved, ai, tag);
