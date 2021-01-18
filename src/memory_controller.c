@@ -220,6 +220,7 @@ int readctr = 0;
 int writectr = 0;
 int wskip = 0;
 int ringdumctr = 0;
+int stalectr = 0;
 
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
@@ -1515,6 +1516,63 @@ int add_to_stash(Slot s){
   }
   return -1;
 }
+
+
+
+
+int add_stale_buf(Slot s){
+
+  // if (s.addr == 0)
+  // {
+  //   printf("exiting due to 0 added to stash!\n");
+  //   // exit(1);
+  // }
+  
+  for(int i = 0; i < STALE_BUF_SIZE; i++ )
+  {
+    if(!StaleBuffer[i].isReal)
+    {
+
+      StaleBuffer[i].addr = s.addr;
+      StaleBuffer[i].label = s.label;
+      StaleBuffer[i].isReal = true;
+      StaleBuffer[i].isData = true;
+      
+      stalectr++;
+
+      if (!s.isReal)
+      {
+        printf("ERROR: add to stash: dummy added @ trace %d\n", tracectr);
+        print_stash();
+        exit(1);
+      }
+      return i;
+    }
+    
+    
+  }
+  return -1;
+}
+
+
+void remove_stale_buf(int index){
+  stalectr--;
+  StaleBuffer[index].isReal = false;
+}
+
+
+int get_stale_buf(int addr){
+  for(int k= 0; k < STALE_BUF_SIZE; k++)
+  {
+    if (StaleBuffer[k].addr == addr && StaleBuffer[k].isReal)
+    {
+      return k;
+    }
+  }
+  return -1;
+}
+
+
 
 
 // remove from stash given the item index in the stash

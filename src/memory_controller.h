@@ -363,6 +363,9 @@ void ring_invalidate(int index, int offset);
 int reverse_lex(int n);
 void print_shuff_stat();
 void export_csv(char * argv[]);
+int add_stale_buf(Slot s);
+void remove_stale_buf(int index);
+int get_stale_buf(int addr);
 
 // Mehrnoosh.
 
