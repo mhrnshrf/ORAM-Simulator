@@ -3897,10 +3897,10 @@ int reverse_lex(int n){
 void export_csv(char * argv[]){
   FILE *fp;
   char *filename;
-  if (chdir("../oram/log") != 0)  
-  {
-    perror("chdir() to ../oram/log failed"); 
-  }
+  // if (chdir("../oram/log") != 0)  
+  // {
+  //   perror("chdir() to ../oram/log failed"); 
+  // }
 
 
   filename = "";
