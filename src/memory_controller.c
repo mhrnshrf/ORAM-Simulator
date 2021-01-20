@@ -1002,8 +1002,8 @@ void read_path(int label){
     int gi = -1;
     bool last_read = false;
 
-    retrieve_stale(label);
-    discard_stale(label);
+    // retrieve_stale(label);
+    // discard_stale(label);
 
     for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     {
@@ -1246,7 +1246,7 @@ void write_path(int label){
   
   int gi = -1;
   
-  flush_stale(label);
+  // flush_stale(label);
 
   for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
@@ -1580,15 +1580,15 @@ int add_to_stash(Slot s){
 
   
   // commented for WSKIP buffer to try
-  // if (RING_ENABLE && WSKIP_ENABLE)
-  // {
-  //   if (s.label != PosMap[s.addr])
-  //   {
-  //     linger_discard++;
-  //     wl_occ--;
-  //     return STASH_SIZE_ORG;
-  //   }
-  // }
+  if (RING_ENABLE && WSKIP_ENABLE)
+  {
+    if (s.label != PosMap[s.addr])
+    {
+      linger_discard++;
+      wl_occ--;
+      return STASH_SIZE_ORG;
+    }
+  }
   
   
 
