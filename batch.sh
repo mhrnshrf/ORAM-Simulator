@@ -20,4 +20,4 @@ bin/usimm input/"1channel.cfg" ../oram/trace/fotonik3d  $LOGNAME > ../oram/log/"
 bin/usimm input/"1channel.cfg" ../oram/trace/roms  $LOGNAME > ../oram/log/"$LOGNAME-roms.txt" ;
 cd ../oram/log; 
 python merge.py $LOGNAME;
-rm log/$LOGNAME-*.csv
+rm $LOGNAME-*.csv
