@@ -18,5 +18,5 @@ bin/usimm input/"1channel.cfg" ../oram/trace/imagick  $LOGNAME > ../oram/log/"$L
 #bin/usimm input/"1channel.cfg" ../oram/trace/nab  $LOGNAME > ../oram/log/"$LOGNAME-nab.txt" &
 bin/usimm input/"1channel.cfg" ../oram/trace/fotonik3d  $LOGNAME > ../oram/log/"$LOGNAME-fotonik3d.txt" &
 bin/usimm input/"1channel.cfg" ../oram/trace/roms  $LOGNAME > ../oram/log/"$LOGNAME-roms.txt" ;
-pyhon log/merge.py $LOGNAME;
-rm log/"$LOGNAME-*.csv"
+python log/merge.py $LOGNAME;
+rm log/$LOGNAME-*.csv
