@@ -264,7 +264,7 @@ int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var = POS2;
-bool SIM_ENABLE_VAR = true;
+bool SIM_ENABLE_VAR = false;
 
 int set_start = 0;
 int way_start = 0;
@@ -3682,6 +3682,8 @@ void ring_early_reshuffle(int label){
     int reqmade = 0;
     int dum_cand[Z] = {0};
     int cand_ind = 0;
+    // print_oram_stats();
+    printf("trace %d\n", tracectr);
     if (GlobTree[index].count >= LS[i] /* || i < TOP_CACHE  || i >= LEVEL-2 */)
     {
       // printf("\nlevel %d reshuffle\n", i);
@@ -3897,15 +3899,14 @@ int reverse_lex(int n){
 void export_csv(char * argv[]){
   FILE *fp;
   char *filename;
-  // if (chdir("../oram/log") != 0)  
-  // {
-  //   perror("chdir() to ../oram/log failed"); 
-  // }
+  if (chdir("../oram/log") != 0)  
+  {
+    perror("chdir() to ../oram/log failed"); 
+  }
 
 
   filename = "";
-  filename = strcat(filename, argv[3]);
-  filename = strcat(filename, "-");
+  filename = strcat(argv[3], "-");
   filename = strcat(filename, bench);
   filename = strcat(filename, ".csv");
 
