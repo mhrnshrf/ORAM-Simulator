@@ -26,6 +26,7 @@ extern long long int trace_clk;
 #include "plb.h"
 #include "stt.h"
 #include <string.h>
+#include <unistd.h> 
 
 char bench[20];
 
@@ -39,10 +40,13 @@ int shuf_dif = 0;
 int shuf_prev = 0;
 int ringacc = 0;
 int wl_occ = 0;
+bool pause_skip = false;
+
 
 // long long int CYCLE_VAL = 0;
 
 double exe_time = 0;
+int gather_var = 5;
 
 
 long long int cache_clk = 0;
@@ -90,11 +94,15 @@ typedef struct EntryBuf{
 }EntryBuf;
 
 
-typedef struct EntryMet{
-  int stale_addr[STALE_CAP];
-  int stale_path[STALE_CAP];
+// typedef struct EntryMet{
+//   int stale_addr[STALE_CAP];
+//   int stale_path[STALE_CAP];
 
-}EntryMet;
+// }EntryMet;
+
+typedef struct BucketMet{
+  Slot slot[STALE_CAP];
+}BucketMet;
 
 Queue *oramQ;
 Queue *plbQ;
@@ -105,7 +113,7 @@ int revarr[RING_REV];
 bool last_read_served;
 
 
-EntryMet Metadata[NODE];      // meta data tree for ring oram 
+BucketMet Metadata[NODE];      // meta data tree for ring oram 
 
 Slot StaleBuffer[STALE_BUF_SIZE];
 
@@ -129,6 +137,7 @@ int curr_page = 0; 	// the current page address
 long long int curr_pc = 0; 	// the current pc address 
 char curr_offset = 0; 	// the current offset
 unsigned long long int curr_footprint = 0; 	// the current footprint of accessed block of the current page 
+int stale_cand[STALE_CAP] = {[0 ... STALE_CAP-1] = -1};    // keep index of candidates in stale buffer for write back to a specific metadatanode
 
 
 
@@ -221,6 +230,8 @@ int writectr = 0;
 int wskip = 0;
 int ringdumctr = 0;
 int stalectr = 0;
+int stale_flush_ctr = 0;
+int stale_discard_ctr = 0;
 
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
@@ -647,6 +658,11 @@ void oram_alloc(){
       GlobTree[i].slot[k].isData = false;
       GlobTree[i].slot[k].valid = true;  // ??? to be revised
       GlobTree[i].dumnum++;
+
+      Metadata[i].slot[k].addr = -1;
+      Metadata[i].slot[k].label = -1;
+      Metadata[i].slot[k].isReal = false;
+      Metadata[i].slot[k].isData = false;
     }
   }
 
@@ -920,11 +936,74 @@ void count_tree(){
   
 }
 
+
+void retrieve_stale(int label){
+  for (int h = GL_COUNT-1; h >= 0; h--)
+  {
+    int gv = GL[h];
+    int index = calc_index(label, gv);
+    for (int j = 0; j < STALE_CAP; j++)
+    {
+      // int target = stash_label>>(LEVEL_VAR-1-i);
+      // bool on_path = (Metadata[index].slot[j].label == label) || 
+      // bool can_clear = Metadata[index].slot[j].isReal && on_path
+      if (Metadata[index].slot[j].isReal)
+      {
+        if(add_stale_buf(Metadata[index].slot[j]) != -1)
+        {
+          Metadata[index].slot[j].isReal = false;
+          Metadata[index].slot[j].addr = -1;
+          Metadata[index].slot[j].label = -1;
+        }
+        else
+        {
+          printf("ERROR: discard stale: trace %d buffer overflow!  @ %d\n", tracectr, stalectr);
+          print_oram_stats();
+          exit(1);
+        }
+      }
+    }
+  }
+}
+
+
+void discard_stale(int label){
+  for (int i = LEVEL-1; i >= 0; i--)
+  {
+    int index = calc_index(label, i);
+    // int mask = label>>(LEVEL_VAR-1-i);
+    // int target = stale_label>>(LEVEL_VAR-1-i);
+    for (int j = 0; j < LZ[i]; j++)
+    {
+      if (GlobTree[index].slot[j].isReal)
+      {
+        for (int k = 0; k < STALE_BUF_SIZE; k++)
+        {
+          if (StaleBuffer[k].isReal && StaleBuffer[index].addr == GlobTree[index].slot[j].addr)
+          {
+            stale_discard_ctr++;
+            remove_stale_buf(get_stale_buf(StaleBuffer[index].addr));  // remove stale info from stale buffer
+            GlobTree[index].slot[j].isReal = false;                   // remove stale block from the oram tree
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+
+}
+
+
+
 void read_path(int label){
 
     // printf("\nread path @ trace %d\n", tracectr);
     int gi = -1;
     bool last_read = false;
+
+    retrieve_stale(label);
+    discard_stale(label);
 
     for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     {
@@ -1094,14 +1173,84 @@ void pick_candidate(int index, int label, int i){
   }
 }
 
+
+int calc_gl(int level){
+  for (int i = GL_COUNT-1; i >= 0; i--)
+  {
+    if (level >= GL[i])
+    {
+      return GL[i];
+    }
+  }
+  return -1;
+}
+
+
+
+void flush_stale(int label){
+  for (int h = GL_COUNT-1; h >= 0; h--)
+  {
+    int gv = GL[h];
+    for (int i = 0; i < STALE_BUF_SIZE; i++)
+    {
+      stale_cand[i] = -1;
+    }
+    
+    int c = 0;
+    int mask = label>>(LEVEL_VAR-1-gv);
+    for(int k = 0; k < STALE_BUF_SIZE; k++)
+    {
+      bool spot_real =  StaleBuffer[k].isReal;
+      if (spot_real)
+      {
+        int stale_label = StaleBuffer[k].label;
+        int target = stale_label>>(LEVEL_VAR-1-gv);
+        if((((target)^mask) == 0))
+        {
+          stale_cand[c] = k;
+          c++; 
+          if (c == STALE_CAP)
+          {
+            break;
+          }
+        }
+      }
+    }
+
+    int index = calc_index(label, gv);
+    for (int j = 0; j < STALE_CAP; j++)
+    {
+      if (stale_cand[j] != -1)
+      {
+        Metadata[index].slot[j].addr = StaleBuffer[stale_cand[j]].addr;
+        Metadata[index].slot[j].label = StaleBuffer[stale_cand[j]].label;
+        Metadata[index].slot[j].isReal = true;
+        Metadata[index].slot[j].isData = false;
+        
+        remove_stale_buf(stale_cand[j]);
+        stale_flush_ctr++;
+      }
+    }
+
+    
+  }
+  
+
+  
+
+}
+
 void write_path(int label){
 
     // printf("\nwrite path @ trace %d\n", tracectr);
   
   int gi = -1;
   
+  flush_stale(label);
+
   for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
+    
     if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
     {
       int index = calc_index(label, i);
@@ -1111,54 +1260,29 @@ void write_path(int label){
         ref_close[i]++;
       }
       GlobTree[index].count = 0; // for ring oram evict path
-      
-      // int stashctr_var = (RHO_ENABLE && (TREE_VAR == RHO))? rho_stashctr : stashctr;
-      // if (stashctr_var == 0)
-      // {
-      //   if (RHO_ENABLE && (TREE_VAR == RHO))
-      //   {
-      //     // printf("write path: @ LEVEL: %d   stash got empty\n\n", i);
-      //   }
-        
-      //   for (int g = 0; g < LZ_VAR[i]; g++)
-      //   {
-      //     if (i >= TOP_CACHE_VAR)
-      //     {
-      //       // addr = SUBTREE_ENABLE ?  SubMap[index]+g:(index*Z_VAR+g);
-      //       addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+g): (TREE_VAR == ORAM)? SubMap[index]+g : RhoSubMap[index]+g;
 
-      //       // insert_write (addr, orig_cycle, orig_thread, orig_instr);
-      //       insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, 0, 'W');
-      //       // printf("insert oramq: %d\n", oramQ->size);
+      reset_candidate();
+      pick_candidate(index, label, i);
+      int stt_cand = -1;
 
-      //     }
-          
-      //   }
-      // }
-      // else
-      // {
-        reset_candidate();
-        pick_candidate(index, label, i);
-        int stt_cand = -1;
+      for(int j = 0; j < LZ_VAR[i]; j++)
+      {
+        GlobTree[index].slot[j].valid = true;  // added for ring oram
 
-        for(int j = 0; j < LZ_VAR[i]; j++)
+        gi++;
+        if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
         {
-          GlobTree[index].slot[j].valid = true;  // added for ring oram
-
-          gi++;
-          if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
+          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
           {
-            addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-            if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
-            {
-              int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
-              int i_prime = floor(gi_prime/Z) + 1 + L1;
-              int j_prime = gi_prime % Z;
-              int index_prime = calc_index(label, i_prime);
-              addr = SubMap[index_prime] + j_prime;
-            }
-            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false);
+            int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
+            int i_prime = floor(gi_prime/Z) + 1 + L1;
+            int j_prime = gi_prime % Z;
+            int index_prime = calc_index(label, i_prime);
+            addr = SubMap[index_prime] + j_prime;
           }
+          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false);
+        }
 
 
           if (STT_ENABLE && TREE_VAR == ORAM)
@@ -1455,16 +1579,16 @@ int add_to_stash(Slot s){
   // }
 
   
-
-  if (RING_ENABLE && WRITE_LINGER)
-  {
-    if (s.label != PosMap[s.addr])
-    {
-      linger_discard++;
-      wl_occ--;
-      return STASH_SIZE_ORG;
-    }
-  }
+  // commented for WSKIP buffer to try
+  // if (RING_ENABLE && WSKIP_ENABLE)
+  // {
+  //   if (s.label != PosMap[s.addr])
+  //   {
+  //     linger_discard++;
+  //     wl_occ--;
+  //     return STASH_SIZE_ORG;
+  //   }
+  // }
   
   
 
@@ -1815,7 +1939,7 @@ void freecursive_access(int addr, char type){
   }
 
 // /*
-  // if (!RING_ENABLE || !WRITE_LINGER)
+  // if (!RING_ENABLE || !WSKIP_ENABLE)
   // {
     // if write bypass feature is on and there is write req hit in the cache
     if (WRITE_BYPASS && write_cache_hit && type == 'W')
@@ -1984,7 +2108,7 @@ void freecursive_access(int addr, char type){
           {
             pos2_access++;
           }
-          if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT-1 /*&& wl_occ < WL_CAP*/)
+          if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT-1 /*&& wl_occ < WL_CAP*/)
           {
             wl_pos[i_saved]++;
           }
@@ -2081,7 +2205,14 @@ void freecursive_access(int addr, char type){
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
   {
-    if (WRITE_LINGER && type == 'W'  && stashctr < LINGER_LIMIT /*&& !posneeded && wl_occ < WL_CAP*/)
+    Slot sl = {.addr = addr , .label = PosMap[addr], .isReal = true, .isData = true};
+    int asb = add_stale_buf(sl);
+    if (asb == -1)
+    {
+      pause_skip = true;
+    }
+
+    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT && stalectr >= STALE_TH  /*!pause_skip && !posneeded && wl_occ < WL_CAP*/)
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
@@ -2093,13 +2224,17 @@ void freecursive_access(int addr, char type){
       int si = add_to_stash(s);
       if (si == -1)
       {
-        printf("ERROR: freecursive: write linger: stash overflow!   @ %d\n", stashctr); 
+        printf("ERROR: freecursive: write skip: stash overflow!   @ %d\n", stashctr); 
         print_oram_stats();
         exit(1);
       }
       lingered++;
       wskip++;
       wl_occ++;
+
+      
+      
+
       
     }
     else
@@ -3399,7 +3534,6 @@ int calc_overlap(int pathA, int pathB){
 
 
 
-
 void ring_evict_path(int label){
   // printf("\nevict path trace %d\n", tracectr);
 
@@ -3763,8 +3897,13 @@ int reverse_lex(int n){
 void export_csv(char * argv[]){
   FILE *fp;
   char *filename;
+  if (chdir("../oram/log") != 0)  
+  {
+    perror("chdir() to ../oram/log failed"); 
+  }
 
-  filename = "../oram/log/";
+
+  filename = "";
   filename = strcat(filename, argv[3]);
   filename = strcat(filename, "-");
   filename = strcat(filename, bench);
@@ -3842,6 +3981,9 @@ void export_csv(char * argv[]){
   fprintf(fp, "ringdumctr,%d\n", ringdumctr);
   fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
   fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
+  fprintf(fp, "stalectr,%d\n", stalectr);
+  fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
+  fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
   fclose(fp);
 }
 

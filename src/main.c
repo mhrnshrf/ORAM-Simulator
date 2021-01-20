@@ -298,7 +298,7 @@ int main(int argc, char * argv[])
 	printf("....................................................\n");
 	printf("Ring Enable     %s\n", RING_ENABLE?"On":"Off");
 	printf("Ring STL        %s\n", RSTL_ENABLE?"On":"Off");
-	printf("Write Linger    %s\n", WRITE_LINGER?"On":"Off");
+	printf("Write Linger    %s\n", WSKIP_ENABLE?"On":"Off");
 	printf("Dummy Enable    %s\n", DUMMY_ENABLE?"On":"Off");
 	printf("Dynamic EP      %s\n", DYNAMIC_EP?"On":"Off");
 	printf("DEP TH          %d\n", DEP_TH);
@@ -1660,8 +1660,8 @@ int main(int argc, char * argv[])
 rmpki = (1000*rctr)/instctr;
 wmpki = (1000*wctr)/instctr;
 
-print_oram_stats();
-// export_csv(argv);
+// print_oram_stats();
+export_csv(argv);
 
 
 // printf("\n\n\n\n............... ORAM Stats ...............\n\n");

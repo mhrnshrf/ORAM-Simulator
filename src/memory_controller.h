@@ -42,7 +42,7 @@
 
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
-#define WRITE_LINGER    1     // 0/1 flag to disable/enable write linger feature for ring oram
+#define WSKIP_ENABLE    1     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
@@ -113,14 +113,15 @@
 #define SL1 L1
 #define SL2 L2
 #define SL3 L3
-#define LINGER_LIMIT 60
+#define SKIP_LIMIT 60
 #define SKIP_L1 10
 #define SKIP_L2 14
 #define DUMMY_TH 100
-#define DEP_TH 5        // threshold on # reshuffle for dynamic ep 
+#define DEP_TH 5             // threshold on # reshuffle for dynamic ep 
 #define WL_CAP 100000        // cap on wl feature
-#define STALE_CAP 4        // cap on stale for each 5 levels
-#define STALE_BUF_SIZE 100        //size of stale buffer
+#define STALE_CAP 4          // cap on stale for each 5 levels
+#define STALE_BUF_SIZE 100   //size of stale buffer
+#define GL_COUNT 3          // # gathering levels
 
 
 
@@ -161,6 +162,7 @@ enum{
   S2 = (RING_ENABLE && RSTL_ENABLE) ? Z2-RING_Z : RING_S,   // # dummy slots per bucket upto SL2
   S3 = (RING_ENABLE && RSTL_ENABLE) ? Z3-RING_Z : RING_S,   // # dummy slots per bucket upto SL3
   S4 = S3,
+  STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
 
 };
 
@@ -281,6 +283,8 @@ extern int oram_effective_pl;
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
 static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
+
+static const int GL[GL_COUNT] = {5, 10, 15};  // array of different Z for different levels in oram
 
 extern bool last_read_served;
 extern long long int nonmemops_sum;
