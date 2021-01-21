@@ -18,7 +18,7 @@ bin/usimm input/"1channel.cfg" ../oram/trace/cam4  $LOGNAME > ../oram/log/"$LOGN
 bin/usimm input/"1channel.cfg" ../oram/trace/imagick  $LOGNAME > ../oram/log/"$LOGNAME-imagick.txt" &
 #bin/usimm input/"1channel.cfg" ../oram/trace/nab  $LOGNAME > ../oram/log/"$LOGNAME-nab.txt" &
 bin/usimm input/"1channel.cfg" ../oram/trace/fotonik3d  $LOGNAME > ../oram/log/"$LOGNAME-fotonik3d.txt" &
-bin/usimm input/"1channel.cfg" ../oram/trace/roms  $LOGNAME > ../oram/log/"$LOGNAME-roms.txt" };
+bin/usimm input/"1channel.cfg" ../oram/trace/roms  $LOGNAME > ../oram/log/"$LOGNAME-roms.txt"; };
 #sleep 2m
 cd ../oram/log; 
 python merge.py $LOGNAME;
