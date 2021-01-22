@@ -659,14 +659,20 @@ void oram_alloc(){
       GlobTree[i].slot[k].valid = true;  // ??? to be revised
       GlobTree[i].dumnum++;
 
-      for (int h = 0; h < GL_COUNT; h++)
+      
+    }
+  }
+  for (int h = 0; h < GL_COUNT; h++)
+  {
+    for (int i = 0; i < META_MAX_SIZE; i++)
+    {
+      for (int k = 0; k < STALE_CAP; k++)
       {
         Metadata[h][i].slot[k].addr = -1;
         Metadata[h][i].slot[k].label = -1;
         Metadata[h][i].slot[k].isReal = false;
         Metadata[h][i].slot[k].isData = false;
       }
-      
     }
   }
 
