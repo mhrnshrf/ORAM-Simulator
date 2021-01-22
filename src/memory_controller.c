@@ -235,6 +235,8 @@ int stale_discard_ctr = 0;
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
 
+int stale_reduction = 0;
+
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
 long long int plbaccess[H-1] = {0};   // # total plb access (hits + misses)
@@ -3432,7 +3434,9 @@ void ring_access(int addr){
   if (ep_cond)
   {
     // printf("\n@- evict %d\n", stalectr);
+    int b4 = stalectr;
     ring_evict_path(label);
+    stale_reduction += b4 - stalectr;
     // printf("@> evict %d\n", stalectr);
     
     // to be removed
@@ -4027,6 +4031,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "stalectr,%d\n", stalectr);
   fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
   fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
+  fprintf(fp, "stale_reduction,%d\n", stale_reduction);
   fclose(fp);
 }
 
