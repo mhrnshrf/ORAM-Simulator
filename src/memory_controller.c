@@ -281,6 +281,8 @@ long long int lastpath = 0;
 
 int  wl_pos[H-1] = {0};
 
+int glctr[GL_COUNT] = {0}; 
+
 bool ring_dummy = false;
 
 unsigned int byte_addr(long long int physical_addr){
@@ -966,6 +968,7 @@ void retrieve_stale(int label){
           Metadata[h][index].slot[j].isReal = false;
           Metadata[h][index].slot[j].addr = -1;
           Metadata[h][index].slot[j].label = -1;
+          glctr[h]--;
         }
         else
         {
@@ -1249,7 +1252,7 @@ void flush_stale(int label){
         Metadata[h][index].slot[j].label = StaleBuffer[stale_cand[j]].label;
         Metadata[h][index].slot[j].isReal = true;
         Metadata[h][index].slot[j].isData = false;
-        
+        glctr[h]++;
         remove_stale_buf(stale_cand[j]);
         stale_flush_ctr++;
       }
@@ -4032,6 +4035,11 @@ void export_csv(char * argv[]){
   fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
   fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
   fprintf(fp, "stale_reduction,%d\n", stale_reduction);
+  for (int i = 0; i < GL_COUNT; i++)
+  {
+    fprintf(fp, "glctr[%d],%d\n", i, glctr[i]);
+  }
+  
   fclose(fp);
 }
 

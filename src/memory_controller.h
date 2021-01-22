@@ -120,10 +120,10 @@
 #define DUMMY_TH 100
 #define DEP_TH 5             // threshold on # reshuffle for dynamic ep 
 #define WL_CAP 100000        // cap on wl feature
-#define STALE_CAP 16          // cap on stale for each 5 levels
+#define STALE_CAP 8          // cap on stale for each 5 levels
 #define STALE_BUF_SIZE 100   //size of stale buffer
-#define GL_COUNT 1          // # gathering levels
-#define GLMAX 5          // last level gl
+#define GL_COUNT 3          // # gathering levels
+#define GLMAX 15          // last level gl
 
 
 
@@ -287,8 +287,8 @@ static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3]
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
 static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
 
-// static const int GL[GL_COUNT] = {5, 10, GLMAX};  // array of different Z for different levels in oram
-static const int GL[GL_COUNT] = {1};  // array of different Z for different levels in oram
+static const int GL[GL_COUNT] = {5, 10, GLMAX};  // array of different Z for different levels in oram
+// static const int GL[GL_COUNT] = {1};  // array of different Z for different levels in oram
 
 enum {META_MAX_SIZE = (int)pow(2, GLMAX)};
 
