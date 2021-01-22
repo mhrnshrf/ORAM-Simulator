@@ -989,7 +989,7 @@ void discard_stale(int label){
       {
         for (int k = 0; k < STALE_BUF_SIZE; k++)
         {
-          if (StaleBuffer[k].isReal && StaleBuffer[index].addr == GlobTree[index].slot[j].addr)
+          if (StaleBuffer[k].isReal && StaleBuffer[index].addr == GlobTree[index].slot[j].addr  && StaleBuffer[index].label == GlobTree[index].slot[j].label)
           {
             stale_discard_ctr++;
             remove_stale_buf(get_stale_buf(StaleBuffer[index].addr));  // remove stale info from stale buffer
