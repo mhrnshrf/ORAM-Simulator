@@ -1209,7 +1209,7 @@ void flush_stale(int label){
   for (int h = GL_COUNT-1; h >= 0; h--)
   {
     int gv = GL[h];
-    for (int i = 0; i < STALE_BUF_SIZE; i++)
+    for (int i = 0; i < STALE_CAP; i++)
     {
       stale_cand[i] = -1;
     }
@@ -2234,13 +2234,8 @@ void freecursive_access(int addr, char type){
   if (RING_ENABLE)
   {
     Slot sl = {.addr = addr , .label = PosMap[addr], .isReal = true, .isData = true};
-    int asb = add_stale_buf(sl);
-    if (asb == -1)
-    {
-      pause_skip = true;
-    }
 
-    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT && stalectr >= STALE_TH  /*!pause_skip && !posneeded && wl_occ < WL_CAP*/)
+    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT && stalectr <= STALE_TH  /*!pause_skip && !posneeded && wl_occ < WL_CAP*/)
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
@@ -2261,6 +2256,14 @@ void freecursive_access(int addr, char type){
       wl_occ++;
 
       
+      int asb = add_stale_buf(sl);
+      if (asb == -1)
+      {
+        printf("ERROR: freecursive: write skip: stale buffer overflow!   @ %d\n", stalectr); 
+        print_oram_stats();
+        exit(1);
+        // pause_skip = true;
+      }
       
 
       
@@ -3426,7 +3429,9 @@ void ring_access(int addr){
   // if (ring_round == 0)
   if (ep_cond)
   {
+    // printf("\n@- evict %d\n", stalectr);
     ring_evict_path(label);
+    // printf("@> evict %d\n", stalectr);
     
     // to be removed
     // ring_evictctr++;
@@ -4045,14 +4050,14 @@ void print_oram_stats(){
 
   // print_count_level();
 
-  print_shuff_stat();
+  // print_shuff_stat();
 
-  print_ref_close_stat();
+  // print_ref_close_stat();
   // print_stash();
 
-  print_wb_stat();
+  // print_wb_stat();
 
-  print_shuff_dist();
+  // print_shuff_dist();
 
   int shuffctr = 0; 
   for (int i = TOP_CACHE; i < LEVEL; i++)
@@ -4065,43 +4070,43 @@ void print_oram_stats(){
   printf("Execution Time (s)       %f\n", exe_time);
   printf("Total Cycles             %lld \n", CYCLE_VAL);
   printf("Trace Size               %d\n", tracectr);
-  printf("Mem Cycles #             %lld\n", mem_clk);
-  printf("Invoke Mem #             %d\n", invokectr);
-  printf("ORAM Access #            %d\n", oramctr);
-  printf("ORAM Dummy #             %d\n", dummyctr);
-  printf("Pos1 Access #            %d\n", pos1_access);
-  printf("Pos2 Access #            %d\n", pos2_access);
+  printf("Mem Cycles               %lld\n", mem_clk);
+  printf("Invoke Mem               %d\n", invokectr);
+  printf("ORAM Access              %d\n", oramctr);
+  printf("ORAM Dummy               %d\n", dummyctr);
+  printf("Pos1 Access              %d\n", pos1_access);
+  printf("Pos2 Access              %d\n", pos2_access);
   printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
   printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
   printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
-  printf("PLB pos0 hit #           %lld\n", plb_hit[0]);
-  printf("PLB pos1 hit #           %lld\n", plb_hit[1]);
-  printf("PLB pos2 hit #           %lld\n", plb_hit[2]);
-  printf("PLB pos0 acc #           %lld\n", plbaccess[0]);
-  printf("PLB pos1 acc #           %lld\n", plbaccess[1]);
-  printf("PLB pos2 acc #           %lld\n", plbaccess[2]);
+  printf("PLB pos0 hit             %lld\n", plb_hit[0]);
+  printf("PLB pos1 hit             %lld\n", plb_hit[1]);
+  printf("PLB pos2 hit             %lld\n", plb_hit[2]);
+  printf("PLB pos0 acc             %lld\n", plbaccess[0]);
+  printf("PLB pos1 acc             %lld\n", plbaccess[1]);
+  printf("PLB pos2 acc             %lld\n", plbaccess[2]);
   printf("oramQ Size               %d\n", oramQ->size);
   printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
-  printf("Bk Evict #               %d\n", bkctr);
+  printf("Bk Evict                 %d\n", bkctr);
   printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
   printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
   printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
-  printf("Rho Access #             %d\n", rhoctr);
-  printf("Rho  Dummy #             %d\n", rho_dummyctr);
+  printf("Rho Access               %d\n", rhoctr);
+  printf("Rho  Dummy               %d\n", rho_dummyctr);
   printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
-  printf("Early WB #               %d\n", earlyctr);
-  printf("Early WB Pointer #       %d\n", dirty_pointctr);
-  printf("Cache Dirty #            %d\n", cache_dirty);
-  printf("ptr fail #               %d\n", ptr_fail);
-  printf("search fail #            %d\n", search_fail);
-  printf("pin ctr #                %d\n", pinctr);
-  printf("unpin ctr #              %d\n", unpinctr);
-  printf("prefetch case #          %d\n", precase);
-  printf("STT Cand #               %d\n", sttctr);
-  printf("Stash leftover #         %d\n", stash_leftover);
-  printf("Stash removed #          %d\n", stash_removed);
-  printf("fill hit #               %d\n", fillhit);
-  printf("fill miss #              %d\n", fillmiss);
+  printf("Early WB                 %d\n", earlyctr);
+  printf("Early WB Pointer         %d\n", dirty_pointctr);
+  printf("Cache Dirty              %d\n", cache_dirty);
+  printf("ptr fail                 %d\n", ptr_fail);
+  printf("search fail              %d\n", search_fail);
+  printf("pin ctr                  %d\n", pinctr);
+  printf("unpin ctr                %d\n", unpinctr);
+  printf("prefetch case            %d\n", precase);
+  printf("STT Cand                 %d\n", sttctr);
+  printf("Stash leftover           %d\n", stash_leftover);
+  printf("Stash removed            %d\n", stash_removed);
+  printf("fill hit                 %d\n", fillhit);
+  printf("fill miss                %d\n", fillmiss);
   printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
   printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
   printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
@@ -4116,12 +4121,14 @@ void print_oram_stats(){
   printf("W skipped                %d\n", wskip);
   printf("Mem req latency          %f\n", (double)mem_req_latencies/(invokectr));
   printf("Nonmemops                %lld\n", nonmemops_sum);
-  printf("Miss L1    shad          %lld\n", missl1wb);
-  printf("Miss L1    ratio         %f%%\n", 100*(double)missl1wb/missctr);
+  printf("Miss L1 shad             %lld\n", missl1wb);
+  printf("Miss L1 ratio            %f%%\n", 100*(double)missl1wb/missctr);
   printf("Shuff wb                 %d\n", wbshuff);
   printf("Ring dummy               %d\n", ringdumctr);
   printf("WL Pos1 acc              %d\n", wl_pos[1]);
   printf("WL Pos2 acc              %d\n", wl_pos[2]);
+  printf("flush ctr                %d\n", stale_flush_ctr );
+  printf("discard ctr              %d\n", stale_discard_ctr );
   // prinf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
