@@ -3697,7 +3697,7 @@ void ring_early_reshuffle(int label){
     int cand_ind = 0;
     // print_oram_stats();
       // printf("trace %d\n", tracectr);
-      printf("flush ctr %d\n", stale_flush_ctr);
+      // printf("flush ctr %d\n", stale_flush_ctr);
     if (GlobTree[index].count >= LS[i])    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       // printf("\nlevel %d reshuffle\n", i);
