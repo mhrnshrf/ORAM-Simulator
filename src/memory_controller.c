@@ -263,7 +263,7 @@ int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var = POS2;
-bool SIM_ENABLE_VAR = true;
+bool SIM_ENABLE_VAR = SIM_ENABLE;
 
 int set_start = 0;
 int way_start = 0;

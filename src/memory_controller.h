@@ -48,8 +48,8 @@
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
 #define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
-#define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
-
+#define META_ENABLE     1     // 0/1 flag that indicates whether stale info is stored in metadata tree
+#define SIM_ENABLE      0     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
 
 
 // oram config
@@ -164,7 +164,7 @@ enum{
   S2 = (RING_ENABLE && RSTL_ENABLE) ? Z2-RING_Z : RING_S,   // # dummy slots per bucket upto SL2
   S3 = (RING_ENABLE && RSTL_ENABLE) ? Z3-RING_Z : RING_S,   // # dummy slots per bucket upto SL3
   S4 = S3,
-  STALE_TH = STALE_BUF_SIZE - 2*(GL_COUNT*STALE_CAP+1),
+  STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
   
 
 };

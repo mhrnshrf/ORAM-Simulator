@@ -5,7 +5,7 @@ import sys
 os.chdir(".")
 
 extension = 'csv'
-all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
+all_filenames = [i for i in glob.glob(sys.argv[1]+'*.{}'.format(extension))]
 
 #combine all files in the list
 #combined_csv = pd.concat([pd.read_csv(f, index_col=0) for f in all_filenames ], axis=0, join='outer', ignore_index=False, sort=False)
