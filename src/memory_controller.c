@@ -978,6 +978,8 @@ void retrieve_stale(int label){
 
 
 void discard_stale(int label){
+
+
   for (int i = LEVEL-1; i >= 0; i--)
   {
     int index = calc_index(label, i);
