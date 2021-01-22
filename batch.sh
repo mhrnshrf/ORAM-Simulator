@@ -2,9 +2,8 @@
 #CONFIGILE="$1"
 LOGNAME="$1"
 cd ../ORAM-Simulator; rm obj/*; rm bin/usimm; git reset --hard HEAD; git pull; rm bin/usimm; cd src; make; cd ..; 
-{
 #bin/usimm input/"1channel.cfg" ../oram/trace/perlbench  $LOGNAME > ../oram/log/"$LOGNAME-perlbench.txt" &
-bin/usimm input/"1channel.cfg" ../oram/trace/gcc  $LOGNAME > ../oram/log/"$LOGNAME-gcc.txt" &
+{ bin/usimm input/"1channel.cfg" ../oram/trace/gcc  $LOGNAME > ../oram/log/"$LOGNAME-gcc.txt" &
 bin/usimm input/"1channel.cfg" ../oram/trace/mcf  $LOGNAME > ../oram/log/"$LOGNAME-mcf.txt" &
 bin/usimm input/"1channel.cfg" ../oram/trace/omnetpp  $LOGNAME > ../oram/log/"$LOGNAME-omnetpp.txt" &
 bin/usimm input/"1channel.cfg" ../oram/trace/xalancbmk  $LOGNAME > ../oram/log/"$LOGNAME-xalancbmk.txt" &
@@ -18,8 +17,8 @@ bin/usimm input/"1channel.cfg" ../oram/trace/cam4  $LOGNAME > ../oram/log/"$LOGN
 bin/usimm input/"1channel.cfg" ../oram/trace/imagick  $LOGNAME > ../oram/log/"$LOGNAME-imagick.txt" &
 #bin/usimm input/"1channel.cfg" ../oram/trace/nab  $LOGNAME > ../oram/log/"$LOGNAME-nab.txt" &
 bin/usimm input/"1channel.cfg" ../oram/trace/fotonik3d  $LOGNAME > ../oram/log/"$LOGNAME-fotonik3d.txt" &
-bin/usimm input/"1channel.cfg" ../oram/trace/roms  $LOGNAME > ../oram/log/"$LOGNAME-roms.txt"; };
+bin/usimm input/"1channel.cfg" ../oram/trace/roms  $LOGNAME > ../oram/log/"$LOGNAME-roms.txt"; } &&
 #sleep 2m
 cd ../oram/log; 
-python merge.py $LOGNAME;
+python merge.py $LOGNAME &&
 rm $LOGNAME-*.csv

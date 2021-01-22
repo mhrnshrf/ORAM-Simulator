@@ -113,7 +113,7 @@ int revarr[RING_REV];
 bool last_read_served;
 
 
-BucketMet Metadata[NODE];      // meta data tree for ring oram 
+BucketMet Metadata[GL_COUNT][META_MAX_SIZE];      // meta data tree for ring oram 
 
 Slot StaleBuffer[STALE_BUF_SIZE];
 
@@ -264,7 +264,7 @@ int PATH_VAR = PATH;
 AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var = POS2;
-bool SIM_ENABLE_VAR = false;
+bool SIM_ENABLE_VAR = true;
 
 int set_start = 0;
 int way_start = 0;
@@ -659,10 +659,14 @@ void oram_alloc(){
       GlobTree[i].slot[k].valid = true;  // ??? to be revised
       GlobTree[i].dumnum++;
 
-      Metadata[i].slot[k].addr = -1;
-      Metadata[i].slot[k].label = -1;
-      Metadata[i].slot[k].isReal = false;
-      Metadata[i].slot[k].isData = false;
+      for (int h = 0; h < GL_COUNT; h++)
+      {
+        Metadata[h][i].slot[k].addr = -1;
+        Metadata[h][i].slot[k].label = -1;
+        Metadata[h][i].slot[k].isReal = false;
+        Metadata[h][i].slot[k].isData = false;
+      }
+      
     }
   }
 
@@ -942,18 +946,19 @@ void retrieve_stale(int label){
   {
     int gv = GL[h];
     int index = calc_index(label, gv);
+    index = gl_index(index, h);
     for (int j = 0; j < STALE_CAP; j++)
     {
       // int target = stash_label>>(LEVEL_VAR-1-i);
       // bool on_path = (Metadata[index].slot[j].label == label) || 
       // bool can_clear = Metadata[index].slot[j].isReal && on_path
-      if (Metadata[index].slot[j].isReal)
+      if (Metadata[h][index].slot[j].isReal)
       {
-        if(add_stale_buf(Metadata[index].slot[j]) != -1)
+        if(add_stale_buf(Metadata[h][index].slot[j]) != -1)
         {
-          Metadata[index].slot[j].isReal = false;
-          Metadata[index].slot[j].addr = -1;
-          Metadata[index].slot[j].label = -1;
+          Metadata[h][index].slot[j].isReal = false;
+          Metadata[h][index].slot[j].addr = -1;
+          Metadata[h][index].slot[j].label = -1;
         }
         else
         {
@@ -1002,8 +1007,8 @@ void read_path(int label){
     int gi = -1;
     bool last_read = false;
 
-    // retrieve_stale(label);
-    // discard_stale(label);
+    retrieve_stale(label);
+    discard_stale(label);
 
     for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     {
@@ -1187,6 +1192,10 @@ int calc_gl(int level){
 
 
 
+int gl_index(int index, int h){
+  return index - (pow(2,GL[h]) - 1);
+}
+
 void flush_stale(int label){
   for (int h = GL_COUNT-1; h >= 0; h--)
   {
@@ -1218,14 +1227,15 @@ void flush_stale(int label){
     }
 
     int index = calc_index(label, gv);
+    index = gl_index(index, h);
     for (int j = 0; j < STALE_CAP; j++)
     {
       if (stale_cand[j] != -1)
       {
-        Metadata[index].slot[j].addr = StaleBuffer[stale_cand[j]].addr;
-        Metadata[index].slot[j].label = StaleBuffer[stale_cand[j]].label;
-        Metadata[index].slot[j].isReal = true;
-        Metadata[index].slot[j].isData = false;
+        Metadata[h][index].slot[j].addr = StaleBuffer[stale_cand[j]].addr;
+        Metadata[h][index].slot[j].label = StaleBuffer[stale_cand[j]].label;
+        Metadata[h][index].slot[j].isReal = true;
+        Metadata[h][index].slot[j].isData = false;
         
         remove_stale_buf(stale_cand[j]);
         stale_flush_ctr++;
@@ -1246,7 +1256,7 @@ void write_path(int label){
   
   int gi = -1;
   
-  // flush_stale(label);
+  flush_stale(label);
 
   for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
@@ -1580,15 +1590,15 @@ int add_to_stash(Slot s){
 
   
   // commented for WSKIP buffer to try
-  if (RING_ENABLE && WSKIP_ENABLE)
-  {
-    if (s.label != PosMap[s.addr])
-    {
-      linger_discard++;
-      wl_occ--;
-      return STASH_SIZE_ORG;
-    }
-  }
+  // if (RING_ENABLE && WSKIP_ENABLE)
+  // {
+  //   if (s.label != PosMap[s.addr])
+  //   {
+  //     linger_discard++;
+  //     wl_occ--;
+  //     return STASH_SIZE_ORG;
+  //   }
+  // }
   
   
 
@@ -3686,8 +3696,9 @@ void ring_early_reshuffle(int label){
     int dum_cand[Z] = {0};
     int cand_ind = 0;
     // print_oram_stats();
-    // printf("trace %d\n", tracectr);
-    if (GlobTree[index].count >= LS[i] /* || i < TOP_CACHE  || i >= LEVEL-2 */)
+      // printf("trace %d\n", tracectr);
+      printf("flush ctr %d\n", stale_flush_ctr);
+    if (GlobTree[index].count >= LS[i])    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       // printf("\nlevel %d reshuffle\n", i);
       shuff[i]++;
