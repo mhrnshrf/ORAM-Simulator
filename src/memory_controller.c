@@ -113,10 +113,6 @@ int revarr[RING_REV];
 bool last_read_served;
 
 
-BucketMet Metadata[GL_COUNT][META_MAX_SIZE];      // meta data tree for ring oram 
-
-Slot StaleBuffer[STALE_BUF_SIZE];
-
 
 Bucket GlobTree[NODE];      // global oram tree
 int PosMap[BLOCK];          // position map
@@ -139,6 +135,9 @@ char curr_offset = 0; 	// the current offset
 unsigned long long int curr_footprint = 0; 	// the current footprint of accessed block of the current page 
 int stale_cand[STALE_CAP] = {[0 ... STALE_CAP-1] = -1};    // keep index of candidates in stale buffer for write back to a specific metadatanode
 
+BucketMet Metadata[GL_COUNT][META_MAX_SIZE];      // meta data tree for ring oram 
+
+Slot StaleBuffer[STALE_BUF_SIZE];
 
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on
@@ -1013,8 +1012,12 @@ void read_path(int label){
     int gi = -1;
     bool last_read = false;
 
-    retrieve_stale(label);
-    discard_stale(label);
+    if (META_ENABLE)
+    {
+      retrieve_stale(label);
+      discard_stale(label);
+    }
+    
 
     for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     {
@@ -1261,8 +1264,13 @@ void write_path(int label){
     // printf("\nwrite path @ trace %d\n", tracectr);
   
   int gi = -1;
+
+  if (META_ENABLE)
+  {
+    flush_stale(label);
+  }
   
-  flush_stale(label);
+  
 
   for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
@@ -1594,17 +1602,21 @@ int add_to_stash(Slot s){
   //   }
   // }
 
+
+
+  if (!META_ENABLE)
+  {
+    if (RING_ENABLE && WSKIP_ENABLE)
+    {
+      if (s.label != PosMap[s.addr])
+      {
+        linger_discard++;
+        wl_occ--;
+        return STASH_SIZE_ORG;
+      }
+    }
+  }
   
-  // commented for WSKIP buffer to try
-  // if (RING_ENABLE && WSKIP_ENABLE)
-  // {
-  //   if (s.label != PosMap[s.addr])
-  //   {
-  //     linger_discard++;
-  //     wl_occ--;
-  //     return STASH_SIZE_ORG;
-  //   }
-  // }
   
   
 
@@ -3703,6 +3715,9 @@ void ring_early_reshuffle(int label){
     int cand_ind = 0;
     // print_oram_stats();
       // printf("trace %d\n", tracectr);
+      // printf("i %d\n", i);
+      // printf("index %d\n", index);
+      // printf("heloooooo\n");
       // printf("flush ctr %d\n", stale_flush_ctr);
     if (GlobTree[index].count >= LS[i])    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
