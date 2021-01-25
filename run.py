@@ -1,5 +1,6 @@
 from subprocess import Popen
 import sys
-Popen("./batch.sh " + sys.argv[1], shell=True).wait()
+p = Popen("./batch.sh " + sys.argv[1], shell=True)
+p.wait()
 Popen("./gather.sh " + sys.argv[1], shell=True).wait()
 print("Done!")
