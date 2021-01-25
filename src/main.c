@@ -1579,6 +1579,8 @@ int main(int argc, char * argv[])
   }
 
 
+  export_csv(argv);
+
 
   printf("Done with loop. Printing stats.\n");
   printf("Cycles %lld\n", CYCLE_VAL);
@@ -1662,7 +1664,7 @@ rmpki = (1000*rctr)/instctr;
 wmpki = (1000*wctr)/instctr;
 
 // print_oram_stats();
-export_csv(argv);
+
 
 
 // printf("\n\n\n\n............... ORAM Stats ...............\n\n");
