@@ -120,7 +120,7 @@
 #define DUMMY_TH 100
 #define DEP_TH 5             // threshold on # reshuffle for dynamic ep 
 #define WL_CAP 100000        // cap on wl feature
-#define STALE_CAP 24          // cap on stale for each 5 levels
+#define STALE_CAP 32          // cap on stale for each 5 levels
 #define STALE_BUF_SIZE 3000   //size of stale buffer
 #define GL_COUNT 3          // # gathering levels
 #define GLMAX 15          // last level gl
