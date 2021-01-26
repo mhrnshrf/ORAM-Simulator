@@ -4039,6 +4039,8 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "glctr[%d],%d\n", i, glctr[i]);
   }
+  fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
+  fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
   
   fclose(fp);
 }
