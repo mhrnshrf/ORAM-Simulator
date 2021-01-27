@@ -161,7 +161,7 @@ enum{
   S2 = (RING_ENABLE && RSTL_ENABLE) ? Z2-RING_Z : RING_S,   // # dummy slots per bucket upto SL2
   S3 = (RING_ENABLE && RSTL_ENABLE) ? Z3-RING_Z : RING_S,   // # dummy slots per bucket upto SL3
   S4 = S3,
-  STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
+  // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
 
 };
 

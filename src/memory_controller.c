@@ -48,6 +48,8 @@ bool pause_skip = false;
 double exe_time = 0;
 int gather_var = 5;
 
+int STALE_TH = 0;
+
 
 long long int cache_clk = 0;
 
@@ -637,6 +639,7 @@ int concat(int a, int b) {
 /********************************/
 
 void oram_alloc(){
+  STALE_TH = STALE_BUF_SIZE-1;
 
   for (int i = 0; i < LEVEL; i++)
 	{
@@ -677,6 +680,7 @@ void oram_alloc(){
         Metadata[h][i].slot[k].isData = false;
       }
     }
+    STALE_TH -= GL_CAP[h];
   }
 
   for (int i = 0; i < STASH_SIZE; i++)
