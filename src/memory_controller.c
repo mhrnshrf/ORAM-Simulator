@@ -956,7 +956,7 @@ void retrieve_stale(int label){
     int gv = GL[h];
     int index = calc_index(label, gv);
     index = gl_index(index, h);
-    for (int j = 0; j < STALE_CAP; j++)
+    for (int j = 0; j < GL_CAP[h]; j++)
     {
       // int target = stash_label>>(LEVEL_VAR-1-i);
       // bool on_path = (Metadata[index].slot[j].label == label) || 
@@ -1234,7 +1234,7 @@ void flush_stale(int label){
         {
           stale_cand[c] = k;
           c++; 
-          if (c == STALE_CAP)
+          if (c == GL_CAP[h])
           {
             break;
           }
@@ -1244,7 +1244,7 @@ void flush_stale(int label){
 
     int index = calc_index(label, gv);
     index = gl_index(index, h);
-    for (int j = 0; j < STALE_CAP; j++)
+    for (int j = 0; j < GL_CAP[h]; j++)
     {
       if (stale_cand[j] != -1)
       {
@@ -4037,7 +4037,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "stale_reduction,%d\n", stale_reduction);
   for (int i = 0; i < GL_COUNT; i++)
   {
-    fprintf(fp, "glctr[%d],%d\n", i, glctr[i]);
+    fprintf(fp, "glctr[%d],%f%%\n", i, 100*(double)glctr[i]/(pow(2,GL[i])*GL_CAP[i]));
   }
   fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
