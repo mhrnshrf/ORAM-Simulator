@@ -284,7 +284,7 @@ static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO
 static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
 
 static const int GL[GL_COUNT] = {5, 10, GLMAX};  // array of different Z for different levels in oram
-static const int GL_CAP[GL_COUNT] = {40, 8, 8};  // array of different Z for different levels in oram
+static const int GL_CAP[GL_COUNT] = {40, 24, 8};  // array of different Z for different levels in oram
 // static const int GL[GL_COUNT] = {1};  // array of different Z for different levels in oram
 
 enum {META_MAX_SIZE = (int)pow(2, GLMAX)};
