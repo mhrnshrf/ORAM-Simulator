@@ -42,13 +42,13 @@
 
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
-#define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
+#define WSKIP_ENABLE    1     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
 #define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
-#define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
+#define META_ENABLE     1     // 0/1 flag that indicates whether stale info is stored in metadata tree
 #define SIM_ENABLE      1     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
 
 
@@ -120,7 +120,7 @@
 #define DUMMY_TH 100
 #define DEP_TH 5             // threshold on # reshuffle for dynamic ep 
 #define WL_CAP 100000        // cap on wl feature
-#define STALE_CAP 64          // cap on stale for each 5 levels each of which is 64 bit
+#define STALE_CAP 56          // cap on stale for each 5 levels each of which is 64 bit
 #define STALE_BUF_SIZE 300   //size of stale buffer
 #define GL_COUNT 3          // # gathering levels
 #define GLMAX 15          // last level gl
@@ -286,7 +286,7 @@ static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO
 static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
 
 static const int GL[GL_COUNT] = {5, 10, GLMAX};  // array of different Z for different levels in oram
-static const int GL_CAP[GL_COUNT] = {64, 40, 8};  // array of different Z for different levels in oram
+static const int GL_CAP[GL_COUNT] = {56, 40, 8};  // array of different Z for different levels in oram
 // static const int GL[GL_COUNT] = {1};  // array of different Z for different levels in oram
 
 enum {META_MAX_SIZE = (int)pow(2, GLMAX)};
