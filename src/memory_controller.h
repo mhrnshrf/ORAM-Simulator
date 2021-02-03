@@ -42,14 +42,14 @@
 
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
-#define WSKIP_ENABLE    1     // 0/1 flag to disable/enable write linger feature for ring oram
+#define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
 #define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
-#define META_ENABLE     1     // 0/1 flag that indicates whether stale info is stored in metadata tree
-#define SIM_ENABLE      0     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
+#define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
+#define SIM_ENABLE      1     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
 
 
 // oram config
@@ -120,7 +120,7 @@
 #define DUMMY_TH 100
 #define DEP_TH 5             // threshold on # reshuffle for dynamic ep 
 #define WL_CAP 100000        // cap on wl feature
-#define STALE_CAP 64          // cap on stale for each 5 levels
+#define STALE_CAP 64          // cap on stale for each 5 levels each of which is 64 bit
 #define STALE_BUF_SIZE 300   //size of stale buffer
 #define GL_COUNT 3          // # gathering levels
 #define GLMAX 15          // last level gl
@@ -161,6 +161,8 @@ enum{
   S2 = (RING_ENABLE && RSTL_ENABLE) ? Z2-RING_Z : RING_S,   // # dummy slots per bucket upto SL2
   S3 = (RING_ENABLE && RSTL_ENABLE) ? Z3-RING_Z : RING_S,   // # dummy slots per bucket upto SL3
   S4 = S3,
+  DATA_ADDR_SPACE = SLOT,
+  META_ADDR_SPACE = NODE,
   // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
 
 };
@@ -374,6 +376,7 @@ int add_stale_buf(Slot s);
 void remove_stale_buf(int index);
 int get_stale_buf(int addr);
 int gl_index(int index, int h);
+void stale_access(int index, int h, char type);
 
 // Mehrnoosh.
 

@@ -924,8 +924,8 @@ void test_init(){
     }
   }
   
-  
 }
+
 
 void reset_candidate(){
   for (int i = 0; i < Z; i++)
@@ -960,6 +960,9 @@ void retrieve_stale(int label){
     int gv = GL[h];
     int index = calc_index(label, gv);
     index = gl_index(index, h);
+
+    stale_access(index, h, 'R');
+
     for (int j = 0; j < GL_CAP[h]; j++)
     {
       // int target = stash_label>>(LEVEL_VAR-1-i);
@@ -1216,6 +1219,35 @@ int gl_index(int index, int h){
   return index - (pow(2,GL[h]) - 1);
 }
 
+int calc_stale_addr(int index, int h){
+
+  int i = 0;
+  int level = GL[i];
+  int sum = 0;
+  while (level < GL[h])
+  {
+    sum += pow(2, GL[i])*(GL_CAP[i]/(int)log2(CACHE_LINE_SIZE));
+    level = GL[i++];
+  }
+  int addr = sum + index*(GL_CAP[h]/(int)log2(CACHE_LINE_SIZE));
+
+  return addr;
+}
+
+
+void stale_access(int index, int h, char type){
+    int cl_count =  GL_CAP[h]/(int)log2(CACHE_LINE_SIZE);
+    int node_addr = DATA_ADDR_SPACE + META_ADDR_SPACE + calc_stale_addr(index, h);
+    for (int k = 0; k < cl_count; k++)
+    {
+      if (GL[h] >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+      {
+        int mem_addr = node_addr + k;
+        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, false);
+      }
+    }
+}
+
 void flush_stale(int label){
   for (int h = GL_COUNT-1; h >= 0; h--)
   {
@@ -1248,8 +1280,12 @@ void flush_stale(int label){
 
     int index = calc_index(label, gv);
     index = gl_index(index, h);
+
+    stale_access(index, h, 'W');
+    
     for (int j = 0; j < GL_CAP[h]; j++)
     {
+
       if (stale_cand[j] != -1)
       {
         Metadata[h][index].slot[j].addr = StaleBuffer[stale_cand[j]].addr;
@@ -3483,10 +3519,28 @@ void bin(unsigned int n)
 }
 
 
+
+void metadata_access(int label){
+  for (int i = 0; i < LEVEL; i++)
+  {
+     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+    {
+      int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false);
+    }
+  }
+
+}
+
+
+
+
 void ring_read_path(int label, int addr){
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = label;
   Enqueue(pathQ, pN);
+
+  metadata_access(label);
 
   for (int i = 0; i < LEVEL; i++)
   {
