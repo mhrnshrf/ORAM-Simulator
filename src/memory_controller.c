@@ -3520,13 +3520,13 @@ void bin(unsigned int n)
 
 
 
-void metadata_access(int label){
+void metadata_access(int label, char type){
   for (int i = 0; i < LEVEL; i++)
   {
      if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
       int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false);
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, false);
     }
   }
 
@@ -3540,7 +3540,7 @@ void ring_read_path(int label, int addr){
   pN->addr = label;
   Enqueue(pathQ, pN);
 
-  metadata_access(label);
+  metadata_access(label, 'R');
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -3764,6 +3764,9 @@ void ring_evict_path(int label){
   read_path(label);
   write_path(label);
   wbctr += b4 - stashctr;
+  
+  metadata_access(label, 'R');
+  metadata_access(label, 'W');
 
   // ring_early_reshuffle(label);
 
