@@ -12,7 +12,7 @@
 #include <math.h>
 // other simulation parameter
 #define TRACE_SIZE 4000000          // # addr read from trace file
-#define QUEUE_SIZE 2000             // oramq capacity
+#define QUEUE_SIZE 3000             // oramq capacity
 #define PAGE_SIZE 4096              // page size in byte ~~~> 4KB
 #define L1_LATENCY 3                // L1 latency in terms of # cycles 
 #define L2_LATENCY 10               // L2 latency in terms of # cycles 

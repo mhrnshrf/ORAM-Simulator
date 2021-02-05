@@ -3541,6 +3541,7 @@ void ring_read_path(int label, int addr){
   Enqueue(pathQ, pN);
 
   metadata_access(label, 'R');
+  metadata_access(label, 'W');
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -3757,6 +3758,8 @@ void ring_evict_path(int label){
   // }
   
   
+  metadata_access(label, 'R');
+  metadata_access(label, 'W');
   
 
   ring_G++;
@@ -3764,9 +3767,7 @@ void ring_evict_path(int label){
   read_path(label);
   write_path(label);
   wbctr += b4 - stashctr;
-  
-  metadata_access(label, 'R');
-  metadata_access(label, 'W');
+
 
   // ring_early_reshuffle(label);
 
