@@ -1238,12 +1238,17 @@ int calc_stale_addr(int index, int h){
 void stale_access(int index, int h, char type){
     int cl_count =  GL_CAP[h]/(int)log2(CACHE_LINE_SIZE);
     int node_addr = DATA_ADDR_SPACE + META_ADDR_SPACE + calc_stale_addr(index, h);
+    int last_read = false;
     for (int k = 0; k < cl_count; k++)
     {
       if (GL[h] >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
       {
+        if (type == 'R' && GL[h] == TOP_CACHE_VAR && k == cl_count -1)  // $ GL[h] == TOP_CACHE_VAR should chabge if GL[1] is not TOP_CACHE (i.e. 10)
+        {
+          last_read = true;
+        }
         int mem_addr = node_addr + k;
-        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, false);
+        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read);
       }
     }
 }
@@ -3521,12 +3526,17 @@ void bin(unsigned int n)
 
 
 void metadata_access(int label, char type){
-  for (int i = 0; i < LEVEL; i++)
+  int last_read = false;
+  for (int i = LEVEL-1; i >= 0; i--)
   {
      if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
+      if (type == 'R' && i == TOP_CACHE_VAR)
+      {
+        last_read = true;
+      }
       int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, false);
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read);
     }
   }
 
