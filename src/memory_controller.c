@@ -3614,6 +3614,10 @@ void ring_read_path(int label, int addr){
 
     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
+      if (i == LEVEL-1)
+      {
+        last_read = true;
+      }
       int mem_addr = index*Z_VAR + offset;
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
     }

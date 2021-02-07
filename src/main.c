@@ -818,7 +818,7 @@ int main(int argc, char * argv[])
 		// printf("in for\n");
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
-        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull) && last_read_served ) { /* && last_read_served */
+        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull) ) { /* && last_read_served */
 		// printf("in while\n");
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
