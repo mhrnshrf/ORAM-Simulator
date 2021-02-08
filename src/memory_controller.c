@@ -2040,12 +2040,12 @@ void freecursive_access(int addr, char type){
     PosMap[addr] = pl;
     Slot s = {.addr = addr , .label = pl, .isReal = true, .isData = true};
     int ats = add_to_stash(s);
-      if(ats == -1)
-      {
-        printf("ERROR: freecursive: llc dirty stash overflow!   @ %d\n", stashctr); 
-        print_oram_stats();
-        exit(1);
-      }
+    if(ats == -1)
+    {
+      printf("ERROR: freecursive: llc dirty stash overflow!   @ %d\n", stashctr); 
+      print_oram_stats();
+      exit(1);
+    }
   }
   
 
