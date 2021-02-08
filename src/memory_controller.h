@@ -24,7 +24,7 @@
 
 // enable/disable options config
 #define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
-#define SUBTREE_ENABLE  0     // 0/1 flag to diable/enable having subtree adddressing scheme
+#define SUBTREE_ENABLE  1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define CACHE_ENABLE    1     // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
@@ -40,7 +40,7 @@
 
 
 
-#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
 #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
@@ -50,13 +50,14 @@
 #define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
 #define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
 #define SIM_ENABLE      1     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
+#define WAIT_ENABLE     0     // 0/1 flag that indicates whether wait for last read req to complete
 
 
 // oram config
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 12     // # slots per bucket // z17
+#define Z 4     // # slots per bucket // z17
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash

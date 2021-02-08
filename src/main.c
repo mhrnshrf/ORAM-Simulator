@@ -818,7 +818,7 @@ int main(int argc, char * argv[])
 		// printf("in for\n");
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
-        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull) ) { /* && last_read_served */
+        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull) ) {
 		// printf("in while\n");
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
@@ -1040,7 +1040,7 @@ int main(int argc, char * argv[])
 		}
 		
 
-		if (oramQ->size == 0  && (!DUMMY_ENABLE || !ring_dummy) && last_read_served)  /*&& last_read_served*/
+		if (oramQ->size == 0  && (!DUMMY_ENABLE || !ring_dummy) && (last_read_served || !WAIT_ENABLE))  /*&& last_read_served*/
 		{
 			if (invokectr != 0)
 			{
@@ -1384,7 +1384,7 @@ int main(int argc, char * argv[])
 			
 			
 		} 
-		if (oramQ->size != 0 && last_read_served)  /*&& last_read_served*/
+		if (oramQ->size != 0 && (last_read_served || !WAIT_ENABLE))  /*&& last_read_served*/
 		{
 			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
