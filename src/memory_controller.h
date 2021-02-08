@@ -36,7 +36,7 @@
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
-#define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
+#define BK_EVICTION     1     // 0/1 flag to disable/enable background eviction
 
 
 
@@ -51,7 +51,7 @@
 #define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
 #define SIM_ENABLE      1     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
 #define WAIT_ENABLE     0     // 0/1 flag that indicates whether wait for last read req to complete
-
+#define LLC_DIRTY       0       // 0/1 flag that indicates whether everything is dirty eviction from cache
 
 // oram config
 #define H 4     // degree of recursion including data access
@@ -255,6 +255,7 @@ extern int sttctr;
 extern int stashctr;
 extern int ring_evictctr;
 extern bool ring_dummy;
+extern bool dirty_evict;
 
 extern long long int topctr;
 extern long long int midctr;

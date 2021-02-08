@@ -1114,6 +1114,7 @@ int main(int argc, char * argv[])
 							waited_for_evicted[numc].valid = false;
 							// eviction_writeback[numc] = true;
 							evictifctr++;
+							
 							// printf("main: evicted if addr: %lld\n", addr[numc]);
 							if (tracectr >= WARMUP_THRESHOLD)
 							{
@@ -1249,6 +1250,7 @@ int main(int argc, char * argv[])
 
 									addr[numc] = victim;
 									opertype[numc] = 'W';
+									dirty_evict = true;
 								}
 
 								nonmemops[numc] += hit_nonmemops /* + L2_LATENCY */;
@@ -1376,6 +1378,7 @@ int main(int argc, char * argv[])
 					oram_just_invoked = true;
 					curr_trace = addr[numc];
 					mem_req_start = CYCLE_VAL;
+					dirty_evict = false;
 				}
 
 			}

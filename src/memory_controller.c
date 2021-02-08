@@ -239,6 +239,8 @@ long long int mem_req_latencies = 0;
 
 int stale_reduction = 0;
 
+bool dirty_evict = false;
+
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
 long long int plbaccess[H-1] = {0};   // # total plb access (hits + misses)
@@ -1587,6 +1589,7 @@ void remap_block(int addr){
 
 
   intended_addr = addr;
+  
   if (RHO_ENABLE && (TREE_VAR == RHO))
   {
     if (ACCESS_VAR == REGULAR)
@@ -1597,7 +1600,10 @@ void remap_block(int addr){
   }
   else
   {
-    PosMap[addr] = label;   // $$$ remember to exclude current path later on
+    if (!LLC_DIRTY || pinFlag)
+    {
+      PosMap[addr] = label;   // $$$ remember to exclude current path later on
+    }
   }
   
   if (!STT_ENABLE || TREE_VAR != ORAM || !stt_access(addr))
@@ -1636,7 +1642,14 @@ void remap_block(int addr){
     }
     else
     {
-      Stash[index].label = label;
+      if (!LLC_DIRTY || pinFlag)
+      {
+        Stash[index].label = label;
+      }
+      else
+      {
+        remove_from_stash(index);
+      }
     }
   }
   
@@ -1992,6 +2005,7 @@ void oram_access(int addr){
 
   oram_acc_addr = addr;
 
+
   int label = PosMap[addr];
   if (label == -1)
   {
@@ -2018,9 +2032,23 @@ void freecursive_access(int addr, char type){
     return;
   }
 
-// /*
-  // if (!RING_ENABLE || !WSKIP_ENABLE)
-  // {
+
+  
+  if (LLC_DIRTY && dirty_evict)
+  {
+    int pl = rand() % PATH;
+    PosMap[addr] = pl;
+    Slot s = {.addr = addr , .label = pl, .isReal = true, .isData = true};
+    int ats = add_to_stash(s);
+      if(ats == -1)
+      {
+        printf("ERROR: freecursive: llc dirty stash overflow!   @ %d\n", stashctr); 
+        print_oram_stats();
+        exit(1);
+      }
+  }
+  
+
     // if write bypass feature is on and there is write req hit in the cache
     if (WRITE_BYPASS && write_cache_hit && type == 'W')
     {
@@ -2044,69 +2072,10 @@ void freecursive_access(int addr, char type){
 
         // printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
 
-
-        // profiling:
-
-        // if ((PLB[tag % PLB_SIZE] != tag) && i != 0)
-        // {
-        //     if (i == 1)
-        //     {
-        //       // int pos1_diff = ai - pos1_recent;
-        //       // printf("%d\n", pos1_diff);
-        //       // pos1_recent = ai;
-        //       pos1acc_ctr++;
-        //     }
-        //     else if (i == 2)
-        //     {
-        //       // int pos2_diff = ai - pos2_recent;
-        //       // printf("%d\n", pos2_diff);
-        //       // pos2_recent = ai;
-        //       pos2acc_ctr++;
-        //     }
-        // }
-
-        
-        // profiling.
         
         if (plb_access(tag) || buffer_contain(tag))  // PLB hit
         {
           
-          // profiling:
-          // if (buffer_contain(tag))
-          // {
-          //   // int pi = buffer_index(tag);
-          //   int pi = tag % PREFETCH_BUF_SIZE;
-
-          //   if (i == 1)
-          //   {
-          //     // printf("%lld\n", trace_clk - PreBuffer[pi].timestamp);
-          //     pos1hit++;
-          //     if (PreBuffer[pi].type != POS1)
-          //     {
-          //       pos1conf++;
-          //       //  printf("ERROR: freecursive: @trace %d pos1 & i %d don't match!\n", tracectr, i);
-          //       //  print_oram_stats();
-  // exit(1);
-          //     }
-              
-          //   }
-          //   else if (i == 2)
-          //   {
-          //     // printf("%lld\n", trace_clk - PreBuffer[pi].timestamp);
-          //     pos2hit++;
-          //     if (PreBuffer[pi].type != POS2)
-          //     {
-          //       pos2conf++;
-          //       //  printf("ERROR: freecursive: @trace %d pos2 & i %d don't match!\n", tracectr, i);
-          //       //  print_oram_stats();
-  // exit(1);
-          //     }
-          //   }
-          // }
-          // else
-          // {
-          //   plb_hit[i]++;
-          // }
             plb_hit[i]++;
           
         // profiling.
@@ -2142,29 +2111,11 @@ void freecursive_access(int addr, char type){
           return;
         }
       
-        // profiling:
-        // if (tag == plb_evict[tag % PLB_SIZE])
-        // {
-        //   plb_hist[tag % PLB_SIZE]++;
-        //   // plb_trace[tag % PLB_SIZE]
-        //   if (plb_interval[tag % PLB_SIZE] == -1 && plb_trace[tag % PLB_SIZE] != -1)
-        //   {
-        //     plb_interval[tag % PLB_SIZE] = tracectr - plb_trace[tag % PLB_SIZE];
-        //   }
-          
 
-        // }
-        
-        // profiling.
         if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
         {
           unsigned int caddr = tag << ((unsigned int) log2(BLOCK_SIZE));
-          // if (cache_invalidate(caddr) != -1)
-          // {
-          //   printf("ERROR: @trace %d  cache contained %x  tagged %x \n", tracectr, caddr, tag);
-          //   print_oram_stats();
-  // exit(1);
-          // }
+
 
           cache_invalidate(caddr);
           // reset_dirty_search();
@@ -2195,37 +2146,12 @@ void freecursive_access(int addr, char type){
           
           
         }
-        // if (i_saved == 1)
-        // {
 
           int si;
           int victim = plb_fill(tag);
           if( victim != -1)
           {
 
-            // profiling:
-            // if (plbQ->size < plbQ->limit)
-            // {
-            //   insert_plbQ(victim);
-            // }
-
-            // if (plb_evict[victim % PLB_SIZE] == -1)
-            // {
-            //   plb_evict[victim % PLB_SIZE] = victim;
-            //   plb_trace[victim % PLB_SIZE] = tracectr;
-            //   // plb_hist[victim % PLB_SIZE] = 1;
-            // }
-            // // else if(plb_evict[victim % PLB_SIZE] == victim)
-            // // {
-            // //   plb_hist[victim % PLB_SIZE]++;
-            // // }
-            // else if(plb_evict[victim % PLB_SIZE] != victim)
-            // {
-            //   plb_conflict[victim % PLB_SIZE]++;
-            // }
-            // profiling.
-            
-            
             Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
             
             
@@ -2270,7 +2196,6 @@ void freecursive_access(int addr, char type){
           }
           
           
-        // }
         
         
         i_saved--;
@@ -2278,9 +2203,7 @@ void freecursive_access(int addr, char type){
 
     }
 
-  // }
 
-// */
   // printf("freecursuve: b4 last oram access (data): %d\n", addr);
   // oram_access(addr);  // STEP 3   Data block access
   if (RING_ENABLE)
@@ -2329,7 +2252,11 @@ void freecursive_access(int addr, char type){
   }
   else
   {
-    oram_access(addr);
+    if (!LLC_DIRTY || !dirty_evict)
+    {
+      oram_access(addr);
+    }
+    
   }
 }
 

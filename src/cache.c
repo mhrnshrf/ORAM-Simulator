@@ -159,7 +159,7 @@ int cache_fill(unsigned int addr,  char type){
     if (way == -1)
     {
         way = find_victim(index);
-        if (LLC[index][way].dirty)
+        if (LLC[index][way].dirty || LLC_DIRTY)
         {
             victim = LLC[index][way].addr;
         }
