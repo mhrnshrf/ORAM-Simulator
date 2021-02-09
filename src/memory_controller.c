@@ -2106,7 +2106,7 @@ void freecursive_access(int addr, char type){
         // posneeded = true;
         int ai = addr/pow(X,i_saved);
         int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
-        // printf("@ trace %d  i saved: %d   ai: %x    tag: %x\n", tracectr, i_saved, ai, tag);
+
 
         if (tag == addr)
         {
@@ -2133,6 +2133,7 @@ void freecursive_access(int addr, char type){
             }
           }
           
+
 
 
           cache_invalidate(caddr);
