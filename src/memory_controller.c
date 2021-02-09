@@ -2037,6 +2037,7 @@ void freecursive_access(int addr, char type){
   
   if (LLC_DIRTY && dirty_evict)
   {
+    // printf("freecursive: llc dirty add to stash %d\n", addr); 
     int pl = rand() % PATH_VAR;
     PosMap[addr] = pl;
     Slot s = {.addr = addr , .label = pl, .isReal = true, .isData = true};
