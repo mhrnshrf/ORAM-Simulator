@@ -23,7 +23,7 @@
 #define MID_BOUNDRY 20              // middle region tree boundry
 
 // enable/disable options config
-#define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
+#define TIMEOUT_ENBALE  0     // 0/1 flag to disable/enable finishing the program in case it get stuck
 #define SUBTREE_ENABLE  1     // 0/1 flag to diable/enable having subtree adddressing scheme
 #define CACHE_ENABLE    1     // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl

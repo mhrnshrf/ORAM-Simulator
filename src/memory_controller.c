@@ -2032,7 +2032,7 @@ void freecursive_access(int addr, char type){
     return;
   }
 
-  // printf("freecursive: block %d  %c request %s dirty eviction\n", addr, type, dirty_evict?"is ":"not"); 
+  // printf("%d  %c %s dirty evict\n", addr, type, dirty_evict?"is ":"not"); 
 
   
   if (LLC_DIRTY && dirty_evict)
@@ -2117,6 +2117,22 @@ void freecursive_access(int addr, char type){
         if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
         {
           unsigned int caddr = tag << ((unsigned int) log2(BLOCK_SIZE));
+
+          if (LLC_DIRTY)
+          {
+            if (cache_access(caddr, 'R'))
+            {
+              Slot mi = {.addr = addr , .label = -1, .isReal = true, .isData = false};
+              int as = add_to_stash(mi);
+              if(as == -1)
+              {
+                printf("ERROR: freecursive: cache exist stash overflow!   @ %d\n", stashctr); 
+                print_oram_stats();
+                exit(1);
+              }
+            }
+          }
+          
 
 
           cache_invalidate(caddr);
