@@ -2122,7 +2122,7 @@ void freecursive_access(int addr, char type){
           {
             if (cache_access(caddr, 'R'))
             {
-              Slot mi = {.addr = addr , .label = -1, .isReal = true, .isData = false};
+              Slot mi = {.addr = tag , .label = -1, .isReal = true, .isData = false};
               int as = add_to_stash(mi);
               if(as == -1)
               {
