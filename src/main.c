@@ -1157,7 +1157,7 @@ int main(int argc, char * argv[])
 							// }
 							
 							// hit
-							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])))
+							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])) || stash_contain(block_addr(addr[numc])))
 							{
 								// pin idea for eraly wb
 								if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)

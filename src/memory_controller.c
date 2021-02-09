@@ -2032,11 +2032,12 @@ void freecursive_access(int addr, char type){
     return;
   }
 
+  // printf("freecursive: block %d  %c request %s dirty eviction\n", addr, type, dirty_evict?"is ":"not"); 
 
   
   if (LLC_DIRTY && dirty_evict)
   {
-    int pl = rand() % PATH;
+    int pl = rand() % PATH_VAR;
     PosMap[addr] = pl;
     Slot s = {.addr = addr , .label = pl, .isReal = true, .isData = true};
     int ats = add_to_stash(s);
@@ -2118,6 +2119,7 @@ void freecursive_access(int addr, char type){
 
 
           cache_invalidate(caddr);
+          // printf("cache invalidated block %d\n", tag);
           // reset_dirty_search();
           
           pinOn();

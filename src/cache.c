@@ -161,6 +161,7 @@ int cache_fill(unsigned int addr,  char type){
         way = find_victim(index);
         if (LLC[index][way].dirty || LLC_DIRTY)
         {
+            // printf("LLC_DIRTY %s\n", LLC_DIRTY?"on":"off");
             victim = LLC[index][way].addr;
         }
     }
