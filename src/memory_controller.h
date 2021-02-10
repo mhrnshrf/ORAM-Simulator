@@ -28,7 +28,7 @@
 #define CACHE_ENABLE    1     // 0/1 flag to diable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE      1     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE   0     // 0/1 flag to disable/enable having timing channel security
