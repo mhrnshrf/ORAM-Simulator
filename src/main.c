@@ -731,6 +731,16 @@ int main(int argc, char * argv[])
 	// {
 	// 	exit(1);
 	// }
+	if (SNAP_CACHE)
+	{
+		if (invokectr % 100000 == 0 )
+		{
+			printf("%dk\n\n",(int)(invokectr/1000));
+			print_count_level();
+			printf("\n\n\n\n");
+		}
+	}
+	
 
 	
 
