@@ -522,11 +522,11 @@ int main(int argc, char * argv[])
 		 endpoint = 3772000;
 		 TIMING_INTERVAL = T2_INTERVAL;
 	 }
-	 else if (strcmp(bench, "mcf") == 0)
-	 {
-		 endpoint = 3492000;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
+	//  else if (strcmp(bench, "mcf") == 0)
+	//  {
+	// 	 endpoint = 3492000;
+	// 	 TIMING_INTERVAL = T1_INTERVAL;
+	//  }
 	//  else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
 	//  {
 	// 	 endpoint = 3327000;

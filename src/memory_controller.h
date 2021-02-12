@@ -11,7 +11,7 @@
 
 #include <math.h>
 // other simulation parameter
-#define TRACE_SIZE 6000000          // # addr read from trace file
+#define TRACE_SIZE 4000000          // # addr read from trace file
 #define QUEUE_SIZE 3000             // oramq capacity
 #define PAGE_SIZE 4096              // page size in byte ~~~> 4KB
 #define L1_LATENCY 3                // L1 latency in terms of # cycles 
@@ -31,13 +31,13 @@
 #define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE   0     // 0/1 flag to disable/enable having timing channel security
+#define TIMING_ENABLE   1     // 0/1 flag to disable/enable having timing channel security
 #define PREFETCH_ENABLE 0     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
 #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
 #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
 #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 #define BK_EVICTION     1     // 0/1 flag to disable/enable background eviction
-#define SNAP_CACHE      1     // 0/1 flag to disable/enable  snapshot with having L2 cache
+#define SNAP_CACHE      0     // 0/1 flag to disable/enable  snapshot with having L2 cache
 
 
 
