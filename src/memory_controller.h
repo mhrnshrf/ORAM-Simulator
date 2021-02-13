@@ -52,7 +52,7 @@
 #define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
 #define SIM_ENABLE      1     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
 #define WAIT_ENABLE     0     // 0/1 flag that indicates whether wait for last read req to complete
-#define LLC_DIRTY       1       // 0/1 flag that indicates whether everything is dirty eviction from cache
+#define LLC_DIRTY       0       // 0/1 flag that indicates whether everything is dirty eviction from cache
 
 // oram config
 #define H 4     // degree of recursion including data access

@@ -168,7 +168,8 @@ int main(int argc, char * argv[])
 	printf("Snapshot       %s\n", SNAPSHOT_ENABLE?"Enabled":"No" );
 	printf("Timeout        %s\n", TIMEOUT_ENBALE?"Enabled":"No" );
 	printf("Ring           %s\n", RING_ENABLE?"Enabled":"No" );
-	printf("Nonsecure      %s\n\n", NONSEC_ENABLE?"Enabled":"No" );
+	printf("Nonsecure      %s\n", NONSEC_ENABLE?"Enabled":"No" );
+	printf("LLC Dirty      %s\n\n", LLC_DIRTY?"Enabled":"No" );
  
 
 	printf("....................................................\n");
