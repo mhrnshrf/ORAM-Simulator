@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <math.h>
 
-// #define CACHE_SIZE 2097152  // in bytes ~~~> 2 MB
-#define CACHE_SIZE 4194304  // in bytes ~~~> 4 MB
+#define CACHE_SIZE 2097152  // in bytes ~~~> 2 MB
+// #define CACHE_SIZE 4194304  // in bytes ~~~> 4 MB
 // #define CACHE_SIZE 1048576     // in bytes ~~~> 1 MB
 // #define CACHE_SIZE 262144  // in bytes ~~~> 256 KB
 #define NUM_WAY 8           //  ~~~> # way per set

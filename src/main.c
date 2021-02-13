@@ -525,7 +525,7 @@ int main(int argc, char * argv[])
 	 }
 	 else if (strcmp(bench, "mcf") == 0)
 	 {
-		 endpoint = 3592000;
+		 endpoint = 3692000;
 		 TIMING_INTERVAL = T1_INTERVAL;
 	 }
 	//  else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
