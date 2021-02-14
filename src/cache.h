@@ -9,8 +9,8 @@
 // #define CACHE_SIZE 4194304  // in bytes ~~~> 4 MB
 // #define CACHE_SIZE 1048576     // in bytes ~~~> 1 MB
 // #define CACHE_SIZE 262144  // in bytes ~~~> 256 KB
-// #define NUM_WAY 8           //  ~~~> # way per set
-#define NUM_WAY 16           //  ~~~> # way per set
+// #define NUM_WAY 16           //  ~~~> # way per set
+#define NUM_WAY 8           //  ~~~> # way per set
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
 
