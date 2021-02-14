@@ -27,8 +27,8 @@
 #define SUBTREE_ENABLE  1     // 0/1 flag to disable/enable having subtree adddressing scheme
 #define CACHE_ENABLE    1     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
-#define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STT_ENABLE      1     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
+#define STL_ENABLE      1     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
 #define TIMING_ENABLE   1     // 0/1 flag to disable/enable having timing channel security
@@ -52,7 +52,7 @@
 #define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
 #define SIM_ENABLE      1     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
 #define WAIT_ENABLE     0     // 0/1 flag that indicates whether wait for last read req to complete
-#define LLC_DIRTY       0       // 0/1 flag that indicates whether everything is dirty eviction from cache
+#define LLC_DIRTY       1       // 0/1 flag that indicates whether everything is dirty eviction from cache
 
 // oram config
 #define H 4     // degree of recursion including data access
