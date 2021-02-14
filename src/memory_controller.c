@@ -3324,12 +3324,33 @@ void early_writeback(){
     int addr = block_addr(wb_cand);
     int label = PosMap[addr];
 
+    if (LLC_DIRTY)
+    {
+      // printf("freecursive: llc dirty add to stash %d\n", addr); 
+      // int pl = rand() % PATH_VAR;
+      // PosMap[addr] = pl;
+      Slot s = {.addr = addr , .label = label, .isReal = true, .isData = true};
+      int ats = add_to_stash(s);
+      if(ats == -1)
+      {
+        printf("ERROR: early writeback: llc dirty stash overflow!   @ %d\n", stashctr); 
+        print_oram_stats();
+        exit(1);
+      }
+      pinOn();
+    }
+
     switch_tree_to(ORAM);     // switch to oram tree 
     switch_enqueue_to(HEAD);
     read_path(label);
     remap_block(addr);
     write_path(label);
     switch_enqueue_to(TAIL);  // switch back to normal tail enqueue
+
+     if (LLC_DIRTY)
+     {
+       pinOff();
+     }
 
     cache_clean(i_target, j_target);
 
