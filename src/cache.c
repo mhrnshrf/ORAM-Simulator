@@ -104,8 +104,9 @@ bool cache_access(unsigned int addr, char type){
         // hit
         if (LLC[index][j].tag == tag && LLC[index][j].valid)
         {   
-            if (type == CWRITE)
+            if (type == CWRITE || LLC_DIRTY)
             {
+                // printf("LLC_DIRTY %s\n", LLC_DIRTY?"on":"off");
                 LLC[index][j].dirty = true;
                 cache_dirty++;
 
@@ -159,7 +160,7 @@ int cache_fill(unsigned int addr,  char type){
     if (way == -1)
     {
         way = find_victim(index);
-        if (LLC[index][way].dirty || LLC_DIRTY)
+        if (LLC[index][way].dirty ) /*|| LLC_DIRTY */
         {
             // printf("LLC_DIRTY %s\n", LLC_DIRTY?"on":"off");
             victim = LLC[index][way].addr;
@@ -179,7 +180,7 @@ int cache_fill(unsigned int addr,  char type){
     LLC[index][way].addr = addr;
     LLC[index][way].dirty = false;
 
-    if (type == CWRITE)
+    if (type == CWRITE || LLC_DIRTY)
     {
         LLC[index][way].dirty = true;
         cache_dirty++;
