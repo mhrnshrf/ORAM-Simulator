@@ -30,6 +30,8 @@ extern long long int trace_clk;
 
 char bench[20];
 
+long long int touch_ctr = 0;
+
 long long int ring_G = 0;
 long long int ring_round = 0;
 long long int ep_round = 0;
@@ -3590,6 +3592,11 @@ void ring_read_path(int label, int addr){
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
     }
      GlobTree[index].count++;
+     if ( GlobTree[index].count < LS[i])
+     {
+       touch_ctr++;
+     }
+     
   }
 }
 
@@ -4085,6 +4092,7 @@ void export_csv(char * argv[]){
   }
   fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
+  fprintf(fp, "touch_ctr,%lld\n", touch_ctr);
   
   fclose(fp);
 }
