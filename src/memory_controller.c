@@ -664,7 +664,6 @@ void oram_alloc(){
   {
     int l = calc_level(i);  
      GlobTree[i].count = 0;
-     deadctr -= GlobTree[i].dumdead;
      GlobTree[i].dumdead = 0;
     for (int k = 0; k < LZ[l]; ++k)
     {
@@ -1346,6 +1345,8 @@ void write_path(int label){
         ref_close[i]++;
       }
       GlobTree[index].count = 0; // for ring oram evict path
+      deadctr -= GlobTree[index].dumdead;
+      GlobTree[index].dumdead = 0;
 
       reset_candidate();
       pick_candidate(index, label, i);
@@ -3469,9 +3470,11 @@ void ring_access(int addr){
   if (ep_cond)
   {
     // printf("\n@- evict %d\n", stalectr);
+    // int dead_b4 = deadctr;
     int b4 = stalectr;
     ring_evict_path(label);
     stale_reduction += b4 - stalectr;
+    // printf("%lld\n", dead_b4 - deadctr);
     // printf("@> evict %d\n", stalectr);
     
     // to be removed
@@ -3481,8 +3484,8 @@ void ring_access(int addr){
 
     // printf("%d\n", ringacc);
     shuf_prev = shuf_cur;
-
   }
+  
   
   ring_early_reshuffle(label);
 
