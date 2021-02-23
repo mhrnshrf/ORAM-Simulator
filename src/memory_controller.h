@@ -11,13 +11,13 @@
 
 #include <math.h>
 // other simulation parameter
-#define TRACE_SIZE 4000000          // # addr read from trace file
+#define TRACE_SIZE 30000000          // # addr read from trace file
 #define QUEUE_SIZE 3000             // oramq capacity
 #define PAGE_SIZE 4096              // page size in byte ~~~> 4KB
 #define L1_LATENCY 3                // L1 latency in terms of # cycles 
 #define L2_LATENCY 10               // L2 latency in terms of # cycles 
 #define MAINMEM_LATENCY 0           // mem latency in terms of # cycles 
-#define WARMUP_THRESHOLD 3000000    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
+#define WARMUP_THRESHOLD 0    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 #define TIMEOUT_THRESHOLD 10000      // time out threshold in seconds
 #define TOP_BOUNDRY 10              // top region tree boundry
 #define MID_BOUNDRY 20              // middle region tree boundry
@@ -25,7 +25,7 @@
 // enable/disable options config
 #define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
 #define SUBTREE_ENABLE  0     // 0/1 flag to disable/enable having subtree adddressing scheme
-#define CACHE_ENABLE    1     // 0/1 flag to disable/enable having cache
+#define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
 #define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
@@ -50,7 +50,7 @@
 #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
 #define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
 #define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
-#define SIM_ENABLE      1     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
+#define SIM_ENABLE      0     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
 #define WAIT_ENABLE     0     // 0/1 flag that indicates whether wait for last read req to complete
 #define LLC_DIRTY       0       // 0/1 flag that indicates whether everything is dirty eviction from cache
 

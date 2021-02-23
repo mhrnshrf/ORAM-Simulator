@@ -30,7 +30,8 @@ extern long long int trace_clk;
 
 char bench[20];
 
-long long int touch_ctr = 0;
+long long int deadctr = 0;
+long long int deadarr[100] = {0};
 
 long long int ring_G = 0;
 long long int ring_round = 0;
@@ -43,6 +44,8 @@ int shuf_prev = 0;
 int ringacc = 0;
 int wl_occ = 0;
 bool pause_skip = false;
+
+
 
 
 // long long int CYCLE_VAL = 0;
@@ -83,6 +86,7 @@ typedef struct Bucket{
   Slot slot[Z];
   char count;  // added for ring oram
   char dumnum; // added for ring oram, # dummy slots available
+  char dumdead; // added for ring oram, # dummy slots that are dead
 }Bucket;
 
 typedef struct Entry{
@@ -660,6 +664,8 @@ void oram_alloc(){
   {
     int l = calc_level(i);  
      GlobTree[i].count = 0;
+     deadctr -= GlobTree[i].dumdead;
+     GlobTree[i].dumdead = 0;
     for (int k = 0; k < LZ[l]; ++k)
     {
       GlobTree[i].slot[k].addr = -1;
@@ -2029,6 +2035,7 @@ void freecursive_access(int addr, char type){
   
   // bool posneeded = false;
 
+
   if (stash_contain(addr))      // check if the block is already in the stash
   {
     return;
@@ -2499,6 +2506,16 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_thread = thread_id; 
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
+
+  if (invokectr > 10000000)
+  {
+    if (invokectr % 1000000 == 0)
+    {
+      int ind = (int)(invokectr/1000000);
+      deadarr[ind] = deadctr;
+    }
+  }
+  
 
   // int flip = rand() % 2;
   // if (flip)
@@ -3591,11 +3608,14 @@ void ring_read_path(int label, int addr){
       int mem_addr = index*Z_VAR + offset;
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
     }
-     GlobTree[index].count++;
-     if ( GlobTree[index].count < LS[i])
-     {
-       touch_ctr++;
-     }
+
+    GlobTree[index].count++;
+
+    if ( GlobTree[index].slot[offset].isReal)
+    {
+      GlobTree[index].dumdead++;
+      deadctr++;
+    }
      
   }
 }
@@ -3878,6 +3898,8 @@ void ring_early_reshuffle(int label){
       }
       
       GlobTree[index].count = 0;
+      deadctr -= GlobTree[index].dumdead;
+      GlobTree[index].dumdead = 0;
       wb[i] += stashb4 - stashctr;
 
     }
@@ -4092,7 +4114,11 @@ void export_csv(char * argv[]){
   }
   fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
-  fprintf(fp, "touch_ctr,%lld\n", touch_ctr);
+  fprintf(fp, "deadctr,%lld\n", deadctr);
+  for (int i = 0; i < 20; i++)
+  {
+    fprintf(fp, "deadarr[%d],%lld\n", i, deadarr[i]);
+  }
   
   fclose(fp);
 }
