@@ -18,14 +18,14 @@
 #define L2_LATENCY 10               // L2 latency in terms of # cycles 
 #define MAINMEM_LATENCY 0           // mem latency in terms of # cycles 
 #define WARMUP_THRESHOLD 0    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
-#define TIMEOUT_THRESHOLD 10000      // time out threshold in seconds
+#define TIMEOUT_THRESHOLD 20000      // time out threshold in seconds
 #define TOP_BOUNDRY 10              // top region tree boundry
 #define MID_BOUNDRY 20              // middle region tree boundry
 
 // enable/disable options config
 #define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
 #define SUBTREE_ENABLE  0     // 0/1 flag to disable/enable having subtree adddressing scheme
-#define CACHE_ENABLE    1     // 0/1 flag to disable/enable having cache
+#define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
 #define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled

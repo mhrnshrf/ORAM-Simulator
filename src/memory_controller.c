@@ -2507,7 +2507,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  if (invokectr > 10000000)
+  if (invokectr >= 10000000)
   {
     if (invokectr % 1000000 == 0)
     {
@@ -3611,7 +3611,7 @@ void ring_read_path(int label, int addr){
 
     GlobTree[index].count++;
 
-    if ( GlobTree[index].slot[offset].isReal)
+    if ( !GlobTree[index].slot[offset].isReal)
     {
       GlobTree[index].dumdead++;
       deadctr++;

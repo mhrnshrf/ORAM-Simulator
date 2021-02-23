@@ -1348,6 +1348,7 @@ int main(int argc, char * argv[])
 					ROB[numc].tracedone=1;
 					break;  /* Break out of the while loop fetching instructions. */
 				}
+				addr[numc] = byte_addr(addr[numc]);
 			}
 
 			if (eviction_writeback[numc])
