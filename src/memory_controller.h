@@ -25,7 +25,7 @@
 // enable/disable options config
 #define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
 #define SUBTREE_ENABLE  0     // 0/1 flag to disable/enable having subtree adddressing scheme
-#define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
+#define CACHE_ENABLE    1     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
 #define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
