@@ -2508,7 +2508,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  if (invokectr >= 10000000)
+  if (invokectr >= 1000000)
   {
     if (invokectr % 1000000 == 0)
     {
