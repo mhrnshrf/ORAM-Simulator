@@ -32,6 +32,8 @@ char bench[20];
 
 long long int deadctr = 0;
 long long int deadarr[100] = {0};
+long long int dead_on_path = 0;
+long long int dead_on_path_arr[100] = {0};
 
 long long int ring_G = 0;
 long long int ring_round = 0;
@@ -2514,6 +2516,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
     {
       int ind = (int)(invokectr/1000000);
       deadarr[ind] = deadctr;
+      dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
     }
   }
   
@@ -3470,11 +3473,12 @@ void ring_access(int addr){
   if (ep_cond)
   {
     // printf("\n@- evict %d\n", stalectr);
-    // int dead_b4 = deadctr;
+    int dead_b4 = deadctr;
     int b4 = stalectr;
     ring_evict_path(label);
     stale_reduction += b4 - stalectr;
-    // printf("%lld\n", dead_b4 - deadctr);
+
+    dead_on_path += dead_b4 - deadctr;
     // printf("@> evict %d\n", stalectr);
     
     // to be removed
@@ -4121,6 +4125,11 @@ void export_csv(char * argv[]){
   for (int i = 0; i < 20; i++)
   {
     fprintf(fp, "deadarr[%d],%lld\n", i, deadarr[i]);
+  }
+  fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
+  for (int i = 0; i < 20; i++)
+  {
+    fprintf(fp, "dead_on_path_arr[%d],%lld\n", i, dead_on_path_arr[i]);
   }
   
   fclose(fp);
