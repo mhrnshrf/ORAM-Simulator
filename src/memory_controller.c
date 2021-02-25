@@ -3544,8 +3544,13 @@ void ring_read_path(int label, int addr){
   pN->addr = label;
   Enqueue(pathQ, pN);
 
-  metadata_access(label, 'R');
-  metadata_access(label, 'W');
+  if (SIM_ENABLE_VAR)
+  {
+    metadata_access(label, 'R');
+    metadata_access(label, 'W');
+  }
+  
+
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -3773,9 +3778,12 @@ void ring_evict_path(int label){
   //   injcount++;
   // }
   
+  if (SIM_ENABLE_VAR)
+  {
+    metadata_access(label, 'R');
+    metadata_access(label, 'W');
+  }
   
-  metadata_access(label, 'R');
-  metadata_access(label, 'W');
   
 
   ring_G++;
