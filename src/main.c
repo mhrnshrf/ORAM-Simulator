@@ -375,7 +375,7 @@ int main(int argc, char * argv[])
 	
 
 
-	// test_oram(argv);
+	test_oram(argv);
 	
 
 
@@ -725,7 +725,7 @@ int main(int argc, char * argv[])
 
 	// Mehrnoosh:
 	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
-	// printf("@ trace %d\n", tracectr);
+	printf("@ trace %d\n", tracectr);
 	// print_count_level();
 	// cnt++;
 	// if (cnt > 1)
@@ -993,6 +993,7 @@ int main(int argc, char * argv[])
 			}
 			
 			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc]);
+			
 
 			// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
 
@@ -1016,7 +1017,6 @@ int main(int argc, char * argv[])
 			{
 				// start = clock();
 
-				
 				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc]);
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');

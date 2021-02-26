@@ -2393,6 +2393,8 @@ void test_oram(char * argv[]){
               exit(1);
               }
             }
+            addr[numc] = byte_addr(addr[numc]);
+
             if (cache_access(addr[numc], opertype[numc]) == HIT)
             {
               hitctr++;
@@ -2452,12 +2454,14 @@ void test_oram(char * argv[]){
           exit(1);
 		    }
 		  }
+      addr[numc] = byte_addr(addr[numc]); 
 		}
 		else {
 		  printf("Panic.  Poor trace format.\n");
 		  print_oram_stats();
       exit(1);
 		}
+
 	      }
 		}
 
@@ -2486,16 +2490,9 @@ void test_oram(char * argv[]){
 
 
 
-  printf("\n............... Test ORAM Stats ...............\n");
-	printf("trace ctr: %d\n", tracectr_test);
-	printf("invoke ctr: 	%d\n", invokectr);
-	printf("oram ctr: 	%d\n", oramctr);
-	printf("bk evict rate: %f%%\n", 100*(double)bkctr/invokectr);
-	printf("cache hit rate: %f%%\n", 100*(double)hitctr/(hitctr+missctr));
-  printf("cache evict rate wrt # miss: %f%%\n", 100*(double)evictctr/(missctr));
-	printf("rho hit rate: %f%%\n", 100*(double)rho_hit/(invokectr));
-	printf("rho bk evict rate: %f%%\n", 100*(double)rho_bkctr/rho_hit);
-
+  // printf("\n............... Test ORAM Stats ...............\n");
+  printf("trace test ctr%d\n", tracectr_test);
+  export_csv(argv);
   exit(0);
 
 }
@@ -4130,12 +4127,12 @@ void export_csv(char * argv[]){
   fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
   fprintf(fp, "deadctr,%lld\n", deadctr);
-  for (int i = 0; i < 20; i++)
+  for (int i = 0; i < 30; i++)
   {
     fprintf(fp, "deadarr[%d],%lld\n", i, deadarr[i]);
   }
   fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
-  for (int i = 0; i < 20; i++)
+  for (int i = 0; i < 30; i++)
   {
     fprintf(fp, "dead_on_path_arr[%d],%lld\n", i, dead_on_path_arr[i]);
   }
