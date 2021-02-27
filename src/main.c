@@ -725,7 +725,7 @@ int main(int argc, char * argv[])
 
 	// Mehrnoosh:
 	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
-	printf("@ trace %d\n", tracectr);
+	// printf("@ trace %d\n", tracectr);
 	// print_count_level();
 	// cnt++;
 	// if (cnt > 1)
