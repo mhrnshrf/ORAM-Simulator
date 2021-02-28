@@ -2509,9 +2509,9 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
 
   if (invokectr >= 1000000)
   {
-    if (invokectr % 1000000 == 0)
+    if (invokectr % 10000000 == 0)
     {
-      int ind = (int)(invokectr/1000000);
+      int ind = (int)(invokectr/10000000);
       deadarr[ind] = deadctr;
       dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
     }
@@ -4127,12 +4127,12 @@ void export_csv(char * argv[]){
   fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
   fprintf(fp, "deadctr,%lld\n", deadctr);
-  for (int i = 0; i < 30; i++)
+  for (int i = 0; i < 11; i++)
   {
     fprintf(fp, "deadarr[%d],%lld\n", i, deadarr[i]);
   }
   fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
-  for (int i = 0; i < 30; i++)
+  for (int i = 0; i < 11; i++)
   {
     fprintf(fp, "dead_on_path_arr[%d],%lld\n", i, dead_on_path_arr[i]);
   }
