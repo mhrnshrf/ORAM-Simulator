@@ -2514,6 +2514,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
       int ind = (int)(invokectr/10000000);
       deadarr[ind] = deadctr;
       dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
+      printf("%lld\n", dead_on_path_arr[ind]);
     }
   }
   
