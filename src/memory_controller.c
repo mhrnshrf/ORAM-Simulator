@@ -134,7 +134,7 @@ int SubMap[NODE];          // subtree address map
 int intended = -1;         // index of intended block in stash
 int intended_addr = -1;         // intended block in stash
 bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
-int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
+// int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 int candidate[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
 bool write_cache_hit = false;
 int curr_trace = -1; 	// the current trace address 
@@ -249,6 +249,8 @@ int stale_reduction = 0;
 
 bool dirty_evict = false;
 
+int TIMING_INTERVAL;
+
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
 long long int plbaccess[H-1] = {0};   // # total plb access (hits + misses)
@@ -264,20 +266,34 @@ int wb[LEVEL] = {0};
 int ref_close[LEVEL] = {0};
 
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
-TreeType TREE_VAR = ORAM;
-int LEVEL_VAR = LEVEL;
-int Z_VAR = Z;
-int STASH_SIZE_VAR = STASH_SIZE;
-int OV_THRESHOLD_VAR = OV_THRESHOLD;  
-int BK_EVICTION_VAR = BK_EVICTION;
-int EMPTY_TOP_VAR = EMPTY_TOP;
-int TOP_CACHE_VAR = TOP_CACHE;
 int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4}; 
-int PATH_VAR = PATH;
-AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
-EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
-PosType pos_var = POS2;
-bool SIM_ENABLE_VAR = SIM_ENABLE;
+TreeType TREE_VAR;
+int LEVEL_VAR;
+int Z_VAR;
+int STASH_SIZE_VAR;
+int OV_THRESHOLD_VAR;  
+int BK_EVICTION_VAR;
+int EMPTY_TOP_VAR;
+int TOP_CACHE_VAR;
+int PATH_VAR;
+AccessType ACCESS_VAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
+EnqueueType ENQUEUE_VAR;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
+PosType pos_var;
+bool SIM_ENABLE_VAR;
+
+// TreeType TREE_VAR = ORAM;
+// int LEVEL_VAR = LEVEL;
+// int Z_VAR = Z;
+// int STASH_SIZE_VAR = STASH_SIZE;
+// int OV_THRESHOLD_VAR = OV_THRESHOLD;  
+// int BK_EVICTION_VAR = BK_EVICTION;
+// int EMPTY_TOP_VAR = EMPTY_TOP;
+// int TOP_CACHE_VAR = TOP_CACHE;
+// int PATH_VAR = PATH;
+// AccessType ACCESS_VAR = REGULAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
+// EnqueueType ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
+// PosType pos_var = POS2;
+// bool SIM_ENABLE_VAR = SIM_ENABLE;
 
 int set_start = 0;
 int way_start = 0;
@@ -296,6 +312,24 @@ int  wl_pos[H-1] = {0};
 int glctr[GL_COUNT] = {0}; 
 
 bool ring_dummy = false;
+
+
+
+void var_init(){
+  TREE_VAR = ORAM;
+  LEVEL_VAR = LEVEL;
+  Z_VAR = Z;
+  STASH_SIZE_VAR = STASH_SIZE;
+  OV_THRESHOLD_VAR = OV_THRESHOLD;  
+  BK_EVICTION_VAR = BK_EVICTION;
+  EMPTY_TOP_VAR = EMPTY_TOP;
+  TOP_CACHE_VAR = TOP_CACHE;
+  PATH_VAR = PATH;
+  ACCESS_VAR = REGULAR;      // to indicate whether a block should be remapped and written back to the path or it should be evicted entirly
+  ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
+  pos_var = POS2;
+  SIM_ENABLE_VAR = SIM_ENABLE;
+}
 
 unsigned int byte_addr(long long int physical_addr){
   unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
@@ -810,41 +844,39 @@ void print_count_level(){
 }
 
 // read trace file in fill in the trace array 
-void init_trace(){
-  for (int i = 0; i < TRACE_SIZE; i++)
-  {
-    FILE *fp;
-    char c[100];
-    fp = fopen("trace.txt","r");
-    fscanf(fp,"%[^\n]", c);
+// void init_trace(){
+//   for (int i = 0; i < TRACE_SIZE; i++)
+//   {
+//     FILE *fp;
+//     char c[100];
+//     fp = fopen("trace.txt","r");
+//     fscanf(fp,"%[^\n]", c);
 
-    int i = 0;
-    while (fgets(c, 100, fp) != NULL)
-    {
-      // printf("%s", c);
-      int addr;
-      sscanf(c, "%d", &addr);
-      if (addr > pow(2,24) -1)
-      {
-        c[0] = '0';
-        c[1] = '0';
-        c[2] = '0';
-        sscanf(c, "%d", &addr);
-      }
-      trace[i] = addr;
-      i++;
-      if (i == TRACE_SIZE)
-      {
-        break;
-      }
+//     int i = 0;
+//     while (fgets(c, 100, fp) != NULL)
+//     {
+//       // printf("%s", c);
+//       int addr;
+//       sscanf(c, "%d", &addr);
+//       if (addr > pow(2,24) -1)
+//       {
+//         c[0] = '0';
+//         c[1] = '0';
+//         c[2] = '0';
+//         sscanf(c, "%d", &addr);
+//       }
+//       trace[i] = addr;
+//       i++;
+//       if (i == TRACE_SIZE)
+//       {
+//         break;
+//       }
       
-    }
-    fclose(fp);
+//     }
+//     fclose(fp);
     
-  }
-  
-
-}
+//   }
+// }
 
 
 // print glob tree structure
@@ -1112,11 +1144,11 @@ void read_path(int label){
             {
               if (GlobTree[index].slot[j].addr == oram_acc_addr)
               {
-                if (i <= TOP_BOUNDRY)
+                if (i <= TOP_BOUNDARY)
                 {
                   topctr++;
                 }
-                else if (i <= MID_BOUNDRY)
+                else if (i <= MID_BOUNDARY)
                 {
                   midctr++;
                 }
@@ -1698,7 +1730,7 @@ int add_to_stash(Slot s){
 
   if (s.addr == 0)
   {
-    printf("exiting due to 0 added to stash!\n");
+    // printf("exiting due to 0 added to stash!\n");
     // exit(1);
   }
   
@@ -2514,7 +2546,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
       int ind = (int)(invokectr/10000000);
       deadarr[ind] = deadctr;
       dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
-      printf("%lld\n", dead_on_path_arr[ind]);
+      printf("%d:             %lld\n", tracectr_test, deadarr[ind]);
     }
   }
   
@@ -3121,6 +3153,7 @@ void invoke_prefetch(){
 }
 
 
+
 // void invoke_prefetch(){
 
 //   int candidate = -1;
@@ -3569,11 +3602,11 @@ void ring_read_path(int label, int addr){
           offset = j;
 
           // profiling
-          if (i <= TOP_BOUNDRY)
+          if (i <= TOP_BOUNDARY)
           {
             topctr++;
           }
-          else if (i <= MID_BOUNDRY)
+          else if (i <= MID_BOUNDARY)
           {
             midctr++;
           }
@@ -4128,14 +4161,14 @@ void export_csv(char * argv[]){
   fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
   fprintf(fp, "deadctr,%lld\n", deadctr);
-  for (int i = 0; i < 11; i++)
+  for (int i = 0; i < 31; i++)
   {
-    fprintf(fp, "deadarr[%d],%lld\n", i, deadarr[i]);
+    fprintf(fp, "%dm,%lld\n", i*10, deadarr[i]);
   }
   fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
-  for (int i = 0; i < 11; i++)
+  for (int i = 0; i < 31; i++)
   {
-    fprintf(fp, "dead_on_path_arr[%d],%lld\n", i, dead_on_path_arr[i]);
+    fprintf(fp, "%dm,%lld\n", i*10, dead_on_path_arr[i]);
   }
   
   fclose(fp);

@@ -60,6 +60,56 @@ typedef enum {
 	address_mapping_token,
 	wq_lookup_latency_token,
 
+	TIMEOUT_ENABLE_token,
+	SUBTREE_ENABLE_token , 
+	CACHE_ENABLE_token   , 
+	WRITE_BYPASS_token   , 
+	RHO_ENABLE_token     , 
+	TIMING_ENABLE_token  , 
+	PREFETCH_ENABLE_token,
+	EARLY_ENABLE_token  , 
+	SNAPSHOT_ENABLE_token,
+	NONSEC_ENABLE_token  , 
+	BK_EVICTION_token    , 
+	RHO_BK_EVICTION_token    , 
+	SNAP_CACHE_token     , 
+	RAND_ENABLE_token    , 
+	WSKIP_ENABLE_token   , 
+	SKIP_ENABLE_token    , 
+	LINGER_BASE_token    , 
+	DUMMY_ENABLE_token   , 
+	DYNAMIC_EP_token     , 
+	META_ENABLE_token    , 
+	SIM_ENABLE_token     , 
+	WAIT_ENABLE_token    , 
+	LLC_DIRTY_token      , 
+
+	TRACE_SIZE_token  			 ,
+	QUEUE_SIZE_token  			 ,                  
+	PAGE_SIZE_token ,
+	L1_LATENCY_token ,
+	L2_LATENCY_token ,
+	MAINMEM_LATENCY_token ,
+	WARMUP_THRESHOLD_token ,
+	TIMEOUT_THRESHOLD_token ,
+	TOP_BOUNDARY_token ,
+	MID_BOUNDARY_token ,
+	TOP_CACHE_token ,
+	CAP_LEVEL_token ,
+	RHO_EMPTY_TOP_token ,
+	RHO_TOP_CACHE_token ,
+	T1_INTERVAL_token ,
+	T2_INTERVAL_token ,
+	RING_A_token ,
+	RING_REV_token  ,
+	EP_TURN_token  ,
+	SKIP_LIMIT_token  ,
+	SKIP_L1_token  ,
+	SKIP_L2_token  ,
+	DUMMY_TH_token  ,
+	DEP_TH_token ,
+	WL_CAP_token ,
+
 	comment_token,
 	unknown_token
 }token_t;
@@ -160,6 +210,98 @@ token_t tokenize(char * input){
 	return address_mapping_token;
   } else if (strncmp(input, "WQ_LOOKUP_LATENCY",length) == 0) {
 	return wq_lookup_latency_token;
+  } else if (strncmp(input, "TIMEOUT_ENABLE",length) == 0) {
+	return TIMEOUT_ENABLE_token;
+  } else if (strncmp(input, "SUBTREE_ENABLE",length) == 0) {
+	return SUBTREE_ENABLE_token;
+  } else if (strncmp(input, "CACHE_ENABLE",length) == 0) {
+	return CACHE_ENABLE_token;
+  } else if (strncmp(input, "WRITE_BYPASS",length) == 0) {
+	return WRITE_BYPASS_token;
+  } else if (strncmp(input, "RHO_ENABLE",length) == 0) {
+	return RHO_ENABLE_token;
+  } else if (strncmp(input, "TIMING_ENABLE",length) == 0) {
+	return TIMING_ENABLE_token;
+  } else if (strncmp(input, "PREFETCH_ENABLE",length) == 0) {
+	return PREFETCH_ENABLE_token;
+  } else if (strncmp(input, "EARLY_ENABLE",length) == 0) {
+	return EARLY_ENABLE_token;
+  } else if (strncmp(input, "SNAPSHOT_ENABLE",length) == 0) {
+	return SNAPSHOT_ENABLE_token;
+  } else if (strncmp(input, "NONSEC_ENABLE",length) == 0) {
+	return NONSEC_ENABLE_token;
+  } else if (strncmp(input, "BK_EVICTION",length) == 0) {
+	return BK_EVICTION_token;
+  } else if (strncmp(input, "RHO_BK_EVICTION",length) == 0) {
+	return RHO_BK_EVICTION_token;
+  } else if (strncmp(input, "SNAP_CACHE",length) == 0) {
+	return SNAP_CACHE_token;
+  } else if (strncmp(input, "RAND_ENABLE",length) == 0) {
+	return RAND_ENABLE_token;
+  } else if (strncmp(input, "WSKIP_ENABLE",length) == 0) {
+	return WSKIP_ENABLE_token;
+  } else if (strncmp(input, "SKIP_ENABLE",length) == 0) {
+	return SKIP_ENABLE_token;
+  } else if (strncmp(input, "LINGER_BASE",length) == 0) {
+	return LINGER_BASE_token;
+  } else if (strncmp(input, "DUMMY_ENABLE",length) == 0) {
+	return DUMMY_ENABLE_token;
+  } else if (strncmp(input, "DYNAMIC_EP",length) == 0) {
+	return DYNAMIC_EP_token;
+  } else if (strncmp(input, "META_ENABLE",length) == 0) {
+	return META_ENABLE_token;
+  } else if (strncmp(input, "SIM_ENABLE",length) == 0) {
+	return SIM_ENABLE_token;
+  } else if (strncmp(input, "WAIT_ENABLE",length) == 0) {
+	return WAIT_ENABLE_token;
+  } else if (strncmp(input, "LLC_DIRTY",length) == 0) {
+	return LLC_DIRTY_token;
+  } else if (strncmp(input, "TRACE_SIZE",length) == 0) {
+	return TRACE_SIZE_token;
+  } else if (strncmp(input, "QUEUE_SIZE",length) == 0) {
+	return QUEUE_SIZE_token;
+  } else if (strncmp(input, "PAGE_SIZE",length) == 0) {
+	return PAGE_SIZE_token;
+  } else if (strncmp(input, "L1_LATENCY",length) == 0) {
+	return L1_LATENCY_token;
+  } else if (strncmp(input, "L2_LATENCY",length) == 0) {
+	return L2_LATENCY_token;
+  } else if (strncmp(input, "MAINMEM_LATENCY",length) == 0) {
+	return MAINMEM_LATENCY_token;
+  } else if (strncmp(input, "WARMUP_THRESHOLD",length) == 0) {
+	return WARMUP_THRESHOLD_token;
+  } else if (strncmp(input, "TIMEOUT_THRESHOLD",length) == 0) {
+	return TIMEOUT_THRESHOLD_token;
+  } else if (strncmp(input, "TOP_BOUNDARY",length) == 0) {
+	return TOP_BOUNDARY_token;
+  } else if (strncmp(input, "MID_BOUNDARY",length) == 0) {
+	return MID_BOUNDARY_token;
+  } else if (strncmp(input, "TOP_CACHE",length) == 0) {
+	return TOP_CACHE_token;
+  } else if (strncmp(input, "RHO_EMPTY_TOP",length) == 0) {
+	return RHO_EMPTY_TOP_token;
+  } else if (strncmp(input, "RHO_TOP_CACHE",length) == 0) {
+	return RHO_TOP_CACHE_token;
+  } else if (strncmp(input, "T1_INTERVAL",length) == 0) {
+	return T1_INTERVAL_token;
+  } else if (strncmp(input, "T2_INTERVAL",length) == 0) {
+	return T2_INTERVAL_token;
+  } else if (strncmp(input, "RING_A",length) == 0) {
+	return RING_A_token;
+  } else if (strncmp(input, "EP_TURN",length) == 0) {
+	return EP_TURN_token;
+  } else if (strncmp(input, "SKIP_LIMIT",length) == 0) {
+	return SKIP_LIMIT_token;
+  } else if (strncmp(input, "SKIP_L1",length) == 0) {
+	return SKIP_L1_token;
+  } else if (strncmp(input, "SKIP_L2",length) == 0) {
+	return SKIP_L2_token;
+  } else if (strncmp(input, "DUMMY_TH",length) == 0) {
+	return DUMMY_TH_token;
+  } else if (strncmp(input, "DEP_TH",length) == 0) {
+	return DEP_TH_token;
+  } else if (strncmp(input, "WL_CAP",length) == 0) {
+	return WL_CAP_token;
   }
 
   else {
@@ -418,6 +560,189 @@ void read_config_file(FILE * fin)
 			case wq_lookup_latency_token:
 				fscanf(fin,"%d",&input_int);
 				WQ_LOOKUP_LATENCY = input_int;
+				break;
+			case TIMEOUT_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				TIMEOUT_ENABLE = input_int;
+				break;
+			case SUBTREE_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				SUBTREE_ENABLE = input_int;
+				break;
+			case CACHE_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				CACHE_ENABLE = input_int;
+				break;
+			case WRITE_BYPASS_token:
+				fscanf(fin,"%d",&input_int);
+				WRITE_BYPASS = input_int;
+				break;
+			case RHO_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				RHO_ENABLE = input_int;
+				break;
+			case TIMING_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				TIMING_ENABLE = input_int;
+				break;
+			case PREFETCH_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				PREFETCH_ENABLE = input_int;
+				break;
+			case EARLY_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				EARLY_ENABLE = input_int;
+				break;
+			case SNAPSHOT_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				SNAPSHOT_ENABLE = input_int;
+				break;
+			case NONSEC_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				NONSEC_ENABLE = input_int;
+				break;
+			case BK_EVICTION_token:
+				fscanf(fin,"%d",&input_int);
+				BK_EVICTION = input_int;
+			case RHO_BK_EVICTION_token:
+				fscanf(fin,"%d",&input_int);
+				RHO_BK_EVICTION = input_int;
+				break;
+			case SNAP_CACHE_token:
+				fscanf(fin,"%d",&input_int);
+				SNAP_CACHE = input_int;
+				break;
+			case RAND_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				RAND_ENABLE = input_int;
+				break;
+			case WSKIP_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				WSKIP_ENABLE = input_int;
+				break;
+			case SKIP_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				SKIP_ENABLE = input_int;
+				break;
+			case LINGER_BASE_token:
+				fscanf(fin,"%d",&input_int);
+				LINGER_BASE = input_int;
+				break;
+			case DUMMY_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				DUMMY_ENABLE = input_int;
+				break;
+			case DYNAMIC_EP_token:
+				fscanf(fin,"%d",&input_int);
+				DYNAMIC_EP = input_int;
+				break;
+			case META_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				META_ENABLE = input_int;
+				break;
+			case SIM_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				SIM_ENABLE = input_int;
+				break;
+			case WAIT_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				WAIT_ENABLE = input_int;
+				break;
+			case LLC_DIRTY_token:
+				fscanf(fin,"%d",&input_int);
+				LLC_DIRTY = input_int;
+				break;
+			case TRACE_SIZE_token:
+				fscanf(fin,"%d",&input_int);
+				TRACE_SIZE = input_int;
+				break;
+			case QUEUE_SIZE_token:
+				fscanf(fin,"%d",&input_int);
+				QUEUE_SIZE = input_int;
+				break;
+			case PAGE_SIZE_token:
+				fscanf(fin,"%d",&input_int);
+				PAGE_SIZE = input_int;
+				break;
+			case L1_LATENCY_token:
+				fscanf(fin,"%d",&input_int);
+				L1_LATENCY = input_int;
+				break;
+			case L2_LATENCY_token:
+				fscanf(fin,"%d",&input_int);
+				L2_LATENCY = input_int;
+				break;
+			case MAINMEM_LATENCY_token:
+				fscanf(fin,"%d",&input_int);
+				MAINMEM_LATENCY = input_int;
+				break;
+			case WARMUP_THRESHOLD_token:
+				fscanf(fin,"%d",&input_int);
+				WARMUP_THRESHOLD = input_int;
+				break;
+			case TIMEOUT_THRESHOLD_token:
+				fscanf(fin,"%d",&input_int);
+				TIMEOUT_THRESHOLD = input_int;
+				break;
+			case TOP_BOUNDARY_token:
+				fscanf(fin,"%d",&input_int);
+				TOP_BOUNDARY = input_int;
+				break;
+			case MID_BOUNDARY_token:
+				fscanf(fin,"%d",&input_int);
+				MID_BOUNDARY = input_int;
+				break;
+			case TOP_CACHE_token:
+				fscanf(fin,"%d",&input_int);
+				TOP_CACHE = input_int;
+				break;
+			case RHO_EMPTY_TOP_token:
+				fscanf(fin,"%d",&input_int);
+				RHO_EMPTY_TOP = input_int;
+				break;
+			case RHO_TOP_CACHE_token:
+				fscanf(fin,"%d",&input_int);
+				RHO_TOP_CACHE = input_int;
+				break;
+			case T1_INTERVAL_token:
+				fscanf(fin,"%d",&input_int);
+				T1_INTERVAL = input_int;
+				break;
+			case T2_INTERVAL_token:
+				fscanf(fin,"%d",&input_int);
+				T2_INTERVAL = input_int;
+				break;
+			case RING_A_token:
+				fscanf(fin,"%d",&input_int);
+				RING_A = input_int;
+				break;
+			case EP_TURN_token:
+				fscanf(fin,"%d",&input_int);
+				EP_TURN = input_int;
+				break;
+			case SKIP_LIMIT_token:
+				fscanf(fin,"%d",&input_int);
+				SKIP_LIMIT = input_int;
+				break;
+			case SKIP_L1_token:
+				fscanf(fin,"%d",&input_int);
+				SKIP_L1 = input_int;
+				break;
+			case SKIP_L2_token:
+				fscanf(fin,"%d",&input_int);
+				SKIP_L2 = input_int;
+				break;
+			case DUMMY_TH_token:
+				fscanf(fin,"%d",&input_int);
+				DUMMY_TH = input_int;
+				break;
+			case DEP_TH_token:
+				fscanf(fin,"%d",&input_int);
+				DEP_TH = input_int;
+				break;
+			case WL_CAP_token:
+				fscanf(fin,"%d",&input_int);
+				WL_CAP = input_int;
 				break;
 
 			case unknown_token:

@@ -1,6 +1,8 @@
 #ifndef __PARAMS_H__
 #define __PARAMS_H__
 
+#include <stdbool.h>
+
 /********************/
 /* Processor params */
 /********************/
@@ -160,6 +162,69 @@ float IDD5;
 
  // WQ associative lookup 
  int WQ_LOOKUP_LATENCY;
+
+
+
+ //.....................................................
+ //                     ORAM Config
+ //.....................................................
+
+ 
+ // options 
+
+bool TIMEOUT_ENABLE ;     // 0/1 flag to disable/enable finishing the program in case it get stuck
+bool SUBTREE_ENABLE ;     // 0/1 flag to disable/enable having subtree adddressing scheme
+bool CACHE_ENABLE   ;     // 0/1 flag to disable/enable having cache
+bool WRITE_BYPASS   ;     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
+bool RHO_ENABLE     ;     // 0/1 flag to disable/enable having rho
+bool TIMING_ENABLE  ;     // 0/1 flag to disable/enable having timing channel security
+bool PREFETCH_ENABLE;     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
+bool EARLY_ENABLE   ;     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
+bool SNAPSHOT_ENABLE;     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
+bool NONSEC_ENABLE  ;     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
+bool BK_EVICTION    ;     // 0/1 flag to disable/enable background eviction
+bool RHO_BK_EVICTION;     // 0/1 flag to disable/enable background eviction c
+bool SNAP_CACHE     ;     // 0/1 flag to disable/enable  snapshot with having L2 cache
+bool RAND_ENABLE    ;     // 0/1 flag to disable/enable rand address instead of trace addr
+bool WSKIP_ENABLE   ;     // 0/1 flag to disable/enable write linger feature for ring oram
+bool SKIP_ENABLE    ;     // 0/1 flag to disable/enable skip middle level feature for ring oram
+bool LINGER_BASE    ;     // 0/1 flag to disable/enable write linger baseline for ring oram
+bool DUMMY_ENABLE   ;     // 0/1 flag to disable/enable dummy enable baseline for ring oram
+bool DYNAMIC_EP     ;     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
+bool META_ENABLE    ;     // 0/1 flag that indicates whether stale info is stored in metadata tree
+bool SIM_ENABLE     ;     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
+bool WAIT_ENABLE    ;     // 0/1 flag that indicates whether wait for last read req to complete
+bool LLC_DIRTY      ;     // 0/1 flag that indicates whether everything is dirty eviction from cache
+
+long long int TRACE_SIZE ;       // # addr read from trace file
+int QUEUE_SIZE ;                  // oramq capacity
+int PAGE_SIZE ;                          // page size in byte ~~~> 4KB
+int L1_LATENCY ;                        // L1 latency in terms of # cycles 
+int L2_LATENCY ;                     // L2 latency in terms of # cycles 
+int MAINMEM_LATENCY ;                   // mem latency in terms of # cycles 
+long long int WARMUP_THRESHOLD ;          // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
+int TIMEOUT_THRESHOLD ;                           // time out threshold in seconds
+int TOP_BOUNDARY ;                      // top region tree boundry
+int MID_BOUNDARY ;                      // middle region tree boundry
+int TOP_CACHE ;                        // # top levels that are cached ---------- freecursive: 10, volcano: don't care
+int RHO_EMPTY_TOP ;                     // # top empty levels of rho ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
+int RHO_TOP_CACHE ;                     // # top levels that are cached in rho
+int T1_INTERVAL ;                    // # cycles after each one oram access is initiated either real or dummy one, t1
+int T2_INTERVAL ;                    // # cycles after each one oram access is initiated either real or dummy one, t2
+int RING_A ;                            // ring oram evict path 
+int EP_TURN ;
+int SKIP_LIMIT ;
+int SKIP_L1 ;
+int SKIP_L2 ;
+int DUMMY_TH ;
+int DEP_TH ;                                 // threshold on # reshuffle for dynamic ep 
+int WL_CAP ;                            // cap on wl feature
+
+
+
+// params
+
+
 
 
 #endif // __PARAMS_H__

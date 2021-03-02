@@ -102,7 +102,7 @@ long long int instctr= 0;
 double rmpki;
 double wmpki;
 
-int TIMING_INTERVAL;
+
 
 int path_access_latency = 0;
 double path_access_latency_avg = 0;
@@ -136,22 +136,7 @@ void print_req_symbols(){
 
 
 
-
-
-
-// Mehrnoosh.
-
-int main(int argc, char * argv[])
-{
-	last_read_served = true;
-  
-  printf("---------------------------------------------\n");
-  printf("-- USIMM: the Utah SImulated Memory Module --\n");
-  printf("--              Version: 1.3               --\n");
-  printf("---------------------------------------------\n");
-
-//   Mehrnoosh:
-
+void print_oram_params(){
 	printf("\n....................................................\n");
 	printf("                     Options\n");
 	printf("....................................................\n");
@@ -166,7 +151,7 @@ int main(int argc, char * argv[])
 	printf("Prefetch       %s\n", PREFETCH_ENABLE?"Enabled":"No" );
 	printf("Early WB       %s\n", EARLY_ENABLE?"Enabled":"No" );
 	printf("Snapshot       %s\n", SNAPSHOT_ENABLE?"Enabled":"No" );
-	printf("Timeout        %s\n", TIMEOUT_ENBALE?"Enabled":"No" );
+	printf("Timeout        %s\n", TIMEOUT_ENABLE?"Enabled":"No" );
 	printf("Ring           %s\n", RING_ENABLE?"Enabled":"No" );
 	printf("Nonsecure      %s\n", NONSEC_ENABLE?"Enabled":"No" );
 	printf("LLC Dirty      %s\n\n", LLC_DIRTY?"Enabled":"No" );
@@ -175,7 +160,10 @@ int main(int argc, char * argv[])
 	printf("....................................................\n");
 	printf("             Simulation Parameters\n");
 	printf("....................................................\n");
+	printf("Trace         %s\n", bench);
+  	printf("T Interval    %d\n", TIMING_INTERVAL);
 	printf("Trace Size    %dm\n", (int)(TRACE_SIZE/pow(10,6)));
+  	printf("Endpoint      %dm\n", (int)(endpoint/pow(10,6)));
 	printf("Queue Size    %d\n", QUEUE_SIZE);
 	printf("Page Size     %d KB\n", (int)(PAGE_SIZE/pow(1024,1)));
 	printf("L1 Latency    %d\n", L1_LATENCY);
@@ -183,8 +171,8 @@ int main(int argc, char * argv[])
 	printf("Mem Latency   %d\n", MAINMEM_LATENCY);
 	printf("Warmup Thld   %dm\n", (int)(WARMUP_THRESHOLD/pow(10,6)));
 	printf("Timeout Thld  %d (s)\n", TIMEOUT_THRESHOLD);
-	printf("Top Boundry   %d\n", TOP_BOUNDRY);
-	printf("Mid Boundry   %d\n\n", MID_BOUNDRY);
+	printf("Top Boundary   %d\n", TOP_BOUNDARY);
+	printf("Mid Boundary   %d\n\n", MID_BOUNDARY);
 
 	printf("....................................................\n");
 	printf("                  ORAM Config\n");
@@ -316,66 +304,29 @@ int main(int argc, char * argv[])
 	}
 	// printf("\n= %d ~> ring oram s\n", ring_oram_path_length);
 	// printf("  %d ~> ring oram effective s\n\n", ring_oram_effective_pl);
+	
 
 	
 	printf("\n....................................................\n\n\n\n\n");
-	// init_trace();
 
-	
-	// test_subtree();
-	
-	// test_footprint();
-
-	// long long int inaddr = 0xfffffffff;
-	// int addrout = byte_addr(2147483520);
-	// printf("block: %d\n", BLOCK);
-	// printf("out: %d\n", addrout);
-	// printf("out: %x\n", addrout);
-	// int xxx = block_addr(addrout);
-	// printf("xxx: %x\n", xxx);
-	
-
-	// plb_test();
-
-	// export_csv(argv);
+}
 
 
-	fflush(stdout);
-	
-	cache_init();
+// Mehrnoosh.
 
-	plb_init();
+int main(int argc, char * argv[])
+{
+	last_read_served = true;
+  
+  printf("---------------------------------------------\n");
+  printf("-- USIMM: the Utah SImulated Memory Module --\n");
+  printf("--              Version: 1.3               --\n");
+  printf("---------------------------------------------\n");
 
-	stt_init();
-
-	table_init();
-	
-	oram_alloc();
-
-	rho_alloc();
-
-	if (SNAPSHOT_ENABLE)
-	{
-		oram_init_path();
-		take_snapshot(argv);
-	}
-		
-	if (!NONSEC_ENABLE)
-	{
-		oram_init();
-		/* code */
-	}
-	
+//   Mehrnoosh:
 
 
-	fflush(stdout);
 
-	// switch_enqueue_to(HEAD);
-	// test_queue();
-	
-
-
-	test_oram(argv);
 	
 
 
@@ -479,70 +430,7 @@ int main(int argc, char * argv[])
        return -5;
      }
 	
-	char delim[] = "/";
-	char *ptr = strtok(argv[2], delim);
 
-	while (ptr != NULL)
-	{
-		strcpy(bench, ptr);
-		ptr = strtok(NULL, delim);
-	}
-
-	 if (strcmp(bench, "deepsjeng") == 0)
-	 {
-		 endpoint = 3248000;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "bwaves") == 0)
-	 {
-		 endpoint = TRACE_SIZE;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "lbm") == 0)
-	 {
-		 endpoint = 3492000;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "cam4") == 0)
-	 {
-		 endpoint = 3382000;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "imagick") == 0)
-	 {
-		 endpoint = 3620000;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
-	 else if (strcmp(bench, "fotonik3d") == 0)
-	 {
-		 endpoint = 3327000;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
-	 else if (strcmp(bench, "roms") == 0)
-	 {
-		 endpoint = 3772000;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "mcf") == 0)
-	 {
-		 endpoint = 3492000;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
-	//  else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
-	//  {
-	// 	 endpoint = 3327000;
-	// 	 TIMING_INTERVAL = T2_INTERVAL;
-	//  }
-	// else if (strcmp(bench, "bwaves") == 0) // this added for nonsec exp
-	//  {
-	// 	 endpoint = 3227000;
-	// 	 TIMING_INTERVAL = T2_INTERVAL;
-	//  }
-	 else
-	 {
-		 endpoint = TRACE_SIZE;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
 	 
 	 
 
@@ -595,6 +483,7 @@ int main(int argc, char * argv[])
   }
 
   read_config_file(config_file);
+
 
 
 	/* Find the appropriate .vi file to read*/
@@ -714,9 +603,148 @@ int main(int argc, char * argv[])
 
   printf("Starting simulation.\n\n");
 
-  printf("Trace            %s\n", bench);
-  printf("Endpoint         %d\n", endpoint);
-  printf("Timing Interval  %d\n\n", TIMING_INTERVAL);
+
+//   Mehrnoosh:
+
+	char bench_path[100]; 
+	strcpy(bench_path, argv[2]);
+	char delim[] = "/";
+	char *ptr = strtok(bench_path, delim);
+
+	while (ptr != NULL)
+	{
+		strcpy(bench, ptr);
+		ptr = strtok(NULL, delim);
+	}
+
+	 if (strcmp(bench, "deepsjeng") == 0)
+	 {
+		 endpoint = 3248000;
+		 TIMING_INTERVAL = T2_INTERVAL;
+	 }
+	 else if (strcmp(bench, "bwaves") == 0)
+	 {
+		 endpoint = TRACE_SIZE;
+		 TIMING_INTERVAL = T2_INTERVAL;
+	 }
+	 else if (strcmp(bench, "lbm") == 0)
+	 {
+		 endpoint = 3492000;
+		 TIMING_INTERVAL = T2_INTERVAL;
+	 }
+	 else if (strcmp(bench, "cam4") == 0)
+	 {
+		 endpoint = 3382000;
+		 TIMING_INTERVAL = T2_INTERVAL;
+	 }
+	 else if (strcmp(bench, "imagick") == 0)
+	 {
+		 endpoint = 3620000;
+		 TIMING_INTERVAL = T1_INTERVAL;
+	 }
+	 else if (strcmp(bench, "fotonik3d") == 0)
+	 {
+		 endpoint = 3327000;
+		 TIMING_INTERVAL = T1_INTERVAL;
+	 }
+	 else if (strcmp(bench, "roms") == 0)
+	 {
+		 endpoint = 3772000;
+		 TIMING_INTERVAL = T2_INTERVAL;
+	 }
+	 else if (strcmp(bench, "mcf") == 0)
+	 {
+		 endpoint = 3492000;
+		 TIMING_INTERVAL = T1_INTERVAL;
+	 }
+	//  else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
+	//  {
+	// 	 endpoint = 3327000;
+	// 	 TIMING_INTERVAL = T2_INTERVAL;
+	//  }
+	// else if (strcmp(bench, "bwaves") == 0) // this added for nonsec exp
+	//  {
+	// 	 endpoint = 3227000;
+	// 	 TIMING_INTERVAL = T2_INTERVAL;
+	//  }
+	 else
+	 {
+		 endpoint = TRACE_SIZE;
+		 TIMING_INTERVAL = T1_INTERVAL;
+	 }
+
+
+//.....................................................................
+// 						ORAM initialization							  .
+//.....................................................................
+
+	print_oram_params();
+
+	var_init();
+
+	// init_trace();
+
+	
+	// test_subtree();
+	
+	// test_footprint();
+
+	// long long int inaddr = 0xfffffffff;
+	// int addrout = byte_addr(2147483520);
+	// printf("block: %d\n", BLOCK);
+	// printf("out: %d\n", addrout);
+	// printf("out: %x\n", addrout);
+	// int xxx = block_addr(addrout);
+	// printf("xxx: %x\n", xxx);
+	
+
+	// plb_test();
+
+	// export_csv(argv);
+
+
+	fflush(stdout);
+	
+	cache_init();
+
+	plb_init();
+
+	stt_init();
+
+	table_init();
+	
+	oram_alloc();
+
+	rho_alloc();
+
+	if (SNAPSHOT_ENABLE)
+	{
+		oram_init_path();
+		take_snapshot(argv);
+	}
+		
+	if (!NONSEC_ENABLE)
+	{
+		oram_init();
+		/* code */
+	}
+	
+
+
+	fflush(stdout);
+
+	// switch_enqueue_to(HEAD);
+	// test_queue();
+	
+
+
+	// test_oram(argv);
+
+//.....................................................................
+
+
+//   Mehrnoosh.
+
 //   int cnt = 0;
 	
 //   signal(SIGINT, handle_sigint); 	
@@ -754,7 +782,7 @@ int main(int argc, char * argv[])
 		break;
 	}
 
-	if (TIMEOUT_ENBALE && exe_time >= TIMEOUT_THRESHOLD)
+	if (TIMEOUT_ENABLE && exe_time >= TIMEOUT_THRESHOLD)
 	{
 		printf("WARNING: reached timeout!\n\n");
 		break;

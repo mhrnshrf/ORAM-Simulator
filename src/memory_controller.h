@@ -7,54 +7,51 @@
 
 // Mehrnoosh:
 
-
+#include "params.h"
 
 #include <math.h>
-// other simulation parameter
-#define TRACE_SIZE 100000000          // # addr read from trace file
-#define QUEUE_SIZE 3000             // oramq capacity
-#define PAGE_SIZE 4096              // page size in byte ~~~> 4KB
-#define L1_LATENCY 3                // L1 latency in terms of # cycles 
-#define L2_LATENCY 10               // L2 latency in terms of # cycles 
-#define MAINMEM_LATENCY 0           // mem latency in terms of # cycles 
-#define WARMUP_THRESHOLD 0    // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
-#define TIMEOUT_THRESHOLD 20000      // time out threshold in seconds
-#define TOP_BOUNDRY 10              // top region tree boundry
-#define MID_BOUNDRY 20              // middle region tree boundry
+// other simulation invariant
+// #define TRACE_SIZE 300000000          // # addr read from trace file
+// #define QUEUE_SIZE 3000               // oramq capacity
+// #define PAGE_SIZE 4096                // page size in byte ~~~> 4KB
+// #define L1_LATENCY 3                   // L1 latency in terms of # cycles 
+// #define L2_LATENCY 10                  // L2 latency in terms of # cycles 
+// #define MAINMEM_LATENCY 0             // mem latency in terms of # cycles 
+// #define WARMUP_THRESHOLD 0             // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
+// #define TIMEOUT_THRESHOLD 20000        // time out threshold in seconds
+// #define TOP_BOUNDARY 10               // top region tree BOUNDARY
+// #define MID_BOUNDARY 20                // middle region tree BOUNDARY
 
 // enable/disable options config
-#define TIMEOUT_ENBALE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
-#define SUBTREE_ENABLE  0     // 0/1 flag to disable/enable having subtree adddressing scheme
-#define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
+// #define TIMEOUT_ENABLE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
+// #define SUBTREE_ENABLE  0     // 0/1 flag to disable/enable having subtree adddressing scheme
+// #define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
 #define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
-#define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
-#define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
-#define TIMING_ENABLE   0     // 0/1 flag to disable/enable having timing channel security
-#define PREFETCH_ENABLE 0     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
-#define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
-#define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
-#define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
-#define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
-#define SNAP_CACHE      0     // 0/1 flag to disable/enable  snapshot with having L2 cache
-
-
-
+// #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
+// #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
+// #define TIMING_ENABLE   0     // 0/1 flag to disable/enable having timing channel security
+// #define PREFETCH_ENABLE 0     // 0/1 flag to disable/enable having prefetching option in case of having timing channel security
+// #define EARLY_ENABLE    0     // 0/1 flag to disable/enable early eviction option in case of having timing channel security
+// #define SNAPSHOT_ENABLE 0     // 0/1 flag to disable/enable performing snapshot by making path oram accesses
+// #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
+// #define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
+// #define SNAP_CACHE      0     // 0/1 flag to disable/enable  snapshot with having L2 cache
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
-#define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
-#define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
+// #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
+// #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
-#define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
-#define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
-#define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
-#define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
-#define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
-#define SIM_ENABLE      0     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
-#define WAIT_ENABLE     0     // 0/1 flag that indicates whether wait for last read req to complete
-#define LLC_DIRTY       0       // 0/1 flag that indicates whether everything is dirty eviction from cache
+// #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
+// #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
+// #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
+// #define DYNAMIC_EP      0     // 0/1 flag that indicates whether ep occur based on number of reshuffles rather than static schedule or 
+// #define META_ENABLE     0     // 0/1 flag that indicates whether stale info is stored in metadata tree
+// #define SIM_ENABLE      0     // 0/1 flag that indicates whether usimm simulation is enabled if disabled only oram alg runs
+// #define WAIT_ENABLE     0     // 0/1 flag that indicates whether wait for last read req to complete
+// #define LLC_DIRTY       0     // 0/1 flag that indicates whether everything is dirty eviction from cache
 
-// oram config
+// oram invariant
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
@@ -62,66 +59,66 @@
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
-#define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
+// #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 16   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define L3 22   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
-// subtree config
+// subtree invariant
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define NUM_CHANNELS_SUBTREE 1  // # memory channel used for subtree calculation
 #define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
 
-// rho config
+// rho invariant
 #define RHO_STASH_SIZE 200  // size of rho stash
 #define RHO_LEVEL 19    // # levels in rho
 #define RHO_Z 2  // # slots per bucket in rho
 #define RHO_OV_THRESHOLD   RHO_STASH_SIZE - RHO_Z*(RHO_LEVEL+1)   // overflow threshold for background eviction; C - Z(L+1)
-#define RHO_BK_EVICTION 0   // 0/1 flag to disable/enable background eviction in rho
+// #define RHO_BK_EVICTION 0   // 0/1 flag to disable/enable background eviction in rho
 #define RHO_L1 9  // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define RHO_L2 12   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
 #define RHO_L3 14   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define RHO_Z1 2   // # slots per bucket upto L1
 #define RHO_Z2 2   // # slots per bucket upto L2
 #define RHO_Z3 2   // # slots per bucket upto L3
-#define RHO_EMPTY_TOP 0   // # top empty levels of rho ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
-#define RHO_TOP_CACHE 6   // # top levels that are cached in rho
+// #define RHO_EMPTY_TOP 0   // # top empty levels of rho ~~~> equivalent to L1 = EMPTY_TOP-1, Z1 = 0 for ------  valcano: 10  freecursive: 0
+// #define RHO_TOP_CACHE 6   // # top levels that are cached in rho
 #define RHO_WAY 10   // # ways in each set accociative entry of rho tag array
 
 
-// timing channel security config
+// timing channel security 
 // #define TIMING_INTERVAL 100   // # cycles after each one oram access is initiated either real or dummy one
-#define T1_INTERVAL 1000   // # cycles after each one oram access is initiated either real or dummy one
-#define T2_INTERVAL 100   // # cycles after each one oram access is initiated either real or dummy one
+// #define T1_INTERVAL 1000   // # cycles after each one oram access is initiated either real or dummy one
+// #define T2_INTERVAL 100   // # cycles after each one oram access is initiated either real or dummy one
 
 
 // prefetching config
-#define PREFETCH_INPLACE 1
 #define PREFETCH_BUF_SIZE 32
-#define PREFETCH_STRIDE 1
 #define PREFETCH_TYPE COMBO
+#define PREFETCH_INPLACE 1
+#define PREFETCH_STRIDE 1
 
 // early eviction config
 
 
-// ring oram config
-#define RING_A 5
+// ring oram invariant
+// #define RING_A 5
 #define RING_S 7
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 
 #define RING_REV 512
-#define EP_TURN 2
+// #define EP_TURN 2
 #define SL1 L1
 #define SL2 L2
 #define SL3 L3
-#define SKIP_LIMIT 70
-#define SKIP_L1 10
-#define SKIP_L2 14
-#define DUMMY_TH 100
-#define DEP_TH 5             // threshold on # reshuffle for dynamic ep 
-#define WL_CAP 100000        // cap on wl feature
+// #define SKIP_LIMIT 70
+// #define SKIP_L1 10
+// #define SKIP_L2 14
+// #define DUMMY_TH 100
+// #define DEP_TH 5             // threshold on # reshuffle for dynamic ep 
+// #define WL_CAP 100000        // cap on wl feature
 #define STALE_CAP 56          // cap on stale for each 5 levels each of which is 64 bit
 #define STALE_BUF_SIZE 300   //size of stale buffer
 #define GL_COUNT 3          // # gathering levels
@@ -283,6 +280,7 @@ long long int mem_req_latencies;
 extern int PosMap[BLOCK];  
 
 extern int oram_effective_pl;
+extern int TIMING_INTERVAL;
 
 static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
@@ -380,6 +378,7 @@ void remove_stale_buf(int index);
 int get_stale_buf(int addr);
 int gl_index(int index, int h);
 void stale_access(int index, int h, char type);
+void var_init();
 
 // Mehrnoosh.
 

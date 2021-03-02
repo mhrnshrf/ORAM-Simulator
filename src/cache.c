@@ -2,6 +2,7 @@
 
 #include "cache.h"
 #include "memory_controller.h"
+#include "params.h"
 #include <stdio.h>
 #include <stdlib.h>
 

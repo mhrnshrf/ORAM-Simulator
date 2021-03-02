@@ -6,5 +6,11 @@
         "stdbool.h": "c",
         "time.h": "c",
         "limits": "c"
-    }
+    },
+    "cSpell.words": [
+        "ORAM",
+        "RSTL",
+        "WSKIP",
+        "usimm"
+    ]
 }
