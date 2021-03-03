@@ -88,6 +88,7 @@ typedef struct Bucket{
   Slot slot[Z];
   char count;  // added for ring oram
   char dumnum; // added for ring oram, # dummy slots available
+  char dumval; // added for ring oram, # dummy slots available that are valid
   char dumdead; // added for ring oram, # dummy slots that are dead
 }Bucket;
 
@@ -192,6 +193,7 @@ int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
 int oramctr = 0;  // # oram accesses
 int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
+int dumval_dist[RING_Z] = {0}; // distribution of number of available valid dummy
 
 int rhoctr = 0;  // # rho accesses
 int rho_stashctr = 0;  // stash occupancy distribution in rho
@@ -709,6 +711,7 @@ void oram_alloc(){
       GlobTree[i].slot[k].isData = false;
       GlobTree[i].slot[k].valid = true;  // ??? to be revised
       GlobTree[i].dumnum++;
+      GlobTree[i].dumval++;
 
       
     }
@@ -1166,6 +1169,7 @@ void read_path(int label){
                 GlobTree[index].slot[j].label = -1;
                 cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]--;
                 GlobTree[index].dumnum++;
+                GlobTree[index].dumval++;
               }
               else
               {
@@ -1421,6 +1425,7 @@ void write_path(int label){
                 stt_invalidate(stt_cand);
 
                 GlobTree[index].dumnum--;
+                GlobTree[index].dumval--;
 
                 continue;
               }
@@ -3637,7 +3642,13 @@ void ring_read_path(int label, int addr){
     }
     
 
-    ring_invalidate(index, offset);  
+    ring_invalidate(index, offset); 
+
+    if (!GlobTree[index].slot[offset].isReal)
+    {
+      GlobTree[index].dumval--;
+    }
+     
 
     bool last_read = false;
     
@@ -3853,6 +3864,8 @@ void ring_early_reshuffle(int label){
     if (GlobTree[index].count >= LS[i])    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       // printf("\nlevel %d reshuffle\n", i);
+      int valnum = GlobTree[index].dumval;
+      dumval_dist[valnum]++;
       shuff[i]++;
       shufcount++;
       for (int j = 0; j < LZ_VAR[i]; j++)
@@ -3883,6 +3896,7 @@ void ring_early_reshuffle(int label){
             GlobTree[index].slot[j].addr = -1;
             GlobTree[index].slot[j].label = -1;
             GlobTree[index].dumnum++;
+            GlobTree[index].dumval++;
           }
           else
           {
@@ -3937,6 +3951,7 @@ void ring_early_reshuffle(int label){
           GlobTree[index].slot[j].isReal = true;
           GlobTree[index].slot[j].isData = true;
           GlobTree[index].dumnum--;
+          GlobTree[index].dumval--;
 
 
           remove_from_stash(candidate[j]);
@@ -4161,14 +4176,18 @@ void export_csv(char * argv[]){
   fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
   fprintf(fp, "deadctr,%lld\n", deadctr);
-  for (int i = 0; i < 31; i++)
-  {
-    fprintf(fp, "%dm,%lld\n", i*10, deadarr[i]);
-  }
+  // for (int i = 0; i < 31; i++)
+  // {
+  //   fprintf(fp, "%dm,%lld\n", i*10, deadarr[i]);
+  // }
   fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
-  for (int i = 0; i < 31; i++)
+  // for (int i = 0; i < 31; i++)
+  // {
+  //   fprintf(fp, "%dm,%lld\n", i*10, dead_on_path_arr[i]);
+  // }
+  for (int i = 0; i < RING_Z; i++)
   {
-    fprintf(fp, "%dm,%lld\n", i*10, dead_on_path_arr[i]);
+    fprintf(fp, "dumval[%d],%d\n", i,dumval_dist[i]);
   }
   
   fclose(fp);
