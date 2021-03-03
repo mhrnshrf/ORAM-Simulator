@@ -1169,7 +1169,7 @@ void read_path(int label){
                 GlobTree[index].slot[j].label = -1;
                 cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]--;
                 GlobTree[index].dumnum++;
-                GlobTree[index].dumval++;
+                // GlobTree[index].dumval++;
               }
               else
               {
@@ -1385,6 +1385,7 @@ void write_path(int label){
       GlobTree[index].count = 0; // for ring oram evict path
       deadctr -= GlobTree[index].dumdead;
       GlobTree[index].dumdead = 0;
+      GlobTree[index].dumval = Z;
 
       reset_candidate();
       pick_candidate(index, label, i);
@@ -3866,6 +3867,7 @@ void ring_early_reshuffle(int label){
       // printf("\nlevel %d reshuffle\n", i);
       int valnum = GlobTree[index].dumval;
       dumval_dist[valnum]++;
+      GlobTree[index].dumval = Z;
       shuff[i]++;
       shufcount++;
       for (int j = 0; j < LZ_VAR[i]; j++)
@@ -3896,7 +3898,7 @@ void ring_early_reshuffle(int label){
             GlobTree[index].slot[j].addr = -1;
             GlobTree[index].slot[j].label = -1;
             GlobTree[index].dumnum++;
-            GlobTree[index].dumval++;
+            // GlobTree[index].dumval++;
           }
           else
           {
@@ -4099,7 +4101,7 @@ void export_csv(char * argv[]){
   fp = fopen(filename,"w+");
 
   int shuffctr = 0; 
-  for (int i = TOP_CACHE; i < LEVEL; i++)
+  for (int i = 0; i < LEVEL; i++)
   {
     shuffctr += shuff[i];
   }
