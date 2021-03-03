@@ -606,72 +606,82 @@ int main(int argc, char * argv[])
 
 //   Mehrnoosh:
 
-	char bench_path[100]; 
-	strcpy(bench_path, argv[2]);
-	char delim[] = "/";
-	char *ptr = strtok(bench_path, delim);
-
-	while (ptr != NULL)
+	if (SIM_ENABLE && CACHE_ENABLE)
 	{
-		strcpy(bench, ptr);
-		ptr = strtok(NULL, delim);
-	}
+		char bench_path[100]; 
+		strcpy(bench_path, argv[2]);
+		char delim[] = "/";
+		char *ptr = strtok(bench_path, delim);
 
-	 if (strcmp(bench, "deepsjeng") == 0)
-	 {
-		 endpoint = 3248000;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "bwaves") == 0)
-	 {
-		 endpoint = TRACE_SIZE;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "lbm") == 0)
-	 {
-		 endpoint = 3492000;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "cam4") == 0)
-	 {
-		 endpoint = 3382000;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "imagick") == 0)
-	 {
-		 endpoint = 3620000;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
-	 else if (strcmp(bench, "fotonik3d") == 0)
-	 {
-		 endpoint = 3327000;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
-	 else if (strcmp(bench, "roms") == 0)
-	 {
-		 endpoint = 3772000;
-		 TIMING_INTERVAL = T2_INTERVAL;
-	 }
-	 else if (strcmp(bench, "mcf") == 0)
-	 {
-		 endpoint = 3492000;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
-	//  else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
-	//  {
-	// 	 endpoint = 3327000;
-	// 	 TIMING_INTERVAL = T2_INTERVAL;
-	//  }
-	// else if (strcmp(bench, "bwaves") == 0) // this added for nonsec exp
-	//  {
-	// 	 endpoint = 3227000;
-	// 	 TIMING_INTERVAL = T2_INTERVAL;
-	//  }
-	 else
-	 {
-		 endpoint = TRACE_SIZE;
-		 TIMING_INTERVAL = T1_INTERVAL;
-	 }
+		while (ptr != NULL)
+		{
+			strcpy(bench, ptr);
+			ptr = strtok(NULL, delim);
+		}
+
+		if (strcmp(bench, "deepsjeng") == 0)
+		{
+			endpoint = 3248000;
+			TIMING_INTERVAL = T2_INTERVAL;
+		}
+		else if (strcmp(bench, "bwaves") == 0)
+		{
+			endpoint = TRACE_SIZE;
+			TIMING_INTERVAL = T2_INTERVAL;
+		}
+		else if (strcmp(bench, "lbm") == 0)
+		{
+			endpoint = 3492000;
+			TIMING_INTERVAL = T2_INTERVAL;
+		}
+		else if (strcmp(bench, "cam4") == 0)
+		{
+			endpoint = 3382000;
+			TIMING_INTERVAL = T2_INTERVAL;
+		}
+		else if (strcmp(bench, "imagick") == 0)
+		{
+			endpoint = 3620000;
+			TIMING_INTERVAL = T1_INTERVAL;
+		}
+		else if (strcmp(bench, "fotonik3d") == 0)
+		{
+			endpoint = 3327000;
+			TIMING_INTERVAL = T1_INTERVAL;
+		}
+		else if (strcmp(bench, "roms") == 0)
+		{
+			endpoint = 3772000;
+			TIMING_INTERVAL = T2_INTERVAL;
+		}
+		else if (strcmp(bench, "mcf") == 0)
+		{
+			endpoint = 3492000;
+			TIMING_INTERVAL = T1_INTERVAL;
+		}
+		//  else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
+		//  {
+		// 	 endpoint = 3327000;
+		// 	 TIMING_INTERVAL = T2_INTERVAL;
+		//  }
+		// else if (strcmp(bench, "bwaves") == 0) // this added for nonsec exp
+		//  {
+		// 	 endpoint = 3227000;
+		// 	 TIMING_INTERVAL = T2_INTERVAL;
+		//  }
+		else
+		{
+			endpoint = TRACE_SIZE;
+			TIMING_INTERVAL = T1_INTERVAL;
+		}
+	}
+	else
+	{
+		endpoint = TRACE_SIZE;
+		TIMING_INTERVAL = T1_INTERVAL;
+	}
+	
+
 
 
 //.....................................................................
