@@ -193,7 +193,7 @@ int bkctr = 0;  // # background eviction invoked
 int invokectr = 0; // # memory requests coming from outside (# invokation of oram)
 int oramctr = 0;  // # oram accesses
 int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
-int dumval_dist[RING_Z] = {0}; // distribution of number of available valid dummy
+int dumval_dist[Z] = {0}; // distribution of number of available valid dummy
 
 int rhoctr = 0;  // # rho accesses
 int rho_stashctr = 0;  // stash occupancy distribution in rho
@@ -4185,7 +4185,7 @@ void export_csv(char * argv[]){
   // {
   //   fprintf(fp, "%dm,%lld\n", i*10, dead_on_path_arr[i]);
   // }
-  for (int i = 0; i < RING_Z; i++)
+  for (int i = 0; i < Z; i++)
   {
     fprintf(fp, "dumval[%d],%d\n", i,dumval_dist[i]);
   }
