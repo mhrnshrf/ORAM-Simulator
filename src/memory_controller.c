@@ -194,6 +194,7 @@ int invokectr = 0; // # memory requests coming from outside (# invokation of ora
 int oramctr = 0;  // # oram accesses
 int stash_dist[STASH_SIZE+1] = {0}; // stash occupancy distribution
 int dumval_dist[Z] = {0}; // distribution of number of available valid dummy
+int dumval_range_dist[3][Z] = {0}; // distribution of number of available valid dummy across different level range (top, mid, bot)
 
 int rhoctr = 0;  // # rho accesses
 int rho_stashctr = 0;  // stash occupancy distribution in rho
@@ -3840,6 +3841,22 @@ void ring_evict_path(int label){
 
 }
 
+int calc_range(int i){
+  if (i <= TOP_BOUNDARY)
+  {
+    return 0;
+  }
+  else if (i <= MID_BOUNDARY)
+  {
+    return 1;
+  }
+  else
+  {
+    return 2;
+  }
+  
+  return -1;
+}
 
 
 
@@ -3867,6 +3884,7 @@ void ring_early_reshuffle(int label){
       // printf("\nlevel %d reshuffle\n", i);
       int valnum = GlobTree[index].dumval;
       dumval_dist[valnum]++;
+      dumval_range_dist[calc_range(i)][valnum]++;
       GlobTree[index].dumval = Z;
       shuff[i]++;
       shufcount++;
@@ -4190,6 +4208,13 @@ void export_csv(char * argv[]){
   for (int i = 0; i < Z; i++)
   {
     fprintf(fp, "dumval[%d],%d\n", i,dumval_dist[i]);
+  }
+  for (int i = 0; i < 3; i++)
+  {
+    for (int j = 0; j < Z; j++)
+    {
+      fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
+    }
   }
   
   fclose(fp);
