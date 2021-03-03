@@ -2539,14 +2539,14 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  if (invokectr >= 1000000)
+  if (invokectr >= 0)
   {
-    if (invokectr % 10000000 == 0)
+    if (invokectr % 100000 == 0)
     {
-      int ind = (int)(invokectr/10000000);
+      int ind = (int)(invokectr/100000);
       deadarr[ind] = deadctr;
       dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
-      printf("%d:             %lld\n", tracectr_test, deadarr[ind]);
+      // printf("%d:             %lld\n", tracectr_test, deadarr[ind]);
     }
   }
   

@@ -41,7 +41,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
