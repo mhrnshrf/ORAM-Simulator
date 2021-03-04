@@ -749,7 +749,7 @@ int main(int argc, char * argv[])
 
 	// if (!SIM_ENABLE)
 	// {
-	test_oram(argv);
+	// test_oram(argv);
 	// }
 	
 
