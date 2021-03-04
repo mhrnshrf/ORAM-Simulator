@@ -747,10 +747,10 @@ int main(int argc, char * argv[])
 	// test_queue();
 	
 
-	if (!SIM_ENABLE)
-	{
-		test_oram(argv);
-	}
+	// if (!SIM_ENABLE)
+	// {
+	test_oram(argv);
+	// }
 	
 
 //.....................................................................

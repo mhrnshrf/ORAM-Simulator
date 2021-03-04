@@ -4205,17 +4205,17 @@ void export_csv(char * argv[]){
   // {
   //   fprintf(fp, "%dm,%lld\n", i*10, dead_on_path_arr[i]);
   // }
-  for (int i = 0; i < Z; i++)
-  {
-    fprintf(fp, "dumval[%d],%d\n", i,dumval_dist[i]);
-  }
-  for (int i = 0; i < 3; i++)
-  {
-    for (int j = 0; j < Z; j++)
-    {
-      fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
-    }
-  }
+  // for (int i = 0; i < Z; i++)
+  // {
+  //   fprintf(fp, "dumval[%d],%d\n", i,dumval_dist[i]);
+  // }
+  // for (int i = 0; i < 3; i++)
+  // {
+  //   for (int j = 0; j < Z; j++)
+  //   {
+  //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
+  //   }
+  // }
   
   fclose(fp);
 }
