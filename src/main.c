@@ -606,18 +606,19 @@ int main(int argc, char * argv[])
 
 //   Mehrnoosh:
 
+	char bench_path[100]; 
+	strcpy(bench_path, argv[2]);
+	char delim[] = "/";
+	char *ptr = strtok(bench_path, delim);
+
+	while (ptr != NULL)
+	{
+		strcpy(bench, ptr);
+		ptr = strtok(NULL, delim);
+	}
+	
 	if (SIM_ENABLE && CACHE_ENABLE)
 	{
-		char bench_path[100]; 
-		strcpy(bench_path, argv[2]);
-		char delim[] = "/";
-		char *ptr = strtok(bench_path, delim);
-
-		while (ptr != NULL)
-		{
-			strcpy(bench, ptr);
-			ptr = strtok(NULL, delim);
-		}
 
 		if (strcmp(bench, "deepsjeng") == 0)
 		{
