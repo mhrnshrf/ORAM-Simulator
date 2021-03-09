@@ -5,7 +5,8 @@
         "cache.h": "c",
         "stdbool.h": "c",
         "time.h": "c",
-        "limits": "c"
+        "limits": "c",
+        "type_traits": "c"
     },
     "cSpell.words": [
         "ORAM",

@@ -38,7 +38,7 @@
 // #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 // #define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
 // #define SNAP_CACHE      0     // 0/1 flag to disable/enable  snapshot with having L2 cache
-#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
@@ -55,7 +55,7 @@
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 12     // # slots per bucket // z17
+#define Z 4     // # slots per bucket // z17
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
@@ -173,6 +173,8 @@ typedef enum {REGULAR, EVICT} AccessType;
 typedef enum {TAIL, HEAD} EnqueueType;
 typedef enum {POS1, POS2} PosType;
 typedef enum {STRIDE_BASED, HISTORY_BASED, COMBO} PrefetchType;
+typedef enum {REFRESHED, REMEMBERED, ALLOCATED, DEAD} DeadState;
+typedef enum {SNAP, TMP, ALL, NONE} PrintType;
 
 
 typedef struct Slot Slot;
@@ -192,6 +194,7 @@ typedef struct Element_t{
   bool last_read;
   long long int orig_addr;
   struct Element_t *prev; 
+  DeadState dd;
 }Element;
 
 
@@ -205,6 +208,7 @@ typedef struct Queue {
 
 // extern long long int CYCLE_VAL; 
 extern Queue *oramQ;
+extern Queue *deadQ;
 extern Queue *plbQ; 
 extern int tracectr; 
 extern int invokectr; 

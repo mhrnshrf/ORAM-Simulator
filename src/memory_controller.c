@@ -78,6 +78,7 @@ typedef struct Slot{
   int addr;         // address of block e.g. A, B
   int label;      // path label e.g. 0 (=> L0)
   bool valid;     // added for ring oram
+  DeadState dd;
 }Slot;
 
 // typedef struct Bucket{
@@ -118,6 +119,7 @@ typedef struct BucketMet{
 Queue *oramQ;
 Queue *plbQ;
 Queue *pathQ;
+Queue *deadQ;
 
 int revarr[RING_REV];
 
@@ -252,6 +254,11 @@ int stale_reduction = 0;
 
 bool dirty_evict = false;
 
+bool print_flag = false;
+
+void printOn() {print_flag = true;}    // turn the pin flag on
+void printOff() {print_flag = false;}  // turn the pin flag off
+
 int TIMING_INTERVAL;
 
 
@@ -312,9 +319,19 @@ long long int lastpath = 0;
 
 int  wl_pos[H-1] = {0};
 
-int glctr[GL_COUNT] = {0}; 
+int glctr[GL_COUNT] = {0};
+
+float util_sum[LEVEL] = {0}; 
+float util_tmp[LEVEL] = {0}; 
 
 bool ring_dummy = false;
+
+void reset_util(){
+  for (int i = 0; i < LEVEL; i++)
+  {
+    util_tmp[i] = 0;
+  }
+}
 
 
 
@@ -711,6 +728,7 @@ void oram_alloc(){
       GlobTree[i].slot[k].isReal = false;
       GlobTree[i].slot[k].isData = false;
       GlobTree[i].slot[k].valid = true;  // ??? to be revised
+      GlobTree[i].slot[k].dd = REFRESHED;  
       GlobTree[i].dumnum++;
       GlobTree[i].dumval++;
 
@@ -745,6 +763,7 @@ void oram_alloc(){
   oramQ = ConstructQueue(QUEUE_SIZE);
   plbQ = ConstructQueue(128);
   pathQ = ConstructQueue(RING_A);
+  deadQ = ConstructQueue(4000);
 
   for (int i = 0; i < RING_REV; i++)
   {
@@ -825,8 +844,12 @@ void oram_init_path(){
   fflush(stdout);
 }
 
-void print_count_level(){
-  printf("\n");
+void print_count_level(int accesses, PrintType print){
+  if (print != NONE)
+  {
+    printf("\n");
+  }
+  
   for (int l = 0; l < LEVEL; l++)
   {
     int counter = 0;
@@ -841,8 +864,27 @@ void print_count_level(){
         }        
       }
       
-    }   
-    printf("%f\n", counter/(LZ[l]*pow(2,l)));
+    } 
+    
+
+    if (print == SNAP)
+    {
+      printf("%f\n", counter/(LZ[l]*pow(2,l)));
+    }
+    else if (print == TMP)
+    {
+      printf("%f\n", util_tmp[l]/accesses);
+    }
+    else if (print == ALL)
+    {
+      printf("%f\n", util_sum[l]/accesses);
+    }
+    else if (print == NONE)
+    {
+      util_sum[l] += counter/(LZ[l]*pow(2,l));
+      util_tmp[l] += counter/(LZ[l]*pow(2,l));
+    }
+      
   }
   
 }
@@ -1952,14 +1994,19 @@ void take_snapshot(char * argv[]){
 
     label = PosMap[addr];
   
+    print_count_level(0, NONE);
+
+    int prev_i = 0;
 
     if (i <= 10000000 )
     {
       if (i % 4000000 == 0 )
       {
         printf("%dm\n\n",(int)(i/1000000));
-        print_count_level();
+        print_count_level(i - prev_i, TMP);
         printf("\n\n\n\n");
+        prev_i = i;
+        reset_util();
       }
     }
     else if(i <= 90000000 )
@@ -1967,8 +2014,10 @@ void take_snapshot(char * argv[]){
       if (i % 20000000 == 0 )
       {
         printf("%dm\n\n",(int)(i/1000000));
-        print_count_level();
+        print_count_level(i - prev_i, TMP);
         printf("\n\n\n\n");
+        prev_i = i;
+        reset_util();
       }
     }
     else if(i <= 300000000 )
@@ -1976,8 +2025,10 @@ void take_snapshot(char * argv[]){
       if (i % 50000000 == 0 )
       {
         printf("%dm\n\n",(int)(i/1000000));
-        print_count_level();
+        print_count_level(i - prev_i, TMP);
         printf("\n\n\n\n");
+        prev_i = i;
+        reset_util();
       }
     }
     else if(i <= 400000000 )
@@ -1985,10 +2036,23 @@ void take_snapshot(char * argv[]){
       if (i % 10000000 == 0 )
       {
         printf("%dm\n\n",(int)(i/1000000));
-        print_count_level();
+        print_count_level(i - prev_i, TMP);
+        printf("\n\n\n\n");
+        prev_i = i;
+        reset_util();
+      }
+
+      if (i == 400000000 )
+      {
+        printf("Overall avg @> %dm\n\n",(int)(i/1000000));
+        print_count_level(i, ALL);
         printf("\n\n\n\n");
       }
+
     }
+
+  
+    
     
     
     
@@ -3576,6 +3640,23 @@ void metadata_access(int label, char type){
 
 
 
+// gathering dead blk info into the queue
+void gather_dead(int index, int i){
+  for (int j = 0; j < LS[i]; j++)
+  {
+    if (!GlobTree[index].slot[j].isReal)
+    {
+      if (GlobTree[index].slot[j].dd == DEAD)
+      {
+        Element *db = (Element*) malloc(sizeof (Element));
+        Enqueue(deadQ, db);
+        GlobTree[index].slot[j].dd = REMEMBERED;
+      }
+    }
+  }
+}
+
+
 
 void ring_read_path(int label, int addr){
   Element *pN = (Element*) malloc(sizeof (Element));
@@ -3593,6 +3674,8 @@ void ring_read_path(int label, int addr){
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
+    gather_dead(index, i);
+
     int offset = rand() % LZ_VAR[i]; // ??? should change to chose randomly from dummies
     while (GlobTree[index].slot[offset].isReal)
     {
@@ -3645,6 +3728,7 @@ void ring_read_path(int label, int addr){
     
 
     ring_invalidate(index, offset); 
+    GlobTree[index].slot[offset].dd = DEAD;
 
     if (!GlobTree[index].slot[offset].isReal)
     {
