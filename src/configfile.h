@@ -109,6 +109,7 @@ typedef enum {
 	DUMMY_TH_token  ,
 	DEP_TH_token ,
 	WL_CAP_token ,
+	DEAD_ENABLE_token ,
 
 	comment_token,
 	unknown_token
@@ -302,6 +303,8 @@ token_t tokenize(char * input){
 	return DEP_TH_token;
   } else if (strncmp(input, "WL_CAP",length) == 0) {
 	return WL_CAP_token;
+  } else if (strncmp(input, "DEAD_ENABLE",length) == 0) {
+	return DEAD_ENABLE_token;
   }
 
   else {
@@ -743,6 +746,10 @@ void read_config_file(FILE * fin)
 			case WL_CAP_token:
 				fscanf(fin,"%d",&input_int);
 				WL_CAP = input_int;
+				break;
+			case DEAD_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				DEAD_ENABLE = input_int;
 				break;
 
 			case unknown_token:

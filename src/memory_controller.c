@@ -321,8 +321,8 @@ int  wl_pos[H-1] = {0};
 
 int glctr[GL_COUNT] = {0};
 
-float util_sum[LEVEL] = {0}; 
-float util_tmp[LEVEL] = {0}; 
+long double util_sum[LEVEL] = {0}; 
+long double util_tmp[LEVEL] = {0}; 
 
 bool ring_dummy = false;
 
@@ -873,16 +873,16 @@ void print_count_level(int accesses, PrintType print){
     }
     else if (print == TMP)
     {
-      printf("%f\n", util_tmp[l]/accesses);
+      printf("%Lf\n", util_tmp[l]/accesses);
     }
     else if (print == ALL)
     {
-      printf("%f\n", util_sum[l]/accesses);
+      printf("%Lf\n", util_sum[l]/accesses);
     }
     else if (print == NONE)
     {
-      util_sum[l] += counter/(LZ[l]*pow(2,l));
-      util_tmp[l] += counter/(LZ[l]*pow(2,l));
+      util_sum[l] += (counter/(LZ[l]*pow(2,l)));
+      util_tmp[l] += (counter/(LZ[l]*pow(2,l)));
     }
       
   }
@@ -1135,7 +1135,10 @@ void read_path(int label){
           int dum_cand[Z] = {0};
           int cand_ind = 0;
         // }
-        
+        if (RING_ENABLE)
+        {
+          // gather_dead(index, i);
+        }
         for(int j = 0; j < LZ_VAR[i]; j++)
         {
           // printf("j: %d \n", j);
@@ -1262,6 +1265,9 @@ void read_path(int label){
         }
 
       }
+
+
+      
       
     }
 
@@ -3642,13 +3648,15 @@ void metadata_access(int label, char type){
 
 // gathering dead blk info into the queue
 void gather_dead(int index, int i){
-  for (int j = 0; j < LS[i]; j++)
+  for (int j = 0; j < LZ_VAR[i]; j++)
   {
     if (!GlobTree[index].slot[j].isReal)
     {
       if (GlobTree[index].slot[j].dd == DEAD)
       {
         Element *db = (Element*) malloc(sizeof (Element));
+        db->addr = GlobTree[index].slot[j].addr;
+        db->dd = REMEMBERED;
         Enqueue(deadQ, db);
         GlobTree[index].slot[j].dd = REMEMBERED;
       }
@@ -3674,7 +3682,7 @@ void ring_read_path(int label, int addr){
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
-    gather_dead(index, i);
+    // gather_dead(index, i);
 
     int offset = rand() % LZ_VAR[i]; // ??? should change to chose randomly from dummies
     while (GlobTree[index].slot[offset].isReal)
@@ -4042,11 +4050,15 @@ void ring_early_reshuffle(int label){
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
         GlobTree[index].slot[j].valid = true;
-        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        if (!DEAD_ENABLE || GlobTree[index].slot[j].dd != ALLOCATED)
         {
-          int mem_addr = index*Z_VAR + j;
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
+          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+          {
+            int mem_addr = index*Z_VAR + j;
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
+          }
         }
+        
         if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
         {
           // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
@@ -4056,7 +4068,6 @@ void ring_early_reshuffle(int label){
           GlobTree[index].slot[j].isData = true;
           GlobTree[index].dumnum--;
           GlobTree[index].dumval--;
-
 
           remove_from_stash(candidate[j]);
         }
