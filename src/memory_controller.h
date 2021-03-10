@@ -38,7 +38,7 @@
 // #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 // #define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
 // #define SNAP_CACHE      0     // 0/1 flag to disable/enable  snapshot with having L2 cache
-#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
@@ -55,7 +55,7 @@
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
 #define LEVEL 24 // # levels
-#define Z 4     // # slots per bucket // z17
+#define Z 12     // # slots per bucket // z17
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash

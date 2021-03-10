@@ -79,6 +79,7 @@ typedef struct Slot{
   int label;      // path label e.g. 0 (=> L0)
   bool valid;     // added for ring oram
   DeadState dd;
+  int redirect_addr;
 }Slot;
 
 // typedef struct Bucket{
@@ -4050,7 +4051,7 @@ void ring_early_reshuffle(int label){
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
         GlobTree[index].slot[j].valid = true;
-        if (!DEAD_ENABLE || GlobTree[index].slot[j].dd != ALLOCATED)
+        if (!DEAD_ENABLE || GlobTree[index].slot[j].dd == DEAD || GlobTree[index].slot[j].dd == REFRESHED)
         {
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
@@ -4058,6 +4059,16 @@ void ring_early_reshuffle(int label){
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
           }
         }
+        // else if (GlobTree[index].slot[j].dd == ALLOCATED)
+        // {
+        //   // find another dead blk to fill in from the queue
+        // }
+        // else if (GlobTree[index].slot[j].dd == REMEMBERED)
+        // {
+        //   // use this dead blk and remove it from the queue
+        //   GlobTree[index].slot[j].dd = REFRESHED;
+        // }
+        
         
         if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
         {
