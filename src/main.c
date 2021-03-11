@@ -616,7 +616,7 @@ int main(int argc, char * argv[])
 		strcpy(bench, ptr);
 		ptr = strtok(NULL, delim);
 	}
-	
+
 	if (SIM_ENABLE && CACHE_ENABLE)
 	{
 
@@ -731,6 +731,7 @@ int main(int argc, char * argv[])
 	if (SNAPSHOT_ENABLE)
 	{
 		oram_init_path();
+		// oram_init();
 		take_snapshot(argv);
 	}
 		

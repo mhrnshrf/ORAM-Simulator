@@ -1136,9 +1136,9 @@ void read_path(int label){
           int dum_cand[Z] = {0};
           int cand_ind = 0;
         // }
-        if (RING_ENABLE)
+        if (RING_ENABLE && DEAD_ENABLE)
         {
-          // gather_dead(index, i);
+          gather_dead(index, i);
         }
         for(int j = 0; j < LZ_VAR[i]; j++)
         {
@@ -1446,18 +1446,31 @@ void write_path(int label){
         GlobTree[index].slot[j].valid = true;  // added for ring oram
 
         gi++;
-        if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
+        if (!DEAD_ENABLE || GlobTree[index].slot[j].dd == DEAD || GlobTree[index].slot[j].dd == REFRESHED)
         {
-          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-          if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+          if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
           {
-            int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
-            int i_prime = floor(gi_prime/Z) + 1 + L1;
-            int j_prime = gi_prime % Z;
-            int index_prime = calc_index(label, i_prime);
-            addr = SubMap[index_prime] + j_prime;
+            addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+            if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+            {
+              int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
+              int i_prime = floor(gi_prime/Z) + 1 + L1;
+              int j_prime = gi_prime % Z;
+              int index_prime = calc_index(label, i_prime);
+              addr = SubMap[index_prime] + j_prime;
+            }
+            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false);
           }
-          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false);
+
+        }
+        else if (GlobTree[index].slot[j].dd == ALLOCATED)
+        {
+          // find another dead blk to fill in from the queue
+        }
+        else if (GlobTree[index].slot[j].dd == REMEMBERED)
+        {
+          // use this dead blk and remove it from the queue
+          GlobTree[index].slot[j].dd = REFRESHED;
         }
 
 
@@ -2000,63 +2013,74 @@ void take_snapshot(char * argv[]){
     }
 
     label = PosMap[addr];
+
+
+    if (i % 20000000 == 0)
+    {
+      printf("%dm\n\n",(int)(i/1000000));
+      print_count_level(0, SNAP);
+      printf("\n\n\n\n");
+    }
+    
+
+    // printf("@ i: %d\n", i);
   
-    print_count_level(0, NONE);
+    // print_count_level(0, NONE);
 
-    int prev_i = 0;
+    // int prev_i = 0;
 
-    if (i <= 10000000 )
-    {
-      if (i % 4000000 == 0 )
-      {
-        printf("%dm\n\n",(int)(i/1000000));
-        print_count_level(i - prev_i, TMP);
-        printf("\n\n\n\n");
-        prev_i = i;
-        reset_util();
-      }
-    }
-    else if(i <= 90000000 )
-    {
-      if (i % 20000000 == 0 )
-      {
-        printf("%dm\n\n",(int)(i/1000000));
-        print_count_level(i - prev_i, TMP);
-        printf("\n\n\n\n");
-        prev_i = i;
-        reset_util();
-      }
-    }
-    else if(i <= 300000000 )
-    {
-      if (i % 50000000 == 0 )
-      {
-        printf("%dm\n\n",(int)(i/1000000));
-        print_count_level(i - prev_i, TMP);
-        printf("\n\n\n\n");
-        prev_i = i;
-        reset_util();
-      }
-    }
-    else if(i <= 400000000 )
-    {
-      if (i % 10000000 == 0 )
-      {
-        printf("%dm\n\n",(int)(i/1000000));
-        print_count_level(i - prev_i, TMP);
-        printf("\n\n\n\n");
-        prev_i = i;
-        reset_util();
-      }
+    // if (i <= 10000000 )
+    // {
+    //   if (i % 4000000 == 0 )
+    //   {
+    //     printf("%dm\n\n",(int)(i/1000000));
+    //     print_count_level(i - prev_i, SNAP);
+    //     printf("\n\n\n\n");
+    //     prev_i = i;
+    //     reset_util();
+    //   }
+    // }
+    // else if(i <= 90000000 )
+    // {
+    //   if (i % 20000000 == 0 )
+    //   {
+    //     printf("%dm\n\n",(int)(i/1000000));
+    //     print_count_level(i - prev_i, SNAP);
+    //     printf("\n\n\n\n");
+    //     prev_i = i;
+    //     reset_util();
+    //   }
+    // }
+    // else if(i <= 300000000 )
+    // {
+    //   if (i % 50000000 == 0 )
+    //   {
+    //     printf("%dm\n\n",(int)(i/1000000));
+    //     print_count_level(i - prev_i, SNAP);
+    //     printf("\n\n\n\n");
+    //     prev_i = i;
+    //     reset_util();
+    //   }
+    // }
+    // else if(i <= 400000000 )
+    // {
+    //   if (i % 10000000 == 0 )
+    //   {
+    //     printf("%dm\n\n",(int)(i/1000000));
+    //     print_count_level(i - prev_i, SNAP);
+    //     printf("\n\n\n\n");
+    //     prev_i = i;
+    //     reset_util();
+    //   }
 
-      if (i == 400000000 )
-      {
-        printf("Overall avg @> %dm\n\n",(int)(i/1000000));
-        print_count_level(i, ALL);
-        printf("\n\n\n\n");
-      }
+    //   if (i == 400000000 )
+    //   {
+    //     printf("Overall avg @> %dm\n\n",(int)(i/1000000));
+    //     print_count_level(i, ALL);
+    //     printf("\n\n\n\n");
+    //   }
 
-    }
+    // }
 
   
     
@@ -3683,7 +3707,11 @@ void ring_read_path(int label, int addr){
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
-    // gather_dead(index, i);
+    if (RING_ENABLE && DEAD_ENABLE)
+    {
+      gather_dead(index, i);
+    }
+    
 
     int offset = rand() % LZ_VAR[i]; // ??? should change to chose randomly from dummies
     while (GlobTree[index].slot[offset].isReal)
@@ -4059,15 +4087,15 @@ void ring_early_reshuffle(int label){
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
           }
         }
-        // else if (GlobTree[index].slot[j].dd == ALLOCATED)
-        // {
-        //   // find another dead blk to fill in from the queue
-        // }
-        // else if (GlobTree[index].slot[j].dd == REMEMBERED)
-        // {
-        //   // use this dead blk and remove it from the queue
-        //   GlobTree[index].slot[j].dd = REFRESHED;
-        // }
+        else if (GlobTree[index].slot[j].dd == ALLOCATED)
+        {
+          // find another dead blk to fill in from the queue
+        }
+        else if (GlobTree[index].slot[j].dd == REMEMBERED)
+        {
+          // use this dead blk and remove it from the queue
+          GlobTree[index].slot[j].dd = REFRESHED;
+        }
         
         
         if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
