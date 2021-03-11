@@ -845,7 +845,7 @@ void oram_init_path(){
   fflush(stdout);
 }
 
-void print_count_level(int accesses, PrintType print){
+void print_count_level(int rounds, PrintType print){
   if (print != NONE)
   {
     printf("\n");
@@ -874,11 +874,12 @@ void print_count_level(int accesses, PrintType print){
     }
     else if (print == TMP)
     {
-      printf("%Lf\n", util_tmp[l]/accesses);
+      printf("%Lf\n", util_tmp[l]/rounds);
     }
     else if (print == ALL)
     {
-      printf("%Lf\n", util_sum[l]/accesses);
+      util_sum[l] += (counter/(LZ[l]*pow(2,l)));
+      printf("%Lf\n", util_sum[l]/rounds);
     }
     else if (print == NONE)
     {
@@ -2015,10 +2016,11 @@ void take_snapshot(char * argv[]){
     label = PosMap[addr];
 
 
-    if (i % 20000000 == 0)
+    if (i % 10000000 == 0)
     {
       printf("%dm\n\n",(int)(i/1000000));
-      print_count_level(0, SNAP);
+      int rounds = i/10000000;
+      print_count_level(rounds, ALL);
       printf("\n\n\n\n");
     }
     
