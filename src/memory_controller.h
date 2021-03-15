@@ -196,6 +196,8 @@ typedef struct Element_t{
   long long int orig_addr;
   struct Element_t *prev; 
   DeadState dd;
+  int index;
+  int offset;
 }Element;
 
 
@@ -385,6 +387,8 @@ int gl_index(int index, int h);
 void stale_access(int index, int h, char type);
 void var_init();
 void gather_dead(int index, int i);
+void remote_invalidate(int index, int offset);
+int calc_mem_addr(int index, int offset, char type);
 
 // Mehrnoosh.
 

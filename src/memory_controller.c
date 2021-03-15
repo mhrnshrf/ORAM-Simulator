@@ -78,8 +78,10 @@ typedef struct Slot{
   int addr;         // address of block e.g. A, B
   int label;      // path label e.g. 0 (=> L0)
   bool valid;     // added for ring oram
-  DeadState dd;
-  int redirect_addr;
+  DeadState dd;  // the dead block state (state of this physical block not what it contains)
+  bool redirect; // a flag that says this slot is pointing to somewhere else
+  int remote_index; // physical node of a block that supposed to be here but is somewhere else
+  int remote_offset; // physical slot offset of a block that supposed to be here but is somewhere else
 }Slot;
 
 // typedef struct Bucket{
@@ -463,7 +465,7 @@ void DestructQueue(Queue *queue) {
 }
 
 
-bool Enqueue(Queue *pQueue, Element *item) {
+bool  Enqueue(Queue *pQueue, Element *item) {
     /* Bad parameter */
     if ((pQueue == NULL) || (item == NULL)) {
         return false;
@@ -485,6 +487,21 @@ bool Enqueue(Queue *pQueue, Element *item) {
     }
     pQueue->size++;
     return true;
+}
+
+
+Element*  SearchQ(Queue *pQueue, int key1, int key2){
+  Element *it = pQueue->head;
+  for (int i = 0; i < pQueue->size; i++)
+  {
+    if (it->index == key1 && it->offset == key2)
+    {
+      return it;
+    }
+
+    it = it->prev;
+  }
+  return NULL;
 }
 
 bool EnqueueHead(Queue *pQueue, Element *item) {
@@ -730,6 +747,7 @@ void oram_alloc(){
       GlobTree[i].slot[k].isData = false;
       GlobTree[i].slot[k].valid = true;  // ??? to be revised
       GlobTree[i].slot[k].dd = REFRESHED;  
+      GlobTree[i].slot[k].redirect = false;  
       GlobTree[i].dumnum++;
       GlobTree[i].dumval++;
 
@@ -1259,7 +1277,7 @@ void read_path(int label){
             }
             
             
-            int mem_addr = index*Z_VAR + sd;
+            int mem_addr = calc_mem_addr(index, sd, 'R');
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
             dum_cand[ri] = -1;
@@ -1447,32 +1465,23 @@ void write_path(int label){
         GlobTree[index].slot[j].valid = true;  // added for ring oram
 
         gi++;
-        if (!DEAD_ENABLE || GlobTree[index].slot[j].dd == DEAD || GlobTree[index].slot[j].dd == REFRESHED)
-        {
-          if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
-          {
-            addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-            if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
-            {
-              int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
-              int i_prime = floor(gi_prime/Z) + 1 + L1;
-              int j_prime = gi_prime % Z;
-              int index_prime = calc_index(label, i_prime);
-              addr = SubMap[index_prime] + j_prime;
-            }
-            insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false);
-          }
+        
 
-        }
-        else if (GlobTree[index].slot[j].dd == ALLOCATED)
+
+        if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
         {
-          // find another dead blk to fill in from the queue
+          addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
+          {
+            int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
+            int i_prime = floor(gi_prime/Z) + 1 + L1;
+            int j_prime = gi_prime % Z;
+            int index_prime = calc_index(label, i_prime);
+            addr = SubMap[index_prime] + j_prime;
+          }
+          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false);
         }
-        else if (GlobTree[index].slot[j].dd == REMEMBERED)
-        {
-          // use this dead blk and remove it from the queue
-          GlobTree[index].slot[j].dd = REFRESHED;
-        }
+
 
 
           if (STT_ENABLE && TREE_VAR == ORAM)
@@ -3682,8 +3691,9 @@ void gather_dead(int index, int i){
       if (GlobTree[index].slot[j].dd == DEAD)
       {
         Element *db = (Element*) malloc(sizeof (Element));
-        db->addr = GlobTree[index].slot[j].addr;
-        db->dd = REMEMBERED;
+        db->index = index;
+        db->offset = j;
+        // db->dd = REMEMBERED;
         Enqueue(deadQ, db);
         GlobTree[index].slot[j].dd = REMEMBERED;
       }
@@ -3691,6 +3701,82 @@ void gather_dead(int index, int i){
   }
 }
 
+int calc_mem_addr(int index, int offset, char type)
+ {
+  int mem_addr = 0;
+  
+  if (!DEAD_ENABLE)
+  {
+    mem_addr = index*Z_VAR + offset;
+  }
+  else if (type == 'R')
+  {
+    if (GlobTree[index].slot[offset].redirect)
+    {
+      mem_addr = GlobTree[index].slot[offset].remote_index*Z_VAR + GlobTree[index].slot[offset].remote_offset;
+    }
+    else
+    {
+      mem_addr = index*Z_VAR + offset;
+    }
+    
+  }
+  else if (type == 'W')
+  {
+    if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED)
+    {
+      mem_addr = index*Z_VAR + offset;
+    }
+    else if (GlobTree[index].slot[offset].dd == ALLOCATED)
+    {
+      // find another dead blk to fill in from the queue
+
+      if (deadQ->size == 0)
+      {
+        printf("ERROR: calc mem addr run out of dead slots!\n");
+        exit(1);
+      }
+
+      Element *cand;
+      int i;
+      int j;
+
+      while (deadQ->size != 0)
+      {
+       cand = Dequeue(deadQ);
+       i = cand->index;
+       j = cand->offset;
+       bool taken = (GlobTree[i].slot[j].dd == ALLOCATED) || (GlobTree[i].slot[j].dd == REFRESHED);
+       
+       if (!taken)
+       {
+         break;
+       }
+      }
+
+      GlobTree[i].slot[j].dd = ALLOCATED;
+      GlobTree[index].slot[offset].redirect = true;
+      GlobTree[index].slot[offset].remote_index = i;
+      GlobTree[index].slot[offset].remote_offset = j;
+
+    }
+    else if (GlobTree[index].slot[offset].dd == REMEMBERED)
+    {
+      // use this dead blk and remove it from the queue
+      // Element *cur = SearchQ(deadQ, index, offset);
+      // cur->dd = ALLOCATED;
+      mem_addr = index*Z_VAR + offset;
+      GlobTree[index].slot[offset].dd = REFRESHED;
+    }
+    
+  }
+  else
+  {
+    printf("ERROR: calc mem addr %d %d %c\n", index, offset, type);
+    exit(1);
+  }
+  return mem_addr;
+}
 
 
 void ring_read_path(int label, int addr){
@@ -3709,6 +3795,7 @@ void ring_read_path(int label, int addr){
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
+
     if (RING_ENABLE && DEAD_ENABLE)
     {
       gather_dead(index, i);
@@ -3766,8 +3853,7 @@ void ring_read_path(int label, int addr){
     }
     
 
-    ring_invalidate(index, offset); 
-    GlobTree[index].slot[offset].dd = DEAD;
+    ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
 
     if (!GlobTree[index].slot[offset].isReal)
     {
@@ -3776,6 +3862,20 @@ void ring_read_path(int label, int addr){
      
 
     bool last_read = false;
+
+    // deal with redirection
+    if (DEAD_ENABLE)
+    {
+      remote_invalidate(index, offset);
+    }
+
+
+    int mem_addr = calc_mem_addr(index, offset, 'R');
+
+
+    
+
+    
     
 
     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
@@ -3784,7 +3884,6 @@ void ring_read_path(int label, int addr){
       {
         last_read = true;
       }
-      int mem_addr = index*Z_VAR + offset;
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
     }
 
@@ -4015,7 +4114,7 @@ void ring_early_reshuffle(int label){
       {
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR && GlobTree[index].slot[j].isReal)
         {
-          int mem_addr = index*Z_VAR + j;
+          int mem_addr = calc_mem_addr(index, j, 'R');
           if (i == LEVEL - 1 && j == LZ_VAR[i] -1)
           {
             last_read = true;
@@ -4067,7 +4166,7 @@ void ring_early_reshuffle(int label){
             sd = dum_cand[ri];
           }
            
-          int mem_addr = index*Z_VAR + sd;
+          int mem_addr = calc_mem_addr(index, sd, 'R');
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false);
           // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
           dum_cand[ri] = -1;
@@ -4081,23 +4180,12 @@ void ring_early_reshuffle(int label){
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
         GlobTree[index].slot[j].valid = true;
-        if (!DEAD_ENABLE || GlobTree[index].slot[j].dd == DEAD || GlobTree[index].slot[j].dd == REFRESHED)
+        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
-          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
-          {
-            int mem_addr = index*Z_VAR + j;
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
-          }
+          int mem_addr = calc_mem_addr(index, j, 'W');
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
         }
-        else if (GlobTree[index].slot[j].dd == ALLOCATED)
-        {
-          // find another dead blk to fill in from the queue
-        }
-        else if (GlobTree[index].slot[j].dd == REMEMBERED)
-        {
-          // use this dead blk and remove it from the queue
-          GlobTree[index].slot[j].dd = REFRESHED;
-        }
+
         
         
         if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
@@ -4167,6 +4255,19 @@ void ring_early_reshuffle(int label){
 
 void ring_invalidate(int index, int offset){
   GlobTree[index].slot[offset].valid = false;
+}
+
+void remote_invalidate(int index, int offset){
+  if (!GlobTree[index].slot[offset].redirect)  // the slot is dedicated to the containing block and no redirecting is needed 
+  {
+    GlobTree[index].slot[offset].dd = DEAD;  // mark the slot as dead so that it can be used by others as well
+  }
+  else // the slot is being either reserved in queue or used by others
+  {
+    int index_redir = GlobTree[index].slot[offset].remote_index;
+    int offset_redir = GlobTree[index].slot[offset].remote_offset;
+    GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
+  }
 }
 
 void print_shuff_stat(){
