@@ -389,6 +389,7 @@ void var_init();
 void gather_dead(int index, int i);
 void remote_invalidate(int index, int offset);
 int calc_mem_addr(int index, int offset, char type);
+int remote_allocate(int index, int offset);
 
 // Mehrnoosh.
 

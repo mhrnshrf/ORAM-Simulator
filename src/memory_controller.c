@@ -1155,10 +1155,7 @@ void read_path(int label){
           int dum_cand[Z] = {0};
           int cand_ind = 0;
         // }
-        if (RING_ENABLE && DEAD_ENABLE)
-        {
-          gather_dead(index, i);
-        }
+        
         for(int j = 0; j < LZ_VAR[i]; j++)
         {
           // printf("j: %d \n", j);
@@ -3684,26 +3681,67 @@ void metadata_access(int label, char type){
 
 // gathering dead blk info into the queue
 void gather_dead(int index, int i){
-  for (int j = 0; j < LZ_VAR[i]; j++)
+  // if it's not last level (leaf level) add to deadq
+  if (i != LEVEL-1 && i >= TOP_CACHE)
   {
-    if (!GlobTree[index].slot[j].isReal)
+    for (int j = 0; j < LZ_VAR[i]; j++)
     {
-      if (GlobTree[index].slot[j].dd == DEAD)
+      if (!GlobTree[index].slot[j].isReal)
       {
-        Element *db = (Element*) malloc(sizeof (Element));
-        db->index = index;
-        db->offset = j;
-        // db->dd = REMEMBERED;
-        Enqueue(deadQ, db);
-        GlobTree[index].slot[j].dd = REMEMBERED;
+        if (GlobTree[index].slot[j].dd == DEAD)
+        {
+          Element *db = (Element*) malloc(sizeof (Element));
+          db->index = index;
+          db->offset = j;
+          // db->dd = REMEMBERED;
+          Enqueue(deadQ, db);
+          GlobTree[index].slot[j].dd = REMEMBERED;
+        }
       }
     }
   }
 }
 
+int remote_allocate(int index, int offset){
+  Element *cand;
+  int i = -1;
+  int j = -1;
+
+  while (deadQ->size != 0)
+  {
+    cand = Dequeue(deadQ);
+    i = cand->index;
+    j = cand->offset;
+    bool taken = (GlobTree[i].slot[j].dd == ALLOCATED) || (GlobTree[i].slot[j].dd == REFRESHED);
+  
+    if (!taken)
+    {
+      break;
+    }
+  }
+
+  if (i != -1 && j != -1)
+  {
+    GlobTree[i].slot[j].dd = ALLOCATED;
+    GlobTree[index].slot[offset].redirect = true;
+    GlobTree[index].slot[offset].remote_index = i;
+    GlobTree[index].slot[offset].remote_offset = j;
+    int mem_addr = i*Z_VAR + j;
+    return mem_addr;
+  }
+  return -1;
+}
+
+
 int calc_mem_addr(int index, int offset, char type)
  {
   int mem_addr = 0;
+  int level = calc_level(index);
+
+  if (level < TOP_CACHE)
+  {
+    return 0;
+  }
   
   if (!DEAD_ENABLE)
   {
@@ -3719,55 +3757,55 @@ int calc_mem_addr(int index, int offset, char type)
     {
       mem_addr = index*Z_VAR + offset;
     }
-    
   }
   else if (type == 'W')
   {
-    if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED)
+    if (level != LEVEL-1) // for levels other than leaf level
     {
-      mem_addr = index*Z_VAR + offset;
-    }
-    else if (GlobTree[index].slot[offset].dd == ALLOCATED)
-    {
-      // find another dead blk to fill in from the queue
-
-      if (deadQ->size == 0)
+      if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
       {
-        printf("ERROR: calc mem addr run out of dead slots!\n");
-        exit(1);
+        mem_addr = index*Z_VAR + offset;
+      }
+      else if (GlobTree[index].slot[offset].dd == ALLOCATED) // the case that redirect needed ~> find another dead blk to fill in from the queue
+      {
+        if (deadQ->size == 0)
+        {
+          printf("ERROR: calc mem addr queue empty!\n");
+          exit(1);
+        }
+
+        mem_addr = remote_allocate(index, offset);
+        if (mem_addr == -1)
+        {
+          printf("ERROR: calc mem addr no available cand in queue!\n");
+          exit(1);
+        }
+      }
+      else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue
+      {
+        mem_addr = index*Z_VAR + offset;
+        GlobTree[index].slot[offset].dd = REFRESHED;
+      }
+    }
+    else  // for the leaf level
+    {
+      mem_addr = remote_allocate(index, offset);
+      if (mem_addr == -1)
+      {
+        if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED)
+        {
+          mem_addr = index*Z_VAR + offset;
+        }
+        else
+        {
+          printf("ERROR: calc mem addr leaf level allocation failed!\n");
+          exit(1);
+        }
+        
       }
 
-      Element *cand;
-      int i;
-      int j;
-
-      while (deadQ->size != 0)
-      {
-       cand = Dequeue(deadQ);
-       i = cand->index;
-       j = cand->offset;
-       bool taken = (GlobTree[i].slot[j].dd == ALLOCATED) || (GlobTree[i].slot[j].dd == REFRESHED);
-       
-       if (!taken)
-       {
-         break;
-       }
-      }
-
-      GlobTree[i].slot[j].dd = ALLOCATED;
-      GlobTree[index].slot[offset].redirect = true;
-      GlobTree[index].slot[offset].remote_index = i;
-      GlobTree[index].slot[offset].remote_offset = j;
-
     }
-    else if (GlobTree[index].slot[offset].dd == REMEMBERED)
-    {
-      // use this dead blk and remove it from the queue
-      // Element *cur = SearchQ(deadQ, index, offset);
-      // cur->dd = ALLOCATED;
-      mem_addr = index*Z_VAR + offset;
-      GlobTree[index].slot[offset].dd = REFRESHED;
-    }
+    
     
   }
   else
@@ -3796,11 +3834,6 @@ void ring_read_path(int label, int addr){
   {
     int index = calc_index(label, i);
 
-    if (RING_ENABLE && DEAD_ENABLE)
-    {
-      gather_dead(index, i);
-    }
-    
 
     int offset = rand() % LZ_VAR[i]; // ??? should change to chose randomly from dummies
     while (GlobTree[index].slot[offset].isReal)
@@ -3894,6 +3927,8 @@ void ring_read_path(int label, int addr){
       GlobTree[index].dumdead++;
       deadctr++;
     }
+
+
      
   }
 }
@@ -4089,7 +4124,7 @@ void ring_early_reshuffle(int label){
   int shufcount = 0;
   int stashb4 = stashctr;
   // for (int i = 0; i < LEVEL; i++)
-  for (int i = LEVEL-1; i > 0; i--)
+  for (int i = LEVEL-1; i >= 0; i--)
   {
     int index = calc_index(label, i);
     int reqmade = 0;
@@ -4208,6 +4243,13 @@ void ring_early_reshuffle(int label){
       wb[i] += stashb4 - stashctr;
 
     }
+
+    if (RING_ENABLE && DEAD_ENABLE)
+    {
+      gather_dead(index, i);
+    }
+
+
   }
 
   // for (int i = LEVEL-1; i > 0; i--)
@@ -4262,7 +4304,7 @@ void remote_invalidate(int index, int offset){
   {
     GlobTree[index].slot[offset].dd = DEAD;  // mark the slot as dead so that it can be used by others as well
   }
-  else // the slot is being either reserved in queue or used by others
+  else // this slot is being either reserved in queue or used by others and a remote slot is holding the block we want to invalidate
   {
     int index_redir = GlobTree[index].slot[offset].remote_index;
     int offset_redir = GlobTree[index].slot[offset].remote_offset;
