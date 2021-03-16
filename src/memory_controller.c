@@ -4558,6 +4558,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "nonleaf_w_remote,%lld\n", nonleaf_w_remote);
   fprintf(fp, "leaf_w_inplace,%lld\n", leaf_w_inplace);
   fprintf(fp, "leaf_w_remote,%lld\n", leaf_w_remote);
+  fprintf(fp, "deadQ-size,%d\n", deadQ->size);
   
   fclose(fp);
 }
