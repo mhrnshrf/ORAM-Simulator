@@ -223,6 +223,7 @@ int cap_count[CAP_NODE] = {0};
 int path_length = 0;
 int sub_cap = 0;
 
+
 int earlyctr = 0;
 int evictctr = 0;	// # evictions caused after misses on llc
 int pos1_access = 0;
@@ -249,6 +250,15 @@ int ringdumctr = 0;
 int stalectr = 0;
 int stale_flush_ctr = 0;
 int stale_discard_ctr = 0;
+long long int r_norm = 0;
+long long int w_norm = 0;
+long long int r_remote = 0;
+long long int r_inplace = 0;
+long long int nonleaf_w_inplace = 0;
+long long int nonleaf_w_inplace_remembered = 0;
+long long int nonleaf_w_remote = 0;
+long long int leaf_w_inplace = 0;
+long long int leaf_w_remote = 0;
 
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
@@ -3702,6 +3712,19 @@ void gather_dead(int index, int i){
   }
 }
 
+void remote_invalidate(int index, int offset){
+  if (!GlobTree[index].slot[offset].redirect)  // the slot is dedicated to the containing block and no redirecting is needed 
+  {
+    GlobTree[index].slot[offset].dd = DEAD;  // mark the slot as dead so that it can be used by others as well
+  }
+  else // this slot is being either reserved in queue or used by others and a remote slot is holding the block we want to invalidate
+  {
+    int index_redir = GlobTree[index].slot[offset].remote_index;
+    int offset_redir = GlobTree[index].slot[offset].remote_offset;
+    GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
+  }
+}
+
 int remote_allocate(int index, int offset){
   Element *cand;
   int i = -1;
@@ -3710,12 +3733,14 @@ int remote_allocate(int index, int offset){
   while (deadQ->size != 0)
   {
     cand = Dequeue(deadQ);
-    i = cand->index;
-    j = cand->offset;
-    bool taken = (GlobTree[i].slot[j].dd == ALLOCATED) || (GlobTree[i].slot[j].dd == REFRESHED);
+    int i_tmp = cand->index;
+    int j_tmp = cand->offset;
+    bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
   
     if (!taken)
     {
+      i = cand->index;
+      j = cand->offset;
       break;
     }
   }
@@ -3732,6 +3757,30 @@ int remote_allocate(int index, int offset){
   return -1;
 }
 
+int inplace_allocate(int index, int offset){
+  int mem_addr = index*Z_VAR + offset;
+  GlobTree[index].slot[offset].redirect = false;
+  GlobTree[index].slot[offset].dd = REFRESHED;
+  return mem_addr;
+}
+
+
+int inplace_access(int index, int offset){
+  int mem_addr = index*Z_VAR + offset;
+  GlobTree[index].slot[offset].dd = DEAD;
+  return mem_addr;
+}
+
+int remote_access(int index, int offset){
+  int index_redir = GlobTree[index].slot[offset].remote_index;
+  int offset_redir = GlobTree[index].slot[offset].remote_offset;
+  int mem_addr = index_redir*Z_VAR + offset_redir;
+  GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
+  return mem_addr;
+}
+
+
+
 
 int calc_mem_addr(int index, int offset, char type)
  {
@@ -3742,20 +3791,30 @@ int calc_mem_addr(int index, int offset, char type)
   {
     return 0;
   }
-  
+
   if (!DEAD_ENABLE)
   {
+    if (type == 'R')
+    {
+      r_norm++;
+    }
+    else if (type == 'W')
+    {
+      w_norm++;
+    }
     mem_addr = index*Z_VAR + offset;
   }
   else if (type == 'R')
   {
     if (GlobTree[index].slot[offset].redirect)
     {
-      mem_addr = GlobTree[index].slot[offset].remote_index*Z_VAR + GlobTree[index].slot[offset].remote_offset;
+      mem_addr = remote_access(index, offset);
+      r_remote++;
     }
     else
     {
-      mem_addr = index*Z_VAR + offset;
+      mem_addr = inplace_access(index, offset);
+      r_inplace++;
     }
   }
   else if (type == 'W')
@@ -3764,7 +3823,13 @@ int calc_mem_addr(int index, int offset, char type)
     {
       if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
       {
-        mem_addr = index*Z_VAR + offset;
+        mem_addr = inplace_allocate(index, offset);
+        nonleaf_w_inplace++;
+      }
+      else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue? $$$ no removing for now
+      {
+        mem_addr = inplace_allocate(index, offset);
+        nonleaf_w_inplace_remembered++;
       }
       else if (GlobTree[index].slot[offset].dd == ALLOCATED) // the case that redirect needed ~> find another dead blk to fill in from the queue
       {
@@ -3780,11 +3845,7 @@ int calc_mem_addr(int index, int offset, char type)
           printf("ERROR: calc mem addr no available cand in queue!\n");
           exit(1);
         }
-      }
-      else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue
-      {
-        mem_addr = index*Z_VAR + offset;
-        GlobTree[index].slot[offset].dd = REFRESHED;
+        nonleaf_w_remote++;
       }
     }
     else  // for the leaf level
@@ -3794,14 +3855,18 @@ int calc_mem_addr(int index, int offset, char type)
       {
         if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED)
         {
-          mem_addr = index*Z_VAR + offset;
+          mem_addr = inplace_allocate(index, offset);
         }
         else
         {
           printf("ERROR: calc mem addr leaf level allocation failed!\n");
           exit(1);
         }
-        
+        leaf_w_inplace++;
+      }
+      else
+      {
+        leaf_w_remote++;
       }
 
     }
@@ -3897,10 +3962,10 @@ void ring_read_path(int label, int addr){
     bool last_read = false;
 
     // deal with redirection
-    if (DEAD_ENABLE)
-    {
-      remote_invalidate(index, offset);
-    }
+    // if (DEAD_ENABLE)
+    // {
+    //   remote_invalidate(index, offset);
+    // }
 
 
     int mem_addr = calc_mem_addr(index, offset, 'R');
@@ -4147,16 +4212,15 @@ void ring_early_reshuffle(int label){
       shufcount++;
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
+        int mem_addr = calc_mem_addr(index, j, 'R');
+
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR && GlobTree[index].slot[j].isReal)
         {
-          int mem_addr = calc_mem_addr(index, j, 'R');
           if (i == LEVEL - 1 && j == LZ_VAR[i] -1)
           {
             last_read = true;
           }
-          
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
-          // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
           reqmade++;
         }
         
@@ -4215,9 +4279,10 @@ void ring_early_reshuffle(int label){
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
         GlobTree[index].slot[j].valid = true;
+        int mem_addr = calc_mem_addr(index, j, 'W');
+
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
-          int mem_addr = calc_mem_addr(index, j, 'W');
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
         }
 
@@ -4299,18 +4364,7 @@ void ring_invalidate(int index, int offset){
   GlobTree[index].slot[offset].valid = false;
 }
 
-void remote_invalidate(int index, int offset){
-  if (!GlobTree[index].slot[offset].redirect)  // the slot is dedicated to the containing block and no redirecting is needed 
-  {
-    GlobTree[index].slot[offset].dd = DEAD;  // mark the slot as dead so that it can be used by others as well
-  }
-  else // this slot is being either reserved in queue or used by others and a remote slot is holding the block we want to invalidate
-  {
-    int index_redir = GlobTree[index].slot[offset].remote_index;
-    int offset_redir = GlobTree[index].slot[offset].remote_offset;
-    GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
-  }
-}
+
 
 void print_shuff_stat(){
   printf("\nreshuffle count of each level \n");
@@ -4495,6 +4549,15 @@ void export_csv(char * argv[]){
   //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
   //   }
   // }
+  fprintf(fp, "r_norm,%lld\n", r_norm);
+  fprintf(fp, "w_norm,%lld\n", w_norm);
+  fprintf(fp, "r_remote,%lld\n", r_remote);
+  fprintf(fp, "r_inplace,%lld\n", r_inplace);
+  fprintf(fp, "nonleaf_w_inplace,%lld\n", nonleaf_w_inplace);
+  fprintf(fp, "nonleaf_w_inplace_remembered,%lld\n", nonleaf_w_inplace_remembered);
+  fprintf(fp, "nonleaf_w_remote,%lld\n", nonleaf_w_remote);
+  fprintf(fp, "leaf_w_inplace,%lld\n", leaf_w_inplace);
+  fprintf(fp, "leaf_w_remote,%lld\n", leaf_w_remote);
   
   fclose(fp);
 }
