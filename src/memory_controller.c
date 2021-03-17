@@ -1473,11 +1473,12 @@ void write_path(int label){
 
         gi++;
         
-
+        int mem_addr = calc_mem_addr(index, j, 'W');
 
         if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
         {
           addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+          addr = (RING_ENABLE && DEAD_ENABLE) ? mem_addr : addr;
           if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
           {
             int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
@@ -3792,6 +3793,13 @@ int calc_mem_addr(int index, int offset, char type)
   int mem_addr = 0;
   int level = calc_level(index);
 
+  // if (type == 'W')
+  // {
+  //   printf("%d %c\n", level, type);
+  // }
+  
+
+
   if (level < TOP_CACHE)
   {
     return 0;
@@ -4258,8 +4266,8 @@ void ring_early_reshuffle(int label){
           cand_ind++;
         }
       }
-      if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
-      {
+
+
         for (int k = 0; k < RING_Z-reqmade; k++)
         {
           int ri = -1;
@@ -4271,11 +4279,13 @@ void ring_early_reshuffle(int label){
           }
            
           int mem_addr = calc_mem_addr(index, sd, 'R');
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false);
-          // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
+          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+          {
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false);
+              // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
+          }
           dum_cand[ri] = -1;
         }
-      }
       
 
       reset_candidate();
