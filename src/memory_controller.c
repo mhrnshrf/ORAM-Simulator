@@ -250,10 +250,14 @@ int ringdumctr = 0;
 int stalectr = 0;
 int stale_flush_ctr = 0;
 int stale_discard_ctr = 0;
-long long int r_norm = 0;
-long long int w_norm = 0;
-long long int r_remote = 0;
-long long int r_inplace = 0;
+long long int leaf_r_norm = 0;
+long long int nonleaf_r_norm = 0;
+long long int leaf_w_norm = 0;
+long long int nonleaf_w_norm = 0;
+long long int leaf_r_remote = 0;
+long long int nonleaf_r_remote = 0;
+long long int leaf_r_inplace = 0;
+long long int nonleaf_r_inplace = 0;
 long long int nonleaf_w_inplace = 0;
 long long int nonleaf_w_inplace_remembered = 0;
 long long int nonleaf_w_remote = 0;
@@ -3812,11 +3816,13 @@ int calc_mem_addr(int index, int offset, char type)
   {
     if (type == 'R')
     {
-      r_norm++;
+      leaf_r_norm = (level == LEVEL-1) ? leaf_r_norm+1 : leaf_r_norm;
+      nonleaf_r_norm = (level != LEVEL-1) ? nonleaf_r_norm+1 : nonleaf_r_norm;
     }
     else if (type == 'W')
     {
-      w_norm++;
+      leaf_w_norm = (level == LEVEL-1) ? leaf_w_norm+1 : leaf_w_norm;
+      nonleaf_w_norm = (level != LEVEL-1) ? nonleaf_w_norm+1 : nonleaf_w_norm;
     }
     mem_addr = index*Z_VAR + offset;
   }
@@ -3825,12 +3831,15 @@ int calc_mem_addr(int index, int offset, char type)
     if (GlobTree[index].slot[offset].redirect)
     {
       mem_addr = remote_access(index, offset);
-      r_remote++;
+      leaf_r_remote = (level == LEVEL-1) ? leaf_r_remote+1 : leaf_r_remote;
+      nonleaf_r_remote = (level != LEVEL-1) ? nonleaf_r_remote+1 : nonleaf_r_remote;
+      
     }
     else
     {
       mem_addr = inplace_access(index, offset);
-      r_inplace++;
+      leaf_r_inplace = (level == LEVEL-1) ? leaf_r_inplace+1 : leaf_r_inplace;
+      nonleaf_r_inplace = (level != LEVEL-1) ? nonleaf_r_inplace+1 : nonleaf_r_inplace;
     }
   }
   else if (type == 'W')
@@ -3866,7 +3875,12 @@ int calc_mem_addr(int index, int offset, char type)
     }
     else  // for the leaf level
     {
-      mem_addr = remote_allocate(index, offset);
+      mem_addr = -1;
+      if (deadQ->size > DEADQ_TH) // stop remote allocate if deadq size is less than a threshold
+      {
+        mem_addr = remote_allocate(index, offset);
+      }
+      
       if (mem_addr == -1)
       {
         if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED)
@@ -4573,10 +4587,14 @@ void export_csv(char * argv[]){
   //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
   //   }
   // }
-  fprintf(fp, "r_norm,%lld\n", r_norm);
-  fprintf(fp, "w_norm,%lld\n", w_norm);
-  fprintf(fp, "r_remote,%lld\n", r_remote);
-  fprintf(fp, "r_inplace,%lld\n", r_inplace);
+  fprintf(fp, "nonleaf_r_norm,%lld\n", nonleaf_r_norm);
+  fprintf(fp, "leaf_r_norm,%lld\n", leaf_r_norm);
+  fprintf(fp, "nonleaf_w_norm,%lld\n", nonleaf_w_norm);
+  fprintf(fp, "leaf_w_norm,%lld\n", leaf_w_norm);
+  fprintf(fp, "nonleaf_r_remote,%lld\n", nonleaf_r_remote);
+  fprintf(fp, "leaf_r_remote,%lld\n", leaf_r_remote);
+  fprintf(fp, "nonleaf_r_inplace,%lld\n", nonleaf_r_inplace);
+  fprintf(fp, "leaf_r_inplace,%lld\n", leaf_r_inplace);
   fprintf(fp, "nonleaf_w_inplace,%lld\n", nonleaf_w_inplace);
   fprintf(fp, "nonleaf_w_inplace_remembered,%lld\n", nonleaf_w_inplace_remembered);
   fprintf(fp, "nonleaf_w_remote,%lld\n", nonleaf_w_remote);
