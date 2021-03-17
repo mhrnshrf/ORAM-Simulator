@@ -163,7 +163,7 @@ enum{
   S4 = S3,
   DATA_ADDR_SPACE = SLOT,
   META_ADDR_SPACE = NODE,
-  DEADQ_TH = Z*100,
+  DEADQ_TH = Z*200,
   // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
 
 };
@@ -305,6 +305,7 @@ extern long long int nonmemops_sum;
  
 extern long long int missl1wb;
 extern char bench[20];
+extern char *pargv[5];
 
 
 void oram_alloc();

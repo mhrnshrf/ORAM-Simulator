@@ -56,6 +56,7 @@ double exe_time = 0;
 int gather_var = 5;
 
 int STALE_TH = 0;
+char *pargv[5];
 
 
 long long int cache_clk = 0;
@@ -3861,6 +3862,7 @@ int calc_mem_addr(int index, int offset, char type)
         if (deadQ->size == 0)
         {
           printf("ERROR: calc mem addr queue empty!\n");
+          export_csv(pargv);
           exit(1);
         }
 

@@ -325,7 +325,11 @@ int main(int argc, char * argv[])
 
 //   Mehrnoosh:
 
-
+	for (int i = 0; i < argc; i++)
+	{
+	 pargv[i] = argv[i];
+	}
+	
 
 	
 
