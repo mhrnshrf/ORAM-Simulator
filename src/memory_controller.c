@@ -792,7 +792,7 @@ void oram_alloc(){
   oramQ = ConstructQueue(QUEUE_SIZE);
   plbQ = ConstructQueue(128);
   pathQ = ConstructQueue(RING_A);
-  deadQ = ConstructQueue(4000);
+  deadQ = ConstructQueue(DEADQ_SIZE);
 
   for (int i = 0; i < RING_REV; i++)
   {

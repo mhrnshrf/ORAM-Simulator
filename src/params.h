@@ -220,6 +220,7 @@ int SKIP_L2 ;
 int DUMMY_TH ;
 int DEP_TH ;                                 // threshold on # reshuffle for dynamic ep 
 int WL_CAP ;                            // cap on wl feature
+int DEADQ_SIZE ;                            // size of dead queue
 
 
 
