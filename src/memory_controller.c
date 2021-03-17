@@ -2652,6 +2652,7 @@ void test_oram(char * argv[]){
 void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type) {
     
   invokectr++;
+  // printf("deadQ size %d\n", deadQ->size);
   
   orig_addr = physical_address;
   orig_cycle = arrival_time; 
@@ -2666,7 +2667,6 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
       int ind = (int)(invokectr/100000);
       deadarr[ind] = deadctr;
       dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
-      // printf("%d:             %lld\n", tracectr_test, deadarr[ind]);
     }
   }
   
@@ -3704,8 +3704,13 @@ void gather_dead(int index, int i){
           db->index = index;
           db->offset = j;
           // db->dd = REMEMBERED;
+          if (deadQ->size >= deadQ->limit)
+          {
+            Dequeue(deadQ);
+          }
           Enqueue(deadQ, db);
           GlobTree[index].slot[j].dd = REMEMBERED;
+          
         }
       }
     }
