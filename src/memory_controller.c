@@ -2653,7 +2653,7 @@ void test_oram(char * argv[]){
 void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type) {
     
   invokectr++;
-  // printf("deadQ size %d\n", deadQ->size);
+  // printf("trace %d  deadQ size %d\n", tracectr, deadQ->size);
   
   orig_addr = physical_address;
   orig_cycle = arrival_time; 
@@ -3738,6 +3738,7 @@ int remote_allocate(int index, int offset){
 
   while (deadQ->size != 0)
   {
+    printf("here\n");
     cand = Dequeue(deadQ);
     int i_tmp = cand->index;
     int j_tmp = cand->offset;
@@ -3745,6 +3746,7 @@ int remote_allocate(int index, int offset){
   
     if (!taken)
     {
+      printf("break\n");
       i = cand->index;
       j = cand->offset;
       break;
@@ -3795,8 +3797,9 @@ int calc_mem_addr(int index, int offset, char type)
 
   // if (type == 'W')
   // {
-  //   printf("%d %c\n", level, type);
   // }
+
+  // printf("%d %c\n", level, type);
   
 
 
@@ -3917,6 +3920,7 @@ void ring_read_path(int label, int addr){
     while (GlobTree[index].slot[offset].isReal)
     {
       offset = rand() % LZ_VAR[i];
+      // printf("while is real\n");
     }
     
     if (!ring_dummy)
@@ -4202,7 +4206,7 @@ void ring_early_reshuffle(int label){
   int shufcount = 0;
   int stashb4 = stashctr;
   // for (int i = 0; i < LEVEL; i++)
-  for (int i = LEVEL-1; i >= 0; i--)
+  for (int i = LEVEL-1; i > 0; i--)
   {
     int index = calc_index(label, i);
     int reqmade = 0;
@@ -4227,19 +4231,22 @@ void ring_early_reshuffle(int label){
       {
         int mem_addr = calc_mem_addr(index, j, 'R');
 
-        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR && GlobTree[index].slot[j].isReal)
+        if (GlobTree[index].slot[j].isReal)
         {
           if (i == LEVEL - 1 && j == LZ_VAR[i] -1)
           {
             last_read = true;
           }
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
+          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+          {
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
+          }
           reqmade++;
         }
         
         if (GlobTree[index].slot[j].isReal)
         {
-          // printf("j: %d\n", j);
+          // printf("j: %d real\n", j);
           // printf("index: %d\n", index);
           // printf("level: %d\n", i);
           // printf("addr: %d\n", GlobTree[index].slot[j].addr);
@@ -4263,6 +4270,7 @@ void ring_early_reshuffle(int label){
         {
           // printf("\ncand ind %d\n", cand_ind);
           dum_cand[cand_ind] = j;
+          // printf("valid filling dum_cand[%d] %d\n", cand_ind, dum_cand[cand_ind]);
           cand_ind++;
         }
       }
@@ -4276,6 +4284,7 @@ void ring_early_reshuffle(int label){
           {
             ri = rand() % cand_ind;
             sd = dum_cand[ri];
+            // printf("while dum_cand[%d] %d\n", ri, dum_cand[ri]);
           }
            
           int mem_addr = calc_mem_addr(index, sd, 'R');
