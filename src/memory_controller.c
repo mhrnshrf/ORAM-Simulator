@@ -3738,7 +3738,7 @@ int remote_allocate(int index, int offset){
 
   while (deadQ->size != 0)
   {
-    printf("here\n");
+    // printf("here\n");
     cand = Dequeue(deadQ);
     int i_tmp = cand->index;
     int j_tmp = cand->offset;
@@ -3746,7 +3746,7 @@ int remote_allocate(int index, int offset){
   
     if (!taken)
     {
-      printf("break\n");
+      // printf("break\n");
       i = cand->index;
       j = cand->offset;
       break;
