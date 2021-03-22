@@ -58,6 +58,7 @@ double exe_time = 0;
 int gather_var = 5;
 
 int STALE_TH = 0;
+int GATHER_START = 0;
 char *pargv[5];
 
 
@@ -759,6 +760,7 @@ int concat(int a, int b) {
 
 void oram_alloc(){
   STALE_TH = STALE_BUF_SIZE-1;
+  GATHER_START = TOP_CACHE+7;
 
   for (int i = 0; i < LEVEL; i++)
 	{
@@ -824,6 +826,12 @@ void oram_alloc(){
   for (int i = 0; i < RING_REV; i++)
   {
     revarr[i] = reverse_lex(i);
+  }
+
+  for (int i = LEVEL-2; i >= TOP_CACHE; i--)
+  {
+    // int qs = DEADQ_SIZE + i*100;
+    deadQ_arr[i] = ConstructQueue(DEADQ_SIZE);
   }
   
 
@@ -3721,7 +3729,7 @@ void metadata_access(int label, char type){
 // gathering dead blk info into the queue
 void gather_dead(int index, int i){
   // if it's not last level (leaf level) add to deadq
-  if (i != LEVEL-1 && i >= TOP_CACHE+7)
+  if (i != LEVEL-1 && i >= GATHER_START)
   {
     for (int j = 0; j < LZ_VAR[i]; j++)
     {
@@ -3732,13 +3740,20 @@ void gather_dead(int index, int i){
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
           db->offset = j;
-          // db->dd = REMEMBERED;
+          GlobTree[index].slot[j].dd = REMEMBERED;
+
           if (deadQ->size >= deadQ->limit)
           {
             Dequeue(deadQ);
           }
           Enqueue(deadQ, db);
-          GlobTree[index].slot[j].dd = REMEMBERED;
+
+          if (deadQ_arr[i]->size >= deadQ_arr[i]->limit)
+          {
+            Dequeue(deadQ_arr[i]);
+          }
+          Enqueue(deadQ_arr[i] , db);
+          
           
         }
       }
@@ -3763,23 +3778,55 @@ int remote_allocate(int index, int offset){
   Element *cand;
   int i = -1;
   int j = -1;
+  int level = calc_level(index);
 
-  while (deadQ->size != 0)
+  if (level == LEVEL-1)
   {
-    // printf("here\n");
-    cand = Dequeue(deadQ);
-    int i_tmp = cand->index;
-    int j_tmp = cand->offset;
-    bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+    level = level-1;
+  }
   
-    if (!taken)
+
+  // while (deadQ->size != 0)
+  // {
+  //   // printf("here\n");
+  //   cand = Dequeue(deadQ);
+  //   int i_tmp = cand->index;
+  //   int j_tmp = cand->offset;
+  //   bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+  
+  //   if (!taken)
+  //   {
+  //     // printf("break\n");
+  //     i = cand->index;
+  //     j = cand->offset;
+  //     break;
+  //   }
+  // }
+
+  for (int l = level; l >= GATHER_START; l--)
+  {
+    while (deadQ_arr[l]->size != 0)
     {
-      // printf("break\n");
-      i = cand->index;
-      j = cand->offset;
+      // printf("here\n");
+      cand = Dequeue(deadQ_arr[l]);
+      int i_tmp = cand->index;
+      int j_tmp = cand->offset;
+      bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+    
+      if (!taken)
+      {
+        // printf("break\n");
+        i = cand->index;
+        j = cand->offset;
+        break;
+      }
+    }
+    if (i != -1 && j != -1)
+    {
       break;
     }
   }
+  
 
   if (i != -1 && j != -1)
   {
@@ -3912,7 +3959,7 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the leaf level
     {
       mem_addr = -1;
-      if (remote_located_leaves < 0.01*deadctr && tracectr_test > 5000000) // stop remote allocate if deadq size is less than a threshold
+      if (remote_located_leaves < 0.01*deadctr && tracectr > 5000000) // stop remote allocate if deadq size is less than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4527,9 +4574,14 @@ void export_csv(char * argv[]){
   fp = fopen(filename,"w+");
 
   int shuffctr = 0; 
+  int shuffctr_tc = 0; 
   for (int i = 0; i < LEVEL; i++)
   {
     shuffctr += shuff[i];
+    if (i >= TOP_CACHE)
+    {
+      shuffctr_tc++;
+    }
   }
 
   fprintf(fp,"Benchmark,%s\n", bench);
@@ -4639,6 +4691,12 @@ void export_csv(char * argv[]){
   fprintf(fp, "leaf_w_remote,%lld\n", leaf_w_remote);
   fprintf(fp, "deadQ-size,%d\n", deadQ->size);
   fprintf(fp, "remote_located_leaves,%d\n", remote_located_leaves);
+  fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
+
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "shuff[%d],%d\n", i, shuff[i]);
+  }
   
   fclose(fp);
 }
