@@ -163,7 +163,7 @@ enum{
   S4 = S3,
   DATA_ADDR_SPACE = SLOT,
   META_ADDR_SPACE = NODE,
-  DEADQ_TH = Z*200,
+  DEADQ_TH = Z*500,
   // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
 
 };
@@ -392,6 +392,7 @@ void gather_dead(int index, int i);
 void remote_invalidate(int index, int offset);
 int calc_mem_addr(int index, int offset, char type);
 int remote_allocate(int index, int offset);
+bool remove_dead(Queue *pQueue, int key1, int key2);
 
 // Mehrnoosh.
 

@@ -65,8 +65,10 @@ int find_victim(unsigned int index) {
     int victim = -1;
     // char min = NUM_WAY;
     long long int min = cache_clk;
+    // printf("min %lld\n", min);
     for (int j = 0; j < NUM_WAY; j++)
     {
+        // printf(" LRU[index][j] %lld\n",  LRU[index][j]);
         if (LRU[index][j] < min)
         {
             victim = j;
@@ -171,7 +173,7 @@ int cache_fill(unsigned int addr,  char type){
 
      if (way < 0)
     {
-        printf("ERROR: cahce fill way: %d   index %d\n", way, index);
+        printf("ERROR: cache fill way: %d   index %d\n", way, index);
         exit(1);
     }
 

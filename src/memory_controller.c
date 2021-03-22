@@ -47,6 +47,8 @@ int ringacc = 0;
 int wl_occ = 0;
 bool pause_skip = false;
 
+int remote_located_leaves = 0;
+
 
 
 
@@ -124,6 +126,7 @@ Queue *oramQ;
 Queue *plbQ;
 Queue *pathQ;
 Queue *deadQ;
+Queue *deadQ_arr[LEVEL];
 
 int revarr[RING_REV];
 
@@ -505,18 +508,37 @@ bool  Enqueue(Queue *pQueue, Element *item) {
 }
 
 
-Element*  SearchQ(Queue *pQueue, int key1, int key2){
+bool remove_dead(Queue *pQueue, int key1, int key2){
   Element *it = pQueue->head;
+  Element *forehand = pQueue->head;
+
+  
+  
   for (int i = 0; i < pQueue->size; i++)
   {
     if (it->index == key1 && it->offset == key2)
     {
-      return it;
-    }
+      pQueue->size--;
+      if (pQueue->head->index == key1 && pQueue->head->offset == key2)
+      {
+        pQueue->head = pQueue->head->prev;
 
+      }
+      else if (pQueue->tail->index == key1 && pQueue->tail->offset == key2)
+      {
+        pQueue->tail = forehand;
+      }
+      else
+      {
+        forehand->prev = it->prev;
+      }
+      
+      return true;
+    }
+    forehand = it;
     it = it->prev;
   }
-  return NULL;
+  return false;
 }
 
 bool EnqueueHead(Queue *pQueue, Element *item) {
@@ -2649,7 +2671,8 @@ void test_oram(char * argv[]){
 
 
   // printf("\n............... Test ORAM Stats ...............\n");
-  printf("trace test ctr%d\n", tracectr_test);
+  printf("trace test ctr %d\n", tracectr_test);
+  print_shuff_stat();
   export_csv(argv);
   exit(0);
 
@@ -3698,7 +3721,7 @@ void metadata_access(int label, char type){
 // gathering dead blk info into the queue
 void gather_dead(int index, int i){
   // if it's not last level (leaf level) add to deadq
-  if (i != LEVEL-1 && i >= TOP_CACHE)
+  if (i != LEVEL-1 && i >= TOP_CACHE+7)
   {
     for (int j = 0; j < LZ_VAR[i]; j++)
     {
@@ -3832,13 +3855,16 @@ int calc_mem_addr(int index, int offset, char type)
     if (GlobTree[index].slot[offset].redirect)
     {
       mem_addr = remote_access(index, offset);
+
       leaf_r_remote = (level == LEVEL-1) ? leaf_r_remote+1 : leaf_r_remote;
       nonleaf_r_remote = (level != LEVEL-1) ? nonleaf_r_remote+1 : nonleaf_r_remote;
+      remote_located_leaves = (level == LEVEL-1) ? remote_located_leaves-1 : remote_located_leaves;
       
     }
     else
     {
       mem_addr = inplace_access(index, offset);
+
       leaf_r_inplace = (level == LEVEL-1) ? leaf_r_inplace+1 : leaf_r_inplace;
       nonleaf_r_inplace = (level != LEVEL-1) ? nonleaf_r_inplace+1 : nonleaf_r_inplace;
     }
@@ -3855,6 +3881,14 @@ int calc_mem_addr(int index, int offset, char type)
       else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue? $$$ no removing for now
       {
         mem_addr = inplace_allocate(index, offset);
+        // bool discarded = remove_dead(deadQ, index, offset);
+        // if (!discarded)
+        // {
+        //   printf("ERROR: calc mem addr remembered block not found in the queue!\n");
+        //   export_csv(pargv);
+        //   exit(1);
+        // }
+        
         nonleaf_w_inplace_remembered++;
       }
       else if (GlobTree[index].slot[offset].dd == ALLOCATED) // the case that redirect needed ~> find another dead blk to fill in from the queue
@@ -3878,7 +3912,7 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the leaf level
     {
       mem_addr = -1;
-      if (deadQ->size > DEADQ_TH) // stop remote allocate if deadq size is less than a threshold
+      if (remote_located_leaves < 0.01*deadctr && tracectr_test > 5000000) // stop remote allocate if deadq size is less than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -3899,6 +3933,7 @@ int calc_mem_addr(int index, int offset, char type)
       else
       {
         leaf_w_remote++;
+        remote_located_leaves++;
       }
 
     }
@@ -4603,6 +4638,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "leaf_w_inplace,%lld\n", leaf_w_inplace);
   fprintf(fp, "leaf_w_remote,%lld\n", leaf_w_remote);
   fprintf(fp, "deadQ-size,%d\n", deadQ->size);
+  fprintf(fp, "remote_located_leaves,%d\n", remote_located_leaves);
   
   fclose(fp);
 }

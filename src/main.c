@@ -329,8 +329,48 @@ int main(int argc, char * argv[])
 	{
 	 pargv[i] = argv[i];
 	}
-	
 
+	// test delete from q 
+	
+	// Queue *q = ConstructQueue(4);
+	// for (int i = 1; i <= q->limit; i++)
+	// {
+	// 	Element *e = (Element*) malloc(sizeof (Element)); 
+	// 	e->index = i;
+	// 	e->offset = i*10;
+	// 	Enqueue(q, e);
+	// 	printf("%d , %d added\n", e->index, e->offset);
+	// }
+	// printf("queue size: %d\n", q->size);
+	// printf("tail %d , %d \n", q->tail->index, q->tail->offset);
+	// printf("head %d , %d \n", q->head->index, q->head->offset);
+
+	// remove_dead(q, 4, 40);
+
+	// printf("@> remove queue size: %d\n", q->size);
+
+
+
+	// Element *e = (Element*) malloc(sizeof (Element)); 
+	// e->index = 7;
+	// e->offset = 7*10;
+	// Enqueue(q, e);
+	// printf("%d , %d added\n", e->index, e->offset);
+
+	// printf("tail %d , %d \n", q->tail->index, q->tail->offset);
+	// printf("head %d , %d \n", q->head->index, q->head->offset);
+
+
+	// int qs = q->size;
+	
+	 
+	// for (int i = 0; i < qs; i++)
+	// {	Element *e = Dequeue(q);
+
+	// 	printf("%d , %d\n", e->index, e->offset);
+	// }
+
+	// exit(0);
 	
 
 
@@ -881,7 +921,7 @@ int main(int argc, char * argv[])
 		// printf("in for\n");
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
-        while ((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull) ) {
+        while (((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) /* || ( !SIM_ENABLE && (tracectr < TRACE_SIZE ))*/ ) {
 		// printf("in while\n");
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
@@ -1039,7 +1079,11 @@ int main(int argc, char * argv[])
 				last_read_served = false;
 			}
 			
-			insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc]);
+			// if (SIM_ENABLE)
+			// {
+				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc]);
+			// }
+			
 			
 
 			// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], 'R');
@@ -1064,7 +1108,10 @@ int main(int argc, char * argv[])
 			{
 				// start = clock();
 
-				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc]);
+				// if (SIM_ENABLE)
+				// {
+					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc]);
+				// }
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
@@ -1146,10 +1193,10 @@ int main(int argc, char * argv[])
 			}
 			
 			// cache enabled:
-			else if(CACHE_ENABLE)
-			{
+			// else if(CACHE_ENABLE)
+			// {
 				// printf("cache enable if: @ trace %d\n", tracectr);
-				while (no_miss_occured && !expt_done)
+				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE && tracectr < TRACE_SIZE) )
 				{
 					// printf("cache read trace %d\n", tracectr);
 					cache_clk++;
@@ -1179,9 +1226,14 @@ int main(int argc, char * argv[])
 							evictifctr++;
 							
 							// printf("main: evicted if addr: %lld\n", addr[numc]);
-							if (tracectr >= WARMUP_THRESHOLD)
+							if (tracectr >= WARMUP_THRESHOLD && SIM_ENABLE)
 							{
 								break;
+							}
+
+							if (!SIM_ENABLE)
+							{
+								invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
 							}
 							
 						}
@@ -1219,124 +1271,143 @@ int main(int argc, char * argv[])
 							// 	nonmemops[numc] = 200;
 							// }
 							
-							// hit
-							if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])) || stash_contain(block_addr(addr[numc])))
+							if (CACHE_ENABLE)
 							{
-								// pin idea for eraly wb
-								if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
+								// hit
+								if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])) || stash_contain(block_addr(addr[numc])))
 								{
-									if (opertype[numc] == 'W')
+									// pin idea for eraly wb
+									if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
 									{
-										// int posblk = pos_calc(block_addr(addr[numc]), 1);
-										// plb_access(posblk);
-									}
-								}
-								
-								
-								hitctr++;
-								hit_nonmemops += nonmemops[numc] + L2_LATENCY;
-							}
-							else // miss occured
-							{
-								missctr++;
-								if (nonmemops[numc] > 100)
-								{
-									nonmemctr += (nonmemops[numc]/100);
-									// nonmemctr++;
-								}
-
-								// prefetcher history collection
-								if (PREFETCH_ENABLE)
-								{
-									unsigned int page = page_addr(addr[numc]);
-									if (page != curr_page)
-									{
-										fill_access++;
-										Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
-										if ((table_access(e) == -1))
+										if (opertype[numc] == 'W')
 										{
-											fill_miss++;
-											if ((__builtin_popcount(curr_footprint) > 1))
+											// int posblk = pos_calc(block_addr(addr[numc]), 1);
+											// plb_access(posblk);
+										}
+									}
+									
+									
+									hitctr++;
+									hit_nonmemops += nonmemops[numc] + L2_LATENCY;
+								}
+								else // miss occured
+								{
+									missctr++;
+									if (nonmemops[numc] > 100)
+									{
+										nonmemctr += (nonmemops[numc]/100);
+										// nonmemctr++;
+									}
+
+									// prefetcher history collection
+									if (PREFETCH_ENABLE)
+									{
+										unsigned int page = page_addr(addr[numc]);
+										if (page != curr_page)
+										{
+											fill_access++;
+											Event e = {.pc = curr_pc, .addr = curr_page, .offset = curr_offset};
+											if ((table_access(e) == -1))
 											{
-												table_fill(e, curr_footprint);
+												fill_miss++;
+												if ((__builtin_popcount(curr_footprint) > 1))
+												{
+													table_fill(e, curr_footprint);
+												}
+												
 											}
 											
+											curr_page = page;
+											curr_pc = instrpc[numc];
+											curr_offset = offset_val(addr[numc]);
+											curr_footprint = 0;
+											footprint_update(addr[numc]);
+
 										}
-										
-										curr_page = page;
-										curr_pc = instrpc[numc];
-										curr_offset = offset_val(addr[numc]);
-										curr_footprint = 0;
-										footprint_update(addr[numc]);
-
+										else
+										{
+											footprint_update(addr[numc]);
+										}
 									}
-									else
+									
+
+									
+									// first serve the evicted block then next time serve this trace
+									int victim;
+									victim = cache_fill(addr[numc], opertype[numc]);
+									// printf("shad: %d\n", shad_nonmemops[numc]);
+
+									// if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' /*&& victim != -1*/)
+									// {
+									// 	missl1wb++;
+									// }
+									
+									
+									
+
+									if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
 									{
-										footprint_update(addr[numc]);
+										if (opertype[numc] == 'W')
+										{
+											// int posblk = pos_calc(block_addr(addr[numc]), 1);
+											// plb_access(posblk);
+										}
 									}
-								}
-								
+				
 
-								
-								// first serve the evicted block then next time serve this trace
-								int victim;
-								victim = cache_fill(addr[numc], opertype[numc]);
-								// printf("shad: %d\n", shad_nonmemops[numc]);
-
-								// if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' /*&& victim != -1*/)
-								// {
-								// 	missl1wb++;
-								// }
-								
-								
-								
-
-								if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
-								{
-									if (opertype[numc] == 'W')
+									if ( victim != -1)
 									{
-										// int posblk = pos_calc(block_addr(addr[numc]), 1);
-										// plb_access(posblk);
+										evictctr++;
+										waited_for_evicted[numc].valid = true;
+										waited_for_evicted[numc].nonmemops = MAINMEM_LATENCY;	
+										waited_for_evicted[numc].opertype = opertype[numc];
+										waited_for_evicted[numc].addr = addr[numc];
+										waited_for_evicted[numc].instrpc = instrpc[numc];
+										eviction_writeback[numc] = true;
+
+										addr[numc] = victim;
+										opertype[numc] = 'W';
+										dirty_evict = true;
 									}
-								}
-			
 
-								if ( victim != -1)
+									nonmemops[numc] += hit_nonmemops /* + L2_LATENCY */;
+									hit_nonmemops = 0;
+									nonmemops_sum += nonmemops[numc];
+
+									
+
+									no_miss_occured = false;
+
+									if (!SIM_ENABLE)
+									{
+										invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
+									}
+									
+
+								}
+								if (tracectr < WARMUP_THRESHOLD)
 								{
-									evictctr++;
-									waited_for_evicted[numc].valid = true;
-									waited_for_evicted[numc].nonmemops = MAINMEM_LATENCY;	
-									waited_for_evicted[numc].opertype = opertype[numc];
-									waited_for_evicted[numc].addr = addr[numc];
-									waited_for_evicted[numc].instrpc = instrpc[numc];
-									eviction_writeback[numc] = true;
-
-									addr[numc] = victim;
-									opertype[numc] = 'W';
-									dirty_evict = true;
+									no_miss_occured = true;
+									waited_for_evicted[numc].valid = false;
+									eviction_writeback[numc] = false;
+									hitctr = 0;
+									missctr = 0;
+									evictctr = 0;
+									cache_dirty = 0;
+									nonmemops_sum = 0;
+									missl1wb = 0;
 								}
-
-								nonmemops[numc] += hit_nonmemops /* + L2_LATENCY */;
-								hit_nonmemops = 0;
-								nonmemops_sum += nonmemops[numc];
-
-								
-
+							}
+							else if (!CACHE_ENABLE)
+							{
 								no_miss_occured = false;
 
+								if (!SIM_ENABLE)
+								{
+									invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
+								}
 							}
-							if (tracectr < WARMUP_THRESHOLD)
-							{
-								no_miss_occured = true;
-								waited_for_evicted[numc].valid = false;
-								eviction_writeback[numc] = false;
-								hitctr = 0;
-								missctr = 0;
-								evictctr = 0;
-								cache_dirty = 0;
-								nonmemops_sum = 0;
-								missl1wb = 0;
-							}
+							
 						}
 						else {
 							printf("Panic.  Poor trace format. newstr: %s\n", newstr);
@@ -1355,48 +1426,48 @@ int main(int argc, char * argv[])
 
 				}
 
-			}
+			// }
 			// cache disabled:
-			else if (!CACHE_ENABLE)	
-			{
-			/* Done consuming one line of the trace file.  Read in the next. */
-			if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
-				if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
-					tracectr++;
-			if (opertype[numc] == 'R') {
-				if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
-				printf("Panic.  Poor trace format. newstr: %s\n", newstr);
-				return -4;
-				}
-			}
-			else {
-				if (opertype[numc] == 'W') {
-				if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
-					printf("Panic.  Poor trace format. newstr: %s\n", newstr);
-					return -3;
-				}
-				}
-				else {
-				printf("Panic.  Poor trace format. newstr: %s\n", newstr);
-				return -2;
-				}
-			}
-				}
-				else {
-				printf("Panic.  Poor trace format. newstr: %s\n", newstr);
-				return -1;
-				}
-				}
-				else {
-					if (ROB[numc].inflight == 0) {
-					num_done++;
-					if (!time_done[numc]) time_done[numc] = CYCLE_VAL;
-					}
-					ROB[numc].tracedone=1;
-					break;  /* Break out of the while loop fetching instructions. */
-				}
-				addr[numc] = byte_addr(addr[numc]);
-			}
+			// else if (!CACHE_ENABLE)	
+			// {
+			// /* Done consuming one line of the trace file.  Read in the next. */
+			// if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+			// 	if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+			// 		tracectr++;
+			// if (opertype[numc] == 'R') {
+			// 	if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
+			// 	printf("Panic.  Poor trace format. newstr: %s\n", newstr);
+			// 	return -4;
+			// 	}
+			// }
+			// else {
+			// 	if (opertype[numc] == 'W') {
+			// 	if (sscanf(newstr,"%d %c %Lx",&nonmemops[numc],&opertype[numc],&addr[numc]) < 1) {
+			// 		printf("Panic.  Poor trace format. newstr: %s\n", newstr);
+			// 		return -3;
+			// 	}
+			// 	}
+			// 	else {
+			// 	printf("Panic.  Poor trace format. newstr: %s\n", newstr);
+			// 	return -2;
+			// 	}
+			// }
+			// 	}
+			// 	else {
+			// 	printf("Panic.  Poor trace format. newstr: %s\n", newstr);
+			// 	return -1;
+			// 	}
+			// 	}
+			// 	else {
+			// 		if (ROB[numc].inflight == 0) {
+			// 		num_done++;
+			// 		if (!time_done[numc]) time_done[numc] = CYCLE_VAL;
+			// 		}
+			// 		ROB[numc].tracedone=1;
+			// 		break;  /* Break out of the while loop fetching instructions. */
+			// 	}
+			// 	addr[numc] = byte_addr(addr[numc]);
+			// }
 
 			if (eviction_writeback[numc])
 			{
