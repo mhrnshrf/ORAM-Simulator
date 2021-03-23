@@ -3758,13 +3758,15 @@ void gather_dead(int index, int i){
 
           if (deadQ->size >= deadQ->limit)
           {
-            Dequeue(deadQ);
+            Element *oldest = Dequeue(deadQ);
+            // free(oldest);
           }
           Enqueue(deadQ, db);
 
           if (deadQ_arr[i]->size >= deadQ_arr[i]->limit)
           {
-            Dequeue(deadQ_arr[i]);
+            Element *oldest = Dequeue(deadQ_arr[i]);
+            // free(oldest);
           }
           Enqueue(deadQ_arr[i] , db);
           
@@ -3789,7 +3791,7 @@ void remote_invalidate(int index, int offset){
 }
 
 int remote_allocate(int index, int offset){
-  Element *cand;
+  // Element *cand;
   int i = -1;
   int j = -1;
   int level = calc_level(index);
@@ -3822,7 +3824,7 @@ int remote_allocate(int index, int offset){
     while (deadQ_arr[l]->size != 0)
     {
       // printf("here\n");
-      cand = Dequeue(deadQ_arr[l]);
+      Element *cand = Dequeue(deadQ_arr[l]);
       int i_tmp = cand->index;
       int j_tmp = cand->offset;
       bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
@@ -3832,8 +3834,10 @@ int remote_allocate(int index, int offset){
         // printf("break\n");
         i = cand->index;
         j = cand->offset;
+        // free(cand);
         break;
       }
+      // free(cand);
     }
     if (i != -1 && j != -1)
     {
@@ -3973,7 +3977,7 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the leaf level
     {
       mem_addr = -1;
-      if (remote_located_leaves < 0.1*deadctr && tracectr > 5000000) // stop remote allocate if deadq size is less than a threshold
+      if (remote_located_leaves < 0.1*deadctr ) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
