@@ -10,6 +10,9 @@
 #include "params.h"
 
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 // other simulation invariant
 // #define TRACE_SIZE 300000000          // # addr read from trace file
 // #define QUEUE_SIZE 3000               // oramq capacity
