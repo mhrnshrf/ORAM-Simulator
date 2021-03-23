@@ -41,6 +41,7 @@ long long int ep_round = 0;
 long long int touchcount = 0;
 long long int missl1wb = 0;
 int shuff_dist[LEVEL] = {0};
+int shuff_interval[LEVEL] = {0};
 int shuf_dif = 0;
 int shuf_prev = 0;
 int ringacc = 0;
@@ -49,7 +50,12 @@ bool pause_skip = false;
 
 int remote_located_leaves = 0;
 
-
+void reset_shuff_interval(){
+  for (int i = 0; i < LEVEL; i++)
+  {
+    shuff_interval[i] =0;
+  }
+}
 
 
 // long long int CYCLE_VAL = 0;
@@ -355,6 +361,14 @@ void reset_util(){
   }
 }
 
+
+void print_array(int * arr, int size, FILE *fp){
+  for (int i = 0; i < size; i++)
+  {
+    fprintf(fp, "arr[%d],%d\n", i, arr[i]);
+  }
+  // printf("\n");
+}
 
 
 void var_init(){
@@ -3959,7 +3973,7 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the leaf level
     {
       mem_addr = -1;
-      if (remote_located_leaves < 0.01*deadctr && tracectr > 5000000) // stop remote allocate if deadq size is less than a threshold
+      if (remote_located_leaves < 0.1*deadctr && tracectr > 5000000) // stop remote allocate if deadq size is less than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4324,6 +4338,7 @@ void ring_early_reshuffle(int label){
       dumval_range_dist[calc_range(i)][valnum]++;
       GlobTree[index].dumval = Z;
       shuff[i]++;
+      shuff_interval[i]++;
       shufcount++;
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
@@ -4549,7 +4564,30 @@ int reverse_lex(int n){
 
 
 
+void export_csv_intermed(char * argv[], int ind, int *arr){
+  FILE *fp;
+  char *filename;
+  if (chdir("../oram/log") != 0)  
+  {
+    perror("chdir() to ../oram/log failed"); 
+  }
 
+  char str[20];
+  sprintf(str, "%d", ind);
+
+  filename = "";
+  filename = strcat(argv[3], "-");
+  filename = strcat(filename, str);
+  filename = strcat(filename, ".csv");
+
+  fp = fopen(filename,"w+");
+
+  print_array(arr, LEVEL, fp);
+  
+  fclose(fp);
+
+
+}
 
 
 
@@ -4580,7 +4618,7 @@ void export_csv(char * argv[]){
     shuffctr += shuff[i];
     if (i >= TOP_CACHE)
     {
-      shuffctr_tc++;
+      shuffctr_tc +=shuff[i];
     }
   }
 

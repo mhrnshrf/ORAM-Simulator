@@ -1402,6 +1402,14 @@ int main(int argc, char * argv[])
 							{
 								no_miss_occured = false;
 
+								if (tracectr > 100000000 && tracectr % 1000000 == 0)
+								{
+									int ind = tracectr/1000000;
+									export_csv_intermed(argv, ind, shuff_interval);
+									reset_shuff_interval();
+								}
+								
+
 								if (!SIM_ENABLE)
 								{
 									invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
