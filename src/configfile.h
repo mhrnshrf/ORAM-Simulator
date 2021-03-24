@@ -111,6 +111,8 @@ typedef enum {
 	WL_CAP_token ,
 	DEAD_ENABLE_token ,
 	DEADQ_SIZE_token ,
+	DEAD_GATHER_OFFSET_token ,
+	REMOTE_ALLOC_RATIO_token ,
 
 	comment_token,
 	unknown_token
@@ -308,6 +310,10 @@ token_t tokenize(char * input){
 	return DEAD_ENABLE_token;
   } else if (strncmp(input, "DEADQ_SIZE",length) == 0) {
 	return DEADQ_SIZE_token;
+  } else if (strncmp(input, "DEAD_GATHER_OFFSET",length) == 0) {
+	return DEAD_GATHER_OFFSET_token;
+  } else if (strncmp(input, "REMOTE_ALLOC_RATIO",length) == 0) {
+	return REMOTE_ALLOC_RATIO_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -756,6 +762,14 @@ void read_config_file(FILE * fin)
 			case DEADQ_SIZE_token:
 				fscanf(fin,"%d",&input_int);
 				DEADQ_SIZE = input_int;
+				break;
+			case DEAD_GATHER_OFFSET_token:
+				fscanf(fin,"%d",&input_int);
+				DEAD_GATHER_OFFSET = input_int;
+				break;
+			case REMOTE_ALLOC_RATIO_token:
+				fscanf(fin,"%f",&input_float);
+				REMOTE_ALLOC_RATIO = input_float;
 				break;
 
 			case unknown_token:

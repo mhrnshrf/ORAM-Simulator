@@ -836,7 +836,7 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
+	if (tracectr >= TRACE_SIZE-3 || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
 	{
 		break;
 	}
@@ -1196,7 +1196,7 @@ int main(int argc, char * argv[])
 			// else if(CACHE_ENABLE)
 			// {
 				// printf("cache enable if: @ trace %d\n", tracectr);
-				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE && tracectr < TRACE_SIZE) )
+				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE && tracectr < TRACE_SIZE-3) )
 				{
 					// printf("cache read trace %d\n", tracectr);
 					cache_clk++;

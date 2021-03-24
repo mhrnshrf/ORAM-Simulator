@@ -274,6 +274,8 @@ long long int nonleaf_w_inplace_remembered = 0;
 long long int nonleaf_w_remote = 0;
 long long int leaf_w_inplace = 0;
 long long int leaf_w_remote = 0;
+long long int nonleaf_elselevel = 0;
+long long int leaf_elselevel = 0;
 
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
@@ -774,7 +776,7 @@ int concat(int a, int b) {
 
 void oram_alloc(){
   STALE_TH = STALE_BUF_SIZE-1;
-  GATHER_START = TOP_CACHE+7;
+  GATHER_START = TOP_CACHE + DEAD_GATHER_OFFSET;
 
   for (int i = 0; i < LEVEL; i++)
 	{
@@ -842,10 +844,10 @@ void oram_alloc(){
     revarr[i] = reverse_lex(i);
   }
 
-  for (int i = LEVEL-2; i >= TOP_CACHE; i--)
+  for (int i = LEVEL-2; i >= GATHER_START; i--)
   {
-    // int qs = DEADQ_SIZE + i*100;
-    deadQ_arr[i] = ConstructQueue(DEADQ_SIZE);
+    int qs = (int)floor(pow(1.5, i));
+    deadQ_arr[i] = ConstructQueue(qs);
   }
   
 
@@ -3758,14 +3760,16 @@ void gather_dead(int index, int i){
 
           if (deadQ->size >= deadQ->limit)
           {
-            Element *oldest = Dequeue(deadQ);
+            Dequeue(deadQ);
+            // Element *oldest = Dequeue(deadQ);
             // free(oldest);
           }
           Enqueue(deadQ, db);
 
           if (deadQ_arr[i]->size >= deadQ_arr[i]->limit)
           {
-            Element *oldest = Dequeue(deadQ_arr[i]);
+            Dequeue(deadQ_arr[i]);
+            // Element *oldest = Dequeue(deadQ_arr[i]);
             // free(oldest);
           }
           Enqueue(deadQ_arr[i] , db);
@@ -3795,6 +3799,7 @@ int remote_allocate(int index, int offset){
   int i = -1;
   int j = -1;
   int level = calc_level(index);
+  int input_level = level;
 
   if (level == LEVEL-1)
   {
@@ -3802,48 +3807,67 @@ int remote_allocate(int index, int offset){
   }
   
 
-  // while (deadQ->size != 0)
-  // {
-  //   // printf("here\n");
-  //   cand = Dequeue(deadQ);
-  //   int i_tmp = cand->index;
-  //   int j_tmp = cand->offset;
-  //   bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
-  
-  //   if (!taken)
-  //   {
-  //     // printf("break\n");
-  //     i = cand->index;
-  //     j = cand->offset;
-  //     break;
-  //   }
-  // }
-
-  for (int l = level; l >= GATHER_START; l--)
+  // preferred level to look for dead blk
+  while (deadQ_arr[level]->size != 0)
   {
-    while (deadQ_arr[l]->size != 0)
+    // printf("here\n");
+    Element *cand = Dequeue(deadQ_arr[level]);
+    int i_tmp = cand->index;
+    int j_tmp = cand->offset;
+    bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+  
+    if (!taken)
     {
-      // printf("here\n");
-      Element *cand = Dequeue(deadQ_arr[l]);
-      int i_tmp = cand->index;
-      int j_tmp = cand->offset;
-      bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
-    
-      if (!taken)
-      {
-        // printf("break\n");
-        i = cand->index;
-        j = cand->offset;
-        // free(cand);
-        break;
-      }
-      // free(cand);
-    }
-    if (i != -1 && j != -1)
-    {
+      // printf("break\n");
+      i = cand->index;
+      j = cand->offset;
       break;
     }
   }
+
+  // if not found look for dead blk at every level else and start from the bottom 
+  if (i == -1 && j == -1)
+  {
+    if (input_level == LEVEL-1)
+    {
+      nonleaf_elselevel++;
+    }
+    else
+    {
+      leaf_elselevel++;
+    }
+    
+    for (int l = LEVEL-2; l >= GATHER_START; l--)
+    {
+      if (l != level)
+      {
+        while (deadQ_arr[l]->size != 0)
+        {
+          // printf("here\n");
+          Element *cand = Dequeue(deadQ_arr[l]);
+          int i_tmp = cand->index;
+          int j_tmp = cand->offset;
+          bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+        
+          if (!taken)
+          {
+            // printf("break\n");
+            i = cand->index;
+            j = cand->offset;
+            // free(cand);
+            break;
+          }
+          // free(cand);
+        }
+        if (i != -1 && j != -1)
+        {
+          break;
+        }
+      }
+      
+    }
+  }
+  
   
 
   if (i != -1 && j != -1)
@@ -3977,7 +4001,7 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the leaf level
     {
       mem_addr = -1;
-      if (remote_located_leaves < 0.1*deadctr ) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      if (remote_located_leaves < REMOTE_ALLOC_RATIO*deadctr ) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4739,6 +4763,8 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "shuff[%d],%d\n", i, shuff[i]);
   }
+  fprintf(fp, "nonleaf_elselevel,%lld\n", nonleaf_elselevel);
+  fprintf(fp, "leaf_elselevel,%lld\n", leaf_elselevel);
   
   fclose(fp);
 }
