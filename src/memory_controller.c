@@ -3993,6 +3993,7 @@ int calc_mem_addr(int index, int offset, char type)
         if (mem_addr == -1)
         {
           printf("ERROR: calc mem addr no available cand in queue!\n");
+          export_csv(pargv);
           exit(1);
         }
         nonleaf_w_remote++;
@@ -4015,6 +4016,7 @@ int calc_mem_addr(int index, int offset, char type)
         else
         {
           printf("ERROR: calc mem addr leaf level allocation failed!\n");
+          export_csv(pargv);
           exit(1);
         }
         leaf_w_inplace++;
@@ -4032,6 +4034,7 @@ int calc_mem_addr(int index, int offset, char type)
   else
   {
     printf("ERROR: calc mem addr %d %d %c\n", index, offset, type);
+    export_csv(pargv);
     exit(1);
   }
   return mem_addr;
@@ -4147,8 +4150,8 @@ void ring_read_path(int label, int addr){
     if (!GlobTree[index].slot[offset].isReal)
     {
       GlobTree[index].dumdead++;
+      deadctr++;
     }
-    deadctr++;
 
 
      
@@ -4368,6 +4371,7 @@ void ring_early_reshuffle(int label){
       shuff[i]++;
       shuff_interval[i]++;
       shufcount++;
+      
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
         int mem_addr = calc_mem_addr(index, j, 'R');
