@@ -4765,6 +4765,7 @@ void export_csv(char * argv[]){
   }
   fprintf(fp, "nonleaf_elselevel,%lld\n", nonleaf_elselevel);
   fprintf(fp, "leaf_elselevel,%lld\n", leaf_elselevel);
+  fprintf(fp, "remote_located_nonleaves,%lld\n", nonleaf_w_remote - nonleaf_r_remote);
   
   fclose(fp);
 }
