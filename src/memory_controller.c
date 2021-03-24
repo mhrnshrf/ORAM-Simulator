@@ -4144,11 +4144,11 @@ void ring_read_path(int label, int addr){
 
     GlobTree[index].count++;
 
-    if ( !GlobTree[index].slot[offset].isReal)
+    if (!GlobTree[index].slot[offset].isReal)
     {
       GlobTree[index].dumdead++;
-      deadctr++;
     }
+    deadctr++;
 
 
      
