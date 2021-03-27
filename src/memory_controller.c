@@ -50,9 +50,9 @@ bool pause_skip = false;
 
 int remote_located_leaves = 0;
 
-int lifetime_min[LEVEL] = {0};
+int lifetime_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
 int lifetime_max[LEVEL] = {0};
-int lifetime_sum[LEVEL] = {0};
+long long int lifetime_sum[LEVEL] = {0};
 int lifetime_count[LEVEL] = {0};
 
 void reset_shuff_interval(){
@@ -64,16 +64,19 @@ void reset_shuff_interval(){
 
 
 void update_lifetime_stat(int lifetime, int level){
-  if (lifetime_min[level] > lifetime)
+  if (lifetime != 0)
   {
-    lifetime_min[level] = lifetime;
+    if (lifetime_min[level] > lifetime) 
+    {
+      lifetime_min[level] = lifetime;
+    }
+    if (lifetime_max[level] < lifetime)
+    {
+      lifetime_max[level] = lifetime;
+    }
+    lifetime_sum[level] += lifetime;
+    lifetime_count[level]++; 
   }
-  if (lifetime_max[level] < lifetime)
-  {
-    lifetime_max[level] = lifetime;
-  }
-  lifetime_sum[level] += lifetime;
-  lifetime_count[level]++; 
 }
 
 // long long int CYCLE_VAL = 0;
