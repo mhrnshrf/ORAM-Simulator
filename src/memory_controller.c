@@ -50,6 +50,11 @@ bool pause_skip = false;
 
 int remote_located_leaves = 0;
 
+int lifetime_min[LEVEL] = {0};
+int lifetime_max[LEVEL] = {0};
+int lifetime_sum[LEVEL] = {0};
+int lifetime_count[LEVEL] = {0};
+
 void reset_shuff_interval(){
   for (int i = 0; i < LEVEL; i++)
   {
@@ -57,6 +62,19 @@ void reset_shuff_interval(){
   }
 }
 
+
+void update_lifetime_stat(int lifetime, int level){
+  if (lifetime_min[level] > lifetime)
+  {
+    lifetime_min[level] = lifetime;
+  }
+  if (lifetime_max[level] < lifetime)
+  {
+    lifetime_max[level] = lifetime;
+  }
+  lifetime_sum[level] += lifetime;
+  lifetime_count[level]++; 
+}
 
 // long long int CYCLE_VAL = 0;
 
@@ -92,6 +110,8 @@ typedef struct Slot{
   bool redirect; // a flag that says this slot is pointing to somewhere else
   int remote_index; // physical node of a block that supposed to be here but is somewhere else
   int remote_offset; // physical slot offset of a block that supposed to be here but is somewhere else
+  int dead_start;
+  int dead_lifetime;
 }Slot;
 
 // typedef struct Bucket{
@@ -803,6 +823,8 @@ void oram_alloc(){
       GlobTree[i].slot[k].valid = true;  // ??? to be revised
       GlobTree[i].slot[k].dd = REFRESHED;  
       GlobTree[i].slot[k].redirect = false;  
+      GlobTree[i].slot[k].dead_start = 0;  
+      GlobTree[i].slot[k].dead_lifetime = 0;  
       GlobTree[i].dumnum++;
       GlobTree[i].dumval++;
 
@@ -1521,6 +1543,13 @@ void write_path(int label){
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
         GlobTree[index].slot[j].valid = true;  // added for ring oram
+        if (GlobTree[index].slot[j].dead_start != 0)
+        {
+          int lifetime = ringctr - GlobTree[index].slot[j].dead_start;
+          GlobTree[index].slot[j].dead_start = 0;
+          update_lifetime_stat(lifetime, i);
+        }
+        
 
         gi++;
         
@@ -4113,6 +4142,7 @@ void ring_read_path(int label, int addr){
 
     ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
 
+
     if (!GlobTree[index].slot[offset].isReal)
     {
       GlobTree[index].dumval--;
@@ -4448,6 +4478,14 @@ void ring_early_reshuffle(int label){
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
         GlobTree[index].slot[j].valid = true;
+
+        if (GlobTree[index].slot[j].dead_start != 0)
+        {
+          int lifetime = ringctr - GlobTree[index].slot[j].dead_start;
+          GlobTree[index].slot[j].dead_start = 0;
+          update_lifetime_stat(lifetime, i);
+        }
+
         int mem_addr = calc_mem_addr(index, j, 'W');
 
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
@@ -4531,6 +4569,11 @@ void ring_early_reshuffle(int label){
 
 void ring_invalidate(int index, int offset){
   GlobTree[index].slot[offset].valid = false;
+  if (GlobTree[index].slot[offset].dead_start == 0)
+  {
+    GlobTree[index].slot[offset].dead_start = ringctr;
+  }
+  
 }
 
 
@@ -4594,6 +4637,20 @@ int reverse_lex(int n){
 	return rev;
 }
 
+void print_lifetime_stat(FILE *fp){
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "lifetime_min[%d],%d\n", i, lifetime_min[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "lifetime_max[%d],%d\n", i, lifetime_max[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "lifetime_avg[%d],%f\n", i, (double)lifetime_sum[i]/lifetime_count[i]);
+  }
+}
 
 
 void export_csv_intermed(char * argv[], int ind, int *arr){
@@ -4770,6 +4827,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "nonleaf_elselevel,%lld\n", nonleaf_elselevel);
   fprintf(fp, "leaf_elselevel,%lld\n", leaf_elselevel);
   fprintf(fp, "remote_located_nonleaves,%lld\n", nonleaf_w_remote - nonleaf_r_remote);
+
+  print_lifetime_stat(fp);
   
   fclose(fp);
 }
