@@ -324,7 +324,7 @@ int plb_trace[PLB_SIZE] = {[0 ... PLB_SIZE-1] = -1};
 int plb_interval[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
 int plb_temp[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
 
-int shuff[LEVEL] = {0};
+long long int shuff[LEVEL] = {0};
 int wb[LEVEL] = {0};
 int ref_close[LEVEL] = {0};
 
@@ -4586,7 +4586,7 @@ void print_shuff_stat(){
   int sum = 0;
   for (int i = 0; i < LEVEL; i++)
   {
-    printf("%d\n", shuff[i]);
+    printf("%lld\n", shuff[i]);
     sum += shuff[i];
   }
   printf("\n%d\n", sum);
@@ -4825,13 +4825,13 @@ void export_csv(char * argv[]){
 
   for (int i = 0; i < LEVEL; i++)
   {
-    fprintf(fp, "shuff[%d],%d\n", i, shuff[i]);
+    fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
   }
   fprintf(fp, "nonleaf_elselevel,%lld\n", nonleaf_elselevel);
   fprintf(fp, "leaf_elselevel,%lld\n", leaf_elselevel);
   fprintf(fp, "remote_located_nonleaves,%lld\n", nonleaf_w_remote - nonleaf_r_remote);
 
-  print_lifetime_stat(fp);
+  // print_lifetime_stat(fp);
   
   fclose(fp);
 }
