@@ -66,7 +66,7 @@ void reset_shuff_interval(){
 void update_lifetime_stat(int lifetime, int level){
   if (lifetime != 0)
   {
-    if (lifetime_min[level] > lifetime) 
+    if (lifetime_min[level] > lifetime && lifetime != 1) 
     {
       lifetime_min[level] = lifetime;
     }
