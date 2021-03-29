@@ -399,7 +399,7 @@ int remote_allocate(int index, int offset);
 bool remove_dead(Queue *pQueue, int key1, int key2);
 void reset_shuff_interval();
 void print_array(int * arr, int size, FILE *fp);
-void export_csv_intermed(char * argv[], int ind, int *arr);
+void export_csv_intermed(char * exp_name, int ind, int *arr);
 
 // Mehrnoosh.
 

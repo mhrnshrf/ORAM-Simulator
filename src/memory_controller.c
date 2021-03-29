@@ -4656,28 +4656,38 @@ void print_lifetime_stat(FILE *fp){
 }
 
 
-void export_csv_intermed(char * argv[], int ind, int *arr){
+void export_csv_intermed(char exp_name[], int ind, int *arr){
   FILE *fp;
-  char *filename = (char *)malloc(sizeof(char)*100);
+  // char *filename = (char *)malloc(sizeof(char)*100);
+  // filename = "";
+  char filename[100];
 
   if (chdir("../oram/log") != 0)  
   {
     perror("chdir() to ../oram/log failed"); 
   }
 
-  char str[20];
-  sprintf(str, "%d", ind);
+  // char str[20];
+  // sprintf(str, "%d", ind);
+  // strcpy( filename, str );
 
-  filename = "";
-  filename = strcat(argv[3], "-");
-  filename = strcat(filename, str);
-  filename = strcat(filename, ".csv");
+  // // printf("filename "": %s\n", filename);
+  // filename = strcat(exp_name, "-");
+  // // printf("filename argv: %s\n", filename);
+  // filename = strcat(filename, str);
+  // // printf("filename str: %s\n", filename);
+  // filename = strcat(filename, ".csv");
+  // // printf("filename csv: %s\n", filename);
+
+  sprintf(filename, "%s-%d.csv", exp_name, ind);
+  // printf("filename: %s\n", filename);
+
 
   fp = fopen(filename,"w+");
 
   print_array(arr, LEVEL, fp);
 
-  free(filename);
+  // free(filename);
   
   fclose(fp);
 
@@ -4835,6 +4845,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "remote_located_nonleaves,%lld\n", nonleaf_w_remote - nonleaf_r_remote);
 
   // print_lifetime_stat(fp);
+  
   
   fclose(fp);
 }

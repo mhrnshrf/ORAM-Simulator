@@ -38,6 +38,7 @@ int *prefixtable;
 long long int *time_done;
 long long int total_time_done;
 float core_power=0;
+char exp_name[20] = "";
 // FILE **shadtif;  /* The handles to the trace input files. */
 
 // Mehrnoosh:
@@ -330,6 +331,16 @@ int main(int argc, char * argv[])
 	 pargv[i] = argv[i];
 	}
 
+	strcpy(exp_name, argv[3]);
+	// strncpy(exp_name, argv[3], 20);
+	// int c = 0;
+	// do 
+	// {
+	// 	exp_name[c] = argv[3][c];
+	// 	c++;
+	// }  while (argv[3][c] != '\0');
+	
+	// printf("exp name %s\n", exp_name); 
 	// test delete from q 
 	
 	// Queue *q = ConstructQueue(4);
@@ -1402,12 +1413,12 @@ int main(int argc, char * argv[])
 							{
 								no_miss_occured = false;
 
-								// if (tracectr > 1 && tracectr % 1000000 == 0)
-								// {
-								// 	int ind = tracectr/1000000;
-								// 	export_csv_intermed(argv, ind, shuff_interval);
-								// 	reset_shuff_interval();
-								// }
+								if (tracectr > 1 && tracectr % 10000000 == 0)
+								{
+									int ind = tracectr/1000000;
+									export_csv_intermed(exp_name, ind, shuff_interval);
+									reset_shuff_interval();
+								}
 								
 
 								if (!SIM_ENABLE)
