@@ -4382,7 +4382,7 @@ void ring_early_reshuffle(int label){
   int shufcount = 0;
   int stashb4 = stashctr;
   // for (int i = 0; i < LEVEL; i++)
-  for (int i = LEVEL-1; i >= 0; i--)
+  for (int i = LEVEL-1; i > 0; i--)
   {
     int index = calc_index(label, i);
     int reqmade = 0;
@@ -4658,7 +4658,8 @@ void print_lifetime_stat(FILE *fp){
 
 void export_csv_intermed(char * argv[], int ind, int *arr){
   FILE *fp;
-  char *filename;
+  char *filename = (char *)malloc(sizeof(char)*100);
+
   if (chdir("../oram/log") != 0)  
   {
     perror("chdir() to ../oram/log failed"); 
@@ -4675,6 +4676,8 @@ void export_csv_intermed(char * argv[], int ind, int *arr){
   fp = fopen(filename,"w+");
 
   print_array(arr, LEVEL, fp);
+
+  free(filename);
   
   fclose(fp);
 
