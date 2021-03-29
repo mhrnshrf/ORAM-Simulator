@@ -1402,7 +1402,7 @@ int main(int argc, char * argv[])
 							{
 								no_miss_occured = false;
 
-								if (tracectr > 100000000 && tracectr % 1000000 == 0)
+								if (tracectr > 1 && tracectr % 1000000 == 0)
 								{
 									int ind = tracectr/1000000;
 									export_csv_intermed(argv, ind, shuff_interval);
