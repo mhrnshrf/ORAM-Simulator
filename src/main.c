@@ -1413,12 +1413,12 @@ int main(int argc, char * argv[])
 							{
 								no_miss_occured = false;
 
-								if (tracectr > 1 && tracectr % 10000000 == 0)
-								{
-									int ind = tracectr/1000000;
-									export_csv_intermed(exp_name, ind, shuff_interval);
-									reset_shuff_interval();
-								}
+								// if (tracectr > 1 && tracectr % 10000000 == 0)
+								// {
+								// 	int ind = tracectr/1000000;
+								// 	export_csv_intermed(exp_name, ind, shuff_interval);
+								// 	reset_shuff_interval();
+								// }
 								
 
 								if (!SIM_ENABLE)
