@@ -1440,7 +1440,11 @@ int main(int argc, char * argv[])
 						if (!time_done[numc]) time_done[numc] = CYCLE_VAL;
 						}
 						ROB[numc].tracedone=1;
-						break;  /* Break out of the while loop fetching instructions. */
+						if (SIM_ENABLE)
+						{
+							break;  /* Break out of the while loop fetching instructions. */
+						}
+						
 					}
 
 				}
