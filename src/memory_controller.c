@@ -47,6 +47,7 @@ int shuf_prev = 0;
 int ringacc = 0;
 int wl_occ = 0;
 bool pause_skip = false;
+int count_level[LEVEL] = {0};
 
 int remote_located_leaves = 0;
 
@@ -1318,6 +1319,7 @@ void read_path(int label){
                 GlobTree[index].slot[j].label = -1;
                 cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]--;
                 GlobTree[index].dumnum++;
+                count_level[i]--;
                 // GlobTree[index].dumval++;
               }
               else
@@ -1591,6 +1593,7 @@ void write_path(int label){
 
                 GlobTree[index].dumnum--;
                 GlobTree[index].dumval--;
+                count_level[i]++;
 
                 continue;
               }
@@ -1619,6 +1622,7 @@ void write_path(int label){
                 cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]++;
 
                 GlobTree[index].dumnum--;
+                count_level[i]++;
               }
 
               remove_from_stash(candidate[j]);
