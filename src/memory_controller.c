@@ -29,6 +29,7 @@ extern long long int trace_clk;
 #include <unistd.h> 
 
 char bench[20];
+char exp_name[20] = "";
 
 long long int deadctr = 0;
 long long int deadarr[100] = {0};
@@ -48,6 +49,7 @@ int ringacc = 0;
 int wl_occ = 0;
 bool pause_skip = false;
 int count_level[LEVEL] = {0};
+int cap_level[LEVEL] = {0};
 
 int remote_located_leaves = 0;
 
@@ -304,6 +306,8 @@ long long int leaf_elselevel = 0;
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
 
+int cl_interval = 0;
+
 int stale_reduction = 0;
 
 bool dirty_evict = false;
@@ -376,16 +380,17 @@ int  wl_pos[H-1] = {0};
 int glctr[GL_COUNT] = {0};
 
 long double util_sum[LEVEL] = {0}; 
-long double util_tmp[LEVEL] = {0}; 
+long double util_avg[LEVEL] = {0}; 
+long double util_overall[LEVEL] = {0}; 
 
 bool ring_dummy = false;
 
-void reset_util(){
-  for (int i = 0; i < LEVEL; i++)
-  {
-    util_tmp[i] = 0;
-  }
-}
+// void reset_util(){
+//   for (int i = 0; i < LEVEL; i++)
+//   {
+//     util_avg[i] = 0;
+//   }
+// }
 
 
 void print_array(int * arr, int size, FILE *fp){
@@ -394,6 +399,13 @@ void print_array(int * arr, int size, FILE *fp){
     fprintf(fp, "arr[%d],%d\n", i, arr[i]);
   }
   // printf("\n");
+}
+
+void print_array_double(long double * arr, int size, FILE *fp){
+  for (int i = 0; i < size; i++)
+  {
+    fprintf(fp, "arr[%d],%Lf\n", i, arr[i]);
+  }
 }
 
 
@@ -875,6 +887,11 @@ void oram_alloc(){
     int qs = (int)floor(pow(1.5, i));
     deadQ_arr[i] = ConstructQueue(qs);
   }
+
+  for (int i = 0; i < LEVEL; i++)
+  {
+    cap_level[i] = (LZ[i]*pow(2,i));
+  }
   
 
 }
@@ -892,6 +909,9 @@ void oram_init(){
   {
     SubMap[i] = index_to_addr(i);
   }
+
+
+  
 
   // initialize subtree addressing for rho tree
   switch_tree_to(RHO);
@@ -950,6 +970,24 @@ void oram_init_path(){
   fflush(stdout);
 }
 
+void reset_util_level(){
+  for (int i = 0; i < LEVEL; i++)
+  {
+    util_avg[i] = 0;
+    util_sum[i] = 0;
+  }
+  cl_interval = 0;
+}
+
+void record_util_level(){
+  cl_interval++;
+  for (int i = 0; i < LEVEL; i++)
+  {
+    util_avg[i] = util_sum[i]/cl_interval;
+    util_sum[i] += (double)count_level[i]/cap_level[i];
+  }
+}
+
 void print_count_level(int rounds, PrintType print){
   if (print != NONE)
   {
@@ -979,7 +1017,7 @@ void print_count_level(int rounds, PrintType print){
     }
     else if (print == TMP)
     {
-      printf("%Lf\n", util_tmp[l]/rounds);
+      printf("%Lf\n", util_avg[l]/rounds);
     }
     else if (print == ALL)
     {
@@ -989,7 +1027,7 @@ void print_count_level(int rounds, PrintType print){
     else if (print == NONE)
     {
       util_sum[l] += (counter/(LZ[l]*pow(2,l)));
-      util_tmp[l] += (counter/(LZ[l]*pow(2,l)));
+      util_avg[l] += (counter/(LZ[l]*pow(2,l)));
     }
       
   }
@@ -2120,73 +2158,47 @@ void take_snapshot(char * argv[]){
     label = PosMap[addr];
 
 
-    if (i % 10000000 == 0)
+    record_util_level();
+
+
+    if (i <= 10000000 )
     {
-      printf("%dm\n\n",(int)(i/1000000));
-      int rounds = i/10000000;
-      print_count_level(rounds, ALL);
-      printf("\n\n\n\n");
+      if (i % 4000000 == 0 )
+      {
+        export_csv_intermed(exp_name, i/1000000, util_avg);
+        reset_util_level();
+      }
     }
-    
+    else if(i <= 90000000 )
+    {
+      if (i % 20000000 == 0 )
+      {
+        export_csv_intermed(exp_name, i/1000000, util_avg);
+        reset_util_level();
+      }
+    }
+    else if(i <= 300000000 )
+    {
+      if (i % 50000000 == 0 )
+      {
+        export_csv_intermed(exp_name, i/1000000, util_avg);
+        reset_util_level();
+      }
+    }
+    else if(i <= 400000000 )
+    {
+      if (i % 10000000 == 0 )
+      {
+        export_csv_intermed(exp_name, i/1000000, util_avg);
+        reset_util_level();
+      }
 
-    // printf("@ i: %d\n", i);
-  
-    // print_count_level(0, NONE);
+      // if (i == 400000000 )
+      // {
+      //  export_csv_intermed(exp_name, 401, util_avg);
+      // }
 
-    // int prev_i = 0;
-
-    // if (i <= 10000000 )
-    // {
-    //   if (i % 4000000 == 0 )
-    //   {
-    //     printf("%dm\n\n",(int)(i/1000000));
-    //     print_count_level(i - prev_i, SNAP);
-    //     printf("\n\n\n\n");
-    //     prev_i = i;
-    //     reset_util();
-    //   }
-    // }
-    // else if(i <= 90000000 )
-    // {
-    //   if (i % 20000000 == 0 )
-    //   {
-    //     printf("%dm\n\n",(int)(i/1000000));
-    //     print_count_level(i - prev_i, SNAP);
-    //     printf("\n\n\n\n");
-    //     prev_i = i;
-    //     reset_util();
-    //   }
-    // }
-    // else if(i <= 300000000 )
-    // {
-    //   if (i % 50000000 == 0 )
-    //   {
-    //     printf("%dm\n\n",(int)(i/1000000));
-    //     print_count_level(i - prev_i, SNAP);
-    //     printf("\n\n\n\n");
-    //     prev_i = i;
-    //     reset_util();
-    //   }
-    // }
-    // else if(i <= 400000000 )
-    // {
-    //   if (i % 10000000 == 0 )
-    //   {
-    //     printf("%dm\n\n",(int)(i/1000000));
-    //     print_count_level(i - prev_i, SNAP);
-    //     printf("\n\n\n\n");
-    //     prev_i = i;
-    //     reset_util();
-    //   }
-
-    //   if (i == 400000000 )
-    //   {
-    //     printf("Overall avg @> %dm\n\n",(int)(i/1000000));
-    //     print_count_level(i, ALL);
-    //     printf("\n\n\n\n");
-    //   }
-
-    // }
+    }
 
   
     
@@ -4660,7 +4672,7 @@ void print_lifetime_stat(FILE *fp){
 }
 
 
-void export_csv_intermed(char exp_name[], int ind, int *arr){
+void export_csv_intermed(char exp_name[], int ind, long double *arr){
   FILE *fp;
   // char *filename = (char *)malloc(sizeof(char)*100);
   // filename = "";
@@ -4689,7 +4701,8 @@ void export_csv_intermed(char exp_name[], int ind, int *arr){
 
   fp = fopen(filename,"w+");
 
-  print_array(arr, LEVEL, fp);
+  // print_array(arr, LEVEL, fp);
+  print_array_double(arr, LEVEL, fp);
 
   // free(filename);
   

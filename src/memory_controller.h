@@ -41,10 +41,10 @@
 // #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 // #define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
 // #define SNAP_CACHE      0     // 0/1 flag to disable/enable  snapshot with having L2 cache
-#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -308,6 +308,7 @@ extern long long int nonmemops_sum;
  
 extern long long int missl1wb;
 extern char bench[20];
+extern char exp_name[20];
 extern char *pargv[5];
 
 extern int shuff_interval[LEVEL];
@@ -399,7 +400,10 @@ int remote_allocate(int index, int offset);
 bool remove_dead(Queue *pQueue, int key1, int key2);
 void reset_shuff_interval();
 void print_array(int * arr, int size, FILE *fp);
-void export_csv_intermed(char * exp_name, int ind, int *arr);
+void export_csv_intermed(char * exp_name, int ind, long double *arr);
+void record_util_level();
+void reset_util_level();
+void print_array_double(long double * arr, int size, FILE *fp);
 
 // Mehrnoosh.
 

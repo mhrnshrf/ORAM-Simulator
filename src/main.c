@@ -38,7 +38,7 @@ int *prefixtable;
 long long int *time_done;
 long long int total_time_done;
 float core_power=0;
-char exp_name[20] = "";
+
 // FILE **shadtif;  /* The handles to the trace input files. */
 
 // Mehrnoosh:
