@@ -2166,7 +2166,7 @@ void take_snapshot(char * argv[]){
       if (i % 4000000 == 0 )
       {
         export_csv_intermed(exp_name, i/1000000, util_avg);
-        reset_util_level();
+        // reset_util_level();
       }
     }
     else if(i <= 90000000 )
@@ -2174,7 +2174,7 @@ void take_snapshot(char * argv[]){
       if (i % 20000000 == 0 )
       {
         export_csv_intermed(exp_name, i/1000000, util_avg);
-        reset_util_level();
+        // reset_util_level();
       }
     }
     else if(i <= 300000000 )
@@ -2182,7 +2182,7 @@ void take_snapshot(char * argv[]){
       if (i % 50000000 == 0 )
       {
         export_csv_intermed(exp_name, i/1000000, util_avg);
-        reset_util_level();
+        // reset_util_level();
       }
     }
     else if(i <= 400000000 )
@@ -2190,7 +2190,7 @@ void take_snapshot(char * argv[]){
       if (i % 10000000 == 0 )
       {
         export_csv_intermed(exp_name, i/1000000, util_avg);
-        reset_util_level();
+        // reset_util_level();
       }
 
       // if (i == 400000000 )
@@ -4700,7 +4700,8 @@ void export_csv_intermed(char exp_name[], int ind, long double *arr){
 
 
   fp = fopen(filename,"w+");
-
+  
+  fprintf(fp,"series,%dm\n", ind);
   // print_array(arr, LEVEL, fp);
   print_array_double(arr, LEVEL, fp);
 
