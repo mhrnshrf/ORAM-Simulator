@@ -3963,12 +3963,12 @@ int inplace_access(int index, int offset){
   return mem_addr;
 }
 
-int remote_access(int index, int offset){
+int remote_access(int index, int offset, int level){
   int index_redir = GlobTree[index].slot[offset].remote_index;
   int offset_redir = GlobTree[index].slot[offset].remote_offset;
   int mem_addr = index_redir*Z_VAR + offset_redir;
   GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
-  if (offset_redir >= LZ[calc_level(index)])
+  if (offset_redir >= LZ[level])
   {
     surplus_in_use--;
   }
@@ -4015,7 +4015,7 @@ int calc_mem_addr(int index, int offset, char type)
   {
     if (GlobTree[index].slot[offset].redirect)
     {
-      mem_addr = remote_access(index, offset);
+      mem_addr = remote_access(index, offset, level);
 
       leaf_r_remote = (level == LEVEL-1) ? leaf_r_remote+1 : leaf_r_remote;
       nonleaf_r_remote = (level != LEVEL-1) ? nonleaf_r_remote+1 : nonleaf_r_remote;
