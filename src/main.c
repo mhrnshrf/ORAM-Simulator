@@ -1623,6 +1623,15 @@ int main(int argc, char * argv[])
 				last_read_served = false;
 			}
 			
+			if (RING_ENABLE && DEAD_ENABLE)
+			{
+				if (pN->nvm_access)
+				{
+					nonmemops[numc] += 750;
+				}
+				
+			}
+			
 			
 			// nonmemops[numc] = 0; // ??? not sure about this one ~~~> guess resolved
 			

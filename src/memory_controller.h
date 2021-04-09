@@ -44,7 +44,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -202,6 +202,7 @@ typedef struct Element_t{
   DeadState dd;
   int index;
   int offset;
+  bool nvm_access;
 }Element;
 
 
@@ -352,7 +353,7 @@ bool Enqueue(Queue *pQueue, Element *item);
 Element *Dequeue(Queue *pQueue);
 bool isEmpty(Queue* pQueue);
 void test_queue();
-void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read);
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access);
 void test_subtree();
 void dummy_access(TreeType tree);
 void switch_enqueue_to(EnqueueType enqueue);

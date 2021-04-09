@@ -673,7 +673,7 @@ void test_queue(){
 	exit(0);
 }
 
-void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read) {
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access) {
   addr = addr << (int)log2(BLOCK_SIZE);
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = addr;
@@ -687,6 +687,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->tree = TREE_VAR;
   pN->orig_addr = orig_addr;
   pN->last_read = last_read;
+  pN->nvm_access = nvm_access;
   bool added = false;
   if (ENQUEUE_VAR == TAIL)
   {
@@ -1314,8 +1315,8 @@ void read_path(int label){
                 last_read = true;
               }
               
-              
-              insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
+              bool nvm_access = (i == LEVEL-1);
+              insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
               reqmade++;
               // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
             }
@@ -1412,7 +1413,8 @@ void read_path(int label){
             
             
             int mem_addr = calc_mem_addr(index, sd, 'R');
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
+            bool nvm_access = (i == LEVEL-1);
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
             dum_cand[ri] = -1;
           }
@@ -1498,7 +1500,7 @@ void stale_access(int index, int h, char type){
           last_read = true;
         }
         int mem_addr = node_addr + k;
-        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read);
+        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, false);
       }
     }
 }
@@ -1621,7 +1623,8 @@ void write_path(int label){
             int index_prime = calc_index(label, i_prime);
             addr = SubMap[index_prime] + j_prime;
           }
-          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false);
+          bool nvm_access = (i == LEVEL-1);
+          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false, nvm_access);
         }
 
 
@@ -3793,7 +3796,8 @@ void metadata_access(int label, char type){
         last_read = true;
       }
       int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read);
+      bool nvm_access = (i == LEVEL-1);
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access);
     }
   }
 
@@ -4215,7 +4219,8 @@ void ring_read_path(int label, int addr){
       {
         last_read = true;
       }
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
+      bool nvm_access = (i == LEVEL-1);
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
     }
 
     GlobTree[index].count++;
@@ -4457,7 +4462,8 @@ void ring_early_reshuffle(int label){
           }
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read);
+            bool nvm_access = (i == LEVEL-1);
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
           }
           reqmade++;
         }
@@ -4508,7 +4514,8 @@ void ring_early_reshuffle(int label){
           int mem_addr = calc_mem_addr(index, sd, 'R');
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false);
+              bool nvm_access = (i == LEVEL-1);
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, nvm_access);
               // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
           }
           dum_cand[ri] = -1;
@@ -4533,7 +4540,8 @@ void ring_early_reshuffle(int label){
 
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false);
+          bool nvm_access = (i == LEVEL-1);
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, nvm_access);
         }
 
         
