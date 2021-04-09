@@ -32,6 +32,8 @@ char bench[20];
 char exp_name[20] = "";
 
 long long int deadctr = 0;
+long long int surplus_dead = 0;
+long long int surplus_used = 0;
 long long int deadarr[100] = {0};
 long long int dead_on_path = 0;
 long long int dead_on_path_arr[100] = {0};
@@ -830,7 +832,7 @@ void oram_alloc(){
     int l = calc_level(i);  
      GlobTree[i].count = 0;
      GlobTree[i].dumdead = 0;
-    for (int k = 0; k < LZ[l]; ++k)
+    for (int k = 0; k < Z; ++k)
     {
       GlobTree[i].slot[k].addr = -1;
       GlobTree[i].slot[k].label = -1;
@@ -840,10 +842,19 @@ void oram_alloc(){
       GlobTree[i].slot[k].dd = REFRESHED;  
       GlobTree[i].slot[k].redirect = false;  
       GlobTree[i].slot[k].dead_start = 0;  
-      GlobTree[i].slot[k].dead_lifetime = 0;  
-      GlobTree[i].dumnum++;
-      GlobTree[i].dumval++;
-
+      GlobTree[i].slot[k].dead_lifetime = 0; 
+      if (k < LZ[l])
+      {
+        GlobTree[i].dumnum++;
+        GlobTree[i].dumval++;
+      }
+      if (k >= LZ[l])
+      {
+        GlobTree[i].slot[k].valid = false;
+        GlobTree[i].slot[k].dd = DEAD;  
+        surplus_dead++;
+      }
+      
       
     }
   }
@@ -3795,7 +3806,7 @@ void gather_dead(int index, int i){
   // if it's not last level (leaf level) add to deadq
   if (i != LEVEL-1 && i >= GATHER_START)
   {
-    for (int j = 0; j < LZ_VAR[i]; j++)
+    for (int j = 0; j < Z; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
       {
@@ -3821,8 +3832,7 @@ void gather_dead(int index, int i){
             // free(oldest);
           }
           Enqueue(deadQ_arr[i] , db);
-          
-          
+                    
         }
       }
     }
@@ -3869,6 +3879,11 @@ int remote_allocate(int index, int offset){
       // printf("break\n");
       i = cand->index;
       j = cand->offset;
+      if (j >= LZ[level])
+      {
+        surplus_used++;
+      }
+      
       break;
     }
   }
@@ -3909,6 +3924,10 @@ int remote_allocate(int index, int offset){
         }
         if (i != -1 && j != -1)
         {
+          if (j >= LZ[level])
+          {
+            surplus_used++;
+          }
           break;
         }
       }
@@ -4861,6 +4880,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "nonleaf_elselevel,%lld\n", nonleaf_elselevel);
   fprintf(fp, "leaf_elselevel,%lld\n", leaf_elselevel);
   fprintf(fp, "remote_located_nonleaves,%lld\n", nonleaf_w_remote - nonleaf_r_remote);
+  fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
+  fprintf(fp, "surplus_used,%lld\n", surplus_used);
 
   // print_lifetime_stat(fp);
   

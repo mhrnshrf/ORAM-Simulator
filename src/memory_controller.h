@@ -31,7 +31,7 @@
 // #define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE      1     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 // #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 // #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
 // #define TIMING_ENABLE   0     // 0/1 flag to disable/enable having timing channel security
@@ -41,10 +41,10 @@
 // #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 // #define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
 // #define SNAP_CACHE      0     // 0/1 flag to disable/enable  snapshot with having L2 cache
-#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -64,8 +64,8 @@
 #define STASH_SIZE_ORG 200     // original size of stash
 // #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 13   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
-#define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
+#define L2 17   // upto L2 level buckts have specific Z2 number of slots   (inclusive)
+#define L3 22   // upto L3 level buckts have specific Z3 number of slots   (inclusive)
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree invariant
@@ -136,8 +136,8 @@ enum{
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
   Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1    Z-5
   Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 1 :(RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE &&RSTL_ENABLE)? Z:Z,   // # slots per bucket upto L3   Z-10
-  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-5: Z,
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE &&RSTL_ENABLE)? Z-3:Z,   // # slots per bucket upto L3   Z-10
+  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-4: Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + ((RING_ENABLE)?Z4:Z)*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
