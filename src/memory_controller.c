@@ -33,7 +33,7 @@ char exp_name[20] = "";
 
 long long int deadctr = 0;
 long long int surplus_dead = 0;
-long long int surplus_used = 0;
+long long int surplus_in_use = 0;
 long long int deadarr[100] = {0};
 long long int dead_on_path = 0;
 long long int dead_on_path_arr[100] = {0};
@@ -848,7 +848,7 @@ void oram_alloc(){
         GlobTree[i].dumnum++;
         GlobTree[i].dumval++;
       }
-      if (k >= LZ[l])
+      if (k >= LZ[l] && l != LEVEL-1 && l >= GATHER_START)
       {
         GlobTree[i].slot[k].valid = false;
         GlobTree[i].slot[k].dd = DEAD;  
@@ -3881,7 +3881,7 @@ int remote_allocate(int index, int offset){
       j = cand->offset;
       if (j >= LZ[level])
       {
-        surplus_used++;
+        surplus_in_use++;
       }
       
       break;
@@ -3924,9 +3924,9 @@ int remote_allocate(int index, int offset){
         }
         if (i != -1 && j != -1)
         {
-          if (j >= LZ[level])
+          if (j >= LZ[l])
           {
-            surplus_used++;
+            surplus_in_use++;
           }
           break;
         }
@@ -3968,6 +3968,11 @@ int remote_access(int index, int offset){
   int offset_redir = GlobTree[index].slot[offset].remote_offset;
   int mem_addr = index_redir*Z_VAR + offset_redir;
   GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
+  if (offset_redir >= LZ[calc_level(index)])
+  {
+    surplus_in_use--;
+  }
+  
   return mem_addr;
 }
 
@@ -4069,7 +4074,7 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the leaf level
     {
       mem_addr = -1;
-      if (remote_located_leaves < REMOTE_ALLOC_RATIO*deadctr ) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      if (remote_located_leaves < REMOTE_ALLOC_RATIO*(deadctr + surplus_dead )) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4881,7 +4886,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "leaf_elselevel,%lld\n", leaf_elselevel);
   fprintf(fp, "remote_located_nonleaves,%lld\n", nonleaf_w_remote - nonleaf_r_remote);
   fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
-  fprintf(fp, "surplus_used,%lld\n", surplus_used);
+  fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
 
   // print_lifetime_stat(fp);
   
