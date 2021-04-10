@@ -152,6 +152,7 @@ void print_config(char * filename){
     while (fgets(line, 200, fp) != NULL ) {
         printf("%s", line);
     }
+	fclose(fp);
 }
 
 
