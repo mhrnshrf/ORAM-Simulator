@@ -113,6 +113,7 @@ typedef enum {
 	DEADQ_SIZE_token ,
 	DEAD_GATHER_OFFSET_token ,
 	REMOTE_ALLOC_RATIO_token ,
+	NVM_ENABLE_token ,
 
 	comment_token,
 	unknown_token
@@ -314,6 +315,8 @@ token_t tokenize(char * input){
 	return DEAD_GATHER_OFFSET_token;
   } else if (strncmp(input, "REMOTE_ALLOC_RATIO",length) == 0) {
 	return REMOTE_ALLOC_RATIO_token;
+  } else if (strncmp(input, "NVM_ENABLE",length) == 0) {
+	return NVM_ENABLE_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -770,6 +773,10 @@ void read_config_file(FILE * fin)
 			case REMOTE_ALLOC_RATIO_token:
 				fscanf(fin,"%f",&input_float);
 				REMOTE_ALLOC_RATIO = input_float;
+				break;
+			case NVM_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				NVM_ENABLE = input_int;
 				break;
 
 			case unknown_token:

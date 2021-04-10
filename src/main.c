@@ -135,6 +135,24 @@ void print_req_symbols(){
 	}
 }
 
+void print_config(char * filename){
+	char line[200];
+
+	FILE *fp = fopen(filename, "r");
+
+    if (fp == NULL)
+	{	printf("ERROR: Config file is null\n");
+		exit(EXIT_FAILURE);
+	}
+
+	printf("\n....................................................\n");
+	printf("                Config File Parameters\n");
+	printf("....................................................\n");
+
+    while (fgets(line, 200, fp) != NULL ) {
+        printf("%s", line);
+    }
+}
 
 
 void print_oram_params(){
@@ -538,6 +556,7 @@ int main(int argc, char * argv[])
   }
 
   read_config_file(config_file);
+  print_config(argv[1]);
 
 
 
@@ -796,7 +815,6 @@ int main(int argc, char * argv[])
 		/* code */
 	}
 	
-
 
 	fflush(stdout);
 
@@ -1623,7 +1641,7 @@ int main(int argc, char * argv[])
 				last_read_served = false;
 			}
 			
-			if (RING_ENABLE && DEAD_ENABLE)
+			if (RING_ENABLE && NVM_ENABLE)
 			{
 				if (pN->nvm_access)
 				{
