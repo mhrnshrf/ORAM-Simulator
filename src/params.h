@@ -224,6 +224,7 @@ int WL_CAP ;                            // cap on wl feature
 int DEADQ_SIZE ;                            // size of dead queue
 int DEAD_GATHER_OFFSET ;                            // how many levels to skip after top cache for gathering dead blocks
 float REMOTE_ALLOC_RATIO ;                            // what percentage of dead blk let the leaves occupy
+int NVM_START ;                            // starting what level is stored in nvm
 
 
 

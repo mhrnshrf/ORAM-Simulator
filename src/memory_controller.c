@@ -1315,7 +1315,7 @@ void read_path(int label){
                 last_read = true;
               }
               
-              bool nvm_access = (i == LEVEL-1);
+              bool nvm_access = in_nvm(i);
               insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
               reqmade++;
               // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
@@ -1413,7 +1413,7 @@ void read_path(int label){
             
             
             int mem_addr = calc_mem_addr(index, sd, 'R');
-            bool nvm_access = (i == LEVEL-1);
+            bool nvm_access = in_nvm(i);
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
             dum_cand[ri] = -1;
@@ -1623,7 +1623,7 @@ void write_path(int label){
             int index_prime = calc_index(label, i_prime);
             addr = SubMap[index_prime] + j_prime;
           }
-          bool nvm_access = (i == LEVEL-1);
+          bool nvm_access = in_nvm(i);
           insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false, nvm_access);
         }
 
@@ -3796,7 +3796,7 @@ void metadata_access(int label, char type){
         last_read = true;
       }
       int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
-      bool nvm_access = (i == LEVEL-1);
+      bool nvm_access = in_nvm(i);
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access);
     }
   }
@@ -3808,7 +3808,7 @@ void metadata_access(int label, char type){
 // gathering dead blk info into the queue
 void gather_dead(int index, int i){
   // if it's not last level (leaf level) add to deadq
-  if (i != LEVEL-1 && i >= GATHER_START)
+  if (i < NVM_START && i >= GATHER_START)
   {
     for (int j = 0; j < Z; j++)
     {
@@ -3863,9 +3863,9 @@ int remote_allocate(int index, int offset){
   int level = calc_level(index);
   int input_level = level;
 
-  if (level == LEVEL-1)
+  if (in_nvm(level))
   {
-    level = level-1;
+    level = NVM_START-1;
   }
   
 
@@ -3895,7 +3895,7 @@ int remote_allocate(int index, int offset){
   // if not found look for dead blk at every level else and start from the bottom 
   if (i == -1 && j == -1)
   {
-    if (input_level == LEVEL-1)
+    if (in_nvm(input_level))
     {
       nonleaf_elselevel++;
     }
@@ -3904,7 +3904,7 @@ int remote_allocate(int index, int offset){
       leaf_elselevel++;
     }
     
-    for (int l = LEVEL-2; l >= GATHER_START; l--)
+    for (int l = NVM_START-1; l >= GATHER_START; l--)
     {
       if (l != level)
       {
@@ -3980,6 +3980,13 @@ int remote_access(int index, int offset, int level){
   return mem_addr;
 }
 
+bool in_nvm(int level){
+  if (level >= NVM_START)
+  {
+    return true;
+  }
+  return false;
+}
 
 
 
@@ -4005,13 +4012,13 @@ int calc_mem_addr(int index, int offset, char type)
   {
     if (type == 'R')
     {
-      leaf_r_norm = (level == LEVEL-1) ? leaf_r_norm+1 : leaf_r_norm;
-      nonleaf_r_norm = (level != LEVEL-1) ? nonleaf_r_norm+1 : nonleaf_r_norm;
+      leaf_r_norm = in_nvm(level) ? leaf_r_norm+1 : leaf_r_norm;
+      nonleaf_r_norm = (!in_nvm(level)) ? nonleaf_r_norm+1 : nonleaf_r_norm;
     }
     else if (type == 'W')
     {
-      leaf_w_norm = (level == LEVEL-1) ? leaf_w_norm+1 : leaf_w_norm;
-      nonleaf_w_norm = (level != LEVEL-1) ? nonleaf_w_norm+1 : nonleaf_w_norm;
+      leaf_w_norm = in_nvm(level) ? leaf_w_norm+1 : leaf_w_norm;
+      nonleaf_w_norm = (!in_nvm(level)) ? nonleaf_w_norm+1 : nonleaf_w_norm;
     }
     mem_addr = index*Z_VAR + offset;
   }
@@ -4021,22 +4028,22 @@ int calc_mem_addr(int index, int offset, char type)
     {
       mem_addr = remote_access(index, offset, level);
 
-      leaf_r_remote = (level == LEVEL-1) ? leaf_r_remote+1 : leaf_r_remote;
-      nonleaf_r_remote = (level != LEVEL-1) ? nonleaf_r_remote+1 : nonleaf_r_remote;
-      remote_located_leaves = (level == LEVEL-1) ? remote_located_leaves-1 : remote_located_leaves;
+      leaf_r_remote = in_nvm(level) ? leaf_r_remote+1 : leaf_r_remote;
+      nonleaf_r_remote = (!in_nvm(level)) ? nonleaf_r_remote+1 : nonleaf_r_remote;
+      remote_located_leaves = in_nvm(level) ? remote_located_leaves-1 : remote_located_leaves;
       
     }
     else
     {
       mem_addr = inplace_access(index, offset);
 
-      leaf_r_inplace = (level == LEVEL-1) ? leaf_r_inplace+1 : leaf_r_inplace;
-      nonleaf_r_inplace = (level != LEVEL-1) ? nonleaf_r_inplace+1 : nonleaf_r_inplace;
+      leaf_r_inplace = in_nvm(level) ? leaf_r_inplace+1 : leaf_r_inplace;
+      nonleaf_r_inplace = (!in_nvm(level)) ? nonleaf_r_inplace+1 : nonleaf_r_inplace;
     }
   }
   else if (type == 'W')
   {
-    if (level != LEVEL-1) // for levels other than leaf level
+    if (!in_nvm(level)) // for levels in dram
     {
       if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
       {
@@ -4075,7 +4082,7 @@ int calc_mem_addr(int index, int offset, char type)
         nonleaf_w_remote++;
       }
     }
-    else  // for the leaf level
+    else  // for the levels in nvm
     {
       mem_addr = -1;
       if (remote_located_leaves < REMOTE_ALLOC_RATIO*(deadctr + surplus_dead )) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
@@ -4219,7 +4226,7 @@ void ring_read_path(int label, int addr){
       {
         last_read = true;
       }
-      bool nvm_access = (i == LEVEL-1);
+      bool nvm_access = in_nvm(i);
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
     }
 
@@ -4462,7 +4469,7 @@ void ring_early_reshuffle(int label){
           }
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-            bool nvm_access = (i == LEVEL-1);
+            bool nvm_access = in_nvm(i);
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
           }
           reqmade++;
@@ -4514,7 +4521,7 @@ void ring_early_reshuffle(int label){
           int mem_addr = calc_mem_addr(index, sd, 'R');
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-              bool nvm_access = (i == LEVEL-1);
+              bool nvm_access = in_nvm(i);
               insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, nvm_access);
               // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
           }
@@ -4540,7 +4547,7 @@ void ring_early_reshuffle(int label){
 
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
-          bool nvm_access = (i == LEVEL-1);
+          bool nvm_access = in_nvm(i);
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, nvm_access);
         }
 
