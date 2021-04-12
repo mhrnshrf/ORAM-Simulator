@@ -858,7 +858,7 @@ void oram_alloc(){
         GlobTree[i].dumnum++;
         GlobTree[i].dumval++;
       }
-      if (k >= LZ[l] && l != LEVEL-1 && l >= GATHER_START)
+      if (k >= LZ[l] && !in_nvm(l) && l >= GATHER_START)
       {
         GlobTree[i].slot[k].valid = false;
         GlobTree[i].slot[k].dd = DEAD;  
