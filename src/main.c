@@ -1240,10 +1240,10 @@ int main(int argc, char * argv[])
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
 				{
 					// printf("@ trace %d\n", tracectr);
-					if (CACHE_ENABLE && SIM_ENABLE && !SIM_ENABLE_VAR && tracectr >= WARMUP_TREE)
+					if (!SIM_ENABLE_VAR && tracectr >= WARMUP_TREE)
 					{
-						switch_sim_enable_to(true);
-						switch_cache_enable_to(true);
+						switch_sim_enable_to(SIM_ENABLE);
+						switch_cache_enable_to(CACHE_ENABLE);
 						break;
 					}
 					
