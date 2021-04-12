@@ -406,6 +406,7 @@ void record_util_level();
 void reset_util_level();
 void print_array_double(long double * arr, int size, FILE *fp);
 bool in_nvm(int level);
+bool is_nvm_addr(int addr);
 
 // Mehrnoosh.
 

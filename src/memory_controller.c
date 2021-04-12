@@ -346,6 +346,7 @@ int BK_EVICTION_VAR;
 int EMPTY_TOP_VAR;
 int TOP_CACHE_VAR;
 int PATH_VAR;
+int NVM_ADDR_VAR;
 AccessType ACCESS_VAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var;
@@ -410,6 +411,13 @@ void print_array_double(long double * arr, int size, FILE *fp){
   }
 }
 
+bool is_nvm_addr(int addr){
+  if (addr >= NVM_ADDR_VAR && addr < SLOT)
+  {
+    return true;
+  }
+  return false;
+}
 
 void var_init(){
   TREE_VAR = ORAM;
@@ -425,6 +433,7 @@ void var_init(){
   ENQUEUE_VAR = TAIL;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
   pos_var = POS2;
   SIM_ENABLE_VAR = SIM_ENABLE;
+  NVM_ADDR_VAR = (pow(2, NVM_START)-1)*Z_VAR;
 }
 
 unsigned int byte_addr(long long int physical_addr){
@@ -1301,22 +1310,27 @@ void read_path(int label){
           {
             if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
             {
-              int  addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+              int  mem_addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
               if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
               {
                 int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
                 int i_prime = floor(gi_prime/Z) + 1 + L1;
                 int j_prime = gi_prime % Z;
                 int index_prime = calc_index(label, i_prime);
-                addr = SubMap[index_prime] + j_prime;
+                mem_addr = SubMap[index_prime] + j_prime;
               }
               if (i == EMPTY_TOP_VAR && j == LZ_VAR[i] - 1)
               {
                 last_read = true;
               }
+              if (RING_ENABLE)
+              {
+                mem_addr = calc_mem_addr(index, j, 'R');
+              }
               
-              bool nvm_access = in_nvm(i);
-              insert_oramQ(addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+              
+              bool nvm_access = is_nvm_addr(mem_addr);
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
               reqmade++;
               // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
             }
@@ -1393,7 +1407,7 @@ void read_path(int label){
           }
           
         }
-        if (RING_ENABLE && i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        if (RING_ENABLE && i >= TOP_CACHE_VAR)
         {
           for (int k = 0; k < RING_Z-reqmade; k++)
           {
@@ -1413,8 +1427,13 @@ void read_path(int label){
             
             
             int mem_addr = calc_mem_addr(index, sd, 'R');
-            bool nvm_access = in_nvm(i);
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+            bool nvm_access = is_nvm_addr(mem_addr);
+            if (SIM_ENABLE_VAR)
+            {
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+              /* code */
+            }
+            
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
             dum_cand[ri] = -1;
           }
@@ -1623,7 +1642,7 @@ void write_path(int label){
             int index_prime = calc_index(label, i_prime);
             addr = SubMap[index_prime] + j_prime;
           }
-          bool nvm_access = in_nvm(i);
+          bool nvm_access = is_nvm_addr(mem_addr);
           insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false, nvm_access);
         }
 
@@ -3796,6 +3815,7 @@ void metadata_access(int label, char type){
         last_read = true;
       }
       int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
+      // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(i);
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access);
     }
@@ -4226,7 +4246,7 @@ void ring_read_path(int label, int addr){
       {
         last_read = true;
       }
-      bool nvm_access = in_nvm(i);
+      bool nvm_access = is_nvm_addr(mem_addr);
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
     }
 
@@ -4469,7 +4489,7 @@ void ring_early_reshuffle(int label){
           }
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-            bool nvm_access = in_nvm(i);
+            bool nvm_access = is_nvm_addr(mem_addr);
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
           }
           reqmade++;
@@ -4521,7 +4541,7 @@ void ring_early_reshuffle(int label){
           int mem_addr = calc_mem_addr(index, sd, 'R');
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-              bool nvm_access = in_nvm(i);
+              bool nvm_access = is_nvm_addr(mem_addr);
               insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, nvm_access);
               // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
           }
@@ -4547,7 +4567,7 @@ void ring_early_reshuffle(int label){
 
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
-          bool nvm_access = in_nvm(i);
+          bool nvm_access = is_nvm_addr(mem_addr);
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, nvm_access);
         }
 
