@@ -204,7 +204,7 @@ int PAGE_SIZE ;                          // page size in byte ~~~> 4KB
 int L1_LATENCY ;                        // L1 latency in terms of # cycles 
 int L2_LATENCY ;                     // L2 latency in terms of # cycles 
 int MAINMEM_LATENCY ;                   // mem latency in terms of # cycles 
-long long int WARMUP_THRESHOLD ;          // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
+long long int WARMUP_CACHE ;          // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 int TIMEOUT_THRESHOLD ;                           // time out threshold in seconds
 int TOP_BOUNDARY ;                      // top region tree boundry
 int MID_BOUNDARY ;                      // middle region tree boundry
@@ -225,6 +225,7 @@ int DEADQ_SIZE ;                            // size of dead queue
 int DEAD_GATHER_OFFSET ;                            // how many levels to skip after top cache for gathering dead blocks
 float REMOTE_ALLOC_RATIO ;                            // what percentage of dead blk let the leaves occupy
 int NVM_START ;                            // starting what level is stored in nvm (inclusive)
+int WARMUP_TREE  ;         // warmup threshold for oram tree
 
 
 

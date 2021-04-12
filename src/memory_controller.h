@@ -20,7 +20,7 @@
 // #define L1_LATENCY 3                   // L1 latency in terms of # cycles 
 // #define L2_LATENCY 10                  // L2 latency in terms of # cycles 
 // #define MAINMEM_LATENCY 0             // mem latency in terms of # cycles 
-// #define WARMUP_THRESHOLD 0             // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
+// #define WARMUP_CACHE 0             // L2 warm up threshold, after which stats are gathered and memory accesses are actully made
 // #define TIMEOUT_THRESHOLD 20000        // time out threshold in seconds
 // #define TOP_BOUNDARY 10               // top region tree BOUNDARY
 // #define MID_BOUNDARY 20                // middle region tree BOUNDARY
@@ -266,6 +266,7 @@ extern int stashctr;
 extern int ring_evictctr;
 extern bool ring_dummy;
 extern bool dirty_evict;
+extern bool SIM_ENABLE_VAR;
 
 extern long long int topctr;
 extern long long int midctr;

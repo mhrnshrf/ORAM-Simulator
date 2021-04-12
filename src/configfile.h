@@ -90,7 +90,7 @@ typedef enum {
 	L1_LATENCY_token ,
 	L2_LATENCY_token ,
 	MAINMEM_LATENCY_token ,
-	WARMUP_THRESHOLD_token ,
+	WARMUP_CACHE_token ,
 	TIMEOUT_THRESHOLD_token ,
 	TOP_BOUNDARY_token ,
 	MID_BOUNDARY_token ,
@@ -115,6 +115,7 @@ typedef enum {
 	REMOTE_ALLOC_RATIO_token ,
 	NVM_ENABLE_token ,
 	NVM_START_token ,
+	WARMUP_TREE_token ,
 
 	comment_token,
 	unknown_token
@@ -274,8 +275,8 @@ token_t tokenize(char * input){
 	return L2_LATENCY_token;
   } else if (strncmp(input, "MAINMEM_LATENCY",length) == 0) {
 	return MAINMEM_LATENCY_token;
-  } else if (strncmp(input, "WARMUP_THRESHOLD",length) == 0) {
-	return WARMUP_THRESHOLD_token;
+  } else if (strncmp(input, "WARMUP_CACHE",length) == 0) {
+	return WARMUP_CACHE_token;
   } else if (strncmp(input, "TIMEOUT_THRESHOLD",length) == 0) {
 	return TIMEOUT_THRESHOLD_token;
   } else if (strncmp(input, "TOP_BOUNDARY",length) == 0) {
@@ -320,6 +321,8 @@ token_t tokenize(char * input){
 	return NVM_ENABLE_token;
   } else if (strncmp(input, "NVM_START",length) == 0) {
 	return NVM_START_token;
+  } else if (strncmp(input, "WARMUP_TREE",length) == 0) {
+	return WARMUP_TREE_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -693,9 +696,9 @@ void read_config_file(FILE * fin)
 				fscanf(fin,"%d",&input_int);
 				MAINMEM_LATENCY = input_int;
 				break;
-			case WARMUP_THRESHOLD_token:
+			case WARMUP_CACHE_token:
 				fscanf(fin,"%d",&input_int);
-				WARMUP_THRESHOLD = input_int;
+				WARMUP_CACHE = input_int;
 				break;
 			case TIMEOUT_THRESHOLD_token:
 				fscanf(fin,"%d",&input_int);
@@ -784,6 +787,10 @@ void read_config_file(FILE * fin)
 			case NVM_START_token:
 				fscanf(fin,"%d",&input_int);
 				NVM_START = input_int;
+				break;
+			case WARMUP_TREE_token:
+				fscanf(fin,"%d",&input_int);
+				WARMUP_TREE = input_int;
 				break;
 
 			case unknown_token:

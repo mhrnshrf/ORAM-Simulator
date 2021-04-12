@@ -189,7 +189,7 @@ void print_oram_params(){
 	printf("L1 Latency    %d\n", L1_LATENCY);
 	printf("L2 Latency    %d\n", L2_LATENCY);
 	printf("Mem Latency   %d\n", MAINMEM_LATENCY);
-	printf("Warmup Thld   %dm\n", (int)(WARMUP_THRESHOLD/pow(10,6)));
+	printf("Warmup Thld   %dm\n", (int)(WARMUP_CACHE/pow(10,6)));
 	printf("Timeout Thld  %d (s)\n", TIMEOUT_THRESHOLD);
 	printf("Top Boundary   %d\n", TOP_BOUNDARY);
 	printf("Mid Boundary   %d\n\n", MID_BOUNDARY);
@@ -697,7 +697,7 @@ int main(int argc, char * argv[])
 
 		if (strcmp(bench, "deepsjeng") == 0)
 		{
-			endpoint = 3248000;
+			endpoint = WARMUP_CACHE + WARMUP_TREE + 248000;
 			TIMING_INTERVAL = T2_INTERVAL;
 		}
 		else if (strcmp(bench, "bwaves") == 0)
@@ -707,32 +707,32 @@ int main(int argc, char * argv[])
 		}
 		else if (strcmp(bench, "lbm") == 0)
 		{
-			endpoint = 3492000;
+			endpoint = WARMUP_CACHE + WARMUP_TREE + 492000;
 			TIMING_INTERVAL = T2_INTERVAL;
 		}
 		else if (strcmp(bench, "cam4") == 0)
 		{
-			endpoint = 3382000;
+			endpoint = WARMUP_CACHE + WARMUP_TREE +  382000;
 			TIMING_INTERVAL = T2_INTERVAL;
 		}
 		else if (strcmp(bench, "imagick") == 0)
 		{
-			endpoint = 3620000;
+			endpoint = WARMUP_CACHE + WARMUP_TREE +  620000;
 			TIMING_INTERVAL = T1_INTERVAL;
 		}
 		else if (strcmp(bench, "fotonik3d") == 0)
 		{
-			endpoint = 3327000;
+			endpoint = WARMUP_CACHE + WARMUP_TREE + 327000;
 			TIMING_INTERVAL = T1_INTERVAL;
 		}
 		else if (strcmp(bench, "roms") == 0)
 		{
-			endpoint = 3772000;
+			endpoint = WARMUP_CACHE + WARMUP_TREE + 772000;
 			TIMING_INTERVAL = T2_INTERVAL;
 		}
 		else if (strcmp(bench, "mcf") == 0)
 		{
-			endpoint = 3492000;
+			endpoint = WARMUP_CACHE + WARMUP_TREE + 492000;
 			TIMING_INTERVAL = T1_INTERVAL;
 		}
 		//  else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
@@ -827,6 +827,15 @@ int main(int argc, char * argv[])
 	// {
 	// test_oram(argv);
 	// }
+	if (tracectr < WARMUP_TREE)
+	{
+		switch_sim_enable_to(false);
+	}
+	else
+	{
+		switch_sim_enable_to(SIM_ENABLE);
+	}
+	
 	
 
 //.....................................................................
@@ -866,7 +875,7 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE-3 || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_THRESHOLD) */)
+	if (tracectr >= TRACE_SIZE-3 || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_CACHE) */)
 	{
 		break;
 	}
@@ -1226,7 +1235,7 @@ int main(int argc, char * argv[])
 			// else if(CACHE_ENABLE)
 			// {
 				// printf("cache enable if: @ trace %d\n", tracectr);
-				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE && tracectr < TRACE_SIZE-3) )
+				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE) )
 				{
 					// printf("@ trace %d\n", tracectr);
 					cache_clk++;
@@ -1256,12 +1265,12 @@ int main(int argc, char * argv[])
 							evictifctr++;
 							
 							// printf("main: evicted if addr: %lld\n", addr[numc]);
-							if (tracectr >= WARMUP_THRESHOLD && SIM_ENABLE)
+							if (tracectr >= WARMUP_CACHE && SIM_ENABLE_VAR)
 							{
 								break;
 							}
 
-							if (!SIM_ENABLE)
+							if (!SIM_ENABLE_VAR)
 							{
 								invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
 							}
@@ -1307,7 +1316,7 @@ int main(int argc, char * argv[])
 								if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])) || stash_contain(block_addr(addr[numc])))
 								{
 									// pin idea for eraly wb
-									if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
+									if (EARLY_ENABLE && tracectr > WARMUP_CACHE)
 									{
 										if (opertype[numc] == 'W')
 										{
@@ -1320,7 +1329,7 @@ int main(int argc, char * argv[])
 									hitctr++;
 									hit_nonmemops += nonmemops[numc] + L2_LATENCY;
 								}
-								else // miss occured
+								else // miss occurred
 								{
 									missctr++;
 									if (nonmemops[numc] > 100)
@@ -1375,7 +1384,7 @@ int main(int argc, char * argv[])
 									
 									
 
-									if (EARLY_ENABLE && tracectr > WARMUP_THRESHOLD)
+									if (EARLY_ENABLE && tracectr > WARMUP_CACHE)
 									{
 										if (opertype[numc] == 'W')
 										{
@@ -1408,14 +1417,14 @@ int main(int argc, char * argv[])
 
 									no_miss_occured = false;
 
-									if (!SIM_ENABLE)
+									if (!SIM_ENABLE_VAR)
 									{
 										invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
 									}
 									
 
 								}
-								if (tracectr < WARMUP_THRESHOLD)
+								if (tracectr < WARMUP_CACHE)
 								{
 									no_miss_occured = true;
 									waited_for_evicted[numc].valid = false;
@@ -1440,7 +1449,7 @@ int main(int argc, char * argv[])
 								// }
 								
 
-								if (!SIM_ENABLE)
+								if (!SIM_ENABLE_VAR)
 								{
 									invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
 								}
