@@ -830,10 +830,12 @@ int main(int argc, char * argv[])
 	if (tracectr < WARMUP_TREE)
 	{
 		switch_sim_enable_to(false);
+		switch_cache_enable_to(false);
 	}
 	else
 	{
 		switch_sim_enable_to(SIM_ENABLE);
+		switch_cache_enable_to(CACHE_ENABLE);
 	}
 	
 	
@@ -1235,9 +1237,16 @@ int main(int argc, char * argv[])
 			// else if(CACHE_ENABLE)
 			// {
 				// printf("cache enable if: @ trace %d\n", tracectr);
-				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE) )
+				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
 				{
 					// printf("@ trace %d\n", tracectr);
+					if (CACHE_ENABLE && SIM_ENABLE && !SIM_ENABLE_VAR && tracectr >= WARMUP_TREE)
+					{
+						switch_sim_enable_to(true);
+						switch_cache_enable_to(true);
+						break;
+					}
+					
 					cache_clk++;
 					if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 						// printf("while readline trace ctr: %d  \n", tracectr);
@@ -1310,7 +1319,7 @@ int main(int argc, char * argv[])
 							// 	nonmemops[numc] = 200;
 							// }
 							
-							if (CACHE_ENABLE)
+							if (CACHE_ENABLE_VAR)
 							{
 								// hit
 								if ((cache_access(addr[numc], opertype[numc]) == HIT) || plb_contain(block_addr(addr[numc])) || stash_contain(block_addr(addr[numc])))
@@ -1437,7 +1446,7 @@ int main(int argc, char * argv[])
 									missl1wb = 0;
 								}
 							}
-							else if (!CACHE_ENABLE)
+							else if (!CACHE_ENABLE_VAR)
 							{
 								no_miss_occured = false;
 

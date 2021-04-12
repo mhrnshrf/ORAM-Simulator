@@ -351,6 +351,7 @@ AccessType ACCESS_VAR;      // to indicate whether a block shoulb be remapped an
 EnqueueType ENQUEUE_VAR;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var;
 bool SIM_ENABLE_VAR;
+bool CACHE_ENABLE_VAR;
 
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
@@ -758,6 +759,10 @@ void switch_enqueue_to(EnqueueType enqueue){
 
 void switch_sim_enable_to(bool tf){
   SIM_ENABLE_VAR = tf;
+}
+
+void switch_cache_enable_to(bool tf){
+  CACHE_ENABLE_VAR = tf;
 }
 /***********************
   Utility Functions

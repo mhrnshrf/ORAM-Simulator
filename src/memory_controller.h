@@ -44,7 +44,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -267,6 +267,7 @@ extern int ring_evictctr;
 extern bool ring_dummy;
 extern bool dirty_evict;
 extern bool SIM_ENABLE_VAR;
+extern bool CACHE_ENABLE_VAR;
 
 extern long long int topctr;
 extern long long int midctr;
@@ -408,7 +409,7 @@ void reset_util_level();
 void print_array_double(long double * arr, int size, FILE *fp);
 bool in_nvm(int level);
 bool is_nvm_addr(int addr);
-
+void switch_cache_enable_to(bool tf);
 // Mehrnoosh.
 
 
