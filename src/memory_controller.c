@@ -910,7 +910,7 @@ void oram_alloc(){
 
   for (int i = LEVEL-2; i >= GATHER_START; i--)
   {
-    int qs = (int)floor(pow(1.5, i));
+    int qs = (int)floor(pow(1.53, i));
     deadQ_arr[i] = ConstructQueue(qs);
   }
 
