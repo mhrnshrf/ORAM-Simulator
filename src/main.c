@@ -1239,7 +1239,7 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
 				{
-					// printf("@ trace %d\n", tracectr);
+					// printf("^ trace %d\n", tracectr);
 					if (SIM_ENABLE && !SIM_ENABLE_VAR && tracectr >= WARMUP_TREE)
 					{
 						switch_sim_enable_to(SIM_ENABLE);

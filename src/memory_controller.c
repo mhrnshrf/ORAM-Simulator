@@ -1311,7 +1311,7 @@ void read_path(int label){
         {
           // printf("j: %d \n", j);
           gi++;
-          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+          if (i >= TOP_CACHE_VAR)
           {
             if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
             {
@@ -1335,7 +1335,11 @@ void read_path(int label){
               
               
               bool nvm_access = is_nvm_addr(mem_addr);
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+              if (SIM_ENABLE_VAR)
+              {
+                insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+              }
+              
               reqmade++;
               // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
             }
