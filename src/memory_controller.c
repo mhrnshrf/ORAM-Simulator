@@ -908,9 +908,9 @@ void oram_alloc(){
     revarr[i] = reverse_lex(i);
   }
 
-  for (int i = LEVEL-2; i >= GATHER_START; i--)
+  for (int i = NVM_START-1; i >= GATHER_START; i--)
   {
-    int qs = (int)floor(pow(1.53, i));
+    int qs = (int)floor(pow(1.5, i));
     deadQ_arr[i] = ConstructQueue(qs);
   }
 
