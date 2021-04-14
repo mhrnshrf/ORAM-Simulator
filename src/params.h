@@ -196,7 +196,9 @@ bool SIM_ENABLE     ;     // 0/1 flag that indicates whether usimm simulation is
 bool WAIT_ENABLE    ;     // 0/1 flag that indicates whether wait for last read req to complete
 bool LLC_DIRTY      ;     // 0/1 flag that indicates whether everything is dirty eviction from cache
 bool DEAD_ENABLE    ;     // 0/1 flag that indicates whether dead block reuse option in enabled
-bool NVM_ENABLE     ;     // 0/1 flag that indicates whether nvm memory fixed lateny is applied enabled
+bool NVM_ENABLE     ;     // 0/1 flag that indicates whether nvm memory fixed latency is applied enabled
+bool SURONLY_ENABLE ;     // 0/1 flag that indicates whetheronly surplus slots are used for remote allocation
+
 
 long long int TRACE_SIZE ;       // # addr read from trace file
 int QUEUE_SIZE ;                  // oramq capacity

@@ -3842,7 +3842,8 @@ void gather_dead(int index, int i){
   // if it's not last level (leaf level) add to deadq
   if (i < NVM_START && i >= GATHER_START)
   {
-    for (int j = 0; j < Z; j++)
+    int start = SURONLY_ENABLE ? LZ[i] : 0 ;
+    for (int j = start; j < Z; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
       {
