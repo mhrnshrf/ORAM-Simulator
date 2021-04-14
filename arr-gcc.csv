@@ -1,5 +1,5 @@
 Benchmark,gcc
-exe_time,688.890625
+exe_time,895.343750
 CYCLE_VAL,3
 tracectr,9999997
 mem_clk,0

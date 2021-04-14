@@ -3845,7 +3845,7 @@ void gather_dead(int index, int i){
     {
       if (!GlobTree[index].slot[j].isReal)
       {
-        if (GlobTree[index].slot[j].dd == DEAD)
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < RING_S) // 2nd condtion added on 4/13/2021 9:04 pm
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
@@ -4175,7 +4175,7 @@ void ring_read_path(int label, int addr){
   {
     int index = calc_index(label, i);
 
-    // if (GlobTree[index].allctr < 0)
+    // if (GlobTree[index].allctr > 6)
     // {
     //   printf("%d\n", GlobTree[index].allctr);
     // }
