@@ -438,9 +438,10 @@ void var_init(){
   NVM_ADDR_VAR = (pow(2, NVM_START)-1)*Z_VAR;
 }
 
-unsigned int byte_addr(long long int physical_addr){
-  unsigned int addr = (unsigned int)(physical_addr & (0x7fffffff));
-  unsigned int max = ((BLOCK-1)<<((unsigned int)log2(BLOCK_SIZE))) | (BLOCK_SIZE-1);
+unsigned long long int byte_addr(long long int physical_addr){
+  // unsigned long long int mask = pow(2,)
+  unsigned long long int addr = (unsigned long long  int)(physical_addr & (0x7fffffff));
+  unsigned long long int max = ((BLOCK-1)<<((unsigned int)log2(BLOCK_SIZE))) | (BLOCK_SIZE-1);
   if (addr > max)
   {
     addr = max; 
@@ -463,7 +464,7 @@ unsigned int byte_addr(long long int physical_addr){
 //   return addr;
 // }
 
-unsigned int block_addr(unsigned int caddr){
+unsigned int block_addr(unsigned long long int caddr){
   unsigned int addr = caddr >> (unsigned int) log2(BLOCK_SIZE);
   return addr;
 }

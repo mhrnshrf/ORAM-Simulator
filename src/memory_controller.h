@@ -57,7 +57,7 @@
 // oram invariant
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
-#define LEVEL 25 // # levels
+#define LEVEL 26 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
@@ -142,7 +142,7 @@ enum{
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + ((RING_ENABLE)?Z4:Z)*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
   // BLOCK = (RING_ENABLE) ? (long long int)((RING_Z*SLOT*U)/Z):((long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1))))),  // # valid blocks in oram tree
-  BLOCK = 33260542*2, 
+  BLOCK = 33260542*4, 
   // BLOCK = 16777215, 
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
   STASH_SIZE = (VOLCANO_ENABLE /*|| STT_ENABLE*/) ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,
@@ -367,14 +367,14 @@ void insert_buffer(int addr);
 bool buffer_contain(int addr);
 int buffer_index(int addr);
 // unsigned int block_addr(long long int physical_addr);
-unsigned int block_addr(unsigned int caddr);
+unsigned int block_addr(unsigned long long int caddr);
 unsigned int page_addr(unsigned int physical_addr);
 char offset_val(unsigned int addr);
 void footprint_update(unsigned int addr);
 void test_footprint();
 void early_writeback();
 void reset_dirty_search();
-unsigned int byte_addr(long long int physical_addr);
+unsigned long long int byte_addr(long long int physical_addr);
 void handle_sigint(int sig);
 bool bk_evict_needed();
 int pos_calc(int addr, int degree);
