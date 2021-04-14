@@ -132,6 +132,7 @@ typedef struct Bucket{
   char dumnum; // added for ring oram, # dummy slots available
   char dumval; // added for ring oram, # dummy slots available that are valid
   char dumdead; // added for ring oram, # dummy slots that are dead
+  char allctr;
 }Bucket;
 
 typedef struct Entry{
@@ -847,6 +848,7 @@ void oram_alloc(){
     int l = calc_level(i);  
      GlobTree[i].count = 0;
      GlobTree[i].dumdead = 0;
+     GlobTree[i].allctr = 0;
     for (int k = 0; k < Z; ++k)
     {
       GlobTree[i].slot[k].addr = -1;
@@ -3973,6 +3975,7 @@ int remote_allocate(int index, int offset){
   if (i != -1 && j != -1)
   {
     GlobTree[i].slot[j].dd = ALLOCATED;
+    GlobTree[i].allctr++;
     GlobTree[index].slot[offset].redirect = true;
     GlobTree[index].slot[offset].remote_index = i;
     GlobTree[index].slot[offset].remote_offset = j;
@@ -4000,7 +4003,9 @@ int remote_access(int index, int offset, int level){
   int index_redir = GlobTree[index].slot[offset].remote_index;
   int offset_redir = GlobTree[index].slot[offset].remote_offset;
   int mem_addr = index_redir*Z_VAR + offset_redir;
+  GlobTree[index].slot[offset].redirect = false; // ??? added 4/13/2021 7:53 pm
   GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
+  GlobTree[index_redir].allctr--;
   if (offset_redir >= LZ[level])
   {
     surplus_in_use--;
@@ -4169,6 +4174,12 @@ void ring_read_path(int label, int addr){
   for (int i = 0; i < LEVEL; i++)
   {
     int index = calc_index(label, i);
+
+    // if (GlobTree[index].allctr < 0)
+    // {
+    //   printf("%d\n", GlobTree[index].allctr);
+    // }
+    
 
 
     int offset = rand() % LZ_VAR[i]; // ??? should change to chose randomly from dummies

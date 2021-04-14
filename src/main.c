@@ -816,6 +816,7 @@ int main(int argc, char * argv[])
 		/* code */
 	}
 	
+	printf("oram init is done.\n");
 
 	fflush(stdout);
 
