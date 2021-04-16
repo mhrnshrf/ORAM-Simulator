@@ -44,7 +44,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -57,15 +57,15 @@
 // oram invariant
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
-#define LEVEL 24 // # levels
+#define LEVEL 25 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
 #define STASH_SIZE_ORG 200     // original size of stash
 // #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 17   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17
-#define L3 22   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22
+#define L2 18   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17
+#define L3 23   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree invariant
