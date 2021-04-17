@@ -411,6 +411,7 @@ void print_array_double(long double * arr, int size, FILE *fp);
 bool in_nvm(int level);
 bool is_nvm_addr(int addr);
 void switch_cache_enable_to(bool tf);
+void random_test(char * argv[]);
 // Mehrnoosh.
 
 

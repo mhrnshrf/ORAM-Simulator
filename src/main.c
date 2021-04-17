@@ -828,6 +828,9 @@ int main(int argc, char * argv[])
 	// {
 	// test_oram(argv);
 	// }
+
+	random_test(argv);
+
 	if (tracectr < WARMUP_TREE)
 	{
 		switch_sim_enable_to(false);

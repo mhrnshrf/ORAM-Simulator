@@ -27,6 +27,7 @@ extern long long int trace_clk;
 #include "stt.h"
 #include <string.h>
 #include <unistd.h> 
+#include <time.h>
 
 char bench[20];
 char exp_name[20] = "";
@@ -2787,6 +2788,7 @@ void test_oram(char * argv[]){
 
 
 
+
   // printf("\n............... Test ORAM Stats ...............\n");
   printf("trace test ctr %d\n", tracectr_test);
   print_shuff_stat();
@@ -2794,6 +2796,24 @@ void test_oram(char * argv[]){
   exit(0);
 
 }
+
+
+
+
+void random_test(char * argv[]){
+  int i = 0;
+  while (i < TRACE_SIZE)
+  {
+  srand(time(NULL)); 
+   int addr = rand() % BLOCK;
+   invoke_oram(addr, 0, 0, 0, 0, 'R');
+   i++;
+  }
+  export_csv(argv);
+  exit(0);
+  
+}
+
 
 void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type) {
     
