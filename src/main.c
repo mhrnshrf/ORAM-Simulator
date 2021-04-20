@@ -829,7 +829,7 @@ int main(int argc, char * argv[])
 	// test_oram(argv);
 	// }
 
-	random_test(argv);
+	// random_test(argv);
 
 	if (tracectr < WARMUP_TREE)
 	{
