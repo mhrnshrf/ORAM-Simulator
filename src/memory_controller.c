@@ -3836,6 +3836,14 @@ void bin(unsigned int n)
 
 
 
+void bucket_meta_access(int index){
+  int mem_addr = DATA_ADDR_SPACE + index;
+  // bool nvm_access = is_nvm_addr(mem_addr);
+  // bool nvm_access = in_nvm(i);
+  insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, false);
+  insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, false);
+}
+
 void metadata_access(int label, char type){
   int last_read = false;
   for (int i = LEVEL-1; i >= 0; i--)
@@ -4002,6 +4010,7 @@ int remote_allocate(int index, int offset){
     GlobTree[index].slot[offset].remote_index = i;
     GlobTree[index].slot[offset].remote_offset = j;
     int mem_addr = i*Z_VAR + j;
+    bucket_meta_access(i);
     return mem_addr;
   }
   return -1;
@@ -4028,6 +4037,8 @@ int remote_access(int index, int offset, int level){
   GlobTree[index].slot[offset].redirect = false; // ??? added 4/13/2021 7:53 pm
   GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
   GlobTree[index_redir].allctr--;
+  bucket_meta_access(index_redir);
+
   if (offset_redir >= LZ[level])
   {
     surplus_in_use--;
