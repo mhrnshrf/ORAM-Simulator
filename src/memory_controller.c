@@ -4010,7 +4010,7 @@ int remote_allocate(int index, int offset){
     GlobTree[index].slot[offset].remote_index = i;
     GlobTree[index].slot[offset].remote_offset = j;
     int mem_addr = i*Z_VAR + j;
-    bucket_meta_access(i);
+    // bucket_meta_access(i);
     return mem_addr;
   }
   return -1;
@@ -4037,7 +4037,7 @@ int remote_access(int index, int offset, int level){
   GlobTree[index].slot[offset].redirect = false; // ??? added 4/13/2021 7:53 pm
   GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
   GlobTree[index_redir].allctr--;
-  bucket_meta_access(index_redir);
+  // bucket_meta_access(index_redir);
 
   if (offset_redir >= LZ[level])
   {
@@ -4117,20 +4117,20 @@ int calc_mem_addr(int index, int offset, char type)
         mem_addr = inplace_allocate(index, offset);
         nonleaf_w_inplace++;
       }
-      else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue? $$$ no removing for now
-      {
-        mem_addr = inplace_allocate(index, offset);
-        // bool discarded = remove_dead(deadQ, index, offset);
-        // if (!discarded)
-        // {
-        //   printf("ERROR: calc mem addr remembered block not found in the queue!\n");
-        //   export_csv(pargv);
-        //   exit(1);
-        // }
+      // else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue? $$$ no removing for now
+      // {
+      //   mem_addr = inplace_allocate(index, offset);
+      //   // bool discarded = remove_dead(deadQ, index, offset);
+      //   // if (!discarded)
+      //   // {
+      //   //   printf("ERROR: calc mem addr remembered block not found in the queue!\n");
+      //   //   export_csv(pargv);
+      //   //   exit(1);
+      //   // }
         
-        nonleaf_w_inplace_remembered++;
-      }
-      else if (GlobTree[index].slot[offset].dd == ALLOCATED) // the case that redirect needed ~> find another dead blk to fill in from the queue
+      //   nonleaf_w_inplace_remembered++;
+      // }
+      else if (GlobTree[index].slot[offset].dd == ALLOCATED || GlobTree[index].slot[offset].dd == REMEMBERED) // the case that redirect needed ~> find another dead blk to fill in from the queue
       {
         if (deadQ->size == 0)
         {
