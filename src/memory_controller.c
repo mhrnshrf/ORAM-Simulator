@@ -3890,13 +3890,16 @@ void gather_dead(int index, int i){
           }
           Enqueue(deadQ, db);
 
-          if (deadQ_arr[i]->size >= deadQ_arr[i]->limit)
+          // if (deadQ_arr[i]->size >= deadQ_arr[i]->limit)
+          // {
+          //   Dequeue(deadQ_arr[i]);
+          // }
+          // Enqueue(deadQ_arr[i] , db);
+
+          if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
           {
-            Dequeue(deadQ_arr[i]);
-            // Element *oldest = Dequeue(deadQ_arr[i]);
-            // free(oldest);
+            Enqueue(deadQ_arr[i] , db);
           }
-          Enqueue(deadQ_arr[i] , db);
                     
         }
       }
