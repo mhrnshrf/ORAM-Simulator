@@ -336,6 +336,9 @@ void print_oram_params(){
 
 int main(int argc, char * argv[])
 {
+
+	// random_trace();
+
 	last_read_served = true;
   
   printf("---------------------------------------------\n");

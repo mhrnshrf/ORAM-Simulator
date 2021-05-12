@@ -44,7 +44,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -136,7 +136,7 @@ enum{
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
   Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1    Z-5
   Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 1 :(RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE &&RSTL_ENABLE)? Z-5:Z,   // # slots per bucket upto L3   Z-10
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE &&RSTL_ENABLE)? Z-2:Z,   // # slots per bucket upto L3   Z-10
   Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
@@ -413,6 +413,7 @@ bool is_nvm_addr(int addr);
 void switch_cache_enable_to(bool tf);
 void random_test(char * argv[]);
 void bucket_meta_access(int index);
+void random_trace();
 // Mehrnoosh.
 
 

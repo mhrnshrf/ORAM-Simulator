@@ -2815,6 +2815,31 @@ void random_test(char * argv[]){
 }
 
 
+void random_trace(){
+
+  for (int k = 1; k < 6; k++)
+  {
+    FILE *fp;
+    char filename[100];
+    int ind = k;
+    sprintf(filename, "random%d", ind);
+    fp = fopen(filename,"w+");
+    for (int i = 0; i < 20000000; i++)
+    {
+      int nonmemops = rand() % 300;
+      char opertype = ((rand()%2) == 1) ? 'R' : 'W';
+      long long int addr = rand() % BLOCK;
+      int offset = rand() % BLOCK_SIZE;
+      addr = addr << ((unsigned int)log2(BLOCK_SIZE)) | offset;
+      long long int instrpc = 0;
+      fprintf(fp, "%d %c 0x%Lx 0x%Lx\n", nonmemops, opertype, addr, instrpc);
+    }
+  }
+  
+
+ exit(0);  
+}
+
 void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type) {
     
   invokectr++;
