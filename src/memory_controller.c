@@ -61,6 +61,8 @@ int lifetime_max[LEVEL] = {0};
 long long int lifetime_sum[LEVEL] = {0};
 int lifetime_count[LEVEL] = {0};
 
+int GREEN_BLOCK = 0;
+
 void reset_shuff_interval(){
   for (int i = 0; i < LEVEL; i++)
   {
@@ -134,6 +136,7 @@ typedef struct Bucket{
   char dumval; // added for ring oram, # dummy slots available that are valid
   char dumdead; // added for ring oram, # dummy slots that are dead
   char allctr;
+  char greenctr;
 }Bucket;
 
 typedef struct Entry{
@@ -833,6 +836,7 @@ int concat(int a, int b) {
 void oram_alloc(){
   STALE_TH = STALE_BUF_SIZE-1;
   GATHER_START = TOP_CACHE + DEAD_GATHER_OFFSET;
+  GREEN_BLOCK = CB_ENABLE ? CB_GREEN_MAX : 0;
 
   for (int i = 0; i < LEVEL; i++)
 	{
@@ -851,6 +855,7 @@ void oram_alloc(){
      GlobTree[i].count = 0;
      GlobTree[i].dumdead = 0;
      GlobTree[i].allctr = 0;
+     GlobTree[i].greenctr = 0;
     for (int k = 0; k < Z; ++k)
     {
       GlobTree[i].slot[k].addr = -1;
@@ -4249,6 +4254,9 @@ void ring_read_path(int label, int addr){
       offset = rand() % LZ_VAR[i];
       // printf("while is real\n");
     }
+
+
+    
     
     if (!ring_dummy)
     {
@@ -4274,6 +4282,17 @@ void ring_read_path(int label, int addr){
           }
         }
       }
+
+    // if cb enabled and runout of dummies and this bucket is not returning the block of interest, go pick a real block as a green block
+    if (CB_ENABLE && GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
+    {
+      while (!GlobTree[index].slot[offset].isReal)
+      {
+        offset = rand() % LZ_VAR[i];
+        // printf("while is real\n");
+      }
+    }
+
 
       if (GlobTree[index].slot[offset].isReal)
       {
@@ -4547,7 +4566,7 @@ void ring_early_reshuffle(int label){
       // printf("index %d\n", index);
       // printf("heloooooo\n");
       // printf("flush ctr %d\n", stale_flush_ctr);
-    if (GlobTree[index].count >= LS[i])    // || i < TOP_CACHE  || i >= LEVEL-2 
+    if (GlobTree[index].count >= LS[i] + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       // printf("\nlevel %d reshuffle\n", i);
       int valnum = GlobTree[index].dumval;
@@ -4608,7 +4627,7 @@ void ring_early_reshuffle(int label){
       }
 
 
-        for (int k = 0; k < RING_Z-reqmade; k++)
+        for (int k = 0; k < RING_Z-reqmade-GREEN_BLOCK; k++)
         {
           int ri = -1;
           int sd = -1;

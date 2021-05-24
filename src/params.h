@@ -197,7 +197,8 @@ bool WAIT_ENABLE    ;     // 0/1 flag that indicates whether wait for last read 
 bool LLC_DIRTY      ;     // 0/1 flag that indicates whether everything is dirty eviction from cache
 bool DEAD_ENABLE    ;     // 0/1 flag that indicates whether dead block reuse option in enabled
 bool NVM_ENABLE     ;     // 0/1 flag that indicates whether nvm memory fixed latency is applied enabled
-bool SURONLY_ENABLE ;     // 0/1 flag that indicates whetheronly surplus slots are used for remote allocation
+bool SURONLY_ENABLE ;     // 0/1 flag that indicates whether only surplus slots are used for remote allocation
+bool CB_ENABLE      ;     // 0/1 flag that indicates whether compact bucket feature of string oram paper is enabled
 
 
 long long int TRACE_SIZE ;       // # addr read from trace file
@@ -228,6 +229,7 @@ int DEAD_GATHER_OFFSET ;                            // how many levels to skip a
 float REMOTE_ALLOC_RATIO ;                            // what percentage of dead blk let the leaves occupy
 int NVM_START ;                            // starting what level is stored in nvm (inclusive)
 int WARMUP_TREE  ;         // warmup threshold for oram tree
+int CB_GREEN_MAX  ;         // number of green blocks in compact bucket feature of string oram paper
 
 
 

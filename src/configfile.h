@@ -117,6 +117,8 @@ typedef enum {
 	NVM_START_token ,
 	WARMUP_TREE_token ,
 	SURONLY_ENABLE_token ,
+	CB_ENABLE_token ,
+	CB_GREEN_MAX_token ,
 
 	comment_token,
 	unknown_token
@@ -326,6 +328,10 @@ token_t tokenize(char * input){
 	return WARMUP_TREE_token;
   } else if (strncmp(input, "SURONLY_ENABLE",length) == 0) {
 	return SURONLY_ENABLE_token;
+  } else if (strncmp(input, "CB_ENABLE",length) == 0) {
+	return CB_ENABLE_token;
+  } else if (strncmp(input, "CB_GREEN_MAX",length) == 0) {
+	return CB_GREEN_MAX_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -798,6 +804,14 @@ void read_config_file(FILE * fin)
 			case SURONLY_ENABLE_token:
 				fscanf(fin,"%d",&input_int);
 				SURONLY_ENABLE = input_int;
+				break;
+			case CB_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				CB_ENABLE = input_int;
+				break;
+			case CB_GREEN_MAX_token:
+				fscanf(fin,"%d",&input_int);
+				CB_GREEN_MAX = input_int;
 				break;
 
 			case unknown_token:
