@@ -4286,7 +4286,7 @@ void ring_read_path(int label, int addr){
     // if cb enabled and runout of dummies and this bucket is not returning the block of interest, go pick a real block as a green block
     if (CB_ENABLE && GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
     {
-      while (!GlobTree[index].slot[offset].isReal)
+      while (!GlobTree[index].slot[offset].valid)
       {
         offset = rand() % LZ_VAR[i];
         // printf("while is real\n");
