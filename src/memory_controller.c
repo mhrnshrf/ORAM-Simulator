@@ -101,6 +101,8 @@ long long int cache_clk = 0;
 
 int hitctr = 0;		// # hits on llc
 int missctr = 0;	// # misses on llc
+int rmiss = 0;	// #  read misses on llc
+int wmiss = 0;	// #  write misses on llc
 long long int mem_clk = 0;
 
 long long int orig_addr;
@@ -5022,6 +5024,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "remote_located_nonleaves,%lld\n", nonleaf_w_remote - nonleaf_r_remote);
   fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
   fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
+  fprintf(fp, "rmiss,%d\n", rmiss);
+  fprintf(fp, "wmiss,%d\n", wmiss);
 
   // print_lifetime_stat(fp);
   

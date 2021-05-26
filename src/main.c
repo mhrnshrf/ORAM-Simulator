@@ -1348,6 +1348,15 @@ int main(int argc, char * argv[])
 								else // miss occurred
 								{
 									missctr++;
+									if (opertype[numc] == 'R')
+									{
+										rmiss++;
+									}
+									else if (opertype[numc] == 'W')
+									{
+										wmiss++;
+									}
+									
 									if (nonmemops[numc] > 100)
 									{
 										nonmemctr += (nonmemops[numc]/100);
