@@ -970,7 +970,7 @@ int main(int argc, char * argv[])
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
         while (((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) /* || ( !SIM_ENABLE && (tracectr < TRACE_SIZE ))*/ ) {
-		// printf("in while\n");
+		// printf("in while q full\n");
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
@@ -1246,7 +1246,7 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
 				{
-					// printf("^ trace %d\n", tracectr);
+					// printf("while no miss trace %d\n", tracectr);
 					if (SIM_ENABLE && !SIM_ENABLE_VAR && tracectr >= WARMUP_TREE)
 					{
 						switch_sim_enable_to(SIM_ENABLE);
@@ -1573,7 +1573,7 @@ int main(int argc, char * argv[])
 				// 	printf("\n@ while exp  trace %d\n", tracectr);
 				// 	print_count_level();
 				// }
-
+				// printf("@- %d\n", tracectr);
 				if (!NONSEC_ENABLE)
 				{
 					invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
@@ -1582,6 +1582,7 @@ int main(int argc, char * argv[])
 					mem_req_start = CYCLE_VAL;
 					dirty_evict = false;
 				}
+				// printf("@> %d\n", tracectr);
 
 			}
 			skip_invokation = false;

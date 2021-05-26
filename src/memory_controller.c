@@ -1427,7 +1427,7 @@ void read_path(int label){
         }
         if (RING_ENABLE && i >= TOP_CACHE_VAR)
         {
-          for (int k = 0; k < RING_Z-reqmade; k++)
+          for (int k = 0; k < RING_Z-reqmade-GREEN_BLOCK; k++)
           {
             int ri = -1;
             int sd = -1;
@@ -1435,10 +1435,10 @@ void read_path(int label){
             {
               ri = rand() % cand_ind;
               sd = dum_cand[ri];
-              // printf("level %d   count %d\n", i, GlobTree[index].count);
+              // printf("level %d   count %d   @%d\n", i, GlobTree[index].count, tracectr);
             }
 
-            if (i == EMPTY_TOP_VAR && k == RING_Z-reqmade - 1)
+            if (i == EMPTY_TOP_VAR && k == RING_Z-reqmade-GREEN_BLOCK - 1)
             {
               last_read = true;
             }
@@ -4289,7 +4289,7 @@ void ring_read_path(int label, int addr){
       while (!GlobTree[index].slot[offset].valid)
       {
         offset = rand() % LZ_VAR[i];
-        // printf("while is real\n");
+        // printf("trace: %d   dummy: %d\n", tracectr, ring_dummy);
       }
     }
 
