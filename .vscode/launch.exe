@@ -1,0 +1,34 @@
+# 1 "E:\\Pitt\\Year 4\\Summer 2021\\ORAM-Simulator\\.vscode\\launch.json"
+# 1 "E:\\Pitt\\Year 4\\Summer 2021\\ORAM-Simulator\\.vscode//"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "E:\\Pitt\\Year 4\\Summer 2021\\ORAM-Simulator\\.vscode\\launch.json"
+{
+
+
+
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\a.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

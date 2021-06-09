@@ -33,6 +33,7 @@ char bench[20];
 char exp_name[20] = "";
 
 long long int deadctr = 0;
+long long int deadrem = 0;
 long long int surplus_dead = 0;
 long long int surplus_in_use = 0;
 long long int deadarr[100] = {0};
@@ -3930,6 +3931,7 @@ void gather_dead(int index, int i){
           if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
           {
             GlobTree[index].slot[j].dd = REMEMBERED;
+            deadrem++;
             Enqueue(deadQ_arr[i] , db);
           }
                     
@@ -3977,6 +3979,7 @@ int remote_allocate(int index, int offset){
     if (!taken)
     {
       // printf("break\n");
+      deadrem--;
       i = cand->index;
       j = cand->offset;
       if (j >= LZ[level])
@@ -4015,6 +4018,7 @@ int remote_allocate(int index, int offset){
           if (!taken)
           {
             // printf("break\n");
+            deadrem--;
             i = cand->index;
             j = cand->offset;
             // free(cand);
@@ -5026,6 +5030,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
   fprintf(fp, "rmiss,%d\n", rmiss);
   fprintf(fp, "wmiss,%d\n", wmiss);
+  fprintf(fp, "deadrem,%lld\n", deadrem);
 
   // print_lifetime_stat(fp);
   

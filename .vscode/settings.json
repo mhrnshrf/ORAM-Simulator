@@ -1,17 +1,21 @@
 {
-    "workbench.colorTheme": "Panda Syntax",
-    "C_Cpp.errorSquiggles": "Disabled",
-    "files.associations": {
-        "cache.h": "c",
-        "stdbool.h": "c",
-        "time.h": "c",
-        "limits": "c",
-        "type_traits": "c"
-    },
-    "cSpell.words": [
-        "ORAM",
-        "RSTL",
-        "WSKIP",
-        "usimm"
-    ]
+  "workbench.colorTheme": "Panda Syntax",
+  "C_Cpp.errorSquiggles": "Disabled",
+  "files.associations": {
+    "cache.h": "c",
+    "stdbool.h": "c",
+    "time.h": "c",
+    "limits": "c",
+    "type_traits": "c"
+  },
+  "cSpell.words": [
+    "ORAM",
+    "RSTL",
+    "WSKIP",
+    "usimm"
+  ],
+  "C_Cpp_Runner.cCompilerPath": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\gcc.exe",
+  "C_Cpp_Runner.cppCompilerPath": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe",
+  "C_Cpp_Runner.debuggerPath": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\gdb.exe",
+  "C_Cpp_Runner.makePath": "C:\\Program Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\mingw32-make.exe"
 }
