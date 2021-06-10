@@ -2859,7 +2859,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  if (invokectr >= 0)
+  if (invokectr >= 0 && RING_ENABLE)
   {
     if (invokectr % 100000 == 0)
     {
