@@ -4986,7 +4986,11 @@ void export_csv(char * argv[]){
   // {
   //   fprintf(fp, "%dm,%lld\n", i*10, deadarr[i]);
   // }
-  fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
+  if (RING_ENABLE)
+  {
+    fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
+  }
+  
   // for (int i = 0; i < 31; i++)
   // {
   //   fprintf(fp, "%dm,%lld\n", i*10, dead_on_path_arr[i]);
