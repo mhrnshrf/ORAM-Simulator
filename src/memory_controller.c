@@ -2326,7 +2326,7 @@ void oram_access(int addr){
   int label = PosMap[addr];
   if (label == -1)
   {
-    printf("ERROR: block label not found in pos map!\n");
+    printf("ERROR: block %d label not found in pos map! ~> label %x \n", addr, label);
     print_oram_stats();
     exit(1);
   }
