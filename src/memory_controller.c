@@ -1359,6 +1359,12 @@ void read_path(int label){
 
           if (RHO_ENABLE && (TREE_VAR == RHO))
           {
+            // if (index == 16831545 )
+            // {
+            //   printf("index: %d  @  level %d   slot %d  for label %d     @ tracectr %d\n", index, i, j, label, tracectr);
+            //   // printf("found in lookup rho %d\n", rho_lookup());
+            // }
+            
             if(RhoTree[index].slot[j].isReal)
             {
               
@@ -2911,7 +2917,7 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
     
     if (label != -1)
     {
-      // printf("invoke: rho hit on %d\n", addr);
+      // printf("rho @ trace %d  addr %d   label %d \n", tracectr, addr, label);
       // printf("invoke: b4 rho access stashctr: %d    @ %d\n", rho_stashctr, tracectr_test);
       
       // printf("invoke: before rho access stashctr:  %d\n", rho_stashctr);
@@ -2929,7 +2935,9 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
     }
   }
 
+  // printf("oram @ trace %d  addr %d\n", tracectr, addr);
  
+  switch_tree_to(ORAM);
   freecursive_access(addr, type);
 
   if (STT_ENABLE && TREE_VAR == ORAM)
@@ -3142,6 +3150,12 @@ void rho_access(int addr, int label){
     return;
   }
 
+  // if (label == 16569402)
+  // {
+  //   printf("@ trace %d  label %d     addr %d\n", tracectr, label, addr);
+  // }
+  
+
 
   read_path(label);
 
@@ -3197,6 +3211,11 @@ void rho_insert(int physical_address){
   {
     // rho_access(new.addr, new.label);
     int label = rand() % RHO_PATH;
+
+    //  if (label == 16569402)
+    // {
+    //   printf("@ trace %d  label %d     addr %d\n", tracectr, label, addr);
+    // }
     // int label = new.label;
     // printf("\n\nrho insert: b4 dummy access rho stash ctr: %d    @ trace: %d\n", rho_stashctr, tracectr_test);
     // print_path_occupancy(label);
@@ -3232,6 +3251,7 @@ void rho_insert(int physical_address){
       exit(1);
     }
   }
+  switch_tree_to(ORAM); // added 6/17/2021
   
 
 
