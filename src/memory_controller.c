@@ -4886,7 +4886,7 @@ void export_csv_intermed(char exp_name[], int ind, long double *arr){
 
   fp = fopen(filename,"w+");
   
-  fprintf(fp,"series,%dm\n", ind);
+  fprintf(fp,"series,%d\n", ind);
   // print_array(arr, LEVEL, fp);
   print_array_double(arr, LEVEL, fp);
 

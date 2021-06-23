@@ -4,7 +4,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cluster=smp # mpi, gpu and smp are available in H2P
 #SBATCH --partition=smp# available: smp, high-mem, opa, gtx1080, titanx, k40
-#SBATCH --mail-user=mer140@pitt.edu #send email to this address if ...
+#SBATCH --mail-user=mhrnshrf@gmail.com #send email to this address if ...
 #SBATCH --mail-type=END,FAIL # ... job ends or fails
 #SBATCH --time=0-03:00:00 # 6 days walltime in dd-hh:mm format
 #SBATCH --cpus-per-task=1
