@@ -404,6 +404,98 @@ bool ring_dummy = false;
 //   }
 // }
 
+int calc_space(int * lz){
+  int sum = 0;
+  for (int i = 0; i < LEVEL; i++)
+  {
+    sum += lz[i]*pow(2,i);
+  }
+  return sum; 
+}
+
+
+void print_lz(int* lz){
+  int pl = 0;
+	for (int i = TOP_CACHE; i < LEVEL; i++)
+	{
+		printf("%d ", lz[i]);
+    if (i >= TOP_CACHE)
+    {
+		  pl += lz[i];
+    }
+    
+	}
+  printf(" ~> PL = %d\n", pl);
+}
+
+int find_start(int* bitmap){
+  for (int i = LEVEL-1; i >= 0; i--)
+  {
+    if (bitmap[i] == 1)
+    {
+      return i;
+    }
+  }
+  return LEVEL-1;
+}
+
+void explore_lz(){
+  int total = Z*(pow(2,LEVEL)-1);
+  int start = LEVEL-1;
+
+  for (int k = 1; k < 4; k++)
+  {
+    bool has_new_start = true;
+    // bool go_for_hybrid = false;
+    while (has_new_start)
+    {
+      // if (go_for_hybrid)
+      // {
+      //   offset
+      // }
+      
+      // printf("start: %d\n", start);
+      int lz[LEVEL] = {[0 ... LEVEL-1] = Z};
+      int bitmap[LEVEL] = {0};
+      bool chained = true;
+      bool ongoing = false;  // whether the reduction has been ongoing
+      
+      for (int i = start; i >= TOP_CACHE ; i--)
+      {
+        if (ongoing && !chained)
+        {
+          break;
+        }
+        
+        lz[i] -= k;
+        if (total - calc_space(lz) >= 0.01*total)
+        {
+          lz[i] += k ;
+          if(ongoing)
+          {
+            chained = false;
+            start = find_start(bitmap)-1;
+          }
+        }
+        else
+        {
+          bitmap[i] = 1;
+          ongoing = true;
+        }
+        if (i == TOP_CACHE && chained)
+        {
+          has_new_start = false;
+          // go_for_hybrid = true;
+        }
+      }
+      print_lz(lz);
+    }
+  }
+    
+  
+  exit(0);
+}
+
 
 void print_array(int * arr, int size, FILE *fp){
   for (int i = 0; i < size; i++)

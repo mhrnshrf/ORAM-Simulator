@@ -26,8 +26,8 @@
 #define ADDR_WIDTH 32       // bits
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
 #define L2_LATENCY 10       // L2 latency in terms of # cycles 
-//#define SKIP_THRESH 500000000       // skip threshold for dumping trace
-#define SKIP_THRESH 0       // skip threshold for dumping trace
+#define SKIP_THRESH 1790900000000       // skip threshold for dumping trace
+// #define SKIP_THRESH 0       // skip threshold for dumping trace
 #define CLK_PRINT 0       // 0/1 flag to print cache clk
 
 enum reqType {CREAD = 'R', CWRITE = 'W'};
@@ -239,7 +239,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 
 
 		// if needed to evict a block
-        if (cache_clk > SKIP_THRESH)
+        if (instctr > SKIP_THRESH)
         {
             if (victim != -1)
             {
@@ -291,8 +291,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             victim = cache_fill(addrval, 'W');
 
             // if needed to evict a block
-            if (nonmemops != 10 && nonmemops !=43 && nonmemops !=41 && nonmemops !=11 && nonmemops !=6 && nonmemops !=56 && nonmemops !=3304 && nonmemops !=5604 && nonmemops !=3630 && nonmemops !=1652 && nonmemops !=3952)
-			{
+            // if (nonmemops != 10 && nonmemops !=43 && nonmemops !=41 && nonmemops !=11 && nonmemops !=6 && nonmemops !=56 && nonmemops !=3304 && nonmemops !=5604 && nonmemops !=3630 && nonmemops !=1652 && nonmemops !=3952)
+			// {
                 if (victim != -1)
                 {
                     v = (unsigned int)victim;
@@ -301,11 +301,11 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
                     
                     nonmemops = L2_LATENCY;
                 }
-            }
-            else
-            {
-                skip = true;
-            }
+            // }
+            // else
+            // {
+            //     skip = true;
+            // }
 
             if (!skip){
             fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));

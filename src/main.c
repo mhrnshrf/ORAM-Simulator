@@ -767,6 +767,8 @@ int main(int argc, char * argv[])
 // 						ORAM initialization							  .
 //.....................................................................
 
+	explore_lz();
+
 	print_oram_params();
 
 	var_init();
