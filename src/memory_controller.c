@@ -446,13 +446,10 @@ void explore_lz(){
   for (int k = 1; k < 4; k++)
   {
     bool has_new_start = true;
-    // bool go_for_hybrid = false;
+    bool reverse_mode = false;
     while (has_new_start)
     {
-      // if (go_for_hybrid)
-      // {
-      //   offset
-      // }
+
       
       // printf("start: %d\n", start);
       int lz[LEVEL] = {[0 ... LEVEL-1] = Z};
@@ -484,11 +481,25 @@ void explore_lz(){
         }
         if (i == TOP_CACHE && chained)
         {
-          has_new_start = false;
-          // go_for_hybrid = true;
+          // has_new_start = false;
+          reverse_mode = true;
         }
       }
       print_lz(lz);
+      if (reverse_mode)
+      {
+        for (int j = TOP_CACHE; j < LEVEL; j++)
+        {
+          lz[j] --;
+          if (total - calc_space(lz) >= 0.01*total || lz[j] == 0)
+          {
+            lz[j]++;
+            has_new_start = false;
+            print_lz(lz);
+            break;
+          }
+        }
+      }
     }
   }
     
