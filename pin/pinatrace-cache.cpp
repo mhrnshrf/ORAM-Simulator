@@ -232,6 +232,11 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
     unsigned int v = 0;
     bool skip = false;
 
+    char buf[100];
+    sprintf(buf, "%p\n", ip);
+    unsigned int ipval;
+    sscanf(buf,"%x", &ipval);
+
 	if (!cache_access(addrval, 'R')) // miss
 	{
         rctr++;
@@ -239,7 +244,7 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 
 
 		// if needed to evict a block
-        if (instctr > SKIP_THRESH)
+        if (ipval != 0x7fbe48b439c0)
         {
             if (victim != -1)
             {
@@ -280,9 +285,15 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
         sprintf(str, "%p\n", addr);
         unsigned int addrval;
         sscanf(str,"%x", &addrval);
+
         int victim = -1;
         unsigned int v = 0;
         bool skip = false;
+
+        char buf[100];
+        sprintf(buf, "%p\n", ip);
+        unsigned int ipval;
+        sscanf(buf,"%x", &ipval);
 
         if (!cache_access(addrval, 'W')) // miss
         {
@@ -291,8 +302,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             victim = cache_fill(addrval, 'W');
 
             // if needed to evict a block
-            // if (nonmemops != 10 && nonmemops !=43 && nonmemops !=41 && nonmemops !=11 && nonmemops !=6 && nonmemops !=56 && nonmemops !=3304 && nonmemops !=5604 && nonmemops !=3630 && nonmemops !=1652 && nonmemops !=3952)
-			// {
+            if (ipval != 0x7fbe48b439c0)
+			{
                 if (victim != -1)
                 {
                     v = (unsigned int)victim;
@@ -301,11 +312,11 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
                     
                     nonmemops = L2_LATENCY;
                 }
-            // }
-            // else
-            // {
-            //     skip = true;
-            // }
+            }
+            else
+            {
+                skip = true;
+            }
 
             if (!skip){
             fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
