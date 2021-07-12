@@ -2293,75 +2293,91 @@ void take_snapshot(char * argv[]){
 
   int addr;
   int label;
-
-  for(int i = 0; i < 400000001; i++)
+  int trace_max = 400000001;
+  if (RAND_ENABLE)
   {
-    
-    if (fgets(newstr,64,tif)) {
-      if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
-        printf("Panic.  Poor trace format.\n");
-        print_oram_stats();
-        exit(1);
-        }
-      addr = block_addr(byte_addr(taddr));
-    }
-    else if (fgets(newstr,64,tifrep)) {
-      if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
-        printf("Panic.  Poor trace format.\n");
-        print_oram_stats();
-        exit(1);
-        }
-      addr = block_addr(byte_addr(taddr));
+    trace_max = 10000001;
+  }
+  
+
+  for(int i = 0; i < trace_max; i++)
+  {
+    if (!RAND_ENABLE)
+    {
+      if (fgets(newstr,64,tif)) {
+        if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+          printf("Panic.  Poor trace format.\n");
+          print_oram_stats();
+          exit(1);
+          }
+        addr = block_addr(byte_addr(taddr));
+      }
+      else if (fgets(newstr,64,tifrep)) {
+        if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+          printf("Panic.  Poor trace format.\n");
+          print_oram_stats();
+          exit(1);
+          }
+        addr = block_addr(byte_addr(taddr));
+      }
+      else
+      {
+        addr = rand() % BLOCK;
+      }
     }
     else
     {
       addr = rand() % BLOCK;
     }
+    
 
     label = PosMap[addr];
 
 
     record_util_level();
 
+    if (true) //(!RAND_ENABLE)
+    {
+      if (i <= 10000000 )
+      {
+        if (i % 4000000 == 0 )
+        {
+          export_csv_intermed(exp_name, i/1000000, util_avg);
+          // reset_util_level();
+        }
+      }
+      else if(i <= 90000000 )
+      {
+        if (i % 20000000 == 0 )
+        {
+          export_csv_intermed(exp_name, i/1000000, util_avg);
+          // reset_util_level();
+        }
+      }
+      else if(i <= 300000000 )
+      {
+        if (i % 50000000 == 0 )
+        {
+          export_csv_intermed(exp_name, i/1000000, util_avg);
+          // reset_util_level();
+        }
+      }
+      else if(i <= 400000000 )
+      {
+        if (i % 10000000 == 0 )
+        {
+          export_csv_intermed(exp_name, i/1000000, util_avg);
+          // reset_util_level();
+        }
 
-    if (i <= 10000000 )
-    {
-      if (i % 4000000 == 0 )
-      {
-        export_csv_intermed(exp_name, i/1000000, util_avg);
-        // reset_util_level();
-      }
-    }
-    else if(i <= 90000000 )
-    {
-      if (i % 20000000 == 0 )
-      {
-        export_csv_intermed(exp_name, i/1000000, util_avg);
-        // reset_util_level();
-      }
-    }
-    else if(i <= 300000000 )
-    {
-      if (i % 50000000 == 0 )
-      {
-        export_csv_intermed(exp_name, i/1000000, util_avg);
-        // reset_util_level();
-      }
-    }
-    else if(i <= 400000000 )
-    {
-      if (i % 10000000 == 0 )
-      {
-        export_csv_intermed(exp_name, i/1000000, util_avg);
-        // reset_util_level();
-      }
+        // if (i == 400000000 )
+        // {
+        //  export_csv_intermed(exp_name, 401, util_avg);
+        // }
 
-      // if (i == 400000000 )
-      // {
-      //  export_csv_intermed(exp_name, 401, util_avg);
-      // }
-
+      }
     }
+    
 
   
     
@@ -2379,12 +2395,21 @@ void take_snapshot(char * argv[]){
       exit(1);
     }
     
-    
-    read_path(label);
-    
-    remap_block(addr);
 
-    write_path(label);
+    if (!RAND_ENABLE)
+    {
+      read_path(label);
+      
+      remap_block(addr);
+
+      write_path(label);
+    }
+    else
+    {
+      freecursive_access(addr, 'R');
+    }
+    
+    
 
     
     while (BK_EVICTION && bk_evict_needed())
@@ -2404,6 +2429,7 @@ void take_snapshot(char * argv[]){
 
   printf("finished.\n");
   switch_sim_enable_to(true);
+  export_csv(argv);
   exit(0);
 
 }
