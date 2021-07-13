@@ -2396,7 +2396,7 @@ void take_snapshot(char * argv[]){
     }
     
 
-    if (!RAND_ENABLE)
+    if (true) // (!RAND_ENABLE)
     {
       read_path(label);
       
