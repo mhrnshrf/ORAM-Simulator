@@ -441,16 +441,14 @@ int find_start(int* bitmap){
 
 void explore_lz(){
   int total = Z*(pow(2,LEVEL)-1);
-  int start = LEVEL-1;
 
   for (int k = 1; k < 4; k++)
   {
+    int start = LEVEL-1;
     bool has_new_start = true;
     bool reverse_mode = false;
     while (has_new_start)
     {
-
-      
       // printf("start: %d\n", start);
       int lz[LEVEL] = {[0 ... LEVEL-1] = Z};
       int bitmap[LEVEL] = {0};
@@ -485,7 +483,7 @@ void explore_lz(){
           reverse_mode = true;
         }
       }
-      print_lz(lz);
+      // print_lz(lz);
       if (reverse_mode)
       {
         for (int j = TOP_CACHE; j < LEVEL; j++)
@@ -499,6 +497,10 @@ void explore_lz(){
             break;
           }
         }
+      }
+      else
+      {
+        print_lz(lz);
       }
     }
   }
@@ -2396,7 +2398,7 @@ void take_snapshot(char * argv[]){
     }
     
 
-    if (true) // (!RAND_ENABLE)
+    if (!RAND_ENABLE) // (!RAND_ENABLE)
     {
       read_path(label);
       
