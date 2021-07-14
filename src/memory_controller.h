@@ -31,7 +31,7 @@
 // #define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE      1     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 // #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 // #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
 // #define TIMING_ENABLE   0     // 0/1 flag to disable/enable having timing channel security
@@ -65,7 +65,7 @@
 // #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 16   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17
-#define L3 19   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22
+#define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree invariant

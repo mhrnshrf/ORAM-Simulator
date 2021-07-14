@@ -1113,6 +1113,14 @@ void oram_init_path(){
   fflush(stdout);
 }
 
+void record_util_snap()
+{
+  for (int i = 0; i < LEVEL; i++)
+  {
+    util_avg[i] = (double)count_level[i]/cap_level[i];
+  }
+}
+
 void reset_util_level(){
   for (int i = 0; i < LEVEL; i++)
   {
@@ -2336,7 +2344,8 @@ void take_snapshot(char * argv[]){
     label = PosMap[addr];
 
 
-    record_util_level();
+    // record_util_level();
+    record_util_snap();
 
     if (true) //(!RAND_ENABLE)
     {
@@ -2398,8 +2407,9 @@ void take_snapshot(char * argv[]){
     }
     
 
-    if (!RAND_ENABLE) // (!RAND_ENABLE)
+    if (true) // (!RAND_ENABLE)
     {
+      oramctr++;
       read_path(label);
       
       remap_block(addr);
@@ -2420,6 +2430,7 @@ void take_snapshot(char * argv[]){
       int randpath = rand() % PATH;
       read_path(randpath);
       write_path(randpath);
+      bkctr++;
       // printf("after bk evict @ stash %d\n", stashctr);
     } 
 
