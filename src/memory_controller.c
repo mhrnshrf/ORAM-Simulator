@@ -1134,7 +1134,8 @@ void record_util_level(){
   cl_interval++;
   for (int i = 0; i < LEVEL; i++)
   {
-    util_avg[i] = util_sum[i]/cl_interval;
+    // util_avg[i] = util_sum[i]/cl_interval;
+    util_overall[i] = util_sum[i]/cl_interval;
     util_sum[i] += (double)count_level[i]/cap_level[i];
   }
 }
@@ -2344,7 +2345,7 @@ void take_snapshot(char * argv[]){
     label = PosMap[addr];
 
 
-    // record_util_level();
+    record_util_level();
     record_util_snap();
 
     if (true) //(!RAND_ENABLE)
@@ -2381,10 +2382,10 @@ void take_snapshot(char * argv[]){
           // reset_util_level();
         }
 
-        // if (i == 400000000 )
-        // {
-        //  export_csv_intermed(exp_name, 401, util_avg);
-        // }
+        if (i == 400000000 )
+        {
+         export_csv_intermed(exp_name, 401, util_overall);
+        }
 
       }
     }
