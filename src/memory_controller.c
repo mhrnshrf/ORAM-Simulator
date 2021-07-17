@@ -2973,8 +2973,11 @@ void random_test(char * argv[]){
 
 
 void random_trace(){
-
-  for (int k = 1; k < 6; k++)
+  if (chdir("/mnt/c/random") != 0)  
+  {
+    perror("chdir() to /mnt/c/random failed"); 
+  }
+  for (int k = 1; k < 14; k++)
   {
     FILE *fp;
     char filename[100];
@@ -5093,7 +5096,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "plbaccess1,%lld\n", plbaccess[1]);
   fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
   fprintf(fp, "oramQ_size,%d\n", oramQ->size);
-  fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/oramctr);
+  fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
   fprintf(fp, "Bk_Evict,%d\n", bkctr);
   fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
   fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
