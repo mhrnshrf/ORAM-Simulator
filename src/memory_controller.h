@@ -300,7 +300,7 @@ extern int oram_effective_pl;
 extern int TIMING_INTERVAL;
 
 // static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4};  // array of different Z for different levels in oram
-static const int LZ[LEVEL] = {Z, Z, Z, Z, Z, Z, Z, Z, Z, Z, Z-1, Z-2, Z-2, Z-2, Z-2, Z-2, Z-2, Z-2, Z-1, Z-1, Z, Z, Z, Z, Z};  // array of different Z for different levels in oram
+static const int LZ[LEVEL] = {Z, Z, Z, Z, Z, Z, Z, Z, Z, Z, Z3, Z2, Z2, Z2, Z2, Z2, Z2, Z2, Z3, Z3, Z, Z, Z, Z, Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
 static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
 
