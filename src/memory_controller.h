@@ -31,7 +31,7 @@
 // #define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
-#define STL_ENABLE      1     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
+#define STL_ENABLE      0     // 0/1 flag to disable/enable slim tree level ~> it won't matter if volcano is enabled
 // #define WRITE_BYPASS    0     // 0/1 flag to disable/enable cacheing the path id along the data in the LLC which will benefit write reqs to bypass posmap lookup 
 // #define RHO_ENABLE      0     // 0/1 flag to disable/enable having rho
 // #define TIMING_ENABLE   0     // 0/1 flag to disable/enable having timing channel security
@@ -41,7 +41,7 @@
 // #define NONSEC_ENABLE   0     // 0/1 flag to disable/enable oram simulation if off usimm runs normally
 // #define BK_EVICTION     0     // 0/1 flag to disable/enable background eviction
 // #define SNAP_CACHE      0     // 0/1 flag to disable/enable  snapshot with having L2 cache
-#define RING_ENABLE     0     // 0/1 flag to disable/enable ring oram (instead of path oram)
+#define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
 #define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
@@ -57,7 +57,7 @@
 // oram invariant
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
-#define LEVEL 26 // # levels
+#define LEVEL 24 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
@@ -299,8 +299,8 @@ extern int PosMap[BLOCK];
 extern int oram_effective_pl;
 extern int TIMING_INTERVAL;
 
-// static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4};  // array of different Z for different levels in oram
-static const int LZ[LEVEL] = {Z, Z, Z, Z, Z, Z, Z, Z, Z, Z, Z3, Z3, Z2, Z2, Z2, Z2, Z2, Z2, Z2, Z3, Z3, Z, Z, Z, Z, Z};  // array of different Z for different levels in oram
+static const int LZ[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4};  // array of different Z for different levels in oram
+// static const int LZ[LEVEL] = {Z, Z, Z, Z, Z, Z, Z, Z, Z, Z, Z3, Z3, Z2, Z2, Z2, Z2, Z2, Z2, Z2, Z3, Z3, Z, Z, Z, Z, Z};  // array of different Z for different levels in oram
 static const int RHO_LZ[RHO_LEVEL] = {[0 ... RHO_L1] = RHO_Z1, [RHO_L1+1 ... RHO_L2] = RHO_Z2, [RHO_L2+1 ... RHO_L3] = RHO_Z3, [RHO_L3+1 ... RHO_LEVEL-1] = RHO_Z};  // array of different Z for different levels in rho
 static const int LS[LEVEL] = {[0 ... SL1] = S1, [SL1+1 ... SL2] = S2, [SL2+1 ... SL3] = S3, [SL3+1 ... LEVEL-1] = S4};  // array of different S for different levels in  ring oram
 
