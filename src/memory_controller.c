@@ -5208,7 +5208,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "wmiss,%d\n", wmiss);
   fprintf(fp, "deadrem,%lld\n", deadrem);
 
-  // print_lifetime_stat(fp);
+  print_lifetime_stat(fp);
   
   
   fclose(fp);
