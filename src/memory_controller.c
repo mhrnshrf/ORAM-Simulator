@@ -73,8 +73,8 @@ void reset_shuff_interval(){
 
 
 void update_lifetime_stat(int lifetime, int level){
-  if (tracectr > WARMUP_TREE)
-  {
+  // if (tracectr > WARMUP_TREE)
+  // {
     if (lifetime != 0)
     {
       if (lifetime_min[level] > lifetime ) //&& lifetime != 1) 
@@ -88,7 +88,7 @@ void update_lifetime_stat(int lifetime, int level){
       lifetime_sum[level] += lifetime;
       lifetime_count[level]++; 
     }
-  }
+  // }
   
 }
 
@@ -1765,7 +1765,7 @@ void write_path(int label){
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
         GlobTree[index].slot[j].valid = true;  // added for ring oram
-        if (GlobTree[index].slot[j].dead_start != 0)
+        if (GlobTree[index].slot[j].dead_start != 0 && tracectr > DD_SATURATE)
         {
           int lifetime = ringctr - GlobTree[index].slot[j].dead_start;
           GlobTree[index].slot[j].dead_start = 0;
@@ -4834,7 +4834,7 @@ void ring_early_reshuffle(int label){
       {
         GlobTree[index].slot[j].valid = true;
 
-        if (GlobTree[index].slot[j].dead_start != 0)
+        if (GlobTree[index].slot[j].dead_start != 0 && tracectr > DD_SATURATE)
         {
           int lifetime = ringctr - GlobTree[index].slot[j].dead_start;
           GlobTree[index].slot[j].dead_start = 0;

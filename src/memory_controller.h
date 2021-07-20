@@ -127,6 +127,7 @@
 #define GL_COUNT 3          // # gathering levels
 #define GLMAX 15          // last level gl
 
+#define DD_SATURATE 30000000
 
 
 
