@@ -1208,7 +1208,7 @@ int main(int argc, char * argv[])
 			}
 			
 			// printf("@ oramQ->size == 0\n");
-			if ((!TIMING_ENABLE || (dummy_oram && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed())
+			if (((!TIMING_ENABLE || (dummy_oram && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed()) && !RING_ENABLE)
 			{
 				// printf("bk evict\n");
 				background_eviction();
@@ -1605,7 +1605,7 @@ int main(int argc, char * argv[])
 		{
 			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
 
-			if ((!TIMING_ENABLE || (dummy_oram && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed() && !bk_already_made)
+			if (((!TIMING_ENABLE || (dummy_oram && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed() && !bk_already_made) && !RING_ENABLE)
 			{
 				if (oramQ->size < QUEUE_SIZE - 2*oram_effective_pl)
 				{

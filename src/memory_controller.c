@@ -77,7 +77,7 @@ void update_lifetime_stat(int lifetime, int level){
   {
     if (lifetime != 0)
     {
-      if (lifetime_min[level] > lifetime && lifetime != 1) 
+      if (lifetime_min[level] > lifetime ) //&& lifetime != 1) 
       {
         lifetime_min[level] = lifetime;
       }
