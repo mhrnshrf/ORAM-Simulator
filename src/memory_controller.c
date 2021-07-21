@@ -4403,9 +4403,9 @@ int calc_mem_addr(int index, int offset, char type)
 
 
 void ring_read_path(int label, int addr){
-  Element *pN = (Element*) malloc(sizeof (Element));
-  pN->addr = label;
-  Enqueue(pathQ, pN);
+  // Element *pN = (Element*) malloc(sizeof (Element));
+  // pN->addr = label;
+  // Enqueue(pathQ, pN);
 
   if (SIM_ENABLE_VAR)
   {
