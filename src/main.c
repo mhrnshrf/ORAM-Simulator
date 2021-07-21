@@ -836,6 +836,8 @@ int main(int argc, char * argv[])
 
 	// random_test(argv);
 
+	test_ring();
+
 	if (tracectr < WARMUP_TREE)
 	{
 		switch_sim_enable_to(false);

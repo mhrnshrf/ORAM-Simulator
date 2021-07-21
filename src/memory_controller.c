@@ -64,6 +64,18 @@ int lifetime_count[LEVEL] = {0};
 
 int GREEN_BLOCK = 0;
 
+
+void test_ring(){
+  unsigned long long int addr = 0;
+  printf("Testing Ring ORAM...\n");
+  for (int i = 0; i < TRACE_SIZE; i++)
+  {
+    addr = rand() % BLOCK;
+    freecursive_access(addr, 'R');
+  }
+  exit(0);
+}
+
 void reset_shuff_interval(){
   for (int i = 0; i < LEVEL; i++)
   {
