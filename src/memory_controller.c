@@ -71,7 +71,8 @@ void test_ring(){
   for (int i = 0; i < TRACE_SIZE; i++)
   {
     addr = rand() % BLOCK;
-    freecursive_access(addr, 'R');
+    // freecursive_access(addr, 'R');
+    ring_access(addr);
   }
   exit(0);
 }

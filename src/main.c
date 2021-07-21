@@ -434,10 +434,10 @@ int main(int argc, char * argv[])
   int maxcr;
   int pow_of_2_cores;
   char newstr[MAXTRACELINESIZE];
-  int *nonmemops;
-  char *opertype;
-  long long int *addr;
-  long long int *instrpc;
+//   int *nonmemops;
+//   char *opertype;
+//   long long int *addr;
+//   long long int *instrpc;
   int chips_per_rank=-1;
   // Mehrnoosh:
 //   int *shad_nonmemops;
@@ -445,10 +445,10 @@ int main(int argc, char * argv[])
 //   long long int *shad_addr;
 //   long long int *shad_instrpc;
 //   char shadstr[MAXTRACELINESIZE];
-  int *oramid;
-  int *tree;
-  bool *last_read;
-  int *nonmemops_timing;
+//   int *oramid;
+//   int *tree;
+//   bool *last_read;
+//   int *nonmemops_timing;
   // Mehrnoosh.
 
   /* Initialization code. */
@@ -469,23 +469,39 @@ int main(int argc, char * argv[])
   NUMCORES = argc-3;
 
 
-  ROB = (struct robstructure *)malloc(sizeof(struct robstructure)*NUMCORES);
-  tif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
-  committed = (long long int *)malloc(sizeof(long long int)*NUMCORES);
-  fetched = (long long int *)malloc(sizeof(long long int)*NUMCORES);
-  time_done = (long long int *)malloc(sizeof(long long int)*NUMCORES);
-  nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
-  opertype = (char *)malloc(sizeof(char)*NUMCORES);
-  addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
-  instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
-  prefixtable = (int *)malloc(sizeof(int)*NUMCORES);
+//   ROB = (struct robstructure *)malloc(sizeof(struct robstructure)*NUMCORES);
+  struct robstructure ROB[NCORES];
+//   tif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
+  FILE * tif[NCORES];
+
+//   committed = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+  long long int committed[NCORES];
+//   fetched = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+  long long int fetched[NCORES];
+//   time_done = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+  long long int time_done[NCORES];
+//   nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
+  int nonmemops[NCORES];
+//   opertype = (char *)malloc(sizeof(char)*NUMCORES);
+  char opertype[NCORES];
+//   addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+  long long int addr[NCORES];
+//   instrpc = (long long int *)malloc(sizeof(long long int)*NUMCORES);
+  long long int instrpc[NCORES];
+//   prefixtable = (int *)malloc(sizeof(int)*NUMCORES);
+  int prefixtable[NCORES];
   currMTapp = -1;
   // Mehrnoosh:
 //   shadtif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
-  oramid = (int *)malloc(sizeof(int)*NUMCORES);
-  tree = (int *)malloc(sizeof(int)*NUMCORES);
-  last_read = (bool *)malloc(sizeof(bool)*NUMCORES);
-  nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
+
+//   oramid = (int *)malloc(sizeof(int)*NUMCORES);
+  int oramid[NCORES];
+//   tree = (int *)malloc(sizeof(int)*NUMCORES);
+  int tree[NCORES];
+//   last_read = (bool *)malloc(sizeof(bool)*NUMCORES);
+  bool last_read[NCORES];
+//   nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
+  int nonmemops_timing[NCORES];
 //   shad_nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
 //   shad_opertype = (char *)malloc(sizeof(char)*NUMCORES);
 //   shad_addr = (long long int *)malloc(sizeof(long long int)*NUMCORES);
@@ -836,7 +852,8 @@ int main(int argc, char * argv[])
 
 	// random_test(argv);
 
-	test_ring();
+	// test_ring();
+	// test_oram(argv);
 
 	if (tracectr < WARMUP_TREE)
 	{
