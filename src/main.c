@@ -469,8 +469,8 @@ int main(int argc, char * argv[])
   NUMCORES = argc-3;
 
 
-//   ROB = (struct robstructure *)malloc(sizeof(struct robstructure)*NUMCORES);
-  struct robstructure ROB[NCORES];
+  ROB = (struct robstructure *)malloc(sizeof(struct robstructure)*NUMCORES);
+//   struct robstructure ROB[NCORES];
 //   tif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
   FILE * tif[NCORES];
 

@@ -1577,7 +1577,11 @@ void read_path(int label){
             {
               ri = rand() % cand_ind;
               sd = dum_cand[ri];
-              // printf("level %d   count %d   @%d\n", i, GlobTree[index].count, tracectr);
+              if (tracectr_test >= 17699998 )
+              {
+                printf("level %d   count %d   @%d\n", i, GlobTree[index].count, tracectr_test);
+              }
+              
             }
 
             if (i == EMPTY_TOP_VAR && k == RING_Z-reqmade-GREEN_BLOCK - 1)
@@ -2906,6 +2910,7 @@ void test_oram(char * argv[]){
 		  /* Done consuming one line of the trace file.  Read in the next. */
 	      if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
 	        if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
+            //  printf("test oram: no cache trace: %d  \n", tracectr_test);
 				tracectr_test++;
 		  if (opertype[numc] == 'R') {
 		    if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops[numc],&opertype[numc],&addr[numc],&instrpc[numc]) < 1) {
@@ -4826,7 +4831,10 @@ void ring_early_reshuffle(int label){
           {
             ri = rand() % cand_ind;
             sd = dum_cand[ri];
-            // printf("while dum_cand[%d] %d\n", ri, dum_cand[ri]);
+              if (tracectr_test >= 17699998 )
+              {
+                printf("while dum_cand[%d] %d  @ %d\n", ri, dum_cand[ri], tracectr_test);
+              }
           }
            
           int mem_addr = calc_mem_addr(index, sd, 'R');
