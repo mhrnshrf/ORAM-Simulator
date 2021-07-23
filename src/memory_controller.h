@@ -422,6 +422,7 @@ void bucket_meta_access(int index);
 void random_trace();
 void explore_lz();
 void test_ring();
+void switch_dead_enable_to(bool tf);
 // Mehrnoosh.
 
 

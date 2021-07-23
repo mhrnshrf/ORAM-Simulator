@@ -859,11 +859,13 @@ int main(int argc, char * argv[])
 	{
 		switch_sim_enable_to(false);
 		switch_cache_enable_to(false);
+		switch_dead_enable_to(false);
 	}
 	else
 	{
 		switch_sim_enable_to(SIM_ENABLE);
 		switch_cache_enable_to(CACHE_ENABLE);
+		switch_dead_enable_to(DEAD_ENABLE);
 	}
 	
 	

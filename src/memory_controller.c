@@ -377,6 +377,7 @@ EnqueueType ENQUEUE_VAR;    // to indicate whether enqueue to oramq should be re
 PosType pos_var;
 bool SIM_ENABLE_VAR;
 bool CACHE_ENABLE_VAR;
+bool DEAD_ENABLE_VAR;
 
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
@@ -565,6 +566,7 @@ void var_init(){
   pos_var = POS2;
   SIM_ENABLE_VAR = SIM_ENABLE;
   NVM_ADDR_VAR = (pow(2, NVM_START)-1)*Z_VAR;
+  DEAD_ENABLE_VAR = DEAD_ENABLE;
 }
 
 unsigned long long int byte_addr(long long int physical_addr){
@@ -896,6 +898,10 @@ void switch_sim_enable_to(bool tf){
 
 void switch_cache_enable_to(bool tf){
   CACHE_ENABLE_VAR = tf;
+}
+
+void switch_dead_enable_to(bool tf){
+  DEAD_ENABLE_VAR = tf;
 }
 /***********************
   Utility Functions
@@ -3035,11 +3041,12 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   // {
   //   if (invokectr % 100000 == 0)
   //   {
-  //     int ind = (int)(invokectr/100000);
+  //      int ind = 0;
   //     deadarr[ind] = deadctr;
   //     dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
   //   }
   // }
+
    if (now)
   {
     printf("invoke... %d \n", tracectr);
