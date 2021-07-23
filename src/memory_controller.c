@@ -571,7 +571,7 @@ unsigned long long int byte_addr(long long int physical_addr){
   // unsigned long long int mask = pow(2,)
   // unsigned long long int addr = (unsigned long long  int)(physical_addr & (0x7fffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
   // unsigned long long int addr = (unsigned long long  int)(physical_addr & (0xffffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
-  unsigned long long int addr = physical_addr;  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
+  unsigned long long int addr = physical_addr;  
   unsigned long long int max = ((unsigned long long int)(BLOCK-1)<<((unsigned long long int)log2(BLOCK_SIZE))) | (unsigned long long int)(BLOCK_SIZE-1);
   if (addr > max)
   {
@@ -1492,11 +1492,6 @@ void read_path(int label){
 
           if (RHO_ENABLE && (TREE_VAR == RHO))
           {
-            // if (index == 16831545 )
-            // {
-            //   printf("index: %d  @  level %d   slot %d  for label %d     @ tracectr %d\n", index, i, j, label, tracectr);
-            //   // printf("found in lookup rho %d\n", rho_lookup());
-            // }
             
             if(RhoTree[index].slot[j].isReal)
             {
@@ -1577,11 +1572,6 @@ void read_path(int label){
             {
               ri = rand() % cand_ind;
               sd = dum_cand[ri];
-              if (tracectr_test >= 17699998 )
-              {
-                printf("level %d   count %d   @%d\n", i, GlobTree[index].count, tracectr_test);
-              }
-              
             }
 
             if (i == EMPTY_TOP_VAR && k == RING_Z-reqmade-GREEN_BLOCK - 1)
@@ -1863,11 +1853,6 @@ void write_path(int label){
               remove_from_stash(candidate[j]);
             }
 
-            // if ((TREE_VAR == RHO) /*&& (tracectr_test == 7911) && (j == 1)*/)
-            // {
-            //   printf("write path: @ LEVEL %d after stash removal @ trace: %d stash is   %d   full\n", i,  tracectr_test, rho_stashctr);
-            //   // print_stash();
-            // }
             
 
           }
@@ -2824,7 +2809,6 @@ void test_oram(char * argv[]){
 
   while (tracectr_test < TRACE_SIZE)
   {
-    // printf("test oram: while trace ctr: %d  \n", tracectr_test);
     for (int i = 0; i < oramQ->size; i++)
     {
       Dequeue(oramQ);
@@ -3027,6 +3011,13 @@ void random_trace(){
 void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type) {
     
   invokectr++;
+  bool now = false;
+  if (tracectr == 22300000)
+  {
+    printf("@invoke %d \n", tracectr);
+    now = true;
+  }
+  
   // printf("trace %d  deadQ size %d\n", tracectr, deadQ->size);
   
   orig_addr = physical_address;
@@ -3035,14 +3026,23 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  if (invokectr >= 0 && RING_ENABLE)
+  if (now)
   {
-    if (invokectr % 100000 == 0)
-    {
-      int ind = (int)(invokectr/100000);
-      deadarr[ind] = deadctr;
-      dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
-    }
+    printf("invoke... %d \n", tracectr);
+  }
+  
+  // if (invokectr >= 0 && RING_ENABLE)
+  // {
+  //   if (invokectr % 100000 == 0)
+  //   {
+  //     int ind = (int)(invokectr/100000);
+  //     deadarr[ind] = deadctr;
+  //     dead_on_path_arr[ind] = (int)dead_on_path/ring_evictctr;
+  //   }
+  // }
+   if (now)
+  {
+    printf("invoke... %d \n", tracectr);
   }
   
 
@@ -3064,10 +3064,18 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   
   
 
+   if (now)
+  {
+    printf("invoke... %d \n", tracectr);
+  }
   // int addr = (int)(physical_address & (BLOCK-1));
   unsigned int addr = block_addr(physical_address);
   // printf("invoke oram: physical addr: %lld\n", addr);
   // printf("invoke oram: b4 freecursive call addr: %d\n", addr);
+   if (now)
+  {
+    printf("invoke... %d \n", tracectr);
+  }
 
   // if (RING_ENABLE)
   // {
@@ -3108,7 +3116,26 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   // printf("oram @ trace %d  addr %d\n", tracectr, addr);
  
   switch_tree_to(ORAM);
+  bool point = false;
+  if (tracectr == 22300000)
+  {
+    printf("@- freecur %d \n", tracectr);
+    point = true;
+  }
+   if (now)
+  {
+    printf("invoke... %d \n", tracectr);
+  }
   freecursive_access(addr, type);
+   if (now)
+  {
+    printf("invoke... %d \n", tracectr);
+  }
+  if (point)
+  {
+    printf("@> freecur %d \n", tracectr);
+  }
+  
 
   if (STT_ENABLE && TREE_VAR == ORAM)
   {
@@ -4448,7 +4475,7 @@ void ring_read_path(int label, int addr){
     while (GlobTree[index].slot[offset].isReal)
     {
       offset = rand() % LZ_VAR[i];
-      // printf("while is real\n");
+      
     }
 
 
@@ -4764,7 +4791,6 @@ void ring_early_reshuffle(int label){
       // printf("flush ctr %d\n", stale_flush_ctr);
     if (GlobTree[index].count >= LS[i] + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
-      // printf("\nlevel %d reshuffle\n", i);
       int valnum = GlobTree[index].dumval;
       dumval_dist[valnum]++;
       dumval_range_dist[calc_range(i)][valnum]++;
@@ -4831,10 +4857,6 @@ void ring_early_reshuffle(int label){
           {
             ri = rand() % cand_ind;
             sd = dum_cand[ri];
-              if (tracectr_test >= 17699998 )
-              {
-                printf("while dum_cand[%d] %d  @ %d\n", ri, dum_cand[ri], tracectr_test);
-              }
           }
            
           int mem_addr = calc_mem_addr(index, sd, 'R');
@@ -5074,6 +5096,8 @@ void export_csv_intermed(char exp_name[], int ind, long double *arr){
 
 
 void export_csv(char * argv[]){
+
+
   FILE *fp;
   char *filename;
   if (chdir("../oram/log") != 0)  
@@ -5082,11 +5106,12 @@ void export_csv(char * argv[]){
   }
 
 
+
   filename = "";
   filename = strcat(argv[3], "-");
   filename = strcat(filename, bench);
   filename = strcat(filename, ".csv");
-
+  
   // printf("file: %s\n", filename);
   // sprintf(filename,"%s-%s.csv",argv[3], bench);
 

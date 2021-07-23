@@ -1267,6 +1267,10 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
 				{
+					// if (tracectr >= 17000000)
+					// {
+					// 	printf("no miss %d\n", tracectr);
+					// }
 					// if (tracectr > 21000000 && tracectr % 500000 == 0)
 					// {
 					// 	printf("while %d\n", tracectr);
@@ -1320,8 +1324,13 @@ int main(int argc, char * argv[])
 						
 
 						if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
-							// printf("new trace %d\n", tracectr);
+								// if (tracectr >= 17000000)
+								// {
+								// 	printf("new trace %d\n", tracectr);
+								// }
+							
 								tracectr++;
+								tracectr_test++;
 							if (opertype[numc] == 'R') {
 								rctr++;
 								instctr += nonmemops[numc] + 1;
@@ -1469,7 +1478,9 @@ int main(int argc, char * argv[])
 
 									if (!SIM_ENABLE_VAR)
 									{
+										
 										invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
+								
 									}
 									
 
@@ -1501,7 +1512,25 @@ int main(int argc, char * argv[])
 
 								if (!SIM_ENABLE_VAR)
 								{
+									// bool edge = false;
+									// if (tracectr == 22299999 || tracectr == 22299983 || tracectr == 22299982 || tracectr == 22299998)
+									// {
+									// 	printf("b4 %d\n", tracectr);
+									// 	edge = true;
+									// }
+									// if (tracectr >= 17000000)
+									// {
+									// 	printf("invoke %d\n", tracectr);
+									// }
 									invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]);
+									// if (tracectr >= 17000000)
+									// {
+									// 	printf("invoked %d\n", tracectr);
+									// }
+									// if (edge)
+									// {
+									// 	printf("after %d\n", tracectr);
+									// }
 								}
 							}
 							
