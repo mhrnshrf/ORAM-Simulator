@@ -1793,7 +1793,7 @@ void write_path(int label){
         if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
         {
           addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
-          addr = (RING_ENABLE && DEAD_ENABLE) ? mem_addr : addr;
+          addr = (RING_ENABLE && DEAD_ENABLE_VAR) ? mem_addr : addr;
           if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
           {
             int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
@@ -4338,7 +4338,7 @@ int calc_mem_addr(int index, int offset, char type)
     return 0;
   }
 
-  if (!DEAD_ENABLE)
+  if (!DEAD_ENABLE_VAR)
   {
     if (type == 'R')
     {
@@ -4922,7 +4922,7 @@ void ring_early_reshuffle(int label){
 
     }
 
-    if (RING_ENABLE && DEAD_ENABLE)
+    if (RING_ENABLE && DEAD_ENABLE_VAR)
     {
       gather_dead(index, i);
     }
