@@ -4211,8 +4211,10 @@ int remote_allocate(int index, int offset){
         surplus_in_use++;
       }
       
+      free(cand);
       break;
     }
+    free(cand);
   }
 
   // if not found look for dead blk at every level else and start from the bottom 
@@ -4245,10 +4247,10 @@ int remote_allocate(int index, int offset){
             deadrem--;
             i = cand->index;
             j = cand->offset;
-            // free(cand);
+            free(cand);
             break;
           }
-          // free(cand);
+          free(cand);
         }
         if (i != -1 && j != -1)
         {
