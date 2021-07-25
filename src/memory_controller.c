@@ -314,21 +314,21 @@ int ringdumctr = 0;
 int stalectr = 0;
 int stale_flush_ctr = 0;
 int stale_discard_ctr = 0;
-long long int leaf_r_norm = 0;
-long long int nonleaf_r_norm = 0;
-long long int leaf_w_norm = 0;
-long long int nonleaf_w_norm = 0;
-long long int leaf_r_remote = 0;
-long long int nonleaf_r_remote = 0;
-long long int leaf_r_inplace = 0;
-long long int nonleaf_r_inplace = 0;
-long long int nonleaf_w_inplace = 0;
-long long int nonleaf_w_inplace_remembered = 0;
-long long int nonleaf_w_remote = 0;
-long long int leaf_w_inplace = 0;
-long long int leaf_w_remote = 0;
-long long int nonleaf_elselevel = 0;
-long long int leaf_elselevel = 0;
+long long int nvm_norm_r = 0;
+long long int dram_norm_r = 0;
+long long int nvm_norm_w = 0;
+long long int dram_norm_w = 0;
+long long int nvm_remote_r = 0;
+long long int dram_remote_r = 0;
+long long int nvm_inplace_r = 0;
+long long int dram_inplace_r = 0;
+long long int dram_inplace_w = 0;
+long long int dram_inplace_w_remembered = 0;
+long long int dram_remote_w = 0;
+long long int nvm_inplace_w = 0;
+long long int nvm_remote_w = 0;
+long long int dram_elselevel = 0;
+long long int nvm_elselevel = 0;
 
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
@@ -4220,11 +4220,11 @@ int remote_allocate(int index, int offset){
   {
     if (in_nvm(input_level))
     {
-      nonleaf_elselevel++;
+      dram_elselevel++;
     }
     else
     {
-      leaf_elselevel++;
+      nvm_elselevel++;
     }
     
     for (int l = NVM_START-1; l >= GATHER_START; l--)
@@ -4342,13 +4342,13 @@ int calc_mem_addr(int index, int offset, char type)
   {
     if (type == 'R')
     {
-      leaf_r_norm = in_nvm(level) ? leaf_r_norm+1 : leaf_r_norm;
-      nonleaf_r_norm = (!in_nvm(level)) ? nonleaf_r_norm+1 : nonleaf_r_norm;
+      nvm_norm_r = in_nvm(level) ? nvm_norm_r+1 : nvm_norm_r;
+      dram_norm_r = (!in_nvm(level)) ? dram_norm_r+1 : dram_norm_r;
     }
     else if (type == 'W')
     {
-      leaf_w_norm = in_nvm(level) ? leaf_w_norm+1 : leaf_w_norm;
-      nonleaf_w_norm = (!in_nvm(level)) ? nonleaf_w_norm+1 : nonleaf_w_norm;
+      nvm_norm_w = in_nvm(level) ? nvm_norm_w+1 : nvm_norm_w;
+      dram_norm_w = (!in_nvm(level)) ? dram_norm_w+1 : dram_norm_w;
     }
     mem_addr = index*Z_VAR + offset;
   }
@@ -4358,8 +4358,8 @@ int calc_mem_addr(int index, int offset, char type)
     {
       mem_addr = remote_access(index, offset, level);
 
-      leaf_r_remote = in_nvm(level) ? leaf_r_remote+1 : leaf_r_remote;
-      nonleaf_r_remote = (!in_nvm(level)) ? nonleaf_r_remote+1 : nonleaf_r_remote;
+      nvm_remote_r = in_nvm(level) ? nvm_remote_r+1 : nvm_remote_r;
+      dram_remote_r = (!in_nvm(level)) ? dram_remote_r+1 : dram_remote_r;
       remote_located_leaves = in_nvm(level) ? remote_located_leaves-1 : remote_located_leaves;
       
     }
@@ -4367,8 +4367,8 @@ int calc_mem_addr(int index, int offset, char type)
     {
       mem_addr = inplace_access(index, offset);
 
-      leaf_r_inplace = in_nvm(level) ? leaf_r_inplace+1 : leaf_r_inplace;
-      nonleaf_r_inplace = (!in_nvm(level)) ? nonleaf_r_inplace+1 : nonleaf_r_inplace;
+      nvm_inplace_r = in_nvm(level) ? nvm_inplace_r+1 : nvm_inplace_r;
+      dram_inplace_r = (!in_nvm(level)) ? dram_inplace_r+1 : dram_inplace_r;
     }
   }
   else if (type == 'W')
@@ -4378,7 +4378,7 @@ int calc_mem_addr(int index, int offset, char type)
       if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
       {
         mem_addr = inplace_allocate(index, offset);
-        nonleaf_w_inplace++;
+        dram_inplace_w++;
       }
       // else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue? $$$ no removing for now
       // {
@@ -4391,7 +4391,7 @@ int calc_mem_addr(int index, int offset, char type)
       //   //   exit(1);
       //   // }
         
-      //   nonleaf_w_inplace_remembered++;
+      //   dram_inplace_w_remembered++;
       // }
       else if (GlobTree[index].slot[offset].dd == ALLOCATED || GlobTree[index].slot[offset].dd == REMEMBERED) // the case that redirect needed ~> find another dead blk to fill in from the queue
       {
@@ -4409,7 +4409,7 @@ int calc_mem_addr(int index, int offset, char type)
           export_csv(pargv);
           exit(1);
         }
-        nonleaf_w_remote++;
+        dram_remote_w++;
       }
     }
     else  // for the levels in nvm
@@ -4432,11 +4432,11 @@ int calc_mem_addr(int index, int offset, char type)
           export_csv(pargv);
           exit(1);
         }
-        leaf_w_inplace++;
+        nvm_inplace_w++;
       }
       else
       {
-        leaf_w_remote++;
+        nvm_remote_w++;
         remote_located_leaves++;
       }
 
@@ -5231,37 +5231,37 @@ void export_csv(char * argv[]){
   //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
   //   }
   // }
-  fprintf(fp, "nonleaf_r_norm,%lld\n", nonleaf_r_norm);
-  fprintf(fp, "leaf_r_norm,%lld\n", leaf_r_norm);
-  fprintf(fp, "nonleaf_w_norm,%lld\n", nonleaf_w_norm);
-  fprintf(fp, "leaf_w_norm,%lld\n", leaf_w_norm);
-  fprintf(fp, "nonleaf_r_remote,%lld\n", nonleaf_r_remote);
-  fprintf(fp, "leaf_r_remote,%lld\n", leaf_r_remote);
-  fprintf(fp, "nonleaf_r_inplace,%lld\n", nonleaf_r_inplace);
-  fprintf(fp, "leaf_r_inplace,%lld\n", leaf_r_inplace);
-  fprintf(fp, "nonleaf_w_inplace,%lld\n", nonleaf_w_inplace);
-  fprintf(fp, "nonleaf_w_inplace_remembered,%lld\n", nonleaf_w_inplace_remembered);
-  fprintf(fp, "nonleaf_w_remote,%lld\n", nonleaf_w_remote);
-  fprintf(fp, "leaf_w_inplace,%lld\n", leaf_w_inplace);
-  fprintf(fp, "leaf_w_remote,%lld\n", leaf_w_remote);
+  fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
+  fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
+  fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
+  fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
+  fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
+  fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
+  fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
+  fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
+  fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
+  fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
+  fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
+  fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
+  // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
   fprintf(fp, "deadQ-size,%d\n", deadQ->size);
   fprintf(fp, "remote_located_leaves,%d\n", remote_located_leaves);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
 
-  for (int i = 0; i < LEVEL; i++)
-  {
-    fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
-  }
-  fprintf(fp, "nonleaf_elselevel,%lld\n", nonleaf_elselevel);
-  fprintf(fp, "leaf_elselevel,%lld\n", leaf_elselevel);
-  fprintf(fp, "remote_located_nonleaves,%lld\n", nonleaf_w_remote - nonleaf_r_remote);
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
+  // }
+  fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
+  fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
+  fprintf(fp, "remote_located_nonleaves,%lld\n", dram_remote_w - dram_remote_r);
   fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
   fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
   fprintf(fp, "rmiss,%d\n", rmiss);
   fprintf(fp, "wmiss,%d\n", wmiss);
   fprintf(fp, "deadrem,%lld\n", deadrem);
 
-  print_lifetime_stat(fp);
+  // print_lifetime_stat(fp);
   
   
   fclose(fp);
