@@ -4138,13 +4138,13 @@ void gather_dead(int index, int i){
           db->index = index;
           db->offset = j;
 
-          if (deadQ->size >= deadQ->limit)
-          {
-            Dequeue(deadQ);
-            // Element *oldest = Dequeue(deadQ);
-            // free(oldest);
-          }
-          Enqueue(deadQ, db);
+          // if (deadQ->size >= deadQ->limit)
+          // {
+          //   Dequeue(deadQ);
+          //   // Element *oldest = Dequeue(deadQ);
+          //   // free(oldest);
+          // }
+          // Enqueue(deadQ, db);
 
           // if (deadQ_arr[i]->size >= deadQ_arr[i]->limit)
           // {
@@ -4157,6 +4157,10 @@ void gather_dead(int index, int i){
             GlobTree[index].slot[j].dd = REMEMBERED;
             deadrem++;
             Enqueue(deadQ_arr[i] , db);
+          }
+          else
+          {
+            free(db);
           }
                     
         }
@@ -4397,12 +4401,12 @@ int calc_mem_addr(int index, int offset, char type)
       // }
       else if (GlobTree[index].slot[offset].dd == ALLOCATED || GlobTree[index].slot[offset].dd == REMEMBERED) // the case that redirect needed ~> find another dead blk to fill in from the queue
       {
-        if (deadQ->size == 0)
-        {
-          printf("ERROR: calc mem addr queue empty!\n");
-          export_csv(pargv);
-          exit(1);
-        }
+        // if (deadQ->size == 0)
+        // {
+        //   printf("ERROR: calc mem addr queue empty!\n");
+        //   export_csv(pargv);
+        //   exit(1);
+        // }
 
         mem_addr = remote_allocate(index, offset);
         if (mem_addr == -1)
