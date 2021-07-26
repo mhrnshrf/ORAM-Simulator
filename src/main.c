@@ -1271,10 +1271,10 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
 				{
-					// if (tracectr % 1000000 == 0)
-					// {
-					// 	printf("@ %d\n", tracectr);
-					// }
+					if (tracectr % 1000000 == 0)
+					{
+						printf("@ %d\n", tracectr);
+					}
 					// if (tracectr >= 17000000)
 					// {
 					// 	printf("no miss %d\n", tracectr);

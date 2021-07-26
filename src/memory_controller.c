@@ -4204,6 +4204,9 @@ int remote_allocate(int index, int offset){
       free(cand);
       break;
     }
+
+    // printf("hereeeeeeeeeeee taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
+    // printf("hereeeeeeeeeeee taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED":"unknown", tracectr);
     free(cand);
   }
 
@@ -4281,6 +4284,11 @@ int inplace_allocate(int index, int offset){
 
 int inplace_access(int index, int offset){
   int mem_addr = index*Z_VAR + offset;
+  // if (!GlobTree[index].slot[offset].valid)
+  // {
+  //   printf("inplace access invalid block\n");
+  // }
+  
   GlobTree[index].slot[offset].dd = DEAD;
   return mem_addr;
 }
@@ -4471,7 +4479,7 @@ void ring_read_path(int label, int addr){
 
 
     int offset = rand() % LZ_VAR[i]; // ??? should change to chose randomly from dummies
-    while (GlobTree[index].slot[offset].isReal)
+    while (GlobTree[index].slot[offset].isReal ||  !GlobTree[index].slot[offset].valid )
     {
       offset = rand() % LZ_VAR[i];
       
@@ -4502,6 +4510,7 @@ void ring_read_path(int label, int addr){
           {
             botctr++;
           }
+          break;
         }
       }
 
@@ -4536,7 +4545,6 @@ void ring_read_path(int label, int addr){
     }
     
 
-    ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
 
 
     if (!GlobTree[index].slot[offset].isReal)
@@ -4556,6 +4564,7 @@ void ring_read_path(int label, int addr){
 
     int mem_addr = calc_mem_addr(index, offset, 'R');
 
+    ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
 
     
 
@@ -4966,6 +4975,10 @@ void ring_early_reshuffle(int label){
 
 
 void ring_invalidate(int index, int offset){
+  //  if (!GlobTree[index].slot[offset].valid)
+  // {
+  //   printf("invalidate an invalid block\n");
+  // }
   GlobTree[index].slot[offset].valid = false;
   if (GlobTree[index].slot[offset].dead_start == 0)
   {
