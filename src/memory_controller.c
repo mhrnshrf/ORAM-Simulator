@@ -4115,11 +4115,12 @@ void gather_dead(int index, int i){
     {
       if (!GlobTree[index].slot[j].isReal)
       {
-        if (GlobTree[index].slot[j].dd == DEAD) // && GlobTree[index].allctr < RING_S) // 2nd condtion added on 4/13/2021 9:04 pm
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < RING_S) // 2nd condtion added on 4/13/2021 9:04 pm
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
           db->offset = j;
+
 
           // if (deadQ->size >= deadQ->limit)
           // {
@@ -4138,6 +4139,8 @@ void gather_dead(int index, int i){
           if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
           {
             GlobTree[index].slot[j].dd = REMEMBERED;
+            GlobTree[index].allctr++;
+
             deadrem++;
             Enqueue(deadQ_arr[i] , db);
           }
@@ -4257,7 +4260,7 @@ int remote_allocate(int index, int offset){
   if (i != -1 && j != -1)
   {
     GlobTree[i].slot[j].dd = ALLOCATED;
-    GlobTree[i].allctr++;
+    // GlobTree[i].allctr++;
     GlobTree[index].slot[offset].redirect = true;
     GlobTree[index].slot[offset].remote_index = i;
     GlobTree[index].slot[offset].remote_offset = j;
