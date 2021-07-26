@@ -3017,12 +3017,12 @@ void random_trace(){
 void invoke_oram(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, long long int instruction_pc, char type) {
     
   invokectr++;
-  bool now = false;
-  if (tracectr == 22300000)
-  {
-    printf("@invoke %d \n", tracectr);
-    now = true;
-  }
+  // bool now = false;
+  // if (tracectr == 22300000)
+  // {
+  //   printf("@invoke %d \n", tracectr);
+  //   now = true;
+  // }
   
   // printf("trace %d  deadQ size %d\n", tracectr, deadQ->size);
   
@@ -3032,10 +3032,10 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   orig_instr = instruction_id; 
   orig_pc = instruction_pc;
 
-  if (now)
-  {
-    printf("invoke... %d \n", tracectr);
-  }
+  // if (now)
+  // {
+  //   printf("invoke... %d \n", tracectr);
+  // }
   
   // if (invokectr >= 0 && RING_ENABLE)
   // {
@@ -3047,10 +3047,10 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   //   }
   // }
 
-   if (now)
-  {
-    printf("invoke... %d \n", tracectr);
-  }
+  //  if (now)
+  // {
+  //   printf("invoke... %d \n", tracectr);
+  // }
   
 
   // int flip = rand() % 2;
@@ -3071,18 +3071,18 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   
   
 
-   if (now)
-  {
-    printf("invoke... %d \n", tracectr);
-  }
+  //  if (now)
+  // {
+  //   printf("invoke... %d \n", tracectr);
+  // }
   // int addr = (int)(physical_address & (BLOCK-1));
   unsigned int addr = block_addr(physical_address);
   // printf("invoke oram: physical addr: %lld\n", addr);
   // printf("invoke oram: b4 freecursive call addr: %d\n", addr);
-   if (now)
-  {
-    printf("invoke... %d \n", tracectr);
-  }
+  //  if (now)
+  // {
+  //   printf("invoke... %d \n", tracectr);
+  // }
 
   // if (RING_ENABLE)
   // {
@@ -3123,26 +3123,9 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   // printf("oram @ trace %d  addr %d\n", tracectr, addr);
  
   switch_tree_to(ORAM);
-  bool point = false;
-  if (tracectr == 22300000)
-  {
-    printf("@- freecur %d \n", tracectr);
-    point = true;
-  }
-   if (now)
-  {
-    printf("invoke... %d \n", tracectr);
-  }
+
   freecursive_access(addr, type);
-   if (now)
-  {
-    printf("invoke... %d \n", tracectr);
-  }
-  if (point)
-  {
-    printf("@> freecur %d \n", tracectr);
-  }
-  
+
 
   if (STT_ENABLE && TREE_VAR == ORAM)
   {
