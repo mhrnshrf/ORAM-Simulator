@@ -55,7 +55,7 @@ bool pause_skip = false;
 int count_level[LEVEL] = {0};
 int cap_level[LEVEL] = {0};
 
-int remote_located_leaves = 0;
+int remote_nvms = 0;
 
 int lifetime_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
 int lifetime_max[LEVEL] = {0};
@@ -4115,7 +4115,7 @@ void gather_dead(int index, int i){
     {
       if (!GlobTree[index].slot[j].isReal)
       {
-        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < RING_S) // 2nd condtion added on 4/13/2021 9:04 pm
+        if (GlobTree[index].slot[j].dd == DEAD) // && GlobTree[index].allctr < RING_S) // 2nd condtion added on 4/13/2021 9:04 pm
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
@@ -4349,7 +4349,7 @@ int calc_mem_addr(int index, int offset, char type)
 
       nvm_remote_r = in_nvm(level) ? nvm_remote_r+1 : nvm_remote_r;
       dram_remote_r = (!in_nvm(level)) ? dram_remote_r+1 : dram_remote_r;
-      remote_located_leaves = in_nvm(level) ? remote_located_leaves-1 : remote_located_leaves;
+      remote_nvms = in_nvm(level) ? remote_nvms-1 : remote_nvms;
       
     }
     else
@@ -4404,7 +4404,7 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the levels in nvm
     {
       mem_addr = -1;
-      if (remote_located_leaves < REMOTE_ALLOC_RATIO*(deadctr + surplus_dead )) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      if (remote_nvms < REMOTE_ALLOC_RATIO*(deadctr + surplus_dead )) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4417,7 +4417,7 @@ int calc_mem_addr(int index, int offset, char type)
         }
         else
         {
-          printf("ERROR: calc mem addr leaf level allocation failed!\n");
+          printf("ERROR: calc mem addr nvm level allocation failed!\n");
           export_csv(pargv);
           exit(1);
         }
@@ -4426,7 +4426,7 @@ int calc_mem_addr(int index, int offset, char type)
       else
       {
         nvm_remote_w++;
-        remote_located_leaves++;
+        remote_nvms++;
       }
 
     }
@@ -5234,7 +5234,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
   // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
   fprintf(fp, "deadQ-size,%d\n", deadQ->size);
-  fprintf(fp, "remote_located_leaves,%d\n", remote_located_leaves);
+  fprintf(fp, "remote_nvms,%d\n", remote_nvms);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
 
   // for (int i = 0; i < LEVEL; i++)
@@ -5243,7 +5243,7 @@ void export_csv(char * argv[]){
   // }
   fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
   fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
-  fprintf(fp, "remote_located_nonleaves,%lld\n", dram_remote_w - dram_remote_r);
+  fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
   fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
   fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
   fprintf(fp, "rmiss,%d\n", rmiss);
