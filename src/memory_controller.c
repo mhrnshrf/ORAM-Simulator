@@ -5108,6 +5108,21 @@ void print_lifetime_stat(FILE *fp){
   }
 }
 
+void print_count_stat(FILE *fp){
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "count_min[%d],%d\n", i, count_min[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "count_max[%d],%d\n", i, count_max[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "count_avg[%d],%f\n", i, (double)count_sum[i]/count_count[i]);
+  }
+}
+
 
 void export_csv_intermed(char exp_name[], int ind, long double *arr){
   FILE *fp;
@@ -5315,6 +5330,7 @@ void export_csv(char * argv[]){
 
   // print_lifetime_stat(fp);
   
+  print_count_stat(fp);
   
   fclose(fp);
 }
