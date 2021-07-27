@@ -62,6 +62,12 @@ int lifetime_max[LEVEL] = {0};
 long long int lifetime_sum[LEVEL] = {0};
 int lifetime_count[LEVEL] = {0};
 
+
+int count_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
+int count_max[LEVEL] = {0};
+long long int count_sum[LEVEL] = {0};
+int count_count[LEVEL] = {0};
+
 int GREEN_BLOCK = 0;
 
 
@@ -104,6 +110,27 @@ void update_lifetime_stat(int lifetime, int level){
   // }
   
 }
+
+void update_count_stat(int count, int level){
+  // if (tracectr > WARMUP_TREE)
+  // {
+    if (count != 0)
+    {
+      if (count_min[level] > count ) //&& lifetime != 1) 
+      {
+        count_min[level] = count;
+      }
+      if (count_max[level] < count)
+      {
+        count_max[level] = count;
+      }
+      count_sum[level] += count;
+      count_count[level]++; 
+    }
+  // }
+  
+}
+
 
 // long long int CYCLE_VAL = 0;
 
@@ -1766,6 +1793,7 @@ void write_path(int label){
       {
         ref_close[i]++;
       }
+      update_count_stat(GlobTree[index].count, i);
       GlobTree[index].count = 0; // for ring oram evict path
       deadctr -= GlobTree[index].dumdead;
       GlobTree[index].dumdead = 0;
@@ -1784,6 +1812,7 @@ void write_path(int label){
           GlobTree[index].slot[j].dead_start = 0;
           update_lifetime_stat(lifetime, i);
         }
+        
         
 
         gi++;
@@ -4931,7 +4960,7 @@ void ring_early_reshuffle(int label){
           remove_from_stash(candidate[j]);
         }
       }
-      
+
       GlobTree[index].count = 0;
       deadctr -= GlobTree[index].dumdead;
       GlobTree[index].dumdead = 0;
@@ -5268,12 +5297,7 @@ void export_csv(char * argv[]){
   // fprintf(fp, "deadQ-size,%d\n", deadQ->size);
   fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
   fprintf(fp, "remote_nvms,%d\n", remote_nvms);
-  fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
 
-  // for (int i = 0; i < LEVEL; i++)
-  // {
-  //   fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
-  // }
   fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
   fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
   fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
@@ -5281,6 +5305,13 @@ void export_csv(char * argv[]){
   fprintf(fp, "rmiss,%d\n", rmiss);
   fprintf(fp, "wmiss,%d\n", wmiss);
   fprintf(fp, "deadrem,%lld\n", deadrem);
+
+  fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
+
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
+  }
 
   // print_lifetime_stat(fp);
   

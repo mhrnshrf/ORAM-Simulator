@@ -423,6 +423,7 @@ void random_trace();
 void explore_lz();
 void test_ring();
 void switch_dead_enable_to(bool tf);
+void update_count_stat(int count, int level);
 // Mehrnoosh.
 
 

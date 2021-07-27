@@ -859,13 +859,13 @@ int main(int argc, char * argv[])
 	{
 		switch_sim_enable_to(false);
 		switch_cache_enable_to(false);
-		switch_dead_enable_to(false);
+		// switch_dead_enable_to(false);
 	}
 	else
 	{
 		switch_sim_enable_to(SIM_ENABLE);
 		switch_cache_enable_to(CACHE_ENABLE);
-		switch_dead_enable_to(DEAD_ENABLE);
+		// switch_dead_enable_to(DEAD_ENABLE);
 	}
 	
 	
@@ -945,6 +945,7 @@ int main(int argc, char * argv[])
     for (numc = 0; numc < NUMCORES; numc++) {
       num_ret = 0;
       while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
+		//   printf("while rob inflight %d\n", tracectr);
         /* Keep retiring until retire width is consumed or ROB is empty. */
         if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {  
 	  /* Keep retiring instructions if they are done. */
@@ -995,7 +996,7 @@ int main(int argc, char * argv[])
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
         while (((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) /* || ( !SIM_ENABLE && (tracectr < TRACE_SIZE ))*/ ) {
-		// printf("in while q full\n");
+		// printf("while fetch %d\n", tracectr);
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
@@ -1271,7 +1272,7 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
 				{
-					// if (tracectr % 1000000 == 0)
+					// if (tracectr % 500000 == 0)
 					// {
 					// 	printf("@ %d\n", tracectr);
 					// }
@@ -1288,7 +1289,7 @@ int main(int argc, char * argv[])
 					{
 						switch_sim_enable_to(SIM_ENABLE);
 						switch_cache_enable_to(CACHE_ENABLE);
-						switch_dead_enable_to(DEAD_ENABLE);
+						// switch_dead_enable_to(DEAD_ENABLE);
 						break;
 					}
 					
