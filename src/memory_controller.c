@@ -2692,7 +2692,6 @@ void freecursive_access(int addr, char type){
           } 
           else
           {
-            // printf("hereeeee blk: %d \n", tag);
             stt_invalidate(tag);
           }
           
@@ -4275,6 +4274,22 @@ int remote_allocate(int index, int offset){
 }
 
 int inplace_allocate(int index, int offset){
+  // if (GlobTree[index].slot[offset].dd == REMEMBERED)
+  // {
+  //   printf("inplace alloc REMEMBERED\n");
+  // }
+  // else if (GlobTree[index].slot[offset].dd == ALLOCATED)
+  // {
+  //   printf("inplace alloc ALLOCATED\n");
+  // }
+  // else if (GlobTree[index].slot[offset].dd == DEAD)
+  // {
+  //   printf("inplace alloc DEAD\n");
+  // }
+  // else if (GlobTree[index].slot[offset].dd == REFRESHED)
+  // {
+  //   printf("inplace alloc REFRESHED\n");
+  // }
   int mem_addr = index*Z_VAR + offset;
   GlobTree[index].slot[offset].redirect = false;
   GlobTree[index].slot[offset].dd = REFRESHED;
@@ -4809,10 +4824,10 @@ void ring_early_reshuffle(int label){
       
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
-        int mem_addr = calc_mem_addr(index, j, 'R');
 
         if (GlobTree[index].slot[j].isReal)
         {
+          int mem_addr = calc_mem_addr(index, j, 'R');
           if (i == LEVEL - 1 && j == LZ_VAR[i] -1)
           {
             last_read = true;
