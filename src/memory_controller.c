@@ -4187,6 +4187,7 @@ int remote_allocate(int index, int offset){
     Element *cand = Dequeue(deadQ_arr[level]);
     int i_tmp = cand->index;
     int j_tmp = cand->offset;
+    // ??? taken condition to be deleted, a slot in queue not supposed to be taken ever
     bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
   
     if (!taken)
@@ -5264,7 +5265,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
   fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
   // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
-  fprintf(fp, "deadQ-size,%d\n", deadQ->size);
+  // fprintf(fp, "deadQ-size,%d\n", deadQ->size);
+  fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
   fprintf(fp, "remote_nvms,%d\n", remote_nvms);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
 
@@ -5274,7 +5276,6 @@ void export_csv(char * argv[]){
   // }
   fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
   fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
-  fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
   fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
   fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
   fprintf(fp, "rmiss,%d\n", rmiss);
