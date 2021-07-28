@@ -1112,6 +1112,7 @@ int main(int argc, char * argv[])
 	    ROB[numc].optype[ROB[numc].tail] = 'N';
 	    ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
 	    nonmemops[numc]--;
+		nonmemops_executed++;
 	    ROB[numc].tail = (ROB[numc].tail +1) % ROBSIZE;
 	    ROB[numc].inflight++;
 	    fetched[numc]++;

@@ -428,6 +428,7 @@ int dirty_pointctr = 0;
 int oram_effective_pl = 0;
 
 long long int nonmemops_sum = 0;
+long long int nonmemops_executed = 0;
 
 long long int lastpath = 0;
 
@@ -5328,9 +5329,10 @@ void export_csv(char * argv[]){
     fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
   }
 
+  fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);
   // print_lifetime_stat(fp);
   
-  print_count_stat(fp);
+  // print_count_stat(fp);
   
   fclose(fp);
 }
