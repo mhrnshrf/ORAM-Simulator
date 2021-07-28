@@ -119,6 +119,7 @@ typedef enum {
 	SURONLY_ENABLE_token ,
 	CB_ENABLE_token ,
 	CB_GREEN_MAX_token ,
+	NVM_LATENCY_token ,
 
 	comment_token,
 	unknown_token
@@ -332,6 +333,8 @@ token_t tokenize(char * input){
 	return CB_ENABLE_token;
   } else if (strncmp(input, "CB_GREEN_MAX",length) == 0) {
 	return CB_GREEN_MAX_token;
+  } else if (strncmp(input, "NVM_LATENCY",length) == 0) {
+	return NVM_LATENCY_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -812,6 +815,10 @@ void read_config_file(FILE * fin)
 			case CB_GREEN_MAX_token:
 				fscanf(fin,"%d",&input_int);
 				CB_GREEN_MAX = input_int;
+				break;
+			case NVM_LATENCY_token:
+				fscanf(fin,"%d",&input_int);
+				NVM_LATENCY = input_int;
 				break;
 
 			case unknown_token:

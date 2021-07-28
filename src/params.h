@@ -230,6 +230,8 @@ float REMOTE_ALLOC_RATIO ;                            // what percentage of dead
 int NVM_START ;                            // starting what level is stored in nvm (inclusive)
 int WARMUP_TREE  ;         // warmup threshold for oram tree
 int CB_GREEN_MAX  ;         // number of green blocks in compact bucket feature of string oram paper
+int NVM_LATENCY  ;          // nvm latency in terms of DRAM cycle
+
 
 
 
