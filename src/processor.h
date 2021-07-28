@@ -1,5 +1,6 @@
 #ifndef __PROCESSOR_H__
 #define __PROCESSOR_H__
+#include <stdbool.h>
 
 struct robstructure
 {
@@ -11,6 +12,7 @@ struct robstructure
   int * optype;
   long long int * instrpc;
   int tracedone;
+  bool * waited_on;
 } ;
 
 #endif //__PROCESSOR_H__

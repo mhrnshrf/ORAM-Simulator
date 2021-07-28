@@ -646,6 +646,7 @@ int main(int argc, char * argv[])
 	  ROB[i].mem_address = (long long int*)malloc(sizeof(long long int)*ROBSIZE);
 	  ROB[i].instrpc = (long long int*)malloc(sizeof(long long int)*ROBSIZE);
 	  ROB[i].optype = (int*)malloc(sizeof(int)*ROBSIZE);
+	  ROB[i].waited_on = (bool*)malloc(sizeof(bool)*ROBSIZE);
   }
   init_memory_controller_vars();
   init_scheduler_vars();
@@ -949,11 +950,16 @@ int main(int argc, char * argv[])
 		//   printf("while rob inflight %d\n", tracectr);
         /* Keep retiring until retire width is consumed or ROB is empty. */
         if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {  
+			if (ROB[numc].waited_on[ROB[numc].head])
+			{
+				last_read_served = true;
+			}
 	  /* Keep retiring instructions if they are done. */
 	  ROB[numc].head = (ROB[numc].head + 1) % ROBSIZE;
 	  ROB[numc].inflight--;
 	  committed[numc]++;
 	  num_ret++;
+	  
         }
 	else  /* Instruction not complete.  Stop retirement for this core. */
 	  break;

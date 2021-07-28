@@ -6239,8 +6239,13 @@ issue_request_command (request_t * request)
       // Mehrnoosh:
       if (request->last_read)
 			{
-				last_read_served = true;
+				// last_read_served = true;
+        ROB[request->thread_id].waited_on[request->instruction_id] = true;
 			}
+      else
+      {
+        ROB[request->thread_id].waited_on[request->instruction_id] = false;
+      }
       // Mehrnoosh.
 
       // update the ROB with the completion time
