@@ -500,6 +500,7 @@ int main(int argc, char * argv[])
   int tree[NCORES];
 //   last_read = (bool *)malloc(sizeof(bool)*NUMCORES);
   bool last_read[NCORES];
+  bool nvm_access[NCORES];
 //   nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
   int nonmemops_timing[NCORES];
 //   shad_nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
@@ -1156,7 +1157,7 @@ int main(int argc, char * argv[])
 			
 			// if (SIM_ENABLE)
 			// {
-				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc]);
+				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc]);
 			// }
 			
 			
@@ -1185,7 +1186,7 @@ int main(int argc, char * argv[])
 
 				// if (SIM_ENABLE)
 				// {
-					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc]);
+					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc] );
 				// }
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
@@ -1737,19 +1738,20 @@ int main(int argc, char * argv[])
 			oramid[numc] = pN->oramid;
 			tree[numc] = pN->tree;
 			last_read[numc] = pN->last_read;
+			nvm_access[numc] = pN->nvm_access;
 			if (pN->last_read)
 			{
 				last_read_served = false;
 			}
 			
-			if (RING_ENABLE && NVM_ENABLE)
-			{
-				if (pN->nvm_access)
-				{
-					nonmemops[numc] += 750;
-				}
+			// if (RING_ENABLE && NVM_ENABLE)
+			// {
+			// 	if (pN->nvm_access)
+			// 	{
+			// 		nonmemops[numc] += 750;
+			// 	}
 				
-			}
+			// }
 			
 			
 			// nonmemops[numc] = 0; // ??? not sure about this one ~~~> guess resolved

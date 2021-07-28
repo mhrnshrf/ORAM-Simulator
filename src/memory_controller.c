@@ -5717,7 +5717,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   void *
 init_new_node (long long int physical_address, long long int arrival_time,
     optype_t type, int thread_id, int instruction_id,
-    long long int instruction_pc, int oramid, TreeType tree, bool last_read) 
+    long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access) 
 {
   request_t * new_node = NULL;
   new_node = (request_t *) malloc (sizeof (request_t));
@@ -5735,6 +5735,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->oramid = oramid;
     new_node->tree = tree;
     new_node->last_read = last_read;
+    new_node->nvm_access = nvm_access;
     // Mehrnoosh.
 
 
@@ -5834,7 +5835,7 @@ write_exists_in_write_queue (long long int physical_address)
 // Insert a new read to the read queue
 request_t * insert_read (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read) 
+    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access) 
 {
   optype_t this_op = READ;
 
@@ -5845,7 +5846,7 @@ request_t * insert_read (long long int physical_address,
   stats_reads_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, instruction_pc, oramid, tree, last_read);
+        instruction_id, instruction_pc, oramid, tree, last_read, nvm_access);
   LL_APPEND (read_queue_head[channel], new_node);
   read_queue_length[channel]++;
 
@@ -5857,7 +5858,7 @@ request_t * insert_read (long long int physical_address,
 // Insert a new write to the write queue
 request_t * insert_write (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, int oramid, TreeType tree) 
+    int instruction_id, int oramid, TreeType tree, bool nvm_access) 
 {
   optype_t this_op = WRITE;
   dram_address_t * this_addr = calc_dram_addr (physical_address);
@@ -5866,7 +5867,7 @@ request_t * insert_write (long long int physical_address,
   stats_writes_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, 0, oramid, tree, false);
+        instruction_id, 0, oramid, tree, false, nvm_access);
   LL_APPEND (write_queue_head[channel], new_node);
   write_queue_length[channel]++;
 
@@ -6227,6 +6228,11 @@ issue_request_command (request_t * request)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
+      if (request->nvm_access && RING_ENABLE && NVM_ENABLE)
+      {
+        request->completion_time += NVM_LATENCY;
+      }
+      
       request->latency = request->completion_time - request->arrival_time;
       request->dispatch_time = CYCLE_VAL;
       request->request_served = 1;

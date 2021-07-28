@@ -129,6 +129,7 @@
 
 #define DD_SATURATE 30000000
 #define NCORES 1
+#define NVM_LATENCY 150 // in terms of memory cycles
 
 
 
@@ -497,6 +498,7 @@ typedef struct req
   int oramid;       // oram access id to whcih the request belongs to
   TreeType tree;    // which tree the request belongs to oram or rho
   bool last_read;   // 0/1 flag to indicate whether the request is the last read request in oram read phase
+  bool nvm_access;   // 0/1 flag to indicate whether the request is a nvm block access
 
   // Mehrnoosh.
 } request_t;
@@ -668,10 +670,10 @@ int read_matches_write_or_read_queue(long long int physical_address);
 int write_exists_in_write_queue(long long int physical_address);
 
 // enqueue a read into the corresponding read queue (returns ptr to new node)
-request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read);
+request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access);
 
 // enqueue a write into the corresponding write queue (returns ptr to new_node)
-request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree);
+request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree, bool nvm_access);
 
 // update stats counters
 void gather_stats(int channel);
