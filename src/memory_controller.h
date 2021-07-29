@@ -129,7 +129,6 @@
 
 #define DD_SATURATE 30000000
 #define NCORES 1
-#define NVM_LATENCY 150 // in terms of memory cycles
 
 
 

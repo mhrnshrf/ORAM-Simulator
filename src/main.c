@@ -884,7 +884,17 @@ int main(int argc, char * argv[])
 
 
 	// Mehrnoosh:
-	// printf("@ %d\n", tracectr);
+	// printf("@ %lld\n", CYCLE_VAL);
+	// if (last_read_served)
+	// {
+	// 	printf("serveddddddddddddddddddddddddddddddddd\n");
+	// }
+	// else
+	// {
+	// 	printf("--------------------------------------\n");
+
+	// }
+	
 	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
 	// print_count_level();
 	// cnt++;
@@ -952,8 +962,13 @@ int main(int argc, char * argv[])
         if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {  
 			if (ROB[numc].waited_on[ROB[numc].head])
 			{
+				// printf("retired  NVM @ %lld \n", CYCLE_VAL);
 				last_read_served = true;
 			}
+			// else{
+			// 	printf("retired  DRAM @ %lld \n", CYCLE_VAL);
+
+			// }
 	  /* Keep retiring instructions if they are done. */
 	  ROB[numc].head = (ROB[numc].head + 1) % ROBSIZE;
 	  ROB[numc].inflight--;
@@ -1293,11 +1308,16 @@ int main(int argc, char * argv[])
 					// 	printf("while %d\n", tracectr);
 					// }
 					
+					if (tracectr >= WARMUP_TREE - REMOTE_START_OFF)
+					{
+						switch_dead_enable_to(DEAD_ENABLE);
+					}
+
 					if (SIM_ENABLE && !SIM_ENABLE_VAR && tracectr >= WARMUP_TREE)
 					{
 						switch_sim_enable_to(SIM_ENABLE);
 						switch_cache_enable_to(CACHE_ENABLE);
-						switch_dead_enable_to(DEAD_ENABLE);
+						// switch_dead_enable_to(DEAD_ENABLE);
 						break;
 					}
 					

@@ -6231,7 +6231,11 @@ issue_request_command (request_t * request)
       if (request->nvm_access && RING_ENABLE && NVM_ENABLE)
       {
         request->completion_time += NVM_LATENCY;
+        // printf("nvm  @ %lld\n", CYCLE_VAL);
       }
+      // else{
+      //   printf("dram  @ %lld\n", CYCLE_VAL);
+      // }
       
       request->latency = request->completion_time - request->arrival_time;
       request->dispatch_time = CYCLE_VAL;
