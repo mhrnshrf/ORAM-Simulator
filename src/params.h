@@ -232,6 +232,7 @@ int WARMUP_TREE  ;         // warmup threshold for oram tree
 int CB_GREEN_MAX  ;         // number of green blocks in compact bucket feature of string oram paper
 int NVM_LATENCY  ;          // nvm latency in terms of DRAM cycle
 int REMOTE_START_OFF;  // offset in terms of number of trace, how earlier than warmup start the remote alloc
+int NVM_CHANNEL ;  // number of channels dedicated to nvm
 
 
 

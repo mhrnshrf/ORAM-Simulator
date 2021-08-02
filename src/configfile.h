@@ -121,6 +121,7 @@ typedef enum {
 	CB_GREEN_MAX_token ,
 	NVM_LATENCY_token ,
 	REMOTE_START_OFF_token ,
+	NVM_CHANNEL_token ,
 
 	comment_token,
 	unknown_token
@@ -338,6 +339,8 @@ token_t tokenize(char * input){
 	return NVM_LATENCY_token;
   } else if (strncmp(input, "REMOTE_START_OFF",length) == 0) {
 	return REMOTE_START_OFF_token;
+  } else if (strncmp(input, "NVM_CHANNEL",length) == 0) {
+	return NVM_CHANNEL_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -826,6 +829,10 @@ void read_config_file(FILE * fin)
 			case REMOTE_START_OFF_token:
 				fscanf(fin,"%d",&input_int);
 				REMOTE_START_OFF = input_int;
+				break;
+			case NVM_CHANNEL_token:
+				fscanf(fin,"%d",&input_int);
+				NVM_CHANNEL = input_int;
 				break;
 
 			case unknown_token:

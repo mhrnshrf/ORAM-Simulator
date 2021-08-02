@@ -399,6 +399,7 @@ int EMPTY_TOP_VAR;
 int TOP_CACHE_VAR;
 int PATH_VAR;
 int NVM_ADDR_VAR;
+long long int NVM_ADDR_BYTE;
 AccessType ACCESS_VAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var;
@@ -594,6 +595,7 @@ void var_init(){
   pos_var = POS2;
   SIM_ENABLE_VAR = SIM_ENABLE;
   NVM_ADDR_VAR = (pow(2, NVM_START)-1)*Z_VAR;
+  NVM_ADDR_BYTE = NVM_ADDR_VAR << (int)log2(BLOCK_SIZE);
   DEAD_ENABLE_VAR = DEAD_ENABLE;
 }
 
@@ -4126,6 +4128,7 @@ void metadata_access(int label, char type){
       int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(i);
+      nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access);
     }
   }
@@ -5708,6 +5711,25 @@ dram_address_t * calc_dram_addr (long long int physical_address)
     temp_a = input_a << rowBitWidth;
     this_a->row = temp_a ^ temp_b;	// strip out the row number
   }
+
+  if (RING_ENABLE && NVM_ENABLE)
+  {
+    int cur_chan = this_a->channel;
+    int dram_chan = NUM_CHANNELS - NVM_CHANNEL;
+    unsigned long long int data_addr_byte = (unsigned long long int) DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE);
+    if (physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte)
+    {
+      this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
+    }
+    else
+    {
+      if (this_a->channel >= NUM_CHANNELS - NVM_CHANNEL)
+      {
+        this_a->channel = cur_chan % dram_chan;
+      }
+    }
+  }
+  
   return (this_a);
 }
 
@@ -5736,6 +5758,15 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->tree = tree;
     new_node->last_read = last_read;
     new_node->nvm_access = nvm_access;
+    if (nvm_access)
+    {
+      printf("nvm   ");
+    }
+    else
+    {
+      printf("dram  ");
+    }
+    
     // Mehrnoosh.
 
 
@@ -5753,6 +5784,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->instruction_pc = instruction_pc;
     new_node->next = NULL;
     dram_address_t * this_node_addr = calc_dram_addr (physical_address);
+    printf("channel %d\n", this_node_addr->channel);
     new_node->dram_addr.actual_address = physical_address;
     new_node->dram_addr.channel = this_node_addr->channel;
     new_node->dram_addr.rank = this_node_addr->rank;
