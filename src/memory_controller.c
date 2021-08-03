@@ -5341,23 +5341,6 @@ void export_csv(char * argv[]){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void print_oram_stats(){
 
   // print_count_level();
@@ -5378,72 +5361,106 @@ void print_oram_stats(){
   }
   
 
-  printf("\n\n\n\n............... ORAM Stats ...............\n\n");
-  printf("Execution Time (s)       %f\n", exe_time);
-  printf("Total Cycles             %lld \n", CYCLE_VAL);
-  printf("Trace Size               %d\n", tracectr);
-  printf("Mem Cycles               %lld\n", mem_clk);
-  printf("Invoke Mem               %d\n", invokectr);
-  printf("ORAM Access              %d\n", oramctr);
-  printf("ORAM Dummy               %d\n", dummyctr);
-  printf("Pos1 Access              %d\n", pos1_access);
-  printf("Pos2 Access              %d\n", pos2_access);
-  printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
-  printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
-  printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
-  printf("PLB pos0 hit             %lld\n", plb_hit[0]);
-  printf("PLB pos1 hit             %lld\n", plb_hit[1]);
-  printf("PLB pos2 hit             %lld\n", plb_hit[2]);
-  printf("PLB pos0 acc             %lld\n", plbaccess[0]);
-  printf("PLB pos1 acc             %lld\n", plbaccess[1]);
-  printf("PLB pos2 acc             %lld\n", plbaccess[2]);
-  printf("oramQ Size               %d\n", oramQ->size);
-  printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
-  printf("Bk Evict                 %d\n", bkctr);
-  printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
-  printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
-  printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
-  printf("Rho Access               %d\n", rhoctr);
-  printf("Rho  Dummy               %d\n", rho_dummyctr);
-  printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
-  printf("Early WB                 %d\n", earlyctr);
-  printf("Early WB Pointer         %d\n", dirty_pointctr);
-  printf("Cache Dirty              %d\n", cache_dirty);
-  printf("ptr fail                 %d\n", ptr_fail);
-  printf("search fail              %d\n", search_fail);
-  printf("pin ctr                  %d\n", pinctr);
-  printf("unpin ctr                %d\n", unpinctr);
-  printf("prefetch case            %d\n", precase);
-  printf("STT Cand                 %d\n", sttctr);
-  printf("Stash leftover           %d\n", stash_leftover);
-  printf("Stash removed            %d\n", stash_removed);
-  printf("fill hit                 %d\n", fillhit);
-  printf("fill miss                %d\n", fillmiss);
-  printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
-  printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
-  printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
-  printf("Ring evict               %d\n", ring_evictctr);
-  printf("Stash occ                %d\n", stashctr);
-  printf("Stash Contain            %d\n", stash_cont);
-  printf("Linger Discard           %d\n", linger_discard);
-  printf("Ring shuff 10+           %d\n", shuffctr);
-  printf("Ring acc                 %d\n", ringctr);
-  printf("EP writeback             %d\n", wbctr);
-  printf("W request                %d\n", writectr);
-  printf("W skipped                %d\n", wskip);
-  printf("Mem req latency          %f\n", (double)mem_req_latencies/(invokectr));
-  printf("Nonmemops                %lld\n", nonmemops_sum);
-  printf("Miss L1 shad             %lld\n", missl1wb);
-  printf("Miss L1 ratio            %f%%\n", 100*(double)missl1wb/missctr);
-  printf("Shuff wb                 %d\n", wbshuff);
-  printf("Ring dummy               %d\n", ringdumctr);
-  printf("WL Pos1 acc              %d\n", wl_pos[1]);
-  printf("WL Pos2 acc              %d\n", wl_pos[2]);
-  printf("flush ctr                %d\n", stale_flush_ctr );
-  printf("discard ctr              %d\n", stale_discard_ctr );
+  // printf("\n\n\n\n............... ORAM Stats ...............\n\n");
+  // printf("Execution Time (s)       %f\n", exe_time);
+  // printf("Total Cycles             %lld \n", CYCLE_VAL);
+  // printf("Trace Size               %d\n", tracectr);
+  // printf("Mem Cycles               %lld\n", mem_clk);
+  // printf("Invoke Mem               %d\n", invokectr);
+  // printf("ORAM Access              %d\n", oramctr);
+  // printf("ORAM Dummy               %d\n", dummyctr);
+  // printf("Pos1 Access              %d\n", pos1_access);
+  // printf("Pos2 Access              %d\n", pos2_access);
+  // printf("PLB pos0 hit             %f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+  // printf("PLB pos1 hit             %f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+  // printf("PLB pos2 hit             %f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
+  // printf("PLB pos0 hit             %lld\n", plb_hit[0]);
+  // printf("PLB pos1 hit             %lld\n", plb_hit[1]);
+  // printf("PLB pos2 hit             %lld\n", plb_hit[2]);
+  // printf("PLB pos0 acc             %lld\n", plbaccess[0]);
+  // printf("PLB pos1 acc             %lld\n", plbaccess[1]);
+  // printf("PLB pos2 acc             %lld\n", plbaccess[2]);
+  // printf("oramQ Size               %d\n", oramQ->size);
+  // printf("Bk Evict                 %f%%\n", 100*(double)bkctr/oramctr);
+  // printf("Bk Evict                 %d\n", bkctr);
+  // printf("Cache Hit                %f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  // printf("Cache Evict              %f%%\n", 100*(double)evictctr/(missctr));
+  // printf("Rho Hit                  %f%%\n", 100*(double)rho_hit/(invokectr));
+  // printf("Rho Access               %d\n", rhoctr);
+  // printf("Rho  Dummy               %d\n", rho_dummyctr);
+  // printf("Rho Bk Evict             %f%%\n", 100*(double)rho_bkctr/rho_hit);
+  // printf("Early WB                 %d\n", earlyctr);
+  // printf("Early WB Pointer         %d\n", dirty_pointctr);
+  // printf("Cache Dirty              %d\n", cache_dirty);
+  // printf("ptr fail                 %d\n", ptr_fail);
+  // printf("search fail              %d\n", search_fail);
+  // printf("pin ctr                  %d\n", pinctr);
+  // printf("unpin ctr                %d\n", unpinctr);
+  // printf("prefetch case            %d\n", precase);
+  // printf("STT Cand                 %d\n", sttctr);
+  // printf("Stash leftover           %d\n", stash_leftover);
+  // printf("Stash removed            %d\n", stash_removed);
+  // printf("fill hit                 %d\n", fillhit);
+  // printf("fill miss                %d\n", fillmiss);
+  // printf("Top hit                  %f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+  // printf("Mid hit                  %f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+  // printf("Bot hit                  %f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+  // printf("Ring evict               %d\n", ring_evictctr);
+  // printf("Stash occ                %d\n", stashctr);
+  // printf("Stash Contain            %d\n", stash_cont);
+  // printf("Linger Discard           %d\n", linger_discard);
+  // printf("Ring shuff 10+           %d\n", shuffctr);
+  // printf("Ring acc                 %d\n", ringctr);
+  // printf("EP writeback             %d\n", wbctr);
+  // printf("W request                %d\n", writectr);
+  // printf("W skipped                %d\n", wskip);
+  // printf("Mem req latency          %f\n", (double)mem_req_latencies/(invokectr));
+  // printf("Nonmemops                %lld\n", nonmemops_sum);
+  // printf("Miss L1 shad             %lld\n", missl1wb);
+  // printf("Miss L1 ratio            %f%%\n", 100*(double)missl1wb/missctr);
+  // printf("Shuff wb                 %d\n", wbshuff);
+  // printf("Ring dummy               %d\n", ringdumctr);
+  // printf("WL Pos1 acc              %d\n", wl_pos[1]);
+  // printf("WL Pos2 acc              %d\n", wl_pos[2]);
+  // printf("flush ctr                %d\n", stale_flush_ctr );
+  // printf("discard ctr              %d\n", stale_discard_ctr );
   // prinf("Path Latency Avg         %f\n", path_access_latency_avg);
 }
 
+
+bool is_nvm_channel(int channel){
+  if (channel >= (NUM_CHANNELS - NVM_CHANNEL))
+  {
+    return true;
+  }
+  
+  return false;
+}
+
+void update_ddr_timing_param(int channel){
+  bool nvm = is_nvm_channel(channel);
+
+  T_RCD        = nvm ?   176      :        44;
+  T_RP         = nvm ?   528      :        44;
+
+  T_CAS        = nvm ?    44      :        44;
+  T_RC         = nvm ?   156      :       156;
+  T_RAS        = nvm ?   112      :       112;
+  T_RRD        = nvm ?    20      :        20;
+  T_FAW        = nvm ?   128      :       128;
+  T_WR         = nvm ?    48      :        48;
+  T_WTR        = nvm ?    24      :        24;
+  T_RTP        = nvm ?    24      :        24;
+  T_CCD        = nvm ?    16      :        16;
+  T_RFC        = nvm ?   352      :       352;
+  T_REFI       = nvm ? 24960      :     24960;
+  T_CWD        = nvm ?    20      :        20;
+  T_RTRS       = nvm ?     8      :         8;
+  T_PD_MIN     = nvm ?    16      :        16;
+  T_XP         = nvm ?    20      :        20;
+  T_XP_DLL     = nvm ?    80      :        80;
+  T_DATA_TRANS = nvm ?    16      :        16;
+}
 
 // Mehrnoosh.
 
@@ -5712,7 +5729,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
     this_a->row = temp_a ^ temp_b;	// strip out the row number
   }
 
-  if (RING_ENABLE && NVM_ENABLE)
+  if (NVM_ENABLE)
   {
     int cur_chan = this_a->channel;
     int dram_chan = NUM_CHANNELS - NVM_CHANNEL;
@@ -6183,6 +6200,12 @@ issue_request_command (request_t * request)
   int bank = request->dram_addr.bank;
   long long int row = request->dram_addr.row;
   command_t cmd = request->next_command;
+
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
+
   switch (cmd)
 
   {
@@ -6260,11 +6283,11 @@ issue_request_command (request_t * request)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
-      if (request->nvm_access && RING_ENABLE && NVM_ENABLE)
-      {
-        request->completion_time += NVM_LATENCY;
-        // printf("nvm  @ %lld\n", CYCLE_VAL);
-      }
+      // if (request->nvm_access && RING_ENABLE && NVM_ENABLE)
+      // {
+      //   request->completion_time += NVM_LATENCY;
+      //   // printf("nvm  @ %lld\n", CYCLE_VAL);
+      // }
       // else{
       //   printf("dram  @ %lld\n", CYCLE_VAL);
       // }
@@ -6491,6 +6514,10 @@ issue_request_command (request_t * request)
   int
 is_powerdown_fast_allowed (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   int flag = 0;
 
   // if already a command has been issued this cycle, or if
@@ -6525,6 +6552,10 @@ is_powerdown_fast_allowed (int channel, int rank)
   int
 is_powerdown_slow_allowed (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   int flag = 0;
   if (command_issued_current_cycle[channel]
       || forced_refresh_mode_on[channel][rank]
@@ -6561,6 +6592,10 @@ is_powerdown_slow_allowed (int channel, int rank)
   int
 is_powerup_allowed (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   if (command_issued_current_cycle[channel]
       || forced_refresh_mode_on[channel][rank])
     return 0;
@@ -6593,6 +6628,10 @@ is_powerup_allowed (int channel, int rank)
   int
 is_activate_allowed (int channel, int rank, int bank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   if (command_issued_current_cycle[channel]
       || forced_refresh_mode_on[channel][rank]
       || (CYCLE_VAL + T_RAS > refresh_issue_deadline[channel][rank]))
@@ -6613,6 +6652,10 @@ is_activate_allowed (int channel, int rank, int bank)
   int
 is_autoprecharge_allowed (int channel, int rank, int bank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  } 
   long long int start_precharge = 0;
   if (cas_issued_current_cycle[channel][rank][bank] == 1)
     start_precharge =
@@ -6639,6 +6682,11 @@ is_autoprecharge_allowed (int channel, int rank, int bank)
   int
 is_precharge_allowed (int channel, int rank, int bank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
+
   if (command_issued_current_cycle[channel]
       || forced_refresh_mode_on[channel][rank]
       || (CYCLE_VAL + T_RP > refresh_issue_deadline[channel][rank]))
@@ -6659,6 +6707,11 @@ is_precharge_allowed (int channel, int rank, int bank)
   int
 is_all_bank_precharge_allowed (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
+
   int flag = 0;
   if (command_issued_current_cycle[channel]
       || forced_refresh_mode_on[channel][rank]
@@ -6685,6 +6738,11 @@ is_all_bank_precharge_allowed (int channel, int rank)
   int
 is_refresh_allowed (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
+
   if (command_issued_current_cycle[channel]
       || forced_refresh_mode_on[channel][rank])
     return 0;
@@ -6702,6 +6760,10 @@ is_refresh_allowed (int channel, int rank)
   int
 issue_powerdown_command (int channel, int rank, command_t cmd) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   if (command_issued_current_cycle[channel])
   {
     printf
@@ -6779,6 +6841,11 @@ issue_powerdown_command (int channel, int rank, command_t cmd)
   int
 issue_powerup_command (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
+
   if (!is_powerup_allowed (channel, rank))
 
   {
@@ -6860,6 +6927,10 @@ issue_powerup_command (int channel, int rank)
   int
 issue_autoprecharge (int channel, int rank, int bank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   if (!is_autoprecharge_allowed (channel, rank, bank))
     return 0;
 
@@ -6904,6 +6975,10 @@ issue_autoprecharge (int channel, int rank, int bank)
   int
 issue_activate_command (int channel, int rank, int bank, long long int row) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   if (!is_activate_allowed (channel, rank, bank))
 
   {
@@ -6955,6 +7030,10 @@ issue_activate_command (int channel, int rank, int bank, long long int row)
   int
 issue_precharge_command (int channel, int rank, int bank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   if (!is_precharge_allowed (channel, rank, bank))
 
   {
@@ -6989,6 +7068,10 @@ issue_precharge_command (int channel, int rank, int bank)
   int
 issue_all_bank_precharge_command (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   if (!is_all_bank_precharge_allowed (channel, rank))
 
   {
@@ -7016,6 +7099,10 @@ issue_all_bank_precharge_command (int channel, int rank)
   int
 issue_refresh_command (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   if (!is_refresh_allowed (channel, rank))
 
   {
@@ -7153,6 +7240,10 @@ issue_refresh_command (int channel, int rank)
   void
 issue_forced_refresh_commands (int channel, int rank) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   for (int b = 0; b < NUM_BANKS; b++)
 
   {
@@ -7170,6 +7261,10 @@ issue_forced_refresh_commands (int channel, int rank)
 
 gather_stats (int channel) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   for (int i = 0; i < NUM_RANKS; i++)
 
   {
@@ -7207,6 +7302,10 @@ gather_stats (int channel)
   void
 print_stats (int channel) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   long long int activates_for_reads = 0;
   long long int activates_for_spec = 0;
   long long int activates_for_writes = 0;
@@ -7255,6 +7354,10 @@ print_stats (int channel)
 
 update_issuable_commands (int channel) 
 {
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   for (int rank = 0; rank < NUM_RANKS; rank++)
 
   {
@@ -7281,7 +7384,10 @@ update_memory ()
   for (int channel = 0; channel < NUM_CHANNELS; channel++)
 
   {
-
+    if (NVM_ENABLE)
+    {
+      update_ddr_timing_param(channel);
+    }
     // make every channel ready to receive a new command
     command_issued_current_cycle[channel] = 0;
     for (int rank = 0; rank < NUM_RANKS; rank++)
@@ -7363,7 +7469,10 @@ update_memory ()
 calculate_power (int channel, int rank, int print_stats_type,
     int chips_per_rank) 
 {
-
+  if (NVM_ENABLE)
+  {
+    update_ddr_timing_param(channel);
+  }
   /*
      Power is calculated using the equations from Technical Note "TN-41-01: Calculating Memory System Power for DDR"
      The current values IDD* are taken from the data sheets. 

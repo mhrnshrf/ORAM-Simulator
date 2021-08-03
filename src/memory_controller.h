@@ -425,6 +425,9 @@ void explore_lz();
 void test_ring();
 void switch_dead_enable_to(bool tf);
 void update_count_stat(int count, int level);
+void update_ddr_timing_param(int channel);
+
+
 // Mehrnoosh.
 
 
