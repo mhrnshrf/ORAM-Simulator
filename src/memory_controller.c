@@ -5441,7 +5441,7 @@ void update_ddr_timing_param(int channel){
   bool nvm = is_nvm_channel(channel);
 
   T_RCD        = nvm ?   176      :        44;
-  T_RP         = nvm ?   528      :        44;
+  T_RP         = nvm ?   176      :        44;  // 60 ~ 5 / 528
 
   T_CAS        = nvm ?    44      :        44;
   T_RC         = nvm ?   156      :       156;
