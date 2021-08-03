@@ -5758,14 +5758,14 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->tree = tree;
     new_node->last_read = last_read;
     new_node->nvm_access = nvm_access;
-    if (nvm_access)
-    {
-      printf("nvm   ");
-    }
-    else
-    {
-      printf("dram  ");
-    }
+    // if (nvm_access)
+    // {
+    //   printf("nvm   ");
+    // }
+    // else
+    // {
+    //   printf("dram  ");
+    // }
     
     // Mehrnoosh.
 
@@ -5784,7 +5784,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->instruction_pc = instruction_pc;
     new_node->next = NULL;
     dram_address_t * this_node_addr = calc_dram_addr (physical_address);
-    printf("channel %d\n", this_node_addr->channel);
+    // printf("channel %d\n", this_node_addr->channel);
     new_node->dram_addr.actual_address = physical_address;
     new_node->dram_addr.channel = this_node_addr->channel;
     new_node->dram_addr.rank = this_node_addr->rank;
