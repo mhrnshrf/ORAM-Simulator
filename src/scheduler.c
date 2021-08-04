@@ -78,7 +78,7 @@ void schedule(int channel)
 		{
 			if(wr_ptr->command_issuable)
 			{
-				issue_request_command(wr_ptr);
+				issue_request_command(wr_ptr, 'W');
 				break;
 			}
 		}
@@ -95,7 +95,7 @@ void schedule(int channel)
 		{
 			if(rd_ptr->command_issuable)
 			{
-				issue_request_command(rd_ptr);
+				issue_request_command(rd_ptr, 'R');
 				break;
 			}
 		}

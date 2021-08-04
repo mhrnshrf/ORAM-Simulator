@@ -70,6 +70,8 @@ int count_count[LEVEL] = {0};
 
 int GREEN_BLOCK = 0;
 
+unsigned long long int dram_leftover = 0;
+
 
 void test_ring(){
   unsigned long long int addr = 0;
@@ -398,8 +400,8 @@ int BK_EVICTION_VAR;
 int EMPTY_TOP_VAR;
 int TOP_CACHE_VAR;
 int PATH_VAR;
-int NVM_ADDR_VAR;
-long long int NVM_ADDR_BYTE;
+unsigned long long int NVM_ADDR_VAR;
+unsigned long long int NVM_ADDR_BYTE;
 AccessType ACCESS_VAR;      // to indicate whether a block shoulb be remapped and written back to the path or it should be evicted entirly
 EnqueueType ENQUEUE_VAR;    // to indicate whether enqueue to oramq should be regularely added to the tail or head ~~~> head in case of dummy access 
 PosType pos_var;
@@ -1085,6 +1087,7 @@ void oram_alloc(){
   {
     int qs = (int)floor(pow(1.5, i));
     deadQ_arr[i] = ConstructQueue(qs);
+    // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
 
   for (int i = 0; i < LEVEL; i++)
@@ -5441,14 +5444,14 @@ bool is_nvm_channel(int channel){
 void update_ddr_timing_param(int channel){
   bool nvm = is_nvm_channel(channel);
 
-  T_RCD        = nvm ?   88       :        44;
-  T_RP         = nvm ?   240      :        44;  // 60 ~ 5 / 528
+  T_RCD        = nvm ?   88       :        44;                  // 88
+  T_RP         = nvm ?   240      :        44;  // 60 ~ 5 / 528 // 240
 
   T_CAS        = nvm ?    44      :        44;
   T_RC         = nvm ?   156      :       156;
   T_RAS        = nvm ?   112      :       112;
 
-  T_RRD        = nvm ?    44      :        20;
+  T_RRD        = nvm ?    44      :        20;                  // 44
 
   T_FAW        = nvm ?   128      :       128;
   T_WR         = nvm ?    48      :        48;
@@ -5746,6 +5749,8 @@ dram_address_t * calc_dram_addr (long long int physical_address)
       if (this_a->channel >= NUM_CHANNELS - NVM_CHANNEL)
       {
         this_a->channel = cur_chan % dram_chan;
+        // printf("%d\n", this_a->channel);
+        // dram_leftover++;
       }
     }
   }
@@ -6186,7 +6191,7 @@ clean_queues (int channel)
 // next_"cmd" variables are updated to indicate when the next "cmd"
 // can be issued to each bank
   int
-issue_request_command (request_t * request) 
+issue_request_command (request_t * request, char rwt) 
 {
   long long int cycle = CYCLE_VAL;
   if (request->command_issuable != 1
@@ -6286,11 +6291,13 @@ issue_request_command (request_t * request)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
-      // if (request->nvm_access && RING_ENABLE && NVM_ENABLE)
-      // {
-      //   request->completion_time += NVM_LATENCY;
-      //   // printf("nvm  @ %lld\n", CYCLE_VAL);
-      // }
+      if (request->nvm_access && NVM_ENABLE)
+      {
+        int coef = (rwt == 'R')? 1 : 3;
+        request->completion_time += NVM_LATENCY*coef;
+        // printf("nvm  @ %lld\n", CYCLE_VAL);
+        // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
+      }
       // else{
       //   printf("dram  @ %lld\n", CYCLE_VAL);
       // }

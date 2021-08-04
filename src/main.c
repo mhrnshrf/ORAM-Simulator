@@ -594,7 +594,7 @@ int main(int argc, char * argv[])
   		vi_file = fopen("input/4Gb_x4.vi", "r");
 		chips_per_rank= 16;
   		printf("Reading vi file: 4Gb_x4.vi\t\n%d Chips per Rank\n",chips_per_rank);
-	} else if (NUM_CHANNELS == 4 && NUMCORES == 1) {
+	} else if ((NUM_CHANNELS == 4 || NUM_CHANNELS >= 5) && NUMCORES == 1) {
   		vi_file = fopen("input/1Gb_x16.vi", "r");
 		chips_per_rank= 4;
   		printf("Reading vi file: 1Gb_x16.vi\t\n%d Chips per Rank\n",chips_per_rank);
@@ -790,6 +790,10 @@ int main(int argc, char * argv[])
 	print_oram_params();
 
 	var_init();
+
+	// printf("NVM_ADDR_VAR %lld\n", NVM_ADDR_VAR);
+	// printf("NVM_ADDR_BYTE %lld\n", NVM_ADDR_BYTE);
+	// printf("data addr byte %lld\n", (unsigned long long int)  DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE));
 
 	// init_trace();
 

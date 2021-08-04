@@ -324,6 +324,9 @@ extern char *pargv[5];
 
 extern int shuff_interval[LEVEL];
 
+extern unsigned long long int NVM_ADDR_BYTE;
+extern unsigned long long int NVM_ADDR_VAR;
+
 void oram_alloc();
 void oram_init();
 void test_init();
@@ -642,7 +645,7 @@ int is_refresh_allowed(int channel,int rank);
 
 
 // issues command to make progress on a request
-int issue_request_command(request_t * req);
+int issue_request_command(request_t * req, char rwt);
 
 // power_down command
 int issue_powerdown_command(int channel, int rank, command_t cmd);
