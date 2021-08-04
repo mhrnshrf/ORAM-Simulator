@@ -5180,9 +5180,9 @@ void export_csv(char * argv[]){
 
   FILE *fp;
   char *filename;
-  if (chdir("../oram/log") != 0)  
+  if (chdir("log") != 0)  
   {
-    perror("chdir() to ../oram/log failed"); 
+    perror("chdir() to log failed"); 
   }
 
 
@@ -5444,14 +5444,14 @@ bool is_nvm_channel(int channel){
 void update_ddr_timing_param(int channel){
   bool nvm = is_nvm_channel(channel);
 
-  T_RCD        = nvm ?   88       :        44;                  // 88
-  T_RP         = nvm ?   240      :        44;  // 60 ~ 5 / 528 // 240
+  T_RCD        = nvm ?   44       :        44;                  // 88
+  T_RP         = nvm ?   44      :        44;  // 60 ~ 5 / 528 // 240
 
   T_CAS        = nvm ?    44      :        44;
   T_RC         = nvm ?   156      :       156;
   T_RAS        = nvm ?   112      :       112;
 
-  T_RRD        = nvm ?    44      :        20;                  // 44
+  T_RRD        = nvm ?    20      :        20;                  // 44
 
   T_FAW        = nvm ?   128      :       128;
   T_WR         = nvm ?    48      :        48;
@@ -6293,8 +6293,8 @@ issue_request_command (request_t * request, char rwt)
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
       if (request->nvm_access && NVM_ENABLE)
       {
-        int coef = (rwt == 'R')? 1 : 3;
-        request->completion_time += NVM_LATENCY*coef;
+        // int coef = (rwt == 'R')? 1 : 3;
+        request->completion_time += NVM_LATENCY;
         // printf("nvm  @ %lld\n", CYCLE_VAL);
         // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
       }
@@ -6390,6 +6390,11 @@ issue_request_command (request_t * request, char rwt)
 
       // set the completion time of this write request
       request->completion_time = CYCLE_VAL + T_DATA_TRANS + T_WR;
+      if (request->nvm_access && NVM_ENABLE)
+      {
+        request->completion_time += NVM_LATENCY*3;
+      }
+      
       request->latency = request->completion_time - request->arrival_time;
       request->dispatch_time = CYCLE_VAL;
       request->request_served = 1;
