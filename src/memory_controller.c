@@ -601,6 +601,7 @@ void var_init(){
 
 unsigned long long int byte_addr(long long int physical_addr){
   // unsigned long long int mask = pow(2,)
+  
   unsigned long long int addr = (unsigned long long  int)(physical_addr & (0x7fffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
   // unsigned long long int addr = (unsigned long long  int)(physical_addr & (0xffffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
   // unsigned long long int addr = physical_addr;  
@@ -2582,8 +2583,8 @@ void freecursive_access(int addr, char type){
       {
         plbaccess[i]++;
         // reading form PLB if miss then proceed to access ORAM tree
-        int ai = addr/pow(X,i);
-        int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
+        unsigned long long int ai = addr/pow(X,i);
+        unsigned long long int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
 
         // printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
 
@@ -2629,7 +2630,7 @@ void freecursive_access(int addr, char type){
 
         if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
         {
-          unsigned int caddr = tag << ((unsigned int) log2(BLOCK_SIZE));
+          unsigned long long int caddr = tag << ((unsigned long long int) log2(BLOCK_SIZE));
 
           if (LLC_DIRTY)
           {
