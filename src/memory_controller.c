@@ -4993,7 +4993,7 @@ void ring_early_reshuffle(int label){
 
     }
 
-    if (RING_ENABLE && DEAD_ENABLE_VAR)
+    if (RING_ENABLE && DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
     {
       gather_dead(index, i);
     }
