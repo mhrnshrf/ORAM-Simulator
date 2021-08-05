@@ -4467,7 +4467,7 @@ int calc_mem_addr(int index, int offset, char type)
         mem_addr = remote_allocate(index, offset);
         if (mem_addr == -1)
         {
-          printf("ERROR: calc mem addr no available cand in queue!\n");
+          printf("ERROR: calc mem addr @ level %d no available cand in queue!\n", level);
           export_csv(pargv);
           exit(1);
         }
@@ -6420,7 +6420,7 @@ issue_request_command (request_t * request, char rwt)
       request->completion_time = CYCLE_VAL + T_DATA_TRANS + T_WR;
       if (request->nvm_access && NVM_ENABLE)
       {
-        request->completion_time += NVM_LATENCY*3;
+        request->completion_time += NVM_LATENCY*8;
       }
       
       request->latency = request->completion_time - request->arrival_time;
