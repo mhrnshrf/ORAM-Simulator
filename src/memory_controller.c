@@ -33,11 +33,13 @@ char bench[20];
 char exp_name[20] = "";
 
 long long int deadctr = 0;
+long long int dead_dram = 0;
 long long int deadrem = 0;
 long long int surplus_dead = 0;
 long long int surplus_in_use = 0;
 long long int deadarr[100] = {0};
 long long int dead_on_path = 0;
+long long int dead_on_path_dram = 0;
 long long int dead_on_path_arr[100] = {0};
 
 long long int ring_G = 0;
@@ -1803,6 +1805,11 @@ void write_path(int label){
       update_count_stat(GlobTree[index].count, i);
       GlobTree[index].count = 0; // for ring oram evict path
       deadctr -= GlobTree[index].dumdead;
+      if (i < NVM_START)
+      {
+        dead_dram -= GlobTree[index].dumdead;
+      }
+      
       GlobTree[index].dumdead = 0;
       GlobTree[index].dumval = Z;
 
@@ -4066,11 +4073,13 @@ void ring_access(int addr){
   {
     // printf("\n@- evict %d\n", stalectr);
     int dead_b4 = deadctr;
+    int dead_b4_dram = dead_dram;
     int b4 = stalectr;
     ring_evict_path(label);
     stale_reduction += b4 - stalectr;
 
     dead_on_path += dead_b4 - deadctr;
+    dead_on_path_dram += dead_b4_dram - dead_dram;
     // printf("@> evict %d\n", stalectr);
     
     // to be removed
@@ -4132,7 +4141,7 @@ void metadata_access(int label, char type){
       int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(i);
-      nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
+      // nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access);
     }
   }
@@ -4468,7 +4477,7 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the levels in nvm
     {
       mem_addr = -1;
-      if (remote_nvms < REMOTE_ALLOC_RATIO*(deadctr + surplus_dead )) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      if (remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead )) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4640,6 +4649,10 @@ void ring_read_path(int label, int addr){
     {
       GlobTree[index].dumdead++;
       deadctr++;
+      if (i < NVM_START)
+      {
+        dead_dram++;
+      }
     }
 
 
@@ -4971,6 +4984,10 @@ void ring_early_reshuffle(int label){
 
       GlobTree[index].count = 0;
       deadctr -= GlobTree[index].dumdead;
+      if (i < NVM_START)
+      {
+        dead_dram -= GlobTree[index].dumdead;
+      }
       GlobTree[index].dumdead = 0;
       wb[i] += stashb4 - stashctr;
 
@@ -5287,6 +5304,7 @@ void export_csv(char * argv[]){
   if (RING_ENABLE)
   {
     fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
+    fprintf(fp, "dead_on_path_dram,%d\n", (int)dead_on_path_dram/ring_evictctr);
   }
   
   // for (int i = 0; i < 31; i++)
@@ -5337,6 +5355,7 @@ void export_csv(char * argv[]){
   }
 
   fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);
+  fprintf(fp, "dead_dram,%lld\n", dead_dram);
   // print_lifetime_stat(fp);
   
   // print_count_stat(fp);
@@ -5444,14 +5463,14 @@ bool is_nvm_channel(int channel){
 void update_ddr_timing_param(int channel){
   bool nvm = is_nvm_channel(channel);
 
-  T_RCD        = nvm ?   44       :        44;                  // 88
-  T_RP         = nvm ?   44      :        44;  // 60 ~ 5 / 528 // 240
+  T_RCD        = nvm ?   88       :        44;                  // 88
+  T_RP         = nvm ?   240      :        44;  // 60 ~ 5 / 528 // 240
 
   T_CAS        = nvm ?    44      :        44;
   T_RC         = nvm ?   156      :       156;
   T_RAS        = nvm ?   112      :       112;
 
-  T_RRD        = nvm ?    20      :        20;                  // 44
+  T_RRD        = nvm ?    44      :        20;                  // 44
 
   T_FAW        = nvm ?   128      :       128;
   T_WR         = nvm ?    48      :        48;
@@ -5674,6 +5693,7 @@ log_base2 (unsigned int new_value)
 dram_address_t * calc_dram_addr (long long int physical_address) 
 {
   long long int input_a, temp_b, temp_a;
+  long long int blkaddr;
   int channelBitWidth = log_base2 (NUM_CHANNELS);
   int rankBitWidth = log_base2 (NUM_RANKS);
   int bankBitWidth = log_base2 (NUM_BANKS);
@@ -5685,6 +5705,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   this_a->actual_address = physical_address;
   input_a = physical_address;
   input_a = input_a >> byteOffsetWidth;	// strip out the cache_offset
+  blkaddr = input_a;
   if (ADDRESS_MAPPING == 1)
 
   {
@@ -5740,20 +5761,27 @@ dram_address_t * calc_dram_addr (long long int physical_address)
     int cur_chan = this_a->channel;
     int dram_chan = NUM_CHANNELS - NVM_CHANNEL;
     unsigned long long int data_addr_byte = (unsigned long long int) DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE);
-    if (physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte)
+    unsigned long long int metadata_nvm_byte = DATA_ADDR_SPACE + (pow(2, NVM_START)-1)*1;
+    metadata_nvm_byte =  (unsigned long long int) metadata_nvm_byte << (int)log2(BLOCK_SIZE);
+    if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) || physical_address >= metadata_nvm_byte)
     {
       this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
     }
     else
     {
-      if (this_a->channel >= NUM_CHANNELS - NVM_CHANNEL)
-      {
-        this_a->channel = cur_chan % dram_chan;
-        // printf("%d\n", this_a->channel);
-        // dram_leftover++;
-      }
+      // if (this_a->channel >= NUM_CHANNELS - NVM_CHANNEL)
+      // {
+      //   this_a->channel = cur_chan % dram_chan;
+      //   // printf("%d\n", this_a->channel);
+      //   // dram_leftover++;
+      // }
+      this_a->channel = blkaddr % dram_chan;
     }
   }
+  // else
+  // {
+  //     this_a->channel = blkaddr % NUM_CHANNELS;
+  // }
   
   return (this_a);
 }
