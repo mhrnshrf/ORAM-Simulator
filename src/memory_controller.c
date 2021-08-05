@@ -4141,7 +4141,7 @@ void metadata_access(int label, char type){
       int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(i);
-      // nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
+      nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access);
     }
   }
@@ -5763,7 +5763,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
     unsigned long long int data_addr_byte = (unsigned long long int) DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE);
     unsigned long long int metadata_nvm_byte = DATA_ADDR_SPACE + (pow(2, NVM_START)-1)*1;
     metadata_nvm_byte =  (unsigned long long int) metadata_nvm_byte << (int)log2(BLOCK_SIZE);
-    if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) || physical_address >= metadata_nvm_byte)
+    if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) )// || physical_address >= metadata_nvm_byte)
     {
       this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
     }
