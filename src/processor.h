@@ -13,6 +13,10 @@ struct robstructure
   long long int * instrpc;
   int tracedone;
   bool * waited_on;
+  bool * ending;
+  bool * nvm_access;
+  char * op_type;
+  int * oramid;
 } ;
 
 #endif //__PROCESSOR_H__

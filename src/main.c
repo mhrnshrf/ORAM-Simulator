@@ -490,6 +490,9 @@ int main(int argc, char * argv[])
   long long int instrpc[NCORES];
 //   prefixtable = (int *)malloc(sizeof(int)*NUMCORES);
   int prefixtable[NCORES];
+  char op_type[NCORES];
+  bool beginning[NCORES];
+  bool ending[NCORES];
   currMTapp = -1;
   // Mehrnoosh:
 //   shadtif = (FILE **)malloc(sizeof(FILE *)*NUMCORES);
@@ -647,6 +650,10 @@ int main(int argc, char * argv[])
 	  ROB[i].instrpc = (long long int*)malloc(sizeof(long long int)*ROBSIZE);
 	  ROB[i].optype = (int*)malloc(sizeof(int)*ROBSIZE);
 	  ROB[i].waited_on = (bool*)malloc(sizeof(bool)*ROBSIZE);
+	  ROB[i].ending = (bool*)malloc(sizeof(bool)*ROBSIZE);
+	  ROB[i].nvm_access = (bool*)malloc(sizeof(bool)*ROBSIZE);
+	  ROB[i].op_type = (char*)malloc(sizeof(char)*ROBSIZE);
+	  ROB[i].oramid = (int*)malloc(sizeof(int)*ROBSIZE);
   }
   init_memory_controller_vars();
   init_scheduler_vars();
@@ -969,6 +976,31 @@ int main(int argc, char * argv[])
 				// printf("retired  NVM @ %lld \n", CYCLE_VAL);
 				last_read_served = true;
 			}
+			// if (ROB[numc].ending[ROB[numc].head])
+			// {
+			// 	if (ROB[numc].op_type[ROB[numc].head] == 'o')
+			// 	{
+			// 		if (curr_online == ROB[numc].oramid[ROB[numc].head])
+			// 		{
+			// 			if (curr_online == ROB[numc].nvm_access[ROB[numc].head])
+			// 			{
+							
+			// 			}
+						
+			// 		}
+					
+			// 	}
+			// 	else if (ROB[numc].op_type[ROB[numc].head] == 'e')
+			// 	{
+			// 		/* code */
+			// 	}
+			// 	else if (ROB[numc].op_type[ROB[numc].head] == 'r')
+			// 	{
+			// 		/* code */
+			// 	}
+				
+			// }
+			
 			// else{
 			// 	printf("retired  DRAM @ %lld \n", CYCLE_VAL);
 
@@ -1182,7 +1214,7 @@ int main(int argc, char * argv[])
 			
 			// if (SIM_ENABLE)
 			// {
-				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc]);
+				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc]);
 			// }
 			
 			
@@ -1211,7 +1243,7 @@ int main(int argc, char * argv[])
 
 				// if (SIM_ENABLE)
 				// {
-					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc] );
+					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc]);
 				// }
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
@@ -1769,6 +1801,30 @@ int main(int argc, char * argv[])
 			tree[numc] = pN->tree;
 			last_read[numc] = pN->last_read;
 			nvm_access[numc] = pN->nvm_access;
+
+			beginning[numc] = pN->beginning;
+            ending[numc] = pN->ending;
+            op_type[numc] = pN->op_type;
+
+			if (pN->beginning)
+			{
+				if (op_type[numc] == 'o')
+				{
+					online_beginning = CYCLE_VAL;
+					curr_online = pN->oramid;
+				}
+				else if (op_type[numc] == 'e')
+				{
+					evict_beginning = CYCLE_VAL;
+					curr_evict = pN->oramid;
+				}
+				else if (op_type[numc] == 'r')
+				{
+					reshuffle_beginning = CYCLE_VAL;
+					curr_reshuffle = pN->oramid;
+				}
+			}
+			
 			if (pN->last_read)
 			{
 				last_read_served = false;

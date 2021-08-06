@@ -42,6 +42,8 @@ long long int dead_on_path = 0;
 long long int dead_on_path_dram = 0;
 long long int dead_on_path_arr[100] = {0};
 
+
+
 long long int ring_G = 0;
 long long int ring_round = 0;
 long long int ep_round = 0;
@@ -73,6 +75,21 @@ int count_count[LEVEL] = {0};
 int GREEN_BLOCK = 0;
 
 unsigned long long int dram_leftover = 0;
+
+unsigned long long int online_wait_dram = 0;
+unsigned long long int online_wait_nvm = 0;
+unsigned long long int evict_wait_dram = 0;
+unsigned long long int evict_wait_nvm = 0;
+unsigned long long int reshuffle_wait_dram = 0;
+unsigned long long int reshuffle_wait_nvm = 0;
+
+unsigned long long int online_beginning = 0;
+unsigned long long int curr_online = 0;
+unsigned long long int evict_beginning =  0;
+unsigned long long int curr_evict =  0;
+unsigned long long int reshuffle_beginning = 0;
+unsigned long long int curr_reshuffle = 0;
+
 
 
 void test_ring(){
@@ -388,6 +405,7 @@ int plb_interval[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1};
 int plb_temp[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
 
 long long int shuff[LEVEL] = {0};
+long long int shuff_total = 0;
 int wb[LEVEL] = {0};
 int ref_close[LEVEL] = {0};
 
@@ -853,7 +871,7 @@ void test_queue(){
 	exit(0);
 }
 
-void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access) {
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending) {
   addr = addr << (int)log2(BLOCK_SIZE);
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = addr;
@@ -862,12 +880,17 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->instr = instr; 
   pN->pc = pc; 
   pN->type = type;
-  pN->oramid = (TREE_VAR == RHO) ? rhoctr : oramctr;
+  pN->oramid = (RING_ENABLE)? ringctr :(TREE_VAR == RHO) ? rhoctr : oramctr;
+  pN->oramid = (RING_ENABLE && op_type == 'r')? shuff_total : pN->oramid;
   pN->oramid = (ENQUEUE_VAR == HEAD) ? -1 : pN->oramid;   // in case of dummy access set oram id to -1
   pN->tree = TREE_VAR;
   pN->orig_addr = orig_addr;
   pN->last_read = last_read;
   pN->nvm_access = nvm_access;
+  pN->op_type = op_type;
+  pN->beginning = beginning;
+  pN->ending = ending;
+  
   bool added = false;
   if (ENQUEUE_VAR == TAIL)
   {
@@ -1472,6 +1495,7 @@ void read_path(int label){
     // printf("\nread path @ trace %d\n", tracectr);
     int gi = -1;
     bool last_read = false;
+    
 
     if (META_ENABLE)
     {
@@ -1522,12 +1546,17 @@ void read_path(int label){
               
               
               bool nvm_access = is_nvm_addr(mem_addr);
+
+              reqmade++;
+
               if (SIM_ENABLE_VAR)
               {
-                insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+                bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
+                bool ending = false;
+                char op_type = 'e';
+                insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
               }
               
-              reqmade++;
               // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
             }
           }
@@ -1626,7 +1655,11 @@ void read_path(int label){
             bool nvm_access = is_nvm_addr(mem_addr);
             if (SIM_ENABLE_VAR)
             {
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+              bool beginning = false;
+              bool ending = false;
+              char op_type = 'e';
+
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
               /* code */
             }
             
@@ -1715,7 +1748,10 @@ void stale_access(int index, int h, char type){
           last_read = true;
         }
         int mem_addr = node_addr + k;
-        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, false);
+        bool beginning = false;
+        bool ending = false;
+        char op_type = 's';
+        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, false, op_type, beginning, ending);
       }
     }
 }
@@ -1846,7 +1882,10 @@ void write_path(int label){
             addr = SubMap[index_prime] + j_prime;
           }
           bool nvm_access = is_nvm_addr(mem_addr);
-          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false, nvm_access);
+          bool beginning = false;
+          bool ending = (i == EMPTY_TOP_VAR && j == LZ_VAR[i]-1);
+          char op_type = 'e';
+          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false, nvm_access, op_type, beginning, ending);
         }
 
 
@@ -4124,8 +4163,11 @@ void bucket_meta_access(int index){
   int mem_addr = DATA_ADDR_SPACE + index;
   // bool nvm_access = is_nvm_addr(mem_addr);
   // bool nvm_access = in_nvm(i);
-  insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, false);
-  insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, false);
+  bool beginning = false;
+  bool ending = false;
+  char op_type = 'b';
+  insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, false, op_type, beginning, ending);
+  insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, false, op_type, beginning, ending);
 }
 
 void metadata_access(int label, char type){
@@ -4142,7 +4184,10 @@ void metadata_access(int label, char type){
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(i);
       nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access);
+      bool beginning = false;
+      bool ending = false;
+      char op_type = 'm';
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access, op_type, beginning, ending);
     }
   }
 
@@ -4477,7 +4522,8 @@ int calc_mem_addr(int index, int offset, char type)
     else  // for the levels in nvm
     {
       mem_addr = -1;
-      if (remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead )) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      // printf("level %d\n", level);
+      if ((remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ) ) && (level == NVM_START)) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4640,7 +4686,10 @@ void ring_read_path(int label, int addr){
         last_read = true;
       }
       bool nvm_access = is_nvm_addr(mem_addr);
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+      bool beginning = (i == 0);
+      bool ending = (i == LEVEL-1);
+      char op_type = 'o';
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
     }
 
     GlobTree[index].count++;
@@ -4870,6 +4919,7 @@ void ring_early_reshuffle(int label){
       dumval_range_dist[calc_range(i)][valnum]++;
       GlobTree[index].dumval = Z;
       shuff[i]++;
+      shuff_total++;
       shuff_interval[i]++;
       shufcount++;
       
@@ -4883,12 +4933,15 @@ void ring_early_reshuffle(int label){
           {
             last_read = true;
           }
+          reqmade++;
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
             bool nvm_access = is_nvm_addr(mem_addr);
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access);
+            bool beginning = (reqmade == 1);
+            bool ending = false;
+            char op_type = 'r';
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
           }
-          reqmade++;
         }
         
         if (GlobTree[index].slot[j].isReal)
@@ -4937,7 +4990,10 @@ void ring_early_reshuffle(int label){
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
               bool nvm_access = is_nvm_addr(mem_addr);
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, nvm_access);
+              bool beginning = false;
+              bool ending = false;
+              char op_type = 'r';
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, nvm_access, op_type, beginning, ending);
               // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
           }
           dum_cand[ri] = -1;
@@ -4963,7 +5019,10 @@ void ring_early_reshuffle(int label){
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           bool nvm_access = is_nvm_addr(mem_addr);
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, nvm_access);
+          bool beginning = false;
+          bool ending = (j == LZ_VAR[i]-1);
+          char op_type = 'r';
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, nvm_access, op_type, beginning, ending);
         }
 
         
@@ -4993,7 +5052,7 @@ void ring_early_reshuffle(int label){
 
     }
 
-    if (RING_ENABLE && DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
+    if (RING_ENABLE && DEAD_ENABLE_VAR) //DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
     {
       gather_dead(index, i);
     }
@@ -5189,7 +5248,91 @@ void export_csv_intermed(char exp_name[], int ind, long double *arr){
 
 }
 
-
+void reset_profiling_counters(){
+  invokectr = 0;
+  oramctr = 0;
+  dummyctr = 0;
+  pos1_access = 0;
+  pos2_access = 0;
+  plb_hit[0] = 0; 
+  plb_hit[1] = 0; 
+  plb_hit[2] = 0; 
+  plbaccess[0] = 0;
+  plbaccess[1] = 0;
+  plbaccess[2] = 0;
+  bkctr = 0;
+  hitctr = 0;
+  missctr = 0;
+  evictctr = 0;
+  rho_hit = 0;
+  rhoctr = 0;
+  rho_dummyctr = 0;
+  rho_bkctr = 0;
+  earlyctr = 0;
+  dirty_pointctr = 0;
+  cache_dirty = 0;
+  ptr_fail = 0;
+  search_fail = 0;
+  pinctr = 0;
+  unpinctr = 0;
+  precase = 0;
+  sttctr = 0;
+  stash_leftover = 0;
+  stash_removed = 0;
+  fillhit = 0;
+  fillmiss = 0;
+  topctr = 0;
+  midctr = 0;
+  botctr = 0;
+  ring_evictctr = 0;
+  stashctr = 0;
+  stash_cont = 0;
+  linger_discard = 0;
+  ringctr = 0;
+  wbctr = 0;
+  writectr = 0;
+  wskip = 0;
+  mem_req_latencies = 0;
+  nonmemops_sum = 0;
+  missl1wb = 0;
+  wbshuff = 0;
+  ringdumctr = 0;
+  wl_pos[1] = 0;
+  wl_pos[2] = 0;
+  stalectr = 0;
+  stale_flush_ctr = 0;
+  stale_discard_ctr = 0;
+  stale_reduction = 0;
+  deadctr = 0;
+  dead_on_path = 0;
+  dead_on_path_dram = 0;
+  dram_norm_r = 0;
+  nvm_norm_r = 0;
+  dram_norm_w = 0;
+  nvm_norm_w = 0;
+  dram_inplace_r = 0;
+  dram_remote_r = 0;
+  nvm_inplace_r = 0;
+  nvm_remote_r = 0;
+  dram_inplace_w = 0;
+  dram_remote_w = 0;
+  nvm_inplace_w = 0;
+  nvm_remote_w = 0;
+  remote_nvms = 0;
+  dram_elselevel = 0;
+  nvm_elselevel = 0;
+  surplus_dead = 0;
+  surplus_in_use = 0;
+  rmiss = 0;
+  wmiss = 0;
+  deadrem = 0;
+  nonmemops_executed = 0;
+  dead_dram = 0;
+  for (int i = 0; i < LEVEL; i++)
+  {
+    shuff[i] = 0;
+  }
+}
 
 
 void export_csv(char * argv[]){
@@ -5359,6 +5502,21 @@ void export_csv(char * argv[]){
   // print_lifetime_stat(fp);
   
   // print_count_stat(fp);
+
+  for (int c = 0; c < NUM_CHANNELS; c++)
+  {
+    fprintf(fp, "Reads_chan[%d],%-7lld\n", c, stats_reads_completed[c]);
+    fprintf(fp, "Writes_chan[%d],%-7lld\n", c, stats_writes_completed[c]);
+    fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
+    fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_queue_latency[c]);
+    fprintf(fp, "W_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_latency[c]);
+    fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
+  }
+
+  fprintf(fp, "R_NVM/DRAM,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
+  fprintf(fp, "W_NVM/DRAM,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
+
+
   
   fclose(fp);
 }
@@ -5792,7 +5950,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   void *
 init_new_node (long long int physical_address, long long int arrival_time,
     optype_t type, int thread_id, int instruction_id,
-    long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access) 
+    long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending) 
 {
   request_t * new_node = NULL;
   new_node = (request_t *) malloc (sizeof (request_t));
@@ -5811,6 +5969,9 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->tree = tree;
     new_node->last_read = last_read;
     new_node->nvm_access = nvm_access;
+    new_node->beginning = beginning;
+    new_node->ending = ending;
+    new_node->op_type = op_type;
     // if (nvm_access)
     // {
     //   printf("nvm   ");
@@ -5920,7 +6081,7 @@ write_exists_in_write_queue (long long int physical_address)
 // Insert a new read to the read queue
 request_t * insert_read (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access) 
+    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending) 
 {
   optype_t this_op = READ;
 
@@ -5931,7 +6092,7 @@ request_t * insert_read (long long int physical_address,
   stats_reads_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, instruction_pc, oramid, tree, last_read, nvm_access);
+        instruction_id, instruction_pc, oramid, tree, last_read, nvm_access, op_type, beginning, ending);
   LL_APPEND (read_queue_head[channel], new_node);
   read_queue_length[channel]++;
 
@@ -5943,7 +6104,7 @@ request_t * insert_read (long long int physical_address,
 // Insert a new write to the write queue
 request_t * insert_write (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, int oramid, TreeType tree, bool nvm_access) 
+    int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending) 
 {
   optype_t this_op = WRITE;
   dram_address_t * this_addr = calc_dram_addr (physical_address);
@@ -5952,7 +6113,7 @@ request_t * insert_write (long long int physical_address,
   stats_writes_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, 0, oramid, tree, false, nvm_access);
+        instruction_id, 0, oramid, tree, false, nvm_access, op_type, beginning, ending);
   LL_APPEND (write_queue_head[channel], new_node);
   write_queue_length[channel]++;
 
@@ -6343,6 +6504,12 @@ issue_request_command (request_t * request, char rwt)
       {
         ROB[request->thread_id].waited_on[request->instruction_id] = false;
       }
+
+      ROB[request->thread_id].ending[request->instruction_id] = request->ending;
+      ROB[request->thread_id].nvm_access[request->instruction_id] = request->nvm_access;
+      ROB[request->thread_id].op_type[request->instruction_id] = request->op_type;
+      ROB[request->thread_id].oramid[request->instruction_id] = request->oramid;
+
       // Mehrnoosh.
 
       // update the ROB with the completion time

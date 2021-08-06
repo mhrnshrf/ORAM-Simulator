@@ -206,6 +206,9 @@ typedef struct Element_t{
   int index;
   int offset;
   bool nvm_access;
+  bool beginning;
+  bool ending;
+  char op_type;
 }Element;
 
 
@@ -327,6 +330,19 @@ extern int shuff_interval[LEVEL];
 extern unsigned long long int NVM_ADDR_BYTE;
 extern unsigned long long int NVM_ADDR_VAR;
 
+extern unsigned long long int online_wait_dram;
+extern unsigned long long int online_wait_nvm;
+extern unsigned long long int evict_wait_dram;
+extern unsigned long long int evict_wait_nvm;
+extern unsigned long long int reshuffle_wait_dram;
+extern unsigned long long int reshuffle_wait_nvm;
+extern unsigned long long int online_beginning;
+extern unsigned long long int curr_online;
+extern unsigned long long int evict_beginning;
+extern unsigned long long int curr_evict;
+extern unsigned long long int reshuffle_beginning;
+extern unsigned long long int curr_reshuffle;
+
 void oram_alloc();
 void oram_init();
 void test_init();
@@ -366,7 +382,7 @@ bool Enqueue(Queue *pQueue, Element *item);
 Element *Dequeue(Queue *pQueue);
 bool isEmpty(Queue* pQueue);
 void test_queue();
-void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access);
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending);
 void test_subtree();
 void dummy_access(TreeType tree);
 void switch_enqueue_to(EnqueueType enqueue);
@@ -504,6 +520,9 @@ typedef struct req
   TreeType tree;    // which tree the request belongs to oram or rho
   bool last_read;   // 0/1 flag to indicate whether the request is the last read request in oram read phase
   bool nvm_access;   // 0/1 flag to indicate whether the request is a nvm block access
+  bool beginning;
+  bool ending;
+  char op_type;
 
   // Mehrnoosh.
 } request_t;
@@ -675,10 +694,10 @@ int read_matches_write_or_read_queue(long long int physical_address);
 int write_exists_in_write_queue(long long int physical_address);
 
 // enqueue a read into the corresponding read queue (returns ptr to new node)
-request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access);
+request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending);
 
 // enqueue a write into the corresponding write queue (returns ptr to new_node)
-request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree, bool nvm_access);
+request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending);
 
 // update stats counters
 void gather_stats(int channel);
