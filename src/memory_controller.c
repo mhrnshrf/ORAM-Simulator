@@ -82,14 +82,26 @@ unsigned long long int evict_wait_dram = 0;
 unsigned long long int evict_wait_nvm = 0;
 unsigned long long int reshuffle_wait_dram = 0;
 unsigned long long int reshuffle_wait_nvm = 0;
+unsigned long long int online_t0 = 0;
+unsigned long long int cur_online = 0;
+unsigned long long int evict_t0 =  0;
+unsigned long long int cur_evict =  0;
+unsigned long long int reshuffle_t0 = 0;
+unsigned long long int cur_reshuffle = 0;
 
-unsigned long long int online_beginning = 0;
-unsigned long long int curr_online = 0;
-unsigned long long int evict_beginning =  0;
-unsigned long long int curr_evict =  0;
-unsigned long long int reshuffle_beginning = 0;
-unsigned long long int curr_reshuffle = 0;
+int cur_dram_served_o = 0;
+int cur_nvm_served_o = 0;
+int cur_dram_served_e = 0;
+int cur_nvm_served_e = 0;
+int cur_dram_served_r = 0;
+int cur_nvm_served_r = 0;
 
+int dram_to_serve_online;
+int nvm_to_serve_online;
+int dram_to_serve_evict;
+int nvm_to_serve_evict;
+int dram_to_serve_reshuffle;
+int nvm_to_serve_reshuffle;
 
 
 void test_ring(){
@@ -1028,6 +1040,13 @@ void oram_alloc(){
   STALE_TH = STALE_BUF_SIZE-1;
   GATHER_START = TOP_CACHE + DEAD_GATHER_OFFSET;
   GREEN_BLOCK = CB_ENABLE ? CB_GREEN_MAX : 0;
+
+  dram_to_serve_online = NVM_START - TOP_CACHE;
+  nvm_to_serve_online = LEVEL - NVM_START;
+  dram_to_serve_evict = (NVM_START - TOP_CACHE)*(5+12);
+  nvm_to_serve_evict = (LEVEL - NVM_START)*(5+12);
+  dram_to_serve_reshuffle = 1*(5+12);
+  nvm_to_serve_reshuffle = 1*(5+12);
 
   for (int i = 0; i < LEVEL; i++)
 	{
@@ -5516,6 +5535,12 @@ void export_csv(char * argv[]){
   fprintf(fp, "R_NVM/DRAM,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
   fprintf(fp, "W_NVM/DRAM,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
 
+  fprintf(fp, "online_wait_dram,%lld\n", online_wait_dram);
+  fprintf(fp, "online_wait_nvm,%lld\n", online_wait_nvm);
+  fprintf(fp, "evict_wait_dram,%lld\n", evict_wait_dram);
+  fprintf(fp, "evict_wait_nvm,%lld\n", evict_wait_nvm);
+  fprintf(fp, "reshuffle_wait_dram,%lld\n", reshuffle_wait_dram);
+  fprintf(fp, "reshuffle_wait_nvm,%lld\n", reshuffle_wait_nvm);
 
   
   fclose(fp);
@@ -6490,6 +6515,92 @@ issue_request_command (request_t * request, char rwt)
       // else{
       //   printf("dram  @ %lld\n", CYCLE_VAL);
       // }
+
+      if (request->op_type == 'o' && request->oramid == cur_online)
+      {
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_o == nvm_to_serve_online)
+          {
+            online_wait_nvm += request->completion_time - online_t0;
+            cur_nvm_served_o = 0;
+          }
+          else
+          {
+            cur_nvm_served_o++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_o == dram_to_serve_online)
+          {
+            online_wait_dram += request->completion_time - online_t0;
+            cur_dram_served_o = 0;
+          }
+          else
+          {
+            cur_dram_served_o++;
+          }
+        }
+        
+      }
+      else if (request->op_type == 'e' && request->oramid == cur_evict)
+      {
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_e == nvm_to_serve_evict)
+          {
+            evict_wait_nvm += request->completion_time - evict_t0;
+            cur_nvm_served_e = 0;
+          }
+          else
+          {
+            cur_nvm_served_e++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_e == dram_to_serve_evict)
+          {
+            evict_wait_dram += request->completion_time - evict_t0;
+            cur_dram_served_e = 0;
+          }
+          else
+          {
+            cur_dram_served_e++;
+          }
+        }
+
+      }
+      else if (request->op_type == 'r' && request->oramid == cur_reshuffle)
+      {
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_r == nvm_to_serve_reshuffle)
+          {
+            reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
+            cur_nvm_served_r = 0;
+          }
+          else
+          {
+            cur_nvm_served_r++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_r == dram_to_serve_reshuffle)
+          {
+            reshuffle_wait_dram += request->completion_time - reshuffle_t0;
+            cur_dram_served_r = 0;
+          }
+          else
+          {
+            cur_dram_served_r++;
+          }
+        }
+      }
+      
+      
       
       request->latency = request->completion_time - request->arrival_time;
       request->dispatch_time = CYCLE_VAL;

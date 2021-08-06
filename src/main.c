@@ -1353,6 +1353,7 @@ int main(int argc, char * argv[])
 					{
 						switch_sim_enable_to(SIM_ENABLE);
 						switch_cache_enable_to(CACHE_ENABLE);
+						reset_profiling_counters();
 						// switch_dead_enable_to(DEAD_ENABLE);
 						break;
 					}
@@ -1810,18 +1811,18 @@ int main(int argc, char * argv[])
 			{
 				if (op_type[numc] == 'o')
 				{
-					online_beginning = CYCLE_VAL;
-					curr_online = pN->oramid;
+					online_t0 = CYCLE_VAL;
+					cur_online = pN->oramid;
 				}
 				else if (op_type[numc] == 'e')
 				{
-					evict_beginning = CYCLE_VAL;
-					curr_evict = pN->oramid;
+					evict_t0 = CYCLE_VAL;
+					cur_evict = pN->oramid;
 				}
 				else if (op_type[numc] == 'r')
 				{
-					reshuffle_beginning = CYCLE_VAL;
-					curr_reshuffle = pN->oramid;
+					reshuffle_t0 = CYCLE_VAL;
+					cur_reshuffle = pN->oramid;
 				}
 			}
 			
@@ -1852,7 +1853,7 @@ int main(int argc, char * argv[])
 			}
 			
 
-			if (pN->oramid != curr_access)
+			if (!RING_ENABLE && pN->oramid != curr_access)
 			{
 				printf("\nERROR: deququed req %d does not match curr access %d @ trace %d\n", pN->oramid, curr_access, tracectr);
 				exit(1);

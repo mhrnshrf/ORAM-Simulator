@@ -336,12 +336,15 @@ extern unsigned long long int evict_wait_dram;
 extern unsigned long long int evict_wait_nvm;
 extern unsigned long long int reshuffle_wait_dram;
 extern unsigned long long int reshuffle_wait_nvm;
-extern unsigned long long int online_beginning;
-extern unsigned long long int curr_online;
-extern unsigned long long int evict_beginning;
-extern unsigned long long int curr_evict;
-extern unsigned long long int reshuffle_beginning;
-extern unsigned long long int curr_reshuffle;
+extern unsigned long long int online_t0;
+extern unsigned long long int cur_online;
+extern unsigned long long int evict_t0;
+extern unsigned long long int cur_evict;
+extern unsigned long long int reshuffle_t0;
+extern unsigned long long int cur_reshuffle;
+
+extern int cur_dram_served;
+extern int cur_nvm_served;
 
 void oram_alloc();
 void oram_init();
@@ -445,6 +448,7 @@ void test_ring();
 void switch_dead_enable_to(bool tf);
 void update_count_stat(int count, int level);
 void update_ddr_timing_param(int channel);
+void reset_profiling_counters();
 
 
 // Mehrnoosh.
