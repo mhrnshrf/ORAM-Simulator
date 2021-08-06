@@ -1811,16 +1811,19 @@ int main(int argc, char * argv[])
 			{
 				if (op_type[numc] == 'o')
 				{
+					// printf("o\n");
 					online_t0 = CYCLE_VAL;
 					cur_online = pN->oramid;
 				}
 				else if (op_type[numc] == 'e')
 				{
+					// printf("e\n");
 					evict_t0 = CYCLE_VAL;
 					cur_evict = pN->oramid;
 				}
 				else if (op_type[numc] == 'r')
 				{
+					// printf("r\n");
 					reshuffle_t0 = CYCLE_VAL;
 					cur_reshuffle = pN->oramid;
 				}

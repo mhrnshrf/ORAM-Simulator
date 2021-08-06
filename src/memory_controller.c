@@ -4705,7 +4705,7 @@ void ring_read_path(int label, int addr){
         last_read = true;
       }
       bool nvm_access = is_nvm_addr(mem_addr);
-      bool beginning = (i == 0);
+      bool beginning = (i == TOP_CACHE_VAR);
       bool ending = (i == LEVEL-1);
       char op_type = 'o';
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
@@ -5391,10 +5391,10 @@ void export_csv(char * argv[]){
   fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
-  fprintf(fp, "mem_clk,%lld\n", mem_clk);
+  // fprintf(fp, "mem_clk,%lld\n", mem_clk);
   fprintf(fp, "invokectr,%d\n", invokectr);
-  fprintf(fp, "oramctr,%d\n", oramctr);
-  fprintf(fp, "dummyctr,%d\n", dummyctr);
+  // fprintf(fp, "oramctr,%d\n", oramctr);
+  // fprintf(fp, "dummyctr,%d\n", dummyctr);
   fprintf(fp, "pos1_access,%d\n", pos1_access);
   fprintf(fp, "pos2_access,%d\n", pos2_access);
   fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
@@ -5406,58 +5406,60 @@ void export_csv(char * argv[]){
   fprintf(fp, "plbaccess0,%lld\n", plbaccess[0]);
   fprintf(fp, "plbaccess1,%lld\n", plbaccess[1]);
   fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
-  fprintf(fp, "oramQ_size,%d\n", oramQ->size);
-  fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
-  fprintf(fp, "Bk_Evict,%d\n", bkctr);
+  // fprintf(fp, "oramQ_size,%d\n", oramQ->size);
+  // fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
+  // fprintf(fp, "Bk_Evict,%d\n", bkctr);
   fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
   fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
-  fprintf(fp, "rho_hit,%f%%\n", 100*(double)rho_hit/(invokectr));
-  fprintf(fp, "rhoctr,%d\n", rhoctr);
-  fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
-  fprintf(fp, "rho_bkctr,%f%%\n", 100*(double)rho_bkctr/rho_hit);
-  fprintf(fp, "earlyctr,%d\n", earlyctr);
-  fprintf(fp, "dirty_pointctr,%d\n", dirty_pointctr);
-  fprintf(fp, "cache_dirty,%d\n", cache_dirty);
-  fprintf(fp, "ptr_fail,%d\n", ptr_fail);
-  fprintf(fp, "search_fail,%d\n", search_fail);
-  fprintf(fp, "pinctr,%d\n", pinctr);
-  fprintf(fp, "unpinctr,%d\n", unpinctr);
-  fprintf(fp, "precase,%d\n", precase);
-  fprintf(fp, "sttctr,%d\n", sttctr);
-  fprintf(fp, "stash_leftover,%d\n", stash_leftover);
-  fprintf(fp, "stash_removed,%d\n", stash_removed);
-  fprintf(fp, "fillhit,%d\n", fillhit);
-  fprintf(fp, "fillmiss,%d\n", fillmiss);
+  // fprintf(fp, "rho_hit,%f%%\n", 100*(double)rho_hit/(invokectr));
+  // fprintf(fp, "rhoctr,%d\n", rhoctr);
+  // fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
+  // fprintf(fp, "rho_bkctr,%f%%\n", 100*(double)rho_bkctr/rho_hit);
+  // fprintf(fp, "earlyctr,%d\n", earlyctr);
+  // fprintf(fp, "dirty_pointctr,%d\n", dirty_pointctr);
+  // fprintf(fp, "cache_dirty,%d\n", cache_dirty);
+  // fprintf(fp, "ptr_fail,%d\n", ptr_fail);
+  // fprintf(fp, "search_fail,%d\n", search_fail);
+  // fprintf(fp, "pinctr,%d\n", pinctr);
+  // fprintf(fp, "unpinctr,%d\n", unpinctr);
+  // fprintf(fp, "precase,%d\n", precase);
+  // fprintf(fp, "sttctr,%d\n", sttctr);
+  // fprintf(fp, "stash_leftover,%d\n", stash_leftover);
+  // fprintf(fp, "stash_removed,%d\n", stash_removed);
+  // fprintf(fp, "fillhit,%d\n", fillhit);
+  // fprintf(fp, "fillmiss,%d\n", fillmiss);
   fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
   fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
   fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
-  fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
-  fprintf(fp, "stashctr,%d\n", stashctr);
-  fprintf(fp, "stash_cont,%d\n", stash_cont);
-  fprintf(fp, "linger_discard,%d\n", linger_discard);
-  fprintf(fp, "shuffctr,%d\n", shuffctr);
+  // fprintf(fp, "stashctr,%d\n", stashctr);
+  // fprintf(fp, "stash_cont,%d\n", stash_cont);
+  // fprintf(fp, "linger_discard,%d\n", linger_discard);
   fprintf(fp, "ringctr,%d\n", ringctr);
-  fprintf(fp, "wbctr,%d\n", wbctr);
-  fprintf(fp, "writectr,%d\n", writectr);
-  fprintf(fp, "wskip,%d\n", wskip);
-  fprintf(fp, "mem_req_late,%f\n", (double)mem_req_latencies/(invokectr));
+  fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
+  fprintf(fp, "shuffctr,%d\n", shuffctr);
+  fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
+
+  // fprintf(fp, "wbctr,%d\n", wbctr);
+  // fprintf(fp, "writectr,%d\n", writectr);
+  // fprintf(fp, "wskip,%d\n", wskip);
+  // fprintf(fp, "mem_req_late,%f\n", (double)mem_req_latencies/(invokectr));
   fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
-  fprintf(fp, "missl1wb,%lld\n", missl1wb);
-  fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
-  fprintf(fp, "wbshuff,%d\n", wbshuff);
+  // fprintf(fp, "missl1wb,%lld\n", missl1wb);
+  // fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
+  // fprintf(fp, "wbshuff,%d\n", wbshuff);
   fprintf(fp, "ringdumctr,%d\n", ringdumctr);
-  fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
-  fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
-  fprintf(fp, "stalectr,%d\n", stalectr);
-  fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
-  fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
-  fprintf(fp, "stale_reduction,%d\n", stale_reduction);
-  for (int i = 0; i < GL_COUNT; i++)
-  {
-    fprintf(fp, "glctr[%d],%f%%\n", i, 100*(double)glctr[i]/(pow(2,GL[i])*GL_CAP[i]));
-  }
-  fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
-  fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
+  // fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
+  // fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
+  // fprintf(fp, "stalectr,%d\n", stalectr);
+  // fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
+  // fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
+  // fprintf(fp, "stale_reduction,%d\n", stale_reduction);
+  // for (int i = 0; i < GL_COUNT; i++)
+  // {
+  //   fprintf(fp, "glctr[%d],%f%%\n", i, 100*(double)glctr[i]/(pow(2,GL[i])*GL_CAP[i]));
+  // }
+  // fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
+  // fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
   fprintf(fp, "deadctr,%lld\n", deadctr);
   // for (int i = 0; i < 31; i++)
   // {
@@ -5509,7 +5511,6 @@ void export_csv(char * argv[]){
   fprintf(fp, "wmiss,%d\n", wmiss);
   fprintf(fp, "deadrem,%lld\n", deadrem);
 
-  fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
 
   for (int i = 0; i < LEVEL; i++)
   {
@@ -5521,9 +5522,22 @@ void export_csv(char * argv[]){
   // print_lifetime_stat(fp);
   
   // print_count_stat(fp);
+  long long int all_r = 0;
+  long long int all_w = 0;
+
+  long long int dram_r = 0;
+  long long int dram_w = 0;
 
   for (int c = 0; c < NUM_CHANNELS; c++)
   {
+    all_r += stats_reads_completed[c];
+    all_w += stats_writes_completed[c];
+    if (c < NUM_CHANNELS - NVM_CHANNEL)
+    {
+      dram_r += stats_reads_completed[c];
+      dram_w += stats_writes_completed[c];
+    }
+    
     fprintf(fp, "Reads_chan[%d],%-7lld\n", c, stats_reads_completed[c]);
     fprintf(fp, "Writes_chan[%d],%-7lld\n", c, stats_writes_completed[c]);
     fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
@@ -5532,8 +5546,17 @@ void export_csv(char * argv[]){
     fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
   }
 
-  fprintf(fp, "R_NVM/DRAM,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
-  fprintf(fp, "W_NVM/DRAM,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
+  fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
+  fprintf(fp, "W_NVM/DRAM_T,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
+  
+  fprintf(fp, "All_R,%lld\n", all_r);
+  fprintf(fp, "All_W,%lld\n", all_w);
+
+  fprintf(fp, "dram_R,%lld\n", dram_r);
+  fprintf(fp, "dram_W,%lld\n", dram_w);
+
+  fprintf(fp, "DRAM/NVM_R#,%f\n", (double)dram_r/(all_r - dram_r));
+  fprintf(fp, "DRAM/NVM_W#,%f\n", (double)dram_w/(all_w - dram_w));
 
   fprintf(fp, "online_wait_dram,%lld\n", online_wait_dram);
   fprintf(fp, "online_wait_nvm,%lld\n", online_wait_nvm);
@@ -6518,6 +6541,7 @@ issue_request_command (request_t * request, char rwt)
 
       if (request->op_type == 'o' && request->oramid == cur_online)
       {
+        // printf("in online\n");
         if (request->nvm_access)
         {
           if (cur_nvm_served_o == nvm_to_serve_online)
@@ -6546,6 +6570,8 @@ issue_request_command (request_t * request, char rwt)
       }
       else if (request->op_type == 'e' && request->oramid == cur_evict)
       {
+        // printf("in evict\n");
+
         if (request->nvm_access)
         {
           if (cur_nvm_served_e == nvm_to_serve_evict)
@@ -6574,6 +6600,8 @@ issue_request_command (request_t * request, char rwt)
       }
       else if (request->op_type == 'r' && request->oramid == cur_reshuffle)
       {
+        // printf("in reshuffle\n");
+
         if (request->nvm_access)
         {
           if (cur_nvm_served_r == nvm_to_serve_reshuffle)
