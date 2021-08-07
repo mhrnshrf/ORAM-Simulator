@@ -88,6 +88,8 @@ bool bk_already_made = false;	// a flag to indicate whether a bk evict access ha
 
 int curr_access = -3; 	// the id of current access (oram or rho, real or dummy)
 
+int cur_ring_acc = -1;
+
 int fill_access = 0;	// # prefetch history table access
 int fill_miss = 0;		// # miss on prefetch history table access
 
@@ -340,6 +342,7 @@ int main(int argc, char * argv[])
 	// random_trace();
 
 	last_read_served = true;
+	last_req_served = true;
   
   printf("---------------------------------------------\n");
   printf("-- USIMM: the Utah SImulated Memory Module --\n");
@@ -503,6 +506,7 @@ int main(int argc, char * argv[])
   int tree[NCORES];
 //   last_read = (bool *)malloc(sizeof(bool)*NUMCORES);
   bool last_read[NCORES];
+  bool last_req[NCORES];
   bool nvm_access[NCORES];
 //   nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
   int nonmemops_timing[NCORES];
@@ -975,6 +979,7 @@ int main(int argc, char * argv[])
 			{
 				// printf("retired  NVM @ %lld \n", CYCLE_VAL);
 				last_read_served = true;
+				last_req_served = true;
 			}
 			// if (ROB[numc].ending[ROB[numc].head])
 			// {
@@ -1209,12 +1214,14 @@ int main(int argc, char * argv[])
 			if (NONSEC_ENABLE)
 			{
 				last_read[numc] = true;
+				last_req[numc] = true;
 				last_read_served = false;
+				last_req_served = false;
 			}
 			
 			// if (SIM_ENABLE)
 			// {
-				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc]);
+				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc]);
 			// }
 			
 			
@@ -1243,7 +1250,7 @@ int main(int argc, char * argv[])
 
 				// if (SIM_ENABLE)
 				// {
-					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc]);
+					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], last_read[numc]);
 				// }
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
@@ -1792,6 +1799,17 @@ int main(int argc, char * argv[])
 			
 			int nonmemsaved = nonmemops[numc];
 			Element *pN = Dequeue(oramQ);
+
+			if (oramQ->size != 0)
+			{
+				if (oramQ->head->oramid != pN->oramid)
+				{
+					last_req_served = false;
+					last_req[numc] = true;
+				}
+			}
+			
+			
 			addr[numc] = pN->addr;
 			// pN->cycle 
 			// pN->thread 
@@ -1832,6 +1850,11 @@ int main(int argc, char * argv[])
 			if (pN->last_read)
 			{
 				last_read_served = false;
+				// if (pN->op_type == 'e')
+				// {
+				// 	printf("@ %d oramid %d stall\n", tracectr, pN->oramid);
+				// }
+				
 			}
 			
 			// if (RING_ENABLE && NVM_ENABLE)

@@ -317,6 +317,7 @@ static const int GL_CAP[GL_COUNT] = {56, 40, 8};  // array of different Z for di
 enum {META_MAX_SIZE = (int)pow(2, GLMAX)};
 
 extern bool last_read_served;
+extern bool last_req_served;
 extern long long int nonmemops_sum;
 extern long long int nonmemops_executed;
  
@@ -527,6 +528,7 @@ typedef struct req
   bool beginning;
   bool ending;
   char op_type;
+  bool last_req;
 
   // Mehrnoosh.
 } request_t;
@@ -698,10 +700,10 @@ int read_matches_write_or_read_queue(long long int physical_address);
 int write_exists_in_write_queue(long long int physical_address);
 
 // enqueue a read into the corresponding read queue (returns ptr to new node)
-request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending);
+request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req);
 
 // enqueue a write into the corresponding write queue (returns ptr to new_node)
-request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending);
+request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, bool last_read);
 
 // update stats counters
 void gather_stats(int channel);

@@ -91,18 +91,34 @@ unsigned long long int cur_reshuffle = 0;
 
 int cur_dram_served_o = 0;
 int cur_nvm_served_o = 0;
-int cur_dram_served_e = 0;
-int cur_nvm_served_e = 0;
-int cur_dram_served_r = 0;
-int cur_nvm_served_r = 0;
+int cur_dram_served_e_r = 0;
+int cur_dram_served_e_w = 0;
+int cur_nvm_served_e_r = 0;
+int cur_nvm_served_e_w = 0;
+int cur_dram_served_r_r = 0;
+int cur_dram_served_r_w = 0;
+int cur_nvm_served_r_r = 0;
+int cur_nvm_served_r_w = 0;
 
 int dram_to_serve_online;
 int nvm_to_serve_online;
-int dram_to_serve_evict;
-int nvm_to_serve_evict;
-int dram_to_serve_reshuffle;
-int nvm_to_serve_reshuffle;
+int dram_to_serve_evict_r;
+int dram_to_serve_evict_w;
+int nvm_to_serve_evict_r;
+int nvm_to_serve_evict_w;
+int dram_to_serve_reshuffle_r;
+int dram_to_serve_reshuffle_w;
+int nvm_to_serve_reshuffle_r;
+int nvm_to_serve_reshuffle_w;
 
+int online_r = 0;
+int evict_r = 0;
+int reshuffle_r = 0;
+int evict_w = 0;
+int reshuffle_w = 0;
+int w_ended = 0;
+int r_ended = 0;
+int r_ended_o = 0;
 
 void test_ring(){
   unsigned long long int addr = 0;
@@ -251,6 +267,7 @@ Queue *deadQ_arr[LEVEL];
 int revarr[RING_REV];
 
 bool last_read_served;
+bool last_req_served;
 
 
 
@@ -893,7 +910,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->pc = pc; 
   pN->type = type;
   pN->oramid = (RING_ENABLE)? ringctr :(TREE_VAR == RHO) ? rhoctr : oramctr;
-  pN->oramid = (RING_ENABLE && op_type == 'r')? shuff_total : pN->oramid;
+  // pN->oramid = (RING_ENABLE && op_type == 'r')? shuff_total : pN->oramid;
   pN->oramid = (ENQUEUE_VAR == HEAD) ? -1 : pN->oramid;   // in case of dummy access set oram id to -1
   pN->tree = TREE_VAR;
   pN->orig_addr = orig_addr;
@@ -1043,10 +1060,14 @@ void oram_alloc(){
 
   dram_to_serve_online = NVM_START - TOP_CACHE;
   nvm_to_serve_online = LEVEL - NVM_START;
-  dram_to_serve_evict = (NVM_START - TOP_CACHE)*(5+12);
-  nvm_to_serve_evict = (LEVEL - NVM_START)*(5+12);
-  dram_to_serve_reshuffle = 1*(5+12);
-  nvm_to_serve_reshuffle = 1*(5+12);
+  dram_to_serve_evict_r = (NVM_START - TOP_CACHE)*(5); 
+  dram_to_serve_evict_w = (NVM_START - TOP_CACHE)*(12); 
+  nvm_to_serve_evict_r = (LEVEL - NVM_START)*(5);
+  nvm_to_serve_evict_w = (LEVEL - NVM_START)*(12);
+  dram_to_serve_reshuffle_r = 1*(5);
+  dram_to_serve_reshuffle_w = 1*(12);
+  nvm_to_serve_reshuffle_r = 1*(5);
+  nvm_to_serve_reshuffle_w = 1*(12);
 
   for (int i = 0; i < LEVEL; i++)
 	{
@@ -1554,10 +1575,6 @@ void read_path(int label){
                 int index_prime = calc_index(label, i_prime);
                 mem_addr = SubMap[index_prime] + j_prime;
               }
-              if (i == EMPTY_TOP_VAR && j == LZ_VAR[i] - 1)
-              {
-                last_read = true;
-              }
               if (RING_ENABLE)
               {
                 mem_addr = calc_mem_addr(index, j, 'R');
@@ -1567,6 +1584,13 @@ void read_path(int label){
               bool nvm_access = is_nvm_addr(mem_addr);
 
               reqmade++;
+              if (i == TOP_CACHE_VAR && reqmade == RING_Z)
+              {
+                last_read = true;
+                // printf("reqmade is true\n");
+              }
+              
+
 
               if (SIM_ENABLE_VAR)
               {
@@ -1654,6 +1678,7 @@ void read_path(int label){
         }
         if (RING_ENABLE && i >= TOP_CACHE_VAR)
         {
+          int reqcont = reqmade;
           for (int k = 0; k < RING_Z-reqmade-GREEN_BLOCK; k++)
           {
             int ri = -1;
@@ -1664,11 +1689,13 @@ void read_path(int label){
               sd = dum_cand[ri];
             }
 
-            if (i == EMPTY_TOP_VAR && k == RING_Z-reqmade-GREEN_BLOCK - 1)
+            reqcont++;
+
+            if (i == TOP_CACHE_VAR && reqcont == RING_Z)
             {
+              // printf("reqcont is true\n");
               last_read = true;
             }
-            
             
             int mem_addr = calc_mem_addr(index, sd, 'R');
             bool nvm_access = is_nvm_addr(mem_addr);
@@ -1902,9 +1929,11 @@ void write_path(int label){
           }
           bool nvm_access = is_nvm_addr(mem_addr);
           bool beginning = false;
-          bool ending = (i == EMPTY_TOP_VAR && j == LZ_VAR[i]-1);
+          bool ending = (i == TOP_CACHE_VAR && j == LZ_VAR[i]-1);
+          bool last_read = (i == TOP_CACHE_VAR && j == LZ_VAR[i]-1);
+          last_read = false;
           char op_type = 'e';
-          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', false, nvm_access, op_type, beginning, ending);
+          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', last_read, nvm_access, op_type, beginning, ending);
         }
 
 
@@ -4948,11 +4977,11 @@ void ring_early_reshuffle(int label){
         if (GlobTree[index].slot[j].isReal)
         {
           int mem_addr = calc_mem_addr(index, j, 'R');
-          if (i == LEVEL - 1 && j == LZ_VAR[i] -1)
+          reqmade++;
+          if (reqmade == RING_Z)
           {
             last_read = true;
           }
-          reqmade++;
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
             bool nvm_access = is_nvm_addr(mem_addr);
@@ -4994,7 +5023,7 @@ void ring_early_reshuffle(int label){
         }
       }
 
-
+        int reqcont = reqmade;
         for (int k = 0; k < RING_Z-reqmade-GREEN_BLOCK; k++)
         {
           int ri = -1;
@@ -5004,6 +5033,7 @@ void ring_early_reshuffle(int label){
             ri = rand() % cand_ind;
             sd = dum_cand[ri];
           }
+          reqcont++;
            
           int mem_addr = calc_mem_addr(index, sd, 'R');
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
@@ -5011,8 +5041,9 @@ void ring_early_reshuffle(int label){
               bool nvm_access = is_nvm_addr(mem_addr);
               bool beginning = false;
               bool ending = false;
+              bool last_read = (reqcont == RING_Z);
               char op_type = 'r';
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, nvm_access, op_type, beginning, ending);
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
               // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
           }
           dum_cand[ri] = -1;
@@ -5406,7 +5437,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "plbaccess0,%lld\n", plbaccess[0]);
   fprintf(fp, "plbaccess1,%lld\n", plbaccess[1]);
   fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
-  // fprintf(fp, "oramQ_size,%d\n", oramQ->size);
+  fprintf(fp, "oramQ_size,%d\n", oramQ->size);
   // fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
   // fprintf(fp, "Bk_Evict,%d\n", bkctr);
   fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
@@ -5564,6 +5595,14 @@ void export_csv(char * argv[]){
   fprintf(fp, "evict_wait_nvm,%lld\n", evict_wait_nvm);
   fprintf(fp, "reshuffle_wait_dram,%lld\n", reshuffle_wait_dram);
   fprintf(fp, "reshuffle_wait_nvm,%lld\n", reshuffle_wait_nvm);
+  fprintf(fp, "online_r,%d\n", online_r);
+  fprintf(fp, "evict_r,%d\n", evict_r);
+  fprintf(fp, "reshuffle_r,%d\n", reshuffle_r);
+  fprintf(fp, "evict_w,%d\n", evict_w);
+  fprintf(fp, "reshuffle_w,%d\n", reshuffle_w);
+  fprintf(fp, "w_ended,%d\n", w_ended);
+  fprintf(fp, "r_ended,%d\n", r_ended);
+  fprintf(fp, "r_ended_o,%d\n", r_ended_o);
 
   
   fclose(fp);
@@ -5998,7 +6037,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   void *
 init_new_node (long long int physical_address, long long int arrival_time,
     optype_t type, int thread_id, int instruction_id,
-    long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending) 
+    long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req) 
 {
   request_t * new_node = NULL;
   new_node = (request_t *) malloc (sizeof (request_t));
@@ -6016,6 +6055,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->oramid = oramid;
     new_node->tree = tree;
     new_node->last_read = last_read;
+    new_node->last_req = last_req;
     new_node->nvm_access = nvm_access;
     new_node->beginning = beginning;
     new_node->ending = ending;
@@ -6129,7 +6169,7 @@ write_exists_in_write_queue (long long int physical_address)
 // Insert a new read to the read queue
 request_t * insert_read (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending) 
+    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req) 
 {
   optype_t this_op = READ;
 
@@ -6140,7 +6180,7 @@ request_t * insert_read (long long int physical_address,
   stats_reads_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, instruction_pc, oramid, tree, last_read, nvm_access, op_type, beginning, ending);
+        instruction_id, instruction_pc, oramid, tree, last_read, nvm_access, op_type, beginning, ending, last_req);
   LL_APPEND (read_queue_head[channel], new_node);
   read_queue_length[channel]++;
 
@@ -6152,7 +6192,7 @@ request_t * insert_read (long long int physical_address,
 // Insert a new write to the write queue
 request_t * insert_write (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending) 
+    int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, bool last_read) 
 {
   optype_t this_op = WRITE;
   dram_address_t * this_addr = calc_dram_addr (physical_address);
@@ -6161,7 +6201,7 @@ request_t * insert_write (long long int physical_address,
   stats_writes_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, 0, oramid, tree, false, nvm_access, op_type, beginning, ending);
+        instruction_id, 0, oramid, tree, last_read, nvm_access, op_type, beginning, ending, last_req);
   LL_APPEND (write_queue_head[channel], new_node);
   write_queue_length[channel]++;
 
@@ -6539,13 +6579,15 @@ issue_request_command (request_t * request, char rwt)
       //   printf("dram  @ %lld\n", CYCLE_VAL);
       // }
 
-      if (request->op_type == 'o' && request->oramid == cur_online)
+      if (request->op_type == 'o' )//&& request->oramid == cur_online)
       {
         // printf("in online\n");
+        online_r++;
         if (request->nvm_access)
         {
           if (cur_nvm_served_o == nvm_to_serve_online)
           {
+
             online_wait_nvm += request->completion_time - online_t0;
             cur_nvm_served_o = 0;
           }
@@ -6558,6 +6600,8 @@ issue_request_command (request_t * request, char rwt)
         {
           if (cur_dram_served_o == dram_to_serve_online)
           {
+            // printf("online %d finish     curaccess %lld \n", request->oramid, cur_online);
+            r_ended_o++;
             online_wait_dram += request->completion_time - online_t0;
             cur_dram_served_o = 0;
           }
@@ -6568,62 +6612,65 @@ issue_request_command (request_t * request, char rwt)
         }
         
       }
-      else if (request->op_type == 'e' && request->oramid == cur_evict)
+      else if (request->op_type == 'e' )//&& request->oramid == cur_evict)
       {
         // printf("in evict\n");
-
+        evict_r++;
         if (request->nvm_access)
         {
-          if (cur_nvm_served_e == nvm_to_serve_evict)
+          if (cur_nvm_served_e_r == nvm_to_serve_evict_r)
           {
             evict_wait_nvm += request->completion_time - evict_t0;
-            cur_nvm_served_e = 0;
+            cur_nvm_served_e_r = 0;
           }
           else
           {
-            cur_nvm_served_e++;
+            cur_nvm_served_e_r++;
           }
         }
         else
         {
-          if (cur_dram_served_e == dram_to_serve_evict)
+          if (cur_dram_served_e_r == dram_to_serve_evict_r)
           {
+            r_ended++;
+            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
             evict_wait_dram += request->completion_time - evict_t0;
-            cur_dram_served_e = 0;
+            cur_dram_served_e_r = 0;
           }
           else
           {
-            cur_dram_served_e++;
+            cur_dram_served_e_r++;
           }
         }
 
       }
-      else if (request->op_type == 'r' && request->oramid == cur_reshuffle)
+      else if (request->op_type == 'r' ) //&& request->oramid == cur_reshuffle)
       {
         // printf("in reshuffle\n");
+        reshuffle_r++;
 
         if (request->nvm_access)
         {
-          if (cur_nvm_served_r == nvm_to_serve_reshuffle)
+          if (cur_nvm_served_r_r == nvm_to_serve_reshuffle_r)
           {
-            reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
-            cur_nvm_served_r = 0;
+            // reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
+            cur_nvm_served_r_r = 0;
           }
           else
           {
-            cur_nvm_served_r++;
+            cur_nvm_served_r_r++;
           }
         }
         else
         {
-          if (cur_dram_served_r == dram_to_serve_reshuffle)
+          if (cur_dram_served_r_r == dram_to_serve_reshuffle_r)
           {
-            reshuffle_wait_dram += request->completion_time - reshuffle_t0;
-            cur_dram_served_r = 0;
+            // reshuffle_wait_dram += request->completion_time - reshuffle_t0;
+            cur_dram_served_r_r = 0;
           }
           else
           {
-            cur_dram_served_r++;
+            cur_dram_served_r_r++;
           }
         }
       }
@@ -6643,6 +6690,15 @@ issue_request_command (request_t * request, char rwt)
       {
         ROB[request->thread_id].waited_on[request->instruction_id] = false;
       }
+      // if (request->last_req)
+			// {
+			// 	// last_read_served = true;
+      //   ROB[request->thread_id].waited_on[request->instruction_id] = true;
+			// }
+      // else
+      // {
+      //   ROB[request->thread_id].waited_on[request->instruction_id] = false;
+      // }
 
       ROB[request->thread_id].ending[request->instruction_id] = request->ending;
       ROB[request->thread_id].nvm_access[request->instruction_id] = request->nvm_access;
@@ -6680,6 +6736,11 @@ issue_request_command (request_t * request, char rwt)
       cas_issued_current_cycle[channel][rank][bank] = 1;
       break;
     case COL_WRITE_CMD:
+      // if (!last_read_served)
+      // {
+      //   return 0;
+      // }
+      
       assert (dram_state[channel][rank][bank].state == ROW_ACTIVE);
 
       //UT_MEM_DEBUG("\nCycle: %lld Cmd: COL_WRITE Req:%lld Chan:%d Rank:%d Bank:%d \n", CYCLE_VAL, request->id, channel, rank, bank);
@@ -6728,7 +6789,73 @@ issue_request_command (request_t * request, char rwt)
       {
         request->completion_time += NVM_LATENCY*8;
       }
-      
+
+      if (request->op_type == 'e' )//&& request->oramid == cur_evict)
+      {
+        // printf("in evict\n");
+        evict_w++;
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_e_w == nvm_to_serve_evict_w)
+          {
+            evict_wait_nvm += request->completion_time - evict_t0;
+            cur_nvm_served_e_w = 0;
+          }
+          else
+          {
+            cur_nvm_served_e_w++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_e_w == dram_to_serve_evict_w)
+          {
+            w_ended++;
+            // printf("curead %d     oramid %d     curaccess %lld \n", cur_dram_served_e_r, request->oramid, cur_evict);
+            evict_wait_dram += request->completion_time - evict_t0;
+            cur_dram_served_e_w = 0;
+          }
+          else
+          {
+            cur_dram_served_e_w++;
+          }
+        }
+
+      }
+      else if (request->op_type == 'r' )//&& request->oramid == cur_reshuffle)
+      {
+        reshuffle_w++;
+
+        // printf("in reshuffle\n");
+
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_r_w == nvm_to_serve_reshuffle_w)
+          {
+            reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
+            cur_nvm_served_r_w = 0;
+          }
+          else
+          {
+            cur_nvm_served_r_w++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_r_w == dram_to_serve_reshuffle_w)
+          {
+            reshuffle_wait_dram += request->completion_time - reshuffle_t0;
+            cur_dram_served_r_w = 0;
+          }
+          else
+          {
+            cur_dram_served_r_w++;
+          }
+        }
+      }
+     
+     
+     
       request->latency = request->completion_time - request->arrival_time;
       request->dispatch_time = CYCLE_VAL;
       request->request_served = 1;

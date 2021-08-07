@@ -49,10 +49,10 @@ void schedule(int channel)
 	// if in write drain mode, keep draining writes until the
 	// write queue occupancy drops to LO_WM
 	if (drain_writes[channel] && (write_queue_length[channel] > LO_WM)) {
-	  drain_writes[channel] = 1; // Keep draining.
+	drain_writes[channel] = 1; // Keep draining.
 	}
 	else {
-	  drain_writes[channel] = 0; // No need to drain.
+	drain_writes[channel] = 0; // No need to drain.
 	}
 
 	// initiate write drain if either the write queue occupancy
@@ -63,11 +63,14 @@ void schedule(int channel)
 		drain_writes[channel] = 1;
 	}
 	else {
-	  if (!read_queue_length[channel])
-	    drain_writes[channel] = 1;
+	if (!read_queue_length[channel])
+		drain_writes[channel] = 1;
 	}
 
-
+	// if (!last_read_served)
+	// {
+	// 	drain_writes[channel] = 0;
+	// }
 	// If in write drain mode, look through all the write queue
 	// elements (already arranged in the order of arrival), and
 	// issue the command for the first request that is ready
@@ -84,6 +87,7 @@ void schedule(int channel)
 		}
 		return;
 	}
+	
 
 	// Draining Reads
 	// look through the queue and find the first request whose
