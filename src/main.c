@@ -1360,7 +1360,7 @@ int main(int argc, char * argv[])
 					{
 						switch_sim_enable_to(SIM_ENABLE);
 						switch_cache_enable_to(CACHE_ENABLE);
-						reset_profiling_counters();
+						reset_profile_counters();
 						// switch_dead_enable_to(DEAD_ENABLE);
 						break;
 					}
@@ -1825,27 +1825,33 @@ int main(int argc, char * argv[])
             ending[numc] = pN->ending;
             op_type[numc] = pN->op_type;
 
-			if (pN->beginning)
-			{
-				if (op_type[numc] == 'o')
-				{
-					// printf("o\n");
-					online_t0 = CYCLE_VAL;
-					cur_online = pN->oramid;
-				}
-				else if (op_type[numc] == 'e')
-				{
-					// printf("e\n");
-					evict_t0 = CYCLE_VAL;
-					cur_evict = pN->oramid;
-				}
-				else if (op_type[numc] == 'r')
-				{
-					// printf("r\n");
-					reshuffle_t0 = CYCLE_VAL;
-					cur_reshuffle = pN->oramid;
-				}
-			}
+			// if (pN->beginning)
+			// {
+			// 	if (op_type[numc] == 'o')
+			// 	{
+			// 		// printf("o\n");
+			// 		online_t0 = CYCLE_VAL;
+			// 		cur_online = pN->oramid;
+			// 	}
+			// 	else if (op_type[numc] == 'e')
+			// 	{
+			// 		// printf("e\n");
+			// 		evict_t0 = CYCLE_VAL;
+			// 		cur_evict = pN->oramid;
+			// 	}
+			// 	else if (op_type[numc] == 'r')
+			// 	{
+			// 		// printf("r\n");
+			// 		reshuffle_t0 = CYCLE_VAL;
+			// 		cur_reshuffle = pN->oramid;
+			// 	}
+			// 	else if (op_type[numc] == 'm')
+			// 	{
+			// 		// printf("r\n");
+			// 		meta_t0 = CYCLE_VAL;
+			// 		cur_meta = pN->oramid;
+			// 	}
+			// }
 			
 			if (pN->last_read)
 			{

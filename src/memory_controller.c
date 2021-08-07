@@ -82,12 +82,16 @@ unsigned long long int evict_wait_dram = 0;
 unsigned long long int evict_wait_nvm = 0;
 unsigned long long int reshuffle_wait_dram = 0;
 unsigned long long int reshuffle_wait_nvm = 0;
+unsigned long long int meta_wait_dram = 0;
+unsigned long long int meta_wait_nvm = 0;
 unsigned long long int online_t0 = 0;
 unsigned long long int cur_online = 0;
 unsigned long long int evict_t0 =  0;
 unsigned long long int cur_evict =  0;
 unsigned long long int reshuffle_t0 = 0;
 unsigned long long int cur_reshuffle = 0;
+unsigned long long int meta_t0 = 0;
+unsigned long long int cur_meta = 0;
 
 int cur_dram_served_o = 0;
 int cur_nvm_served_o = 0;
@@ -95,6 +99,10 @@ int cur_dram_served_e_r = 0;
 int cur_dram_served_e_w = 0;
 int cur_nvm_served_e_r = 0;
 int cur_nvm_served_e_w = 0;
+int cur_dram_served_m_r = 0;
+int cur_dram_served_m_w = 0;
+int cur_nvm_served_m_r = 0;
+int cur_nvm_served_m_w = 0;
 int cur_dram_served_r_r = 0;
 int cur_dram_served_r_w = 0;
 int cur_nvm_served_r_r = 0;
@@ -106,6 +114,10 @@ int dram_to_serve_evict_r;
 int dram_to_serve_evict_w;
 int nvm_to_serve_evict_r;
 int nvm_to_serve_evict_w;
+int dram_to_serve_meta_r;
+int dram_to_serve_meta_w;
+int nvm_to_serve_meta_r;
+int nvm_to_serve_meta_w;
 int dram_to_serve_reshuffle_r;
 int dram_to_serve_reshuffle_w;
 int nvm_to_serve_reshuffle_r;
@@ -117,8 +129,12 @@ int reshuffle_r = 0;
 int evict_w = 0;
 int reshuffle_w = 0;
 int w_ended = 0;
+int meta_ended = 0;
 int r_ended = 0;
 int r_ended_o = 0;
+int w_ended_dram = 0;
+int w_ended_nvm = 0;
+
 
 void test_ring(){
   unsigned long long int addr = 0;
@@ -1068,6 +1084,10 @@ void oram_alloc(){
   dram_to_serve_reshuffle_w = 1*(12);
   nvm_to_serve_reshuffle_r = 1*(5);
   nvm_to_serve_reshuffle_w = 1*(12);
+  dram_to_serve_meta_r = (LEVEL - TOP_CACHE)*(1); 
+  dram_to_serve_meta_w = (LEVEL - TOP_CACHE)*(1); 
+  // nvm_to_serve_meta_r = (LEVEL - NVM_START)*(1);
+  // nvm_to_serve_meta_w = (LEVEL - NVM_START)*(1);
 
   for (int i = 0; i < LEVEL; i++)
 	{
@@ -1931,7 +1951,7 @@ void write_path(int label){
           bool beginning = false;
           bool ending = (i == TOP_CACHE_VAR && j == LZ_VAR[i]-1);
           bool last_read = (i == TOP_CACHE_VAR && j == LZ_VAR[i]-1);
-          last_read = false;
+          // last_read = false;
           char op_type = 'e';
           insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', last_read, nvm_access, op_type, beginning, ending);
         }
@@ -4224,7 +4244,7 @@ void metadata_access(int label, char type){
   {
      if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
-      if (type == 'R' && i == TOP_CACHE_VAR)
+      if (i == TOP_CACHE_VAR ) // && type == 'R')
       {
         last_read = true;
       }
@@ -4232,8 +4252,8 @@ void metadata_access(int label, char type){
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(i);
       nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
-      bool beginning = false;
-      bool ending = false;
+      bool beginning = (type == 'R') && (i == LEVEL-1);
+      bool ending = (type == 'W') && (i == TOP_CACHE_VAR);
       char op_type = 'm';
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access, op_type, beginning, ending);
     }
@@ -5039,7 +5059,7 @@ void ring_early_reshuffle(int label){
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
               bool nvm_access = is_nvm_addr(mem_addr);
-              bool beginning = false;
+              bool beginning = (reqcont == 1);
               bool ending = false;
               bool last_read = (reqcont == RING_Z);
               char op_type = 'r';
@@ -5071,8 +5091,9 @@ void ring_early_reshuffle(int label){
           bool nvm_access = is_nvm_addr(mem_addr);
           bool beginning = false;
           bool ending = (j == LZ_VAR[i]-1);
+          bool last_read = (j == LZ_VAR[i]-1);
           char op_type = 'r';
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, nvm_access, op_type, beginning, ending);
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending);
         }
 
         
@@ -5298,7 +5319,7 @@ void export_csv_intermed(char exp_name[], int ind, long double *arr){
 
 }
 
-void reset_profiling_counters(){
+void reset_profile_counters(){
   invokectr = 0;
   oramctr = 0;
   dummyctr = 0;
@@ -5353,9 +5374,9 @@ void reset_profiling_counters(){
   stale_flush_ctr = 0;
   stale_discard_ctr = 0;
   stale_reduction = 0;
-  deadctr = 0;
-  dead_on_path = 0;
-  dead_on_path_dram = 0;
+  // deadctr = 0;
+  // dead_on_path = 0;
+  // dead_on_path_dram = 0;
   dram_norm_r = 0;
   nvm_norm_r = 0;
   dram_norm_w = 0;
@@ -5377,7 +5398,7 @@ void reset_profiling_counters(){
   wmiss = 0;
   deadrem = 0;
   nonmemops_executed = 0;
-  dead_dram = 0;
+  // dead_dram = 0;
   for (int i = 0; i < LEVEL; i++)
   {
     shuff[i] = 0;
@@ -5409,17 +5430,28 @@ void export_csv(char * argv[]){
 
   int shuffctr = 0; 
   int shuffctr_tc = 0; 
+  int shuffctr_dram = 0; 
+  int shuffctr_nvm = 0; 
   for (int i = 0; i < LEVEL; i++)
   {
     shuffctr += shuff[i];
     if (i >= TOP_CACHE)
     {
-      shuffctr_tc +=shuff[i];
+      shuffctr_tc += shuff[i];
+      if (i < NVM_START)
+      {
+        shuffctr_dram += shuff[i];
+      }
+      else
+      {
+        shuffctr_nvm += shuff[i];
+      }
+      
     }
   }
 
   fprintf(fp,"Benchmark,%s\n", bench);
-  fprintf(fp,"exe_time,%f\n", exe_time);
+  // fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
   // fprintf(fp, "mem_clk,%lld\n", mem_clk);
@@ -5428,20 +5460,20 @@ void export_csv(char * argv[]){
   // fprintf(fp, "dummyctr,%d\n", dummyctr);
   fprintf(fp, "pos1_access,%d\n", pos1_access);
   fprintf(fp, "pos2_access,%d\n", pos2_access);
-  fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
-  fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
-  fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
-  fprintf(fp, "plb_hit0,%lld\n", plb_hit[0]);
-  fprintf(fp, "plb_hit1,%lld\n", plb_hit[1]);
-  fprintf(fp, "plb_hit2,%lld\n", plb_hit[2]);
-  fprintf(fp, "plbaccess0,%lld\n", plbaccess[0]);
-  fprintf(fp, "plbaccess1,%lld\n", plbaccess[1]);
-  fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
-  fprintf(fp, "oramQ_size,%d\n", oramQ->size);
+  // fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+  // fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+  // fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
+  // fprintf(fp, "plb_hit0,%lld\n", plb_hit[0]);
+  // fprintf(fp, "plb_hit1,%lld\n", plb_hit[1]);
+  // fprintf(fp, "plb_hit2,%lld\n", plb_hit[2]);
+  // fprintf(fp, "plbaccess0,%lld\n", plbaccess[0]);
+  // fprintf(fp, "plbaccess1,%lld\n", plbaccess[1]);
+  // fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
+  // fprintf(fp, "oramQ_size,%d\n", oramQ->size);
   // fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
   // fprintf(fp, "Bk_Evict,%d\n", bkctr);
-  fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
-  fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
+  // fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  // fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
   // fprintf(fp, "rho_hit,%f%%\n", 100*(double)rho_hit/(invokectr));
   // fprintf(fp, "rhoctr,%d\n", rhoctr);
   // fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
@@ -5459,9 +5491,9 @@ void export_csv(char * argv[]){
   // fprintf(fp, "stash_removed,%d\n", stash_removed);
   // fprintf(fp, "fillhit,%d\n", fillhit);
   // fprintf(fp, "fillmiss,%d\n", fillmiss);
-  fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
-  fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
-  fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+  // fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+  // fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+  // fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
   // fprintf(fp, "stashctr,%d\n", stashctr);
   // fprintf(fp, "stash_cont,%d\n", stash_cont);
   // fprintf(fp, "linger_discard,%d\n", linger_discard);
@@ -5469,16 +5501,18 @@ void export_csv(char * argv[]){
   fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
   fprintf(fp, "shuffctr,%d\n", shuffctr);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
+  fprintf(fp, "shuffctr_dram,%d\n", shuffctr_dram);
+  fprintf(fp, "shuffctr_nvm,%d\n", shuffctr_nvm);
 
   // fprintf(fp, "wbctr,%d\n", wbctr);
   // fprintf(fp, "writectr,%d\n", writectr);
   // fprintf(fp, "wskip,%d\n", wskip);
   // fprintf(fp, "mem_req_late,%f\n", (double)mem_req_latencies/(invokectr));
-  fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
+  // fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
   // fprintf(fp, "missl1wb,%lld\n", missl1wb);
   // fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
   // fprintf(fp, "wbshuff,%d\n", wbshuff);
-  fprintf(fp, "ringdumctr,%d\n", ringdumctr);
+  // fprintf(fp, "ringdumctr,%d\n", ringdumctr);
   // fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
   // fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
   // fprintf(fp, "stalectr,%d\n", stalectr);
@@ -5491,15 +5525,15 @@ void export_csv(char * argv[]){
   // }
   // fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   // fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
-  fprintf(fp, "deadctr,%lld\n", deadctr);
+  // fprintf(fp, "deadctr,%lld\n", deadctr);
   // for (int i = 0; i < 31; i++)
   // {
   //   fprintf(fp, "%dm,%lld\n", i*10, deadarr[i]);
   // }
   if (RING_ENABLE)
   {
-    fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
-    fprintf(fp, "dead_on_path_dram,%d\n", (int)dead_on_path_dram/ring_evictctr);
+    // fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
+    // fprintf(fp, "dead_on_path_dram,%d\n", (int)dead_on_path_dram/ring_evictctr);
   }
   
   // for (int i = 0; i < 31; i++)
@@ -5517,39 +5551,39 @@ void export_csv(char * argv[]){
   //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
   //   }
   // }
-  fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
-  fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
-  fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
-  fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
-  fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
-  fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
-  fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
-  fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
-  fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
-  fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
-  fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
-  fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
+  // fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
+  // fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
+  // fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
+  // fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
+  // fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
+  // fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
+  // fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
+  // fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
+  // fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
+  // fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
+  // fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
+  // fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
   // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
   // fprintf(fp, "deadQ-size,%d\n", deadQ->size);
-  fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
-  fprintf(fp, "remote_nvms,%d\n", remote_nvms);
+  // fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
+  // fprintf(fp, "remote_nvms,%d\n", remote_nvms);
 
-  fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
-  fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
-  fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
-  fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
-  fprintf(fp, "rmiss,%d\n", rmiss);
-  fprintf(fp, "wmiss,%d\n", wmiss);
-  fprintf(fp, "deadrem,%lld\n", deadrem);
+  // fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
+  // fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
+  // fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
+  // fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
+  // fprintf(fp, "rmiss,%d\n", rmiss);
+  // fprintf(fp, "wmiss,%d\n", wmiss);
+  // fprintf(fp, "deadrem,%lld\n", deadrem);
 
 
-  for (int i = 0; i < LEVEL; i++)
-  {
-    fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
-  }
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
+  // }
 
-  fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);
-  fprintf(fp, "dead_dram,%lld\n", dead_dram);
+  // fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);
+  // fprintf(fp, "dead_dram,%lld\n", dead_dram);
   // print_lifetime_stat(fp);
   
   // print_count_stat(fp);
@@ -5571,14 +5605,14 @@ void export_csv(char * argv[]){
     
     fprintf(fp, "Reads_chan[%d],%-7lld\n", c, stats_reads_completed[c]);
     fprintf(fp, "Writes_chan[%d],%-7lld\n", c, stats_writes_completed[c]);
-    fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
-    fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_queue_latency[c]);
-    fprintf(fp, "W_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_latency[c]);
-    fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
+    // fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
+    // fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_queue_latency[c]);
+    // fprintf(fp, "W_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_latency[c]);
+    // fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
   }
 
-  fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
-  fprintf(fp, "W_NVM/DRAM_T,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
+  // fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
+  // fprintf(fp, "W_NVM/DRAM_T,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
   
   fprintf(fp, "All_R,%lld\n", all_r);
   fprintf(fp, "All_W,%lld\n", all_w);
@@ -5595,6 +5629,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "evict_wait_nvm,%lld\n", evict_wait_nvm);
   fprintf(fp, "reshuffle_wait_dram,%lld\n", reshuffle_wait_dram);
   fprintf(fp, "reshuffle_wait_nvm,%lld\n", reshuffle_wait_nvm);
+  fprintf(fp, "meta_wait_dram,%lld\n", meta_wait_dram);
   fprintf(fp, "online_r,%d\n", online_r);
   fprintf(fp, "evict_r,%d\n", evict_r);
   fprintf(fp, "reshuffle_r,%d\n", reshuffle_r);
@@ -5603,6 +5638,9 @@ void export_csv(char * argv[]){
   fprintf(fp, "w_ended,%d\n", w_ended);
   fprintf(fp, "r_ended,%d\n", r_ended);
   fprintf(fp, "r_ended_o,%d\n", r_ended_o);
+  fprintf(fp, "w_ended_dram,%d\n", w_ended_dram);
+  fprintf(fp, "w_ended_nvm,%d\n", w_ended_nvm);
+  fprintf(fp, "meta_ended,%d\n", meta_ended);
 
   
   fclose(fp);
@@ -6486,6 +6524,34 @@ issue_request_command (request_t * request, char rwt)
   long long int row = request->dram_addr.row;
   command_t cmd = request->next_command;
 
+  if (request->beginning)
+  {
+    if (request->op_type == 'o')
+    {
+      // printf("o\n");
+      online_t0 = CYCLE_VAL;
+      cur_online = request->oramid;
+    }
+    else if (request->op_type == 'e')
+    {
+      // printf("e\n");
+      evict_t0 = CYCLE_VAL;
+      cur_evict = request->oramid;
+    }
+    else if (request->op_type == 'r')
+    {
+      // printf("r\n");
+      reshuffle_t0 = CYCLE_VAL;
+      cur_reshuffle = request->oramid;
+    }
+    else if (request->op_type == 'm')
+    {
+      // printf("r\n");
+      meta_t0 = CYCLE_VAL;
+      cur_meta = request->oramid;
+    }
+  }
+
   if (NVM_ENABLE)
   {
     update_ddr_timing_param(channel);
@@ -6620,7 +6686,7 @@ issue_request_command (request_t * request, char rwt)
         {
           if (cur_nvm_served_e_r == nvm_to_serve_evict_r)
           {
-            evict_wait_nvm += request->completion_time - evict_t0;
+            // evict_wait_nvm += request->completion_time - evict_t0;
             cur_nvm_served_e_r = 0;
           }
           else
@@ -6634,7 +6700,7 @@ issue_request_command (request_t * request, char rwt)
           {
             r_ended++;
             // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
-            evict_wait_dram += request->completion_time - evict_t0;
+            // evict_wait_dram += request->completion_time - evict_t0;
             cur_dram_served_e_r = 0;
           }
           else
@@ -6671,6 +6737,34 @@ issue_request_command (request_t * request, char rwt)
           else
           {
             cur_dram_served_r_r++;
+          }
+        }
+      }
+      else if (request->op_type == 'm' )//&& request->oramid == cur_evict)
+      {
+        if (request->nvm_access)
+        {
+          // if (cur_nvm_served_m_r == nvm_to_serve_meta_r)
+          // {
+          //   meta_wait_nvm += request->completion_time - meta_t0;
+          //   cur_nvm_served_m_r = 0;
+          // }
+          // else
+          // {
+          //   cur_nvm_served_m_r++;
+          // }
+        }
+        else
+        {
+          if (cur_dram_served_m_r == dram_to_serve_meta_r)
+          {
+            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
+            // meta_wait_dram += request->completion_time - meta_t0;
+            cur_dram_served_m_r = 0;
+          }
+          else
+          {
+            cur_dram_served_m_r++;
           }
         }
       }
@@ -6832,6 +6926,7 @@ issue_request_command (request_t * request, char rwt)
         {
           if (cur_nvm_served_r_w == nvm_to_serve_reshuffle_w)
           {
+            w_ended_nvm++;
             reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
             cur_nvm_served_r_w = 0;
           }
@@ -6844,12 +6939,42 @@ issue_request_command (request_t * request, char rwt)
         {
           if (cur_dram_served_r_w == dram_to_serve_reshuffle_w)
           {
+            w_ended_dram++;
             reshuffle_wait_dram += request->completion_time - reshuffle_t0;
             cur_dram_served_r_w = 0;
           }
           else
           {
             cur_dram_served_r_w++;
+          }
+        }
+      }
+      else if (request->op_type == 'm' )//&& request->oramid == cur_evict)
+      {
+        if (request->nvm_access)
+        {
+          // if (cur_nvm_served_m_w == nvm_to_serve_meta_w)
+          // {
+          //   meta_wait_nvm += request->completion_time - meta_t0;
+          //   cur_nvm_served_m_w = 0;
+          // }
+          // else
+          // {
+          //   cur_nvm_served_m_w++;
+          // }
+        }
+        else
+        {
+          if (cur_dram_served_m_w == dram_to_serve_meta_w)
+          {
+            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
+            meta_ended++;
+            meta_wait_dram += request->completion_time - meta_t0;
+            cur_dram_served_m_w = 0;
+          }
+          else
+          {
+            cur_dram_served_m_w++;
           }
         }
       }

@@ -337,12 +337,16 @@ extern unsigned long long int evict_wait_dram;
 extern unsigned long long int evict_wait_nvm;
 extern unsigned long long int reshuffle_wait_dram;
 extern unsigned long long int reshuffle_wait_nvm;
+extern unsigned long long int meta_wait_dram;
+extern unsigned long long int meta_wait_nvm;
 extern unsigned long long int online_t0;
 extern unsigned long long int cur_online;
 extern unsigned long long int evict_t0;
 extern unsigned long long int cur_evict;
 extern unsigned long long int reshuffle_t0;
 extern unsigned long long int cur_reshuffle;
+extern unsigned long long int meta_t0;
+extern unsigned long long int cur_meta;
 
 extern int cur_dram_served;
 extern int cur_nvm_served;
@@ -449,7 +453,7 @@ void test_ring();
 void switch_dead_enable_to(bool tf);
 void update_count_stat(int count, int level);
 void update_ddr_timing_param(int channel);
-void reset_profiling_counters();
+void reset_profile_counters();
 
 
 // Mehrnoosh.
