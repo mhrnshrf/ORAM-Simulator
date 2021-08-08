@@ -5389,7 +5389,7 @@ void reset_profile_counters(){
   dram_remote_w = 0;
   nvm_inplace_w = 0;
   nvm_remote_w = 0;
-  remote_nvms = 0;
+  // remote_nvms = 0;
   dram_elselevel = 0;
   nvm_elselevel = 0;
   surplus_dead = 0;
@@ -5411,11 +5411,15 @@ void export_csv(char * argv[]){
 
   FILE *fp;
   char *filename;
-  if (chdir("log") != 0)  
-  {
-    perror("chdir() to log failed"); 
-  }
+  // if (chdir("log") != 0)  
+  // {
+  //   perror("chdir() to log failed"); 
+  // }
 
+  if (chdir("../oram/log") != 0)  
+  {
+    perror("chdir() to ../oram/log failed"); 
+  }
 
 
   filename = "";
@@ -5451,7 +5455,7 @@ void export_csv(char * argv[]){
   }
 
   fprintf(fp,"Benchmark,%s\n", bench);
-  // fprintf(fp,"exe_time,%f\n", exe_time);
+  fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
   // fprintf(fp, "mem_clk,%lld\n", mem_clk);
@@ -5469,11 +5473,11 @@ void export_csv(char * argv[]){
   // fprintf(fp, "plbaccess0,%lld\n", plbaccess[0]);
   // fprintf(fp, "plbaccess1,%lld\n", plbaccess[1]);
   // fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
-  // fprintf(fp, "oramQ_size,%d\n", oramQ->size);
+  fprintf(fp, "oramQ_size,%d\n", oramQ->size);
   // fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
   // fprintf(fp, "Bk_Evict,%d\n", bkctr);
-  // fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
-  // fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
+  fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
   // fprintf(fp, "rho_hit,%f%%\n", 100*(double)rho_hit/(invokectr));
   // fprintf(fp, "rhoctr,%d\n", rhoctr);
   // fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
@@ -5491,9 +5495,9 @@ void export_csv(char * argv[]){
   // fprintf(fp, "stash_removed,%d\n", stash_removed);
   // fprintf(fp, "fillhit,%d\n", fillhit);
   // fprintf(fp, "fillmiss,%d\n", fillmiss);
-  // fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
-  // fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
-  // fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+  fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+  fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+  fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
   // fprintf(fp, "stashctr,%d\n", stashctr);
   // fprintf(fp, "stash_cont,%d\n", stash_cont);
   // fprintf(fp, "linger_discard,%d\n", linger_discard);
@@ -5532,8 +5536,8 @@ void export_csv(char * argv[]){
   // }
   if (RING_ENABLE)
   {
-    // fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
-    // fprintf(fp, "dead_on_path_dram,%d\n", (int)dead_on_path_dram/ring_evictctr);
+    fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
+    fprintf(fp, "dead_on_path_dram,%d\n", (int)dead_on_path_dram/ring_evictctr);
   }
   
   // for (int i = 0; i < 31; i++)
@@ -5551,22 +5555,22 @@ void export_csv(char * argv[]){
   //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
   //   }
   // }
-  // fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
-  // fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
-  // fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
-  // fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
-  // fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
-  // fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
-  // fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
-  // fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
-  // fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
-  // fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
-  // fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
-  // fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
+  fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
+  fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
+  fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
+  fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
+  fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
+  fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
+  fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
+  fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
+  fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
+  fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
+  fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
+  fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
   // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
   // fprintf(fp, "deadQ-size,%d\n", deadQ->size);
-  // fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
-  // fprintf(fp, "remote_nvms,%d\n", remote_nvms);
+  fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
+  fprintf(fp, "remote_nvms,%d\n", remote_nvms);
 
   // fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
   // fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
@@ -5611,8 +5615,8 @@ void export_csv(char * argv[]){
     // fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
   }
 
-  // fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
-  // fprintf(fp, "W_NVM/DRAM_T,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
+  fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
+  fprintf(fp, "W_NVM/DRAM_T,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
   
   fprintf(fp, "All_R,%lld\n", all_r);
   fprintf(fp, "All_W,%lld\n", all_w);
