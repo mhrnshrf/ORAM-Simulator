@@ -5508,7 +5508,7 @@ void export_csv(char * argv[]){
   // fprintf(fp, "writectr,%d\n", writectr);
   // fprintf(fp, "wskip,%d\n", wskip);
   // fprintf(fp, "mem_req_late,%f\n", (double)mem_req_latencies/(invokectr));
-  // fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
+  fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
   // fprintf(fp, "missl1wb,%lld\n", missl1wb);
   // fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
   // fprintf(fp, "wbshuff,%d\n", wbshuff);
@@ -5582,7 +5582,7 @@ void export_csv(char * argv[]){
   //   fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
   // }
 
-  // fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);
+  fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);
   // fprintf(fp, "dead_dram,%lld\n", dead_dram);
   // print_lifetime_stat(fp);
   
@@ -6528,12 +6528,13 @@ issue_request_command (request_t * request, char rwt)
   {
     if (request->op_type == 'o')
     {
-      // printf("o\n");
+      // printf("online begin %d   @ %lld\n", request->oramid, CYCLE_VAL);
       online_t0 = CYCLE_VAL;
       cur_online = request->oramid;
     }
     else if (request->op_type == 'e')
     {
+      // printf("evict begin %d  @ %lld\n", request->oramid, CYCLE_VAL);
       // printf("e\n");
       evict_t0 = CYCLE_VAL;
       cur_evict = request->oramid;
@@ -6541,11 +6542,13 @@ issue_request_command (request_t * request, char rwt)
     else if (request->op_type == 'r')
     {
       // printf("r\n");
+      // printf("reshuffle begin   %lld\n", CYCLE_VAL);
       reshuffle_t0 = CYCLE_VAL;
       cur_reshuffle = request->oramid;
     }
     else if (request->op_type == 'm')
     {
+      // printf("meta begin    %lld\n", CYCLE_VAL);
       // printf("r\n");
       meta_t0 = CYCLE_VAL;
       cur_meta = request->oramid;

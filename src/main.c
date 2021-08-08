@@ -1172,6 +1172,9 @@ int main(int argc, char * argv[])
 	  if (nonmemops_timing[numc]) {  /* Have some non-memory-ops to consume. */
 	//   if (nonmemops[numc]) {  /* Have some non-memory-ops to consume. */
 	//Mehrnoosh.
+		// printf("%c nonmemops @ %lld \n", op_type[numc], CYCLE_VAL);
+		// printf("@ %lld serve N\n", CYCLE_VAL);
+
 	    ROB[numc].optype[ROB[numc].tail] = 'N';
 	    ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
 	    nonmemops[numc]--;
@@ -1181,7 +1184,11 @@ int main(int argc, char * argv[])
 	    fetched[numc]++;
 	    num_fetch++;
 		// Mehrnoosh:
-		// printf("nonmemops:  %d    cycle %lld\n", nonmemops_timing[numc], CYCLE_VAL);
+		// printf("nonmemops %d cycle %lld last read %d\n", nonmemops_timing[numc], CYCLE_VAL, last_read_served);
+		// if (!last_read_served)
+		// {
+		// }
+		
 
 		trace_clk++;
 
@@ -1194,6 +1201,8 @@ int main(int argc, char * argv[])
 
 			// Mehrnoosh.
 	      if (opertype[numc] == 'R') {
+			// printf("@ %lld serve R\n", CYCLE_VAL);
+
 		  addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 	          ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
 	          ROB[numc].optype[ROB[numc].tail] = opertype[numc];
@@ -1237,6 +1246,8 @@ int main(int argc, char * argv[])
 	      }
 	      else {  /* This must be a 'W'.  We are confirming that while reading the trace. */
 	        if (opertype[numc] == 'W') {
+			// printf("@ %lld serve W\n", CYCLE_VAL);
+
 		      addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 		      ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
 		      ROB[numc].optype[ROB[numc].tail] = opertype[numc];
@@ -1292,6 +1303,8 @@ int main(int argc, char * argv[])
 
 		if (oramQ->size == 0  && (!DUMMY_ENABLE || !ring_dummy) && (last_read_served || !WAIT_ENABLE))  /*&& last_read_served*/
 		{
+			// printf("@ %lld serve Q empty\n", CYCLE_VAL);
+
 			if (invokectr != 0)
 			{
 				mem_req_latencies += CYCLE_VAL - mem_req_start;
@@ -1737,8 +1750,10 @@ int main(int argc, char * argv[])
 		} 
 		if (oramQ->size != 0 && (last_read_served || !WAIT_ENABLE))  /*&& last_read_served*/
 		{
-			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
+			// printf("@ %lld serve Q full\n", CYCLE_VAL);
 
+			// printf("if nonzero oramq: %d   @ trace %d\n", oramQ->size, tracectr);
+			// printf("* %lld\n", CYCLE_VAL);
 			if (((!TIMING_ENABLE || (dummy_oram && EARLY_ENABLE)) && BK_EVICTION && bk_evict_needed() && !bk_already_made) && !RING_ENABLE)
 			{
 				if (oramQ->size < QUEUE_SIZE - 2*oram_effective_pl)
@@ -1825,36 +1840,43 @@ int main(int argc, char * argv[])
             ending[numc] = pN->ending;
             op_type[numc] = pN->op_type;
 
-			// if (pN->beginning)
-			// {
-			// 	if (op_type[numc] == 'o')
-			// 	{
-			// 		// printf("o\n");
-			// 		online_t0 = CYCLE_VAL;
-			// 		cur_online = pN->oramid;
-			// 	}
-			// 	else if (op_type[numc] == 'e')
-			// 	{
-			// 		// printf("e\n");
-			// 		evict_t0 = CYCLE_VAL;
-			// 		cur_evict = pN->oramid;
-			// 	}
-			// 	else if (op_type[numc] == 'r')
-			// 	{
-			// 		// printf("r\n");
-			// 		reshuffle_t0 = CYCLE_VAL;
-			// 		cur_reshuffle = pN->oramid;
-			// 	}
-			// 	else if (op_type[numc] == 'm')
-			// 	{
-			// 		// printf("r\n");
-			// 		meta_t0 = CYCLE_VAL;
-			// 		cur_meta = pN->oramid;
-			// 	}
-			// }
+			if (!last_read_served)
+			{
+				printf("last read not served yet!!!\n");
+			}
+			
+
+			if (pN->beginning)
+			{
+				if (op_type[numc] == 'o')
+				{
+					// printf("o begin %d  @ %lld\n", pN->oramid, CYCLE_VAL);
+					// online_t0 = CYCLE_VAL;
+					// cur_online = pN->oramid;
+				}
+				else if (op_type[numc] == 'e')
+				{
+					// printf("e begin %d  @ %lld\n", pN->oramid, CYCLE_VAL);
+					// evict_t0 = CYCLE_VAL;
+					// cur_evict = pN->oramid;
+				}
+				else if (op_type[numc] == 'r')
+				{
+					// printf("r begin %d  @ %lld\n", pN->oramid, CYCLE_VAL);
+					// reshuffle_t0 = CYCLE_VAL;
+					// cur_reshuffle = pN->oramid;
+				}
+				else if (op_type[numc] == 'm')
+				{
+					// printf("m begin %d  @ %lld\n", pN->oramid, CYCLE_VAL);
+					// meta_t0 = CYCLE_VAL;
+					// cur_meta = pN->oramid;
+				}
+			}
 			
 			if (pN->last_read)
 			{
+				// printf("%c last %d  @ %lld\n", pN->op_type, pN->oramid, CYCLE_VAL);
 				last_read_served = false;
 				// if (pN->op_type == 'e')
 				// {
