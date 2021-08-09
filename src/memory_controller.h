@@ -209,6 +209,7 @@ typedef struct Element_t{
   bool beginning;
   bool ending;
   char op_type;
+  int reqid;
 }Element;
 
 
@@ -533,6 +534,7 @@ typedef struct req
   bool ending;
   char op_type;
   bool last_req;
+  int reqid;
 
   // Mehrnoosh.
 } request_t;
@@ -704,10 +706,10 @@ int read_matches_write_or_read_queue(long long int physical_address);
 int write_exists_in_write_queue(long long int physical_address);
 
 // enqueue a read into the corresponding read queue (returns ptr to new node)
-request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req);
+request_t* insert_read(long long int physical_address, long long int arrival_cycle, int thread_id, int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, int reqid);
 
 // enqueue a write into the corresponding write queue (returns ptr to new_node)
-request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, bool last_read);
+request_t* insert_write(long long int physical_address, long long int arrival_time, int thread_id, int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, bool last_read, int reqid);
 
 // update stats counters
 void gather_stats(int channel);

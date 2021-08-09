@@ -18,6 +18,7 @@ struct robstructure
   bool * nvm_access;
   char * op_type;
   int * oramid;
+  int * reqid;
 } ;
 
 #endif //__PROCESSOR_H__

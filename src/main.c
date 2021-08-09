@@ -508,6 +508,7 @@ int main(int argc, char * argv[])
   bool last_read[NCORES];
   bool last_req[NCORES];
   bool nvm_access[NCORES];
+  int reqid[NCORES];
 //   nonmemops_timing = (int *)malloc(sizeof(int)*NUMCORES);
   int nonmemops_timing[NCORES];
 //   shad_nonmemops = (int *)malloc(sizeof(int)*NUMCORES);
@@ -659,6 +660,7 @@ int main(int argc, char * argv[])
 	  ROB[i].nvm_access = (bool*)malloc(sizeof(bool)*ROBSIZE);
 	  ROB[i].op_type = (char*)malloc(sizeof(char)*ROBSIZE);
 	  ROB[i].oramid = (int*)malloc(sizeof(int)*ROBSIZE);
+	  ROB[i].reqid = (int*)malloc(sizeof(int)*ROBSIZE);
   }
   init_memory_controller_vars();
   init_scheduler_vars();
@@ -984,11 +986,11 @@ int main(int argc, char * argv[])
 			}
 			//  if (ROB[numc].waited_on[ROB[numc].head])
 			// {
-				printf("%c %d served %c @ %lld	comp time %lld	%s	%d\n", 
+				printf("%c %d served %c @ %lld	comp time %lld	%s	rob%d	req%d\n", 
 				ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
 				CYCLE_VAL, 
 				ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
-				ROB[numc].head);
+				ROB[numc].head, ROB[numc].reqid[ROB[numc].head]);
 				if (ROB[numc].op_type[ROB[numc].head] == 'o')
 				{
 				// online_t0 = CYCLE_VAL;
@@ -1221,11 +1223,11 @@ int main(int argc, char * argv[])
 	    num_fetch++;
 		// Mehrnoosh:
 	    ROB[numc].op_type[ROB[numc].tail] = 'n';
-	    ROB[numc].nvm_access[ROB[numc].tail] = false;
-	    ROB[numc].waited_on[ROB[numc].tail] = false;
-	    ROB[numc].oramid[ROB[numc].tail] = -1;
-	    ROB[numc].beginning[ROB[numc].tail] = false;
-	    ROB[numc].ending[ROB[numc].tail] = false;
+	    // ROB[numc].nvm_access[ROB[numc].tail] = false;
+	    // ROB[numc].waited_on[ROB[numc].tail] = false;
+	    // ROB[numc].oramid[ROB[numc].tail] = -1;
+	    // ROB[numc].beginning[ROB[numc].tail] = false;
+	    // ROB[numc].ending[ROB[numc].tail] = false;
 		// printf("nonmemops %d cycle %lld last read %d\n", nonmemops_timing[numc], CYCLE_VAL, last_read_served);
 		// if (!last_read_served)
 		// {
@@ -1269,7 +1271,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 				// if (last_read[numc])
 				// {
-					printf("%c %d insert @ %lld	comp time %lld %s	%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail);
+					printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
 					if (op_type[numc] == 'o')
 					{
 						// printf("o %d insert @ %lld	comp time %lld %s	%d\n", oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail);
@@ -1312,7 +1314,7 @@ int main(int argc, char * argv[])
 				// 	printf("%c %d insert @ %lld \n", op_type[numc], oramid[numc], CYCLE_VAL);
 				// }
 				
-				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc]);
+				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], reqid[numc]);
 			// }
 			
 			
@@ -1342,6 +1344,7 @@ int main(int argc, char * argv[])
 	          ROB[numc].nvm_access[ROB[numc].tail] = nvm_access[numc];
 	          ROB[numc].oramid[ROB[numc].tail] = oramid[numc];
 	          ROB[numc].waited_on[ROB[numc].tail] = last_read[numc];
+	          ROB[numc].reqid[ROB[numc].tail] = reqid[numc];
 
 		      /* Also, add this to the write queue. */
 
@@ -1353,13 +1356,13 @@ int main(int argc, char * argv[])
 
 				// if (SIM_ENABLE)
 				// {
-					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], last_read[numc]);
+					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], last_read[numc], reqid[numc]);
 				// }
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
 				// end = clock();
-				// exe_time += ((double) (end - start)) / CLOCKS_PER_SEC;
+				// exe_time += ((double) (end - start)) / CLOCKS_PER_SEC;,
 			}
 			// Mehrnoosh.
 
@@ -1931,6 +1934,7 @@ int main(int argc, char * argv[])
 			beginning[numc] = pN->beginning;
             ending[numc] = pN->ending;
             op_type[numc] = pN->op_type;
+            reqid[numc] = pN->reqid;
 
 			if (!last_read_served)
 			{
@@ -1940,38 +1944,39 @@ int main(int argc, char * argv[])
 
 			if (pN->beginning)
 			{
+				printf("%c %d begin @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 				if (op_type[numc] == 'o')
 				{
-					printf("o %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
+					// printf("o %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// online_t0 = CYCLE_VAL;
 					// cur_online = pN->oramid;
 				}
 				else if (op_type[numc] == 'e')
 				{
-					printf("e %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
+					// printf("e %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// evict_t0 = CYCLE_VAL;
 					// cur_evict = pN->oramid;
 				}
 				else if (op_type[numc] == 'r')
 				{
-					printf("r %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
+					// printf("r %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// reshuffle_t0 = CYCLE_VAL;
 					// cur_reshuffle = pN->oramid;
 				}
 				else if (op_type[numc] == 'm')
 				{
-					printf("m %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
+					// printf("m %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// meta_t0 = CYCLE_VAL;
 					// cur_meta = pN->oramid;
 				}
 			}
 			else if (!(pN->last_read))
 			{
-				printf("%c %d       @ %lld\n", pN->op_type, pN->oramid, CYCLE_VAL);
+				printf("%c %d       @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 
 			}
 			else if(pN->last_read){
-				printf("%c %d last @ %lld\n", pN->op_type, pN->oramid, CYCLE_VAL);
+				printf("%c %d last @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 
 			}
 			

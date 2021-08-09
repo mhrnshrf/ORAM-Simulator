@@ -135,6 +135,7 @@ int r_ended_o = 0;
 int w_ended_dram = 0;
 int w_ended_nvm = 0;
 
+int reqcount = 0;
 
 void test_ring(){
   unsigned long long int addr = 0;
@@ -918,6 +919,7 @@ void test_queue(){
 
 void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending) {
   addr = addr << (int)log2(BLOCK_SIZE);
+  reqcount++;
   Element *pN = (Element*) malloc(sizeof (Element));
   pN->addr = addr;
   pN->cycle = cycle; 
@@ -935,6 +937,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->op_type = op_type;
   pN->beginning = beginning;
   pN->ending = ending;
+  pN->reqid = reqcount;
   
   bool added = false;
   if (ENQUEUE_VAR == TAIL)
@@ -6079,7 +6082,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   void *
 init_new_node (long long int physical_address, long long int arrival_time,
     optype_t type, int thread_id, int instruction_id,
-    long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req) 
+    long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, int reqid) 
 {
   request_t * new_node = NULL;
   new_node = (request_t *) malloc (sizeof (request_t));
@@ -6102,6 +6105,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->beginning = beginning;
     new_node->ending = ending;
     new_node->op_type = op_type;
+    new_node->reqid = reqid;
     // if (nvm_access)
     // {
     //   printf("nvm   ");
@@ -6211,7 +6215,7 @@ write_exists_in_write_queue (long long int physical_address)
 // Insert a new read to the read queue
 request_t * insert_read (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req) 
+    int instruction_id, long long int instruction_pc, int oramid, TreeType tree, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, int reqid) 
 {
   optype_t this_op = READ;
 
@@ -6222,7 +6226,7 @@ request_t * insert_read (long long int physical_address,
   stats_reads_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, instruction_pc, oramid, tree, last_read, nvm_access, op_type, beginning, ending, last_req);
+        instruction_id, instruction_pc, oramid, tree, last_read, nvm_access, op_type, beginning, ending, last_req, reqid);
   LL_APPEND (read_queue_head[channel], new_node);
   read_queue_length[channel]++;
 
@@ -6234,7 +6238,7 @@ request_t * insert_read (long long int physical_address,
 // Insert a new write to the write queue
 request_t * insert_write (long long int physical_address,
     long long int arrival_time, int thread_id,
-    int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, bool last_read) 
+    int instruction_id, int oramid, TreeType tree, bool nvm_access, char op_type, bool beginning, bool ending, bool last_req, bool last_read, int reqid) 
 {
   optype_t this_op = WRITE;
   dram_address_t * this_addr = calc_dram_addr (physical_address);
@@ -6243,7 +6247,7 @@ request_t * insert_write (long long int physical_address,
   stats_writes_seen[channel]++;
   request_t * new_node =
     init_new_node (physical_address, arrival_time, this_op, thread_id,
-        instruction_id, 0, oramid, tree, last_read, nvm_access, op_type, beginning, ending, last_req);
+        instruction_id, 0, oramid, tree, last_read, nvm_access, op_type, beginning, ending, last_req, reqid);
   LL_APPEND (write_queue_head[channel], new_node);
   write_queue_length[channel]++;
 
@@ -6652,7 +6656,7 @@ issue_request_command (request_t * request, char rwt)
       }
       // if (request->last_read)
       // {
-        printf("%c %d issue @ %lld  comp time %lld   %s\n", request->op_type, request->oramid, CYCLE_VAL, request->completion_time, request->last_read?" last ":" ");
+        printf("%c %d issue @ %lld  comp time %lld   %s rob%d req%d\n", request->op_type, request->oramid, CYCLE_VAL, request->completion_time, request->last_read?" last ":" ", request->instruction_id, request->reqid);
       // }
       // else{
       //   printf("dram  @ %lld\n", CYCLE_VAL);
