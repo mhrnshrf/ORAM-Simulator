@@ -5411,15 +5411,15 @@ void export_csv(char * argv[]){
 
   FILE *fp;
   char *filename;
-  // if (chdir("log") != 0)  
-  // {
-  //   perror("chdir() to log failed"); 
-  // }
-
-  if (chdir("../oram/log") != 0)  
+  if (chdir("log") != 0)  
   {
-    perror("chdir() to ../oram/log failed"); 
+    perror("chdir() to log failed"); 
   }
+
+  // if (chdir("../oram/log") != 0)  
+  // {
+  //   perror("chdir() to ../oram/log failed"); 
+  // }
 
 
   filename = "";
@@ -6512,6 +6512,7 @@ clean_queues (int channel)
   int
 issue_request_command (request_t * request, char rwt) 
 {
+  
   long long int cycle = CYCLE_VAL;
   if (request->command_issuable != 1
       || command_issued_current_cycle[request->dram_addr.channel])
@@ -6528,36 +6529,36 @@ issue_request_command (request_t * request, char rwt)
   long long int row = request->dram_addr.row;
   command_t cmd = request->next_command;
 
-  if (request->beginning)
-  {
-    if (request->op_type == 'o')
-    {
-      // printf("online begin %d   @ %lld\n", request->oramid, CYCLE_VAL);
-      online_t0 = CYCLE_VAL;
-      cur_online = request->oramid;
-    }
-    else if (request->op_type == 'e')
-    {
-      // printf("evict begin %d  @ %lld\n", request->oramid, CYCLE_VAL);
-      // printf("e\n");
-      evict_t0 = CYCLE_VAL;
-      cur_evict = request->oramid;
-    }
-    else if (request->op_type == 'r')
-    {
-      // printf("r\n");
-      // printf("reshuffle begin   %lld\n", CYCLE_VAL);
-      reshuffle_t0 = CYCLE_VAL;
-      cur_reshuffle = request->oramid;
-    }
-    else if (request->op_type == 'm')
-    {
-      // printf("meta begin    %lld\n", CYCLE_VAL);
-      // printf("r\n");
-      meta_t0 = CYCLE_VAL;
-      cur_meta = request->oramid;
-    }
-  }
+  // if (request->beginning)
+  // {
+  //   if (request->op_type == 'o')
+  //   {
+  //     // printf("o %d begin   @ %lld\n", request->oramid, CYCLE_VAL);
+  //     online_t0 = CYCLE_VAL;
+  //     cur_online = request->oramid;
+  //   }
+  //   else if (request->op_type == 'e')
+  //   {
+  //     // printf("e %d begin  @ %lld\n", request->oramid, CYCLE_VAL);
+  //     // printf("e\n");
+  //     evict_t0 = CYCLE_VAL;
+  //     cur_evict = request->oramid;
+  //   }
+  //   else if (request->op_type == 'r')
+  //   {
+  //     // printf("r\n");
+  //     // printf("r %d begin  @ %lld\n", request->oramid, CYCLE_VAL);
+  //     reshuffle_t0 = CYCLE_VAL;
+  //     cur_reshuffle = request->oramid;
+  //   }
+  //   else if (request->op_type == 'm')
+  //   {
+  //     // printf("m %d begin @ %lld\n", request->oramid, CYCLE_VAL);
+  //     // printf("r\n");
+  //     meta_t0 = CYCLE_VAL;
+  //     cur_meta = request->oramid;
+  //   }
+  // }
 
   if (NVM_ENABLE)
   {
@@ -6638,6 +6639,7 @@ issue_request_command (request_t * request, char rwt)
         }
       }
 
+      
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
@@ -6648,6 +6650,10 @@ issue_request_command (request_t * request, char rwt)
         // printf("nvm  @ %lld\n", CYCLE_VAL);
         // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
       }
+      // if (request->last_read)
+      // {
+        printf("%c %d issue @ %lld  comp time %lld   %s\n", request->op_type, request->oramid, CYCLE_VAL, request->completion_time, request->last_read?" last ":" ");
+      // }
       // else{
       //   printf("dram  @ %lld\n", CYCLE_VAL);
       // }
@@ -6663,6 +6669,7 @@ issue_request_command (request_t * request, char rwt)
 
             online_wait_nvm += request->completion_time - online_t0;
             cur_nvm_served_o = 0;
+            // printf("o %d nvm ends %lld  @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, online_t0);
           }
           else
           {
@@ -6673,10 +6680,10 @@ issue_request_command (request_t * request, char rwt)
         {
           if (cur_dram_served_o == dram_to_serve_online)
           {
-            // printf("online %d finish     curaccess %lld \n", request->oramid, cur_online);
             r_ended_o++;
             online_wait_dram += request->completion_time - online_t0;
             cur_dram_served_o = 0;
+            // printf("o %d dram ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, online_t0);
           }
           else
           {
@@ -6782,15 +6789,23 @@ issue_request_command (request_t * request, char rwt)
       request->dispatch_time = CYCLE_VAL;
       request->request_served = 1;
       // Mehrnoosh:
-      if (request->last_read)
-			{
-				// last_read_served = true;
-        ROB[request->thread_id].waited_on[request->instruction_id] = true;
-			}
-      else
-      {
-        ROB[request->thread_id].waited_on[request->instruction_id] = false;
-      }
+
+      // if (request->last_read)
+			// {
+      //   ROB[request->thread_id].waited_on[request->instruction_id] = true;
+			// }
+      // else
+      // {
+      //   ROB[request->thread_id].waited_on[request->instruction_id] = false;
+      // }
+
+      // ROB[request->thread_id].ending[request->instruction_id] = request->ending;
+      // ROB[request->thread_id].beginning[request->instruction_id] = request->beginning;
+      // ROB[request->thread_id].nvm_access[request->instruction_id] = request->nvm_access;
+      // ROB[request->thread_id].op_type[request->instruction_id] = request->op_type;
+      // ROB[request->thread_id].oramid[request->instruction_id] = request->oramid;
+
+
       // if (request->last_req)
 			// {
 			// 	// last_read_served = true;
@@ -6800,12 +6815,6 @@ issue_request_command (request_t * request, char rwt)
       // {
       //   ROB[request->thread_id].waited_on[request->instruction_id] = false;
       // }
-
-      ROB[request->thread_id].ending[request->instruction_id] = request->ending;
-      ROB[request->thread_id].nvm_access[request->instruction_id] = request->nvm_access;
-      ROB[request->thread_id].op_type[request->instruction_id] = request->op_type;
-      ROB[request->thread_id].oramid[request->instruction_id] = request->oramid;
-
       // Mehrnoosh.
 
       // update the ROB with the completion time
@@ -6901,6 +6910,8 @@ issue_request_command (request_t * request, char rwt)
           {
             evict_wait_nvm += request->completion_time - evict_t0;
             cur_nvm_served_e_w = 0;
+            // printf("e %d nvm ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, evict_t0);
+
           }
           else
           {
@@ -6915,6 +6926,8 @@ issue_request_command (request_t * request, char rwt)
             // printf("curead %d     oramid %d     curaccess %lld \n", cur_dram_served_e_r, request->oramid, cur_evict);
             evict_wait_dram += request->completion_time - evict_t0;
             cur_dram_served_e_w = 0;
+            // printf("e %d dram ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, evict_t0);
+
           }
           else
           {
@@ -6936,6 +6949,8 @@ issue_request_command (request_t * request, char rwt)
             w_ended_nvm++;
             reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
             cur_nvm_served_r_w = 0;
+            // printf("r %d nvm ends %lld  @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, reshuffle_t0);
+
           }
           else
           {
@@ -6949,6 +6964,7 @@ issue_request_command (request_t * request, char rwt)
             w_ended_dram++;
             reshuffle_wait_dram += request->completion_time - reshuffle_t0;
             cur_dram_served_r_w = 0;
+            // printf("r %d dram ends %lld @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, reshuffle_t0);
           }
           else
           {
@@ -6978,6 +6994,7 @@ issue_request_command (request_t * request, char rwt)
             meta_ended++;
             meta_wait_dram += request->completion_time - meta_t0;
             cur_dram_served_m_w = 0;
+            // printf("m %d dram ends %lld @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, meta_t0);
           }
           else
           {
@@ -7005,6 +7022,9 @@ issue_request_command (request_t * request, char rwt)
 
       //UT_MEM_DEBUG("Req:%lld finishes at Cycle: %lld\n", request->id, request->completion_time);
 
+      // Mehrnoosh: rob comp time added for write as well
+      // ROB[request->thread_id].comptime[request->instruction_id] = request->completion_time + PIPELINEDEPTH;
+      // Mehrnoosh.
       //printf("Cycle: %10lld, Writes Completed = %5lld, this_latency= %5lld, latency = %f\n", CYCLE_VAL, stats_writes_completed[channel], request->latency, stats_average_write_latency[channel]);   
       for (int i = 0; i < NUM_RANKS; i++)
 

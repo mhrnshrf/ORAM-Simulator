@@ -14,6 +14,7 @@ struct robstructure
   int tracedone;
   bool * waited_on;
   bool * ending;
+  bool * beginning;
   bool * nvm_access;
   char * op_type;
   int * oramid;

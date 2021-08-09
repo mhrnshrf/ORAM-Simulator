@@ -655,6 +655,7 @@ int main(int argc, char * argv[])
 	  ROB[i].optype = (int*)malloc(sizeof(int)*ROBSIZE);
 	  ROB[i].waited_on = (bool*)malloc(sizeof(bool)*ROBSIZE);
 	  ROB[i].ending = (bool*)malloc(sizeof(bool)*ROBSIZE);
+	  ROB[i].beginning = (bool*)malloc(sizeof(bool)*ROBSIZE);
 	  ROB[i].nvm_access = (bool*)malloc(sizeof(bool)*ROBSIZE);
 	  ROB[i].op_type = (char*)malloc(sizeof(char)*ROBSIZE);
 	  ROB[i].oramid = (int*)malloc(sizeof(int)*ROBSIZE);
@@ -977,10 +978,45 @@ int main(int argc, char * argv[])
         if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {  
 			if (ROB[numc].waited_on[ROB[numc].head])
 			{
-				// printf("retired  NVM @ %lld \n", CYCLE_VAL);
+				// printf("retired %c %d @ %lld comp time %lld\n",   ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], CYCLE_VAL, ROB[numc].comptime[ROB[numc].head]);
 				last_read_served = true;
 				last_req_served = true;
 			}
+			//  if (ROB[numc].waited_on[ROB[numc].head])
+			// {
+				printf("%c %d served %c @ %lld	comp time %lld	%s	%d\n", 
+				ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
+				CYCLE_VAL, 
+				ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
+				ROB[numc].head);
+				if (ROB[numc].op_type[ROB[numc].head] == 'o')
+				{
+				// online_t0 = CYCLE_VAL;
+				// cur_online = request->oramid;
+				}
+				else if (ROB[numc].op_type[ROB[numc].head]== 'e')
+				{
+					// printf("e %d served @ %lld\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL);
+				// printf("e\n");
+				// evict_t0 = CYCLE_VAL;
+				// cur_evict = request->oramid;
+				}
+				else if (ROB[numc].op_type[ROB[numc].head] == 'r')
+				{
+				// printf("r\n");
+					// printf("r %d served @ %lld\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL);
+				// reshuffle_t0 = CYCLE_VAL;
+				// cur_reshuffle = request->oramid;
+				}
+				else if (ROB[numc].op_type[ROB[numc].head] == 'm')
+				{
+					// printf("m %d served @ %lld	comp time %lld	%s	%d\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL, ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", ROB[numc].head);
+				// printf("r\n");
+				// meta_t0 = CYCLE_VAL;
+				// cur_meta = request->oramid;
+				}
+			// }
+
 			// if (ROB[numc].ending[ROB[numc].head])
 			// {
 			// 	if (ROB[numc].op_type[ROB[numc].head] == 'o')
@@ -1184,6 +1220,12 @@ int main(int argc, char * argv[])
 	    fetched[numc]++;
 	    num_fetch++;
 		// Mehrnoosh:
+	    ROB[numc].op_type[ROB[numc].tail] = 'n';
+	    ROB[numc].nvm_access[ROB[numc].tail] = false;
+	    ROB[numc].waited_on[ROB[numc].tail] = false;
+	    ROB[numc].oramid[ROB[numc].tail] = -1;
+	    ROB[numc].beginning[ROB[numc].tail] = false;
+	    ROB[numc].ending[ROB[numc].tail] = false;
 		// printf("nonmemops %d cycle %lld last read %d\n", nonmemops_timing[numc], CYCLE_VAL, last_read_served);
 		// if (!last_read_served)
 		// {
@@ -1208,6 +1250,13 @@ int main(int argc, char * argv[])
 	          ROB[numc].optype[ROB[numc].tail] = opertype[numc];
 	          ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL + BIGNUM;
 	          ROB[numc].instrpc[ROB[numc].tail] = instrpc[numc];
+
+	          ROB[numc].beginning[ROB[numc].tail] = beginning[numc];
+	          ROB[numc].ending[ROB[numc].tail] = ending[numc];
+	          ROB[numc].op_type[ROB[numc].tail] = op_type[numc];
+	          ROB[numc].nvm_access[ROB[numc].tail] = nvm_access[numc];
+	          ROB[numc].oramid[ROB[numc].tail] = oramid[numc];
+	          ROB[numc].waited_on[ROB[numc].tail] = last_read[numc];
 		
 		  // Check to see if the read is for buffered data in write queue - 
 		  // return constant latency if match in WQ
@@ -1218,6 +1267,34 @@ int main(int argc, char * argv[])
 		  }
 		  else {
 			// Mehrnoosh:
+				// if (last_read[numc])
+				// {
+					printf("%c %d insert @ %lld	comp time %lld %s	%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail);
+					if (op_type[numc] == 'o')
+					{
+						// printf("o %d insert @ %lld	comp time %lld %s	%d\n", oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail);
+						online_t0 = CYCLE_VAL;
+						cur_online = oramid[numc];
+					}
+					else if (op_type[numc] == 'e')
+					{
+						// printf("e %d insert @ %lld\n", oramid[numc], CYCLE_VAL);
+						evict_t0 = CYCLE_VAL;
+						cur_evict = oramid[numc];
+					}
+					else if (op_type[numc] == 'r')
+					{
+						// printf("r %d insert @ %lld\n", oramid[numc], CYCLE_VAL);
+						reshuffle_t0 = CYCLE_VAL;
+						cur_reshuffle = oramid[numc];
+					}
+					else if (op_type[numc] == 'm')
+					{
+						// printf("m %d insert @ %lld	comp time %lld %s	%d\n", oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail] , last_read[numc]?" last ":" ", ROB[numc].tail);
+						meta_t0 = CYCLE_VAL;
+						cur_meta = oramid[numc];
+					}
+				// }
 
 			// start = clock();
 			if (NONSEC_ENABLE)
@@ -1230,6 +1307,11 @@ int main(int argc, char * argv[])
 			
 			// if (SIM_ENABLE)
 			// {
+				// if (beginning[numc])
+				// {
+				// 	printf("%c %d insert @ %lld \n", op_type[numc], oramid[numc], CYCLE_VAL);
+				// }
+				
 				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc]);
 			// }
 			
@@ -1252,12 +1334,22 @@ int main(int argc, char * argv[])
 		      ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
 		      ROB[numc].optype[ROB[numc].tail] = opertype[numc];
 		      ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
+		    //   ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL + BIGNUM;
+
+			  ROB[numc].beginning[ROB[numc].tail] = beginning[numc];
+	          ROB[numc].ending[ROB[numc].tail] = ending[numc];
+	          ROB[numc].op_type[ROB[numc].tail] = op_type[numc];
+	          ROB[numc].nvm_access[ROB[numc].tail] = nvm_access[numc];
+	          ROB[numc].oramid[ROB[numc].tail] = oramid[numc];
+	          ROB[numc].waited_on[ROB[numc].tail] = last_read[numc];
+
 		      /* Also, add this to the write queue. */
 
 		      if(!write_exists_in_write_queue(addr[numc]))
 			// Mehrnoosh:
 			{
 				// start = clock();
+				printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
 
 				// if (SIM_ENABLE)
 				// {
@@ -1850,33 +1942,41 @@ int main(int argc, char * argv[])
 			{
 				if (op_type[numc] == 'o')
 				{
-					// printf("o begin %d  @ %lld\n", pN->oramid, CYCLE_VAL);
+					printf("o %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// online_t0 = CYCLE_VAL;
 					// cur_online = pN->oramid;
 				}
 				else if (op_type[numc] == 'e')
 				{
-					// printf("e begin %d  @ %lld\n", pN->oramid, CYCLE_VAL);
+					printf("e %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// evict_t0 = CYCLE_VAL;
 					// cur_evict = pN->oramid;
 				}
 				else if (op_type[numc] == 'r')
 				{
-					// printf("r begin %d  @ %lld\n", pN->oramid, CYCLE_VAL);
+					printf("r %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// reshuffle_t0 = CYCLE_VAL;
 					// cur_reshuffle = pN->oramid;
 				}
 				else if (op_type[numc] == 'm')
 				{
-					// printf("m begin %d  @ %lld\n", pN->oramid, CYCLE_VAL);
+					printf("m %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// meta_t0 = CYCLE_VAL;
 					// cur_meta = pN->oramid;
 				}
 			}
+			else if (!(pN->last_read))
+			{
+				printf("%c %d       @ %lld\n", pN->op_type, pN->oramid, CYCLE_VAL);
+
+			}
+			else if(pN->last_read){
+				printf("%c %d last @ %lld\n", pN->op_type, pN->oramid, CYCLE_VAL);
+
+			}
 			
 			if (pN->last_read)
 			{
-				// printf("%c last %d  @ %lld\n", pN->op_type, pN->oramid, CYCLE_VAL);
 				last_read_served = false;
 				// if (pN->op_type == 'e')
 				// {
