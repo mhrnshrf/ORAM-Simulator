@@ -6476,8 +6476,13 @@ clean_queues (int channel)
   LL_FOREACH_SAFE (read_queue_head[channel], rd_ptr, rd_tmp) 
   {
     if (rd_ptr->request_served == 1)
-
     {
+      if (rd_ptr->last_read)
+      {
+				last_read_served = true;
+      }
+      
+      printf("%c %d delete @ %lld  comp time %lld   %s rob%d req%d\n", rd_ptr->op_type, rd_ptr->oramid, CYCLE_VAL, rd_ptr->completion_time, rd_ptr->last_read?" last ":" ", rd_ptr->instruction_id, rd_ptr->reqid);
       assert (rd_ptr->next_command == COL_READ_CMD);
       assert (rd_ptr->completion_time != -100);
       LL_DELETE (read_queue_head[channel], rd_ptr);

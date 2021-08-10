@@ -15,6 +15,8 @@
 long long int BIGNUM = 1000000;
 
 
+bool last_lock_released;
+
 int expt_done=0;  
 
 long long int CYCLE_VAL=0;
@@ -343,6 +345,7 @@ int main(int argc, char * argv[])
 
 	last_read_served = true;
 	last_req_served = true;
+	last_lock_released = true;
   
   printf("---------------------------------------------\n");
   printf("-- USIMM: the Utah SImulated Memory Module --\n");
@@ -972,6 +975,8 @@ int main(int argc, char * argv[])
 	// Mehrnoosh.
 
     /* For each core, retire instructions if they have finished. */
+	if (last_read_served || !WAIT_ENABLE)
+	{
     for (numc = 0; numc < NUMCORES; numc++) {
       num_ret = 0;
       while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
@@ -981,8 +986,8 @@ int main(int argc, char * argv[])
 			if (ROB[numc].waited_on[ROB[numc].head])
 			{
 				// printf("retired %c %d @ %lld comp time %lld\n",   ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], CYCLE_VAL, ROB[numc].comptime[ROB[numc].head]);
-				last_read_served = true;
-				last_req_served = true;
+				// last_read_served = true;
+				// last_req_served = true;
 			}
 			//  if (ROB[numc].waited_on[ROB[numc].head])
 			// {
@@ -1060,6 +1065,7 @@ int main(int argc, char * argv[])
       }  /* End of while loop that is retiring instruction for one core. */
     }  /* End of for loop that is retiring instructions for all cores. */
 
+	}
 
     if(CYCLE_VAL%PROCESSOR_CLK_MULTIPLIER == 0)
     { 
@@ -1092,6 +1098,11 @@ int main(int argc, char * argv[])
 	    }
     }
 
+	if (last_read_served || !WAIT_ENABLE)
+	{
+		/* code */
+	
+	
     for (numc = 0; numc < NUMCORES; numc++) {
 		// printf("in for\n");
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
@@ -1213,6 +1224,7 @@ int main(int argc, char * argv[])
 		// printf("%c nonmemops @ %lld \n", op_type[numc], CYCLE_VAL);
 		// printf("@ %lld serve N\n", CYCLE_VAL);
 
+
 	    ROB[numc].optype[ROB[numc].tail] = 'N';
 	    ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
 	    nonmemops[numc]--;
@@ -1232,6 +1244,7 @@ int main(int argc, char * argv[])
 		// if (!last_read_served)
 		// {
 		// }
+		printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", ROB[numc].op_type[ROB[numc].tail], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
 		
 
 		trace_clk++;
@@ -1244,7 +1257,7 @@ int main(int argc, char * argv[])
 			// printf("cycle %lld   main: mem 	 trace: %d		req: %d\n", CYCLE_VAL, tracectr, reqctr);
 
 			// Mehrnoosh.
-	      if (opertype[numc] == 'R') {
+	      if (opertype[numc] == 'R' && last_lock_released) {
 			// printf("@ %lld serve R\n", CYCLE_VAL);
 
 		  addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
@@ -1259,6 +1272,8 @@ int main(int argc, char * argv[])
 	          ROB[numc].nvm_access[ROB[numc].tail] = nvm_access[numc];
 	          ROB[numc].oramid[ROB[numc].tail] = oramid[numc];
 	          ROB[numc].waited_on[ROB[numc].tail] = last_read[numc];
+	          ROB[numc].reqid[ROB[numc].tail] = reqid[numc];
+
 		
 		  // Check to see if the read is for buffered data in write queue - 
 		  // return constant latency if match in WQ
@@ -1305,6 +1320,7 @@ int main(int argc, char * argv[])
 				last_req[numc] = true;
 				last_read_served = false;
 				last_req_served = false;
+				last_lock_released = true;
 			}
 			
 			// if (SIM_ENABLE)
@@ -1313,6 +1329,12 @@ int main(int argc, char * argv[])
 				// {
 				// 	printf("%c %d insert @ %lld \n", op_type[numc], oramid[numc], CYCLE_VAL);
 				// }
+
+				if (last_read[numc])
+				{
+					last_read_served = false;
+					last_lock_released = false;
+				}
 				
 				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], reqid[numc]);
 			// }
@@ -1328,7 +1350,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh.
 		 	 }
 	      }
-	      else {  /* This must be a 'W'.  We are confirming that while reading the trace. */
+	      else if (last_lock_released){  /* This must be a 'W'.  We are confirming that while reading the trace. */
 	        if (opertype[numc] == 'W') {
 			// printf("@ %lld serve W\n", CYCLE_VAL);
 
@@ -1353,6 +1375,11 @@ int main(int argc, char * argv[])
 			{
 				// start = clock();
 				printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
+				
+				// if (last_read[numc])
+				// {
+				// 	last_read_served = false;
+				// }
 
 				// if (SIM_ENABLE)
 				// {
@@ -1906,6 +1933,7 @@ int main(int argc, char * argv[])
 			
 
 			still_same_access = true;
+			last_lock_released = true;
 			
 			int nonmemsaved = nonmemops[numc];
 			Element *pN = Dequeue(oramQ);
@@ -1982,7 +2010,8 @@ int main(int argc, char * argv[])
 			
 			if (pN->last_read)
 			{
-				last_read_served = false;
+				// last_read_served = false;
+
 				// if (pN->op_type == 'e')
 				// {
 				// 	printf("@ %d oramid %d stall\n", tracectr, pN->oramid);
@@ -2065,6 +2094,7 @@ int main(int argc, char * argv[])
       }
     } /* End of for loop that goes through all cores. */
 
+	}
 
     if (num_done == NUMCORES) {
       /* Traces have been consumed and in-flight windows are empty.  Must confirm that write queues have been drained. */
