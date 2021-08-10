@@ -318,6 +318,7 @@ static const int GL_CAP[GL_COUNT] = {56, 40, 8};  // array of different Z for di
 enum {META_MAX_SIZE = (int)pow(2, GLMAX)};
 
 extern bool last_read_served;
+extern bool last_read_deleted;
 extern bool last_req_served;
 extern long long int nonmemops_sum;
 extern long long int nonmemops_executed;
@@ -351,6 +352,8 @@ extern unsigned long long int cur_meta;
 
 extern int cur_dram_served;
 extern int cur_nvm_served;
+
+extern int determineReq;
 
 void oram_alloc();
 void oram_init();

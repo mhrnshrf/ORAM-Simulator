@@ -344,6 +344,7 @@ int main(int argc, char * argv[])
 	// random_trace();
 
 	last_read_served = true;
+	last_read_deleted = true;
 	last_req_served = true;
 	last_lock_released = true;
   
@@ -975,7 +976,7 @@ int main(int argc, char * argv[])
 	// Mehrnoosh.
 
     /* For each core, retire instructions if they have finished. */
-	if (last_read_served || !WAIT_ENABLE)
+	if (last_read_deleted || !WAIT_ENABLE)
 	{
     for (numc = 0; numc < NUMCORES; numc++) {
       num_ret = 0;
@@ -991,6 +992,14 @@ int main(int argc, char * argv[])
 			}
 			//  if (ROB[numc].waited_on[ROB[numc].head])
 			// {
+				if (!last_read_served)
+				{
+					if (ROB[numc].reqid[ROB[numc].head] == determineReq)
+					{
+						last_read_served = true;
+					}
+				}
+				
 				// printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
 				// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
 				// ROB[numc].reqid[ROB[numc].head],
@@ -1289,7 +1298,7 @@ int main(int argc, char * argv[])
 				// if (last_read[numc])
 				// {
 					// printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
-					printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+					// printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 					
 					if (op_type[numc] == 'o')
 					{
@@ -1323,6 +1332,7 @@ int main(int argc, char * argv[])
 				last_read[numc] = true;
 				last_req[numc] = true;
 				last_read_served = false;
+				last_read_deleted = false;
 				last_req_served = false;
 				last_lock_released = true;
 			}
@@ -1338,6 +1348,7 @@ int main(int argc, char * argv[])
 				{
 					last_read_served = false;
 					last_lock_released = false;
+					last_read_deleted = false;
 				}
 				
 				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], reqid[numc]);
@@ -1379,12 +1390,13 @@ int main(int argc, char * argv[])
 			{
 				// start = clock();
 				// printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
-				printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				// printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				
 				if (last_read[numc])
 				{
 					last_read_served = false;
 					last_lock_released = false;
+					last_read_deleted = false;
 				}
 
 				// if (SIM_ENABLE)
