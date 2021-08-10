@@ -991,11 +991,12 @@ int main(int argc, char * argv[])
 			}
 			//  if (ROB[numc].waited_on[ROB[numc].head])
 			// {
-				printf("%c %d served %c @ %lld	comp time %lld	%s	rob%d	req%d\n", 
-				ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
-				CYCLE_VAL, 
-				ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
-				ROB[numc].head, ROB[numc].reqid[ROB[numc].head]);
+				// printf("%c %d served %c @ %lld	comp time %lld	%s	rob%d	req%d\n", 
+				// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
+				// CYCLE_VAL, 
+				// ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
+				// ROB[numc].head, ROB[numc].reqid[ROB[numc].head]);
+
 				if (ROB[numc].op_type[ROB[numc].head] == 'o')
 				{
 				// online_t0 = CYCLE_VAL;
@@ -1244,7 +1245,7 @@ int main(int argc, char * argv[])
 		// if (!last_read_served)
 		// {
 		// }
-		printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", ROB[numc].op_type[ROB[numc].tail], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
+		// printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", ROB[numc].op_type[ROB[numc].tail], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
 		
 
 		trace_clk++;
@@ -1286,7 +1287,9 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 				// if (last_read[numc])
 				// {
-					printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
+					// printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
+					printf("%c %d read req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+					
 					if (op_type[numc] == 'o')
 					{
 						// printf("o %d insert @ %lld	comp time %lld %s	%d\n", oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail);
@@ -1357,8 +1360,8 @@ int main(int argc, char * argv[])
 		      addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 		      ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
 		      ROB[numc].optype[ROB[numc].tail] = opertype[numc];
-		      ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
-		    //   ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL + BIGNUM;
+		    //   ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
+		      ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL + BIGNUM;
 
 			  ROB[numc].beginning[ROB[numc].tail] = beginning[numc];
 	          ROB[numc].ending[ROB[numc].tail] = ending[numc];
@@ -1374,7 +1377,8 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 			{
 				// start = clock();
-				printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
+				// printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
+				printf("%c %d write req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				
 				if (last_read[numc])
 				{
@@ -2001,11 +2005,11 @@ int main(int argc, char * argv[])
 			}
 			else if (!(pN->last_read))
 			{
-				printf("%c %d       @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
+				// printf("%c %d       @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 
 			}
 			else if(pN->last_read){
-				printf("%c %d last @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
+				// printf("%c %d last @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 
 			}
 			
