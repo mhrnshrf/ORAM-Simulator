@@ -983,13 +983,7 @@ int main(int argc, char * argv[])
       while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
 		//   printf("while rob inflight %d\n", tracectr);
         /* Keep retiring until retire width is consumed or ROB is empty. */
-		if (!last_read_served)
-		{
-			if (determineCycle < CYCLE_VAL)
-			{
-				last_read_served = true;
-			}
-		}
+
         if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {  
 			if (ROB[numc].waited_on[ROB[numc].head])
 			{
@@ -999,13 +993,14 @@ int main(int argc, char * argv[])
 			}
 			//  if (ROB[numc].waited_on[ROB[numc].head])
 			// {
-				// if (!last_read_served)
-				// {
-				// 	if (ROB[numc].reqid[ROB[numc].head] == determineReq)
-				// 	{
-				// 		last_read_served = true;
-				// 	}
-				// }
+				if (!last_read_served)
+				{
+					if (ROB[numc].reqid[ROB[numc].head] == determineReq)
+					{
+						last_read_served = true;
+						// printf("last read served @ %lld\n", CYCLE_VAL);		
+					}
+				}
 				
 				// printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
 				// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
@@ -1081,6 +1076,7 @@ int main(int argc, char * argv[])
 	else  /* Instruction not complete.  Stop retirement for this core. */
 	  break;
       }  /* End of while loop that is retiring instruction for one core. */
+
     }  /* End of for loop that is retiring instructions for all cores. */
 
 	}
@@ -1304,30 +1300,25 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 				// if (last_read[numc])
 				// {
-					// printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
-					printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+					// printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 					
 					if (op_type[numc] == 'o')
 					{
-						// printf("o %d insert @ %lld	comp time %lld %s	%d\n", oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail);
 						online_t0 = CYCLE_VAL;
 						cur_online = oramid[numc];
 					}
 					else if (op_type[numc] == 'e')
 					{
-						// printf("e %d insert @ %lld\n", oramid[numc], CYCLE_VAL);
 						evict_t0 = CYCLE_VAL;
 						cur_evict = oramid[numc];
 					}
 					else if (op_type[numc] == 'r')
 					{
-						// printf("r %d insert @ %lld\n", oramid[numc], CYCLE_VAL);
 						reshuffle_t0 = CYCLE_VAL;
 						cur_reshuffle = oramid[numc];
 					}
 					else if (op_type[numc] == 'm')
 					{
-						// printf("m %d insert @ %lld	comp time %lld %s	%d\n", oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail] , last_read[numc]?" last ":" ", ROB[numc].tail);
 						meta_t0 = CYCLE_VAL;
 						cur_meta = oramid[numc];
 					}
@@ -1396,8 +1387,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 			{
 				// start = clock();
-				// printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
-				printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				// printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				
 				if (last_read[numc])
 				{
@@ -2001,25 +1991,21 @@ int main(int argc, char * argv[])
 				// printf("%c %d begin @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 				if (op_type[numc] == 'o')
 				{
-					// printf("o %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// online_t0 = CYCLE_VAL;
 					// cur_online = pN->oramid;
 				}
 				else if (op_type[numc] == 'e')
 				{
-					// printf("e %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// evict_t0 = CYCLE_VAL;
 					// cur_evict = pN->oramid;
 				}
 				else if (op_type[numc] == 'r')
 				{
-					// printf("r %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// reshuffle_t0 = CYCLE_VAL;
 					// cur_reshuffle = pN->oramid;
 				}
 				else if (op_type[numc] == 'm')
 				{
-					// printf("m %d begin @ %lld\n", pN->oramid, CYCLE_VAL);
 					// meta_t0 = CYCLE_VAL;
 					// cur_meta = pN->oramid;
 				}

@@ -356,6 +356,7 @@ extern int cur_nvm_served;
 extern int determineReq;
 extern long long int determineCycle;
 extern long long int comptime_max;
+extern int longest_req;
 
 
 void oram_alloc();
