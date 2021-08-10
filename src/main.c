@@ -1376,10 +1376,11 @@ int main(int argc, char * argv[])
 				// start = clock();
 				printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
 				
-				// if (last_read[numc])
-				// {
-				// 	last_read_served = false;
-				// }
+				if (last_read[numc])
+				{
+					last_read_served = false;
+					last_lock_released = false;
+				}
 
 				// if (SIM_ENABLE)
 				// {
