@@ -108,20 +108,20 @@ int cur_dram_served_r_w = 0;
 int cur_nvm_served_r_r = 0;
 int cur_nvm_served_r_w = 0;
 
-int dram_to_serve_online;
-int nvm_to_serve_online;
-int dram_to_serve_evict_r;
-int dram_to_serve_evict_w;
-int nvm_to_serve_evict_r;
-int nvm_to_serve_evict_w;
-int dram_to_serve_meta_r;
-int dram_to_serve_meta_w;
-int nvm_to_serve_meta_r;
-int nvm_to_serve_meta_w;
-int dram_to_serve_reshuffle_r;
-int dram_to_serve_reshuffle_w;
-int nvm_to_serve_reshuffle_r;
-int nvm_to_serve_reshuffle_w;
+int dram_to_serve_o;
+int nvm_to_serve_o;
+int dram_to_serve_e_r;
+int dram_to_serve_e_w;
+int nvm_to_serve_e_r;
+int nvm_to_serve_e_w;
+int dram_to_serve_m_r;
+int dram_to_serve_m_w;
+int nvm_to_serve_m_r;
+int nvm_to_serve_m_w;
+int dram_to_serve_r_r;
+int dram_to_serve_r_w;
+int nvm_to_serve_r_r;
+int nvm_to_serve_r_w;
 
 int online_r = 0;
 int evict_r = 0;
@@ -1076,21 +1076,26 @@ void oram_alloc(){
   STALE_TH = STALE_BUF_SIZE-1;
   GATHER_START = TOP_CACHE + DEAD_GATHER_OFFSET;
   GREEN_BLOCK = CB_ENABLE ? CB_GREEN_MAX : 0;
+  if (!NVM_ENABLE)
+  {
+    NVM_START = LEVEL;
+  }
+  
 
-  dram_to_serve_online = NVM_START - TOP_CACHE;
-  nvm_to_serve_online = LEVEL - NVM_START;
-  dram_to_serve_evict_r = (NVM_START - TOP_CACHE)*(5); 
-  dram_to_serve_evict_w = (NVM_START - TOP_CACHE)*(12); 
-  nvm_to_serve_evict_r = (LEVEL - NVM_START)*(5);
-  nvm_to_serve_evict_w = (LEVEL - NVM_START)*(12);
-  dram_to_serve_reshuffle_r = 1*(5);
-  dram_to_serve_reshuffle_w = 1*(12);
-  nvm_to_serve_reshuffle_r = 1*(5);
-  nvm_to_serve_reshuffle_w = 1*(12);
-  dram_to_serve_meta_r = (LEVEL - TOP_CACHE)*(1); 
-  dram_to_serve_meta_w = (LEVEL - TOP_CACHE)*(1); 
-  // nvm_to_serve_meta_r = (LEVEL - NVM_START)*(1);
-  // nvm_to_serve_meta_w = (LEVEL - NVM_START)*(1);
+  dram_to_serve_o = NVM_START - TOP_CACHE;
+  nvm_to_serve_o = LEVEL - NVM_START;
+  dram_to_serve_e_r = (NVM_START - TOP_CACHE)*(RING_Z); 
+  dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
+  nvm_to_serve_e_r = (LEVEL - NVM_START)*(RING_Z);
+  nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
+  dram_to_serve_r_r = 1*(RING_Z);
+  dram_to_serve_r_w = 1*(Z);
+  nvm_to_serve_r_r = 1*(RING_Z);
+  nvm_to_serve_r_w = 1*(Z);
+  dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
+  dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
+  // nvm_to_serve_m_r = (LEVEL - NVM_START)*(1);
+  // nvm_to_serve_m_w = (LEVEL - NVM_START)*(1);
 
   for (int i = 0; i < LEVEL; i++)
 	{
@@ -6463,6 +6468,324 @@ update_write_queue_commands (int channel)
 }
 
 
+void update_served_count(request_t * request){
+  if(request->operation_type == 'R')
+  {
+    if (request->op_type == 'o' )//&& request->oramid == cur_online)
+      {
+        // printf("in online\n");
+        online_r++;
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_o == nvm_to_serve_o)
+          {
+
+            online_wait_nvm += request->completion_time - online_t0;
+            // cur_nvm_served_o = 0;
+            // printf("o %d nvm ends %lld  @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, online_t0);
+          }
+          else
+          {
+            cur_nvm_served_o++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_o == dram_to_serve_o)
+          {
+            r_ended_o++;
+            online_wait_dram += request->completion_time - online_t0;
+            // cur_dram_served_o = 0;
+            // printf("o %d dram ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, online_t0);
+          }
+          else
+          {
+            cur_dram_served_o++;
+          }
+        }
+        
+      }
+      else if (request->op_type == 'e' )//&& request->oramid == cur_evict)
+      {
+        // printf("in evict\n");
+        evict_r++;
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_e_r == nvm_to_serve_e_r)
+          {
+            // evict_wait_nvm += request->completion_time - evict_t0;
+            // cur_nvm_served_e_r = 0;
+          }
+          else
+          {
+            cur_nvm_served_e_r++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_e_r == dram_to_serve_e_r)
+          {
+            r_ended++;
+            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
+            // evict_wait_dram += request->completion_time - evict_t0;
+            // cur_dram_served_e_r = 0;
+          }
+          else
+          {
+            cur_dram_served_e_r++;
+          }
+        }
+
+      }
+      else if (request->op_type == 'r' ) //&& request->oramid == cur_reshuffle)
+      {
+        // printf("in reshuffle\n");
+        reshuffle_r++;
+
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_r_r == nvm_to_serve_r_r)
+          {
+            // reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
+            // cur_nvm_served_r_r = 0;
+          }
+          else
+          {
+            cur_nvm_served_r_r++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_r_r == dram_to_serve_r_r)
+          {
+            // reshuffle_wait_dram += request->completion_time - reshuffle_t0;
+            // cur_dram_served_r_r = 0;
+          }
+          else
+          {
+            cur_dram_served_r_r++;
+          }
+        }
+      }
+      else if (request->op_type == 'm' )//&& request->oramid == cur_evict)
+      {
+        if (request->nvm_access)
+        {
+          // if (cur_nvm_served_m_r == nvm_to_serve_m_r)
+          // {
+          //   meta_wait_nvm += request->completion_time - meta_t0;
+          //   cur_nvm_served_m_r = 0;
+          // }
+          // else
+          // {
+          //   cur_nvm_served_m_r++;
+          // }
+        }
+        else
+        {
+          if (cur_dram_served_m_r == dram_to_serve_m_r)
+          {
+            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
+            // meta_wait_dram += request->completion_time - meta_t0;
+            // cur_dram_served_m_r = 0;
+          }
+          else
+          {
+            cur_dram_served_m_r++;
+          }
+        }
+      }
+  }
+  else if(request->operation_type == 'W')
+  {
+    if (request->op_type == 'e' )//&& request->oramid == cur_evict)
+      {
+        // printf("in evict\n");
+        evict_w++;
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_e_w == nvm_to_serve_e_w)
+          {
+            evict_wait_nvm += request->completion_time - evict_t0;
+            // cur_nvm_served_e_w = 0;
+            // printf("e %d nvm ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, evict_t0);
+
+          }
+          else
+          {
+            cur_nvm_served_e_w++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_e_w == dram_to_serve_e_w)
+          {
+            w_ended++;
+            // printf("curead %d     oramid %d     curaccess %lld \n", cur_dram_served_e_r, request->oramid, cur_evict);
+            evict_wait_dram += request->completion_time - evict_t0;
+            // cur_dram_served_e_w = 0;
+            // printf("e %d dram ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, evict_t0);
+
+          }
+          else
+          {
+            cur_dram_served_e_w++;
+          }
+        }
+
+      }
+      else if (request->op_type == 'r' )//&& request->oramid == cur_reshuffle)
+      {
+        reshuffle_w++;
+
+        // printf("in reshuffle\n");
+
+        if (request->nvm_access)
+        {
+          if (cur_nvm_served_r_w == nvm_to_serve_r_w)
+          {
+            w_ended_nvm++;
+            reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
+            // cur_nvm_served_r_w = 0;
+            // printf("r %d nvm ends %lld  @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, reshuffle_t0);
+
+          }
+          else
+          {
+            cur_nvm_served_r_w++;
+          }
+        }
+        else
+        {
+          if (cur_dram_served_r_w == dram_to_serve_r_w)
+          {
+            w_ended_dram++;
+            reshuffle_wait_dram += request->completion_time - reshuffle_t0;
+            // cur_dram_served_r_w = 0;
+            // printf("r %d dram ends %lld @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, reshuffle_t0);
+          }
+          else
+          {
+            cur_dram_served_r_w++;
+          }
+        }
+      }
+      else if (request->op_type == 'm' )//&& request->oramid == cur_evict)
+      {
+        if (request->nvm_access)
+        {
+          // if (cur_nvm_served_m_w == nvm_to_serve_m_w)
+          // {
+          //   meta_wait_nvm += request->completion_time - meta_t0;
+          //   cur_nvm_served_m_w = 0;
+          // }
+          // else
+          // {
+          //   cur_nvm_served_m_w++;
+          // }
+        }
+        else
+        {
+          if (cur_dram_served_m_w == dram_to_serve_m_w)
+          {
+            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
+            meta_ended++;
+            meta_wait_dram += request->completion_time - meta_t0;
+            // cur_dram_served_m_w = 0;
+            // printf("m %d dram ends %lld @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, meta_t0);
+          }
+          else
+          {
+            cur_dram_served_m_w++;
+          }
+        }
+      }
+  }
+}
+
+void determine_served_all(request_t * request){
+  char type = request->operation_type;
+  if (request->op_type == 'o')
+  {
+    if (!last_read_served)
+    {
+      last_read_served = (cur_dram_served_o == dram_to_serve_o) && (cur_nvm_served_o == nvm_to_serve_o);
+      if (last_read_served)
+      {
+        cur_dram_served_o = 0;
+        cur_nvm_served_o = 0;
+      }
+    }
+  }
+  else if (request->op_type == 'e')
+  {
+    if (!last_read_served)
+    {
+      last_read_served = (type == 'R') ? (cur_dram_served_e_r == dram_to_serve_e_r) && (cur_nvm_served_e_r == nvm_to_serve_e_r)
+                                       : (cur_dram_served_e_w == dram_to_serve_e_w) && (cur_nvm_served_e_w == nvm_to_serve_e_w);
+      if (last_read_served)
+      {
+        if (type == 'R')
+        {
+          cur_dram_served_e_r = 0;
+          cur_nvm_served_e_r = 0;
+        }
+        else 
+        {
+          cur_dram_served_e_w = 0;
+          cur_nvm_served_e_w = 0;
+        }
+      }
+    }
+  }
+  else if (request->op_type == 'r')
+  {
+    if (!last_read_served)
+    {
+      last_read_served = (type == 'R') ? (cur_dram_served_r_r == dram_to_serve_r_r) && (cur_nvm_served_r_r == nvm_to_serve_r_r)
+                                       : (cur_dram_served_r_w == dram_to_serve_r_w) && (cur_nvm_served_r_w == nvm_to_serve_r_w);
+      if (last_read_served)
+      {
+        if (type == 'R')
+        {
+          cur_dram_served_r_r = 0;
+          cur_nvm_served_r_r = 0;
+        }
+        else 
+        {
+          cur_dram_served_r_w = 0;
+          cur_nvm_served_r_w = 0;
+        }
+      }                  
+    }
+
+  }
+  else if (request->op_type == 'm')
+  {
+    if (!last_read_served)
+    {
+      last_read_served = (type == 'R') ? (cur_dram_served_m_r == dram_to_serve_m_r) && (cur_nvm_served_m_r == nvm_to_serve_m_r)
+                                       : (cur_dram_served_m_w == dram_to_serve_m_w) && (cur_nvm_served_m_w == nvm_to_serve_m_w);
+      if (last_read_served)
+      {
+        if (type == 'R')
+        {
+          cur_dram_served_m_r = 0;
+          cur_nvm_served_m_r = 0;
+        }
+        else 
+        {
+          cur_dram_served_m_w = 0;
+          cur_nvm_served_m_w = 0;
+        }
+      }                  
+    }
+  }
+  
+}
+
+
+
 // Remove finished requests from the queues.
   void
 clean_queues (int channel) 
@@ -6477,10 +6800,13 @@ clean_queues (int channel)
   {
     if (rd_ptr->request_served == 1)
     {
-      if (rd_ptr->last_read)
-      {
-				last_read_served = true;
-      }
+      update_served_count(rd_ptr);
+      determine_served_all(rd_ptr);
+
+      // if (rd_ptr->last_read)
+      // {
+			// 	last_read_served = true;
+      // }
       
       printf("%c %d delete @ %lld  comp time %lld   %s rob%d req%d\n", rd_ptr->op_type, rd_ptr->oramid, CYCLE_VAL, rd_ptr->completion_time, rd_ptr->last_read?" last ":" ", rd_ptr->instruction_id, rd_ptr->reqid);
       assert (rd_ptr->next_command == COL_READ_CMD);
@@ -6498,8 +6824,10 @@ clean_queues (int channel)
   LL_FOREACH_SAFE (write_queue_head[channel], wrt_ptr, wrt_tmp) 
   {
     if (wrt_ptr->request_served == 1)
-
     {
+      update_served_count(wrt_ptr);
+      determine_served_all(wrt_ptr);
+
       assert (wrt_ptr->next_command == COL_WRITE_CMD);
       LL_DELETE (write_queue_head[channel], wrt_ptr);
       if (wrt_ptr->user_ptr)
@@ -6667,130 +6995,7 @@ issue_request_command (request_t * request, char rwt)
       //   printf("dram  @ %lld\n", CYCLE_VAL);
       // }
 
-      if (request->op_type == 'o' )//&& request->oramid == cur_online)
-      {
-        // printf("in online\n");
-        online_r++;
-        if (request->nvm_access)
-        {
-          if (cur_nvm_served_o == nvm_to_serve_online)
-          {
-
-            online_wait_nvm += request->completion_time - online_t0;
-            cur_nvm_served_o = 0;
-            // printf("o %d nvm ends %lld  @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, online_t0);
-          }
-          else
-          {
-            cur_nvm_served_o++;
-          }
-        }
-        else
-        {
-          if (cur_dram_served_o == dram_to_serve_online)
-          {
-            r_ended_o++;
-            online_wait_dram += request->completion_time - online_t0;
-            cur_dram_served_o = 0;
-            // printf("o %d dram ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, online_t0);
-          }
-          else
-          {
-            cur_dram_served_o++;
-          }
-        }
-        
-      }
-      else if (request->op_type == 'e' )//&& request->oramid == cur_evict)
-      {
-        // printf("in evict\n");
-        evict_r++;
-        if (request->nvm_access)
-        {
-          if (cur_nvm_served_e_r == nvm_to_serve_evict_r)
-          {
-            // evict_wait_nvm += request->completion_time - evict_t0;
-            cur_nvm_served_e_r = 0;
-          }
-          else
-          {
-            cur_nvm_served_e_r++;
-          }
-        }
-        else
-        {
-          if (cur_dram_served_e_r == dram_to_serve_evict_r)
-          {
-            r_ended++;
-            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
-            // evict_wait_dram += request->completion_time - evict_t0;
-            cur_dram_served_e_r = 0;
-          }
-          else
-          {
-            cur_dram_served_e_r++;
-          }
-        }
-
-      }
-      else if (request->op_type == 'r' ) //&& request->oramid == cur_reshuffle)
-      {
-        // printf("in reshuffle\n");
-        reshuffle_r++;
-
-        if (request->nvm_access)
-        {
-          if (cur_nvm_served_r_r == nvm_to_serve_reshuffle_r)
-          {
-            // reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
-            cur_nvm_served_r_r = 0;
-          }
-          else
-          {
-            cur_nvm_served_r_r++;
-          }
-        }
-        else
-        {
-          if (cur_dram_served_r_r == dram_to_serve_reshuffle_r)
-          {
-            // reshuffle_wait_dram += request->completion_time - reshuffle_t0;
-            cur_dram_served_r_r = 0;
-          }
-          else
-          {
-            cur_dram_served_r_r++;
-          }
-        }
-      }
-      else if (request->op_type == 'm' )//&& request->oramid == cur_evict)
-      {
-        if (request->nvm_access)
-        {
-          // if (cur_nvm_served_m_r == nvm_to_serve_meta_r)
-          // {
-          //   meta_wait_nvm += request->completion_time - meta_t0;
-          //   cur_nvm_served_m_r = 0;
-          // }
-          // else
-          // {
-          //   cur_nvm_served_m_r++;
-          // }
-        }
-        else
-        {
-          if (cur_dram_served_m_r == dram_to_serve_meta_r)
-          {
-            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
-            // meta_wait_dram += request->completion_time - meta_t0;
-            cur_dram_served_m_r = 0;
-          }
-          else
-          {
-            cur_dram_served_m_r++;
-          }
-        }
-      }
+      
       
       
       
@@ -6909,108 +7114,7 @@ issue_request_command (request_t * request, char rwt)
         request->completion_time += NVM_LATENCY*8;
       }
 
-      if (request->op_type == 'e' )//&& request->oramid == cur_evict)
-      {
-        // printf("in evict\n");
-        evict_w++;
-        if (request->nvm_access)
-        {
-          if (cur_nvm_served_e_w == nvm_to_serve_evict_w)
-          {
-            evict_wait_nvm += request->completion_time - evict_t0;
-            cur_nvm_served_e_w = 0;
-            // printf("e %d nvm ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, evict_t0);
-
-          }
-          else
-          {
-            cur_nvm_served_e_w++;
-          }
-        }
-        else
-        {
-          if (cur_dram_served_e_w == dram_to_serve_evict_w)
-          {
-            w_ended++;
-            // printf("curead %d     oramid %d     curaccess %lld \n", cur_dram_served_e_r, request->oramid, cur_evict);
-            evict_wait_dram += request->completion_time - evict_t0;
-            cur_dram_served_e_w = 0;
-            // printf("e %d dram ends %lld  @ %lld started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, evict_t0);
-
-          }
-          else
-          {
-            cur_dram_served_e_w++;
-          }
-        }
-
-      }
-      else if (request->op_type == 'r' )//&& request->oramid == cur_reshuffle)
-      {
-        reshuffle_w++;
-
-        // printf("in reshuffle\n");
-
-        if (request->nvm_access)
-        {
-          if (cur_nvm_served_r_w == nvm_to_serve_reshuffle_w)
-          {
-            w_ended_nvm++;
-            reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
-            cur_nvm_served_r_w = 0;
-            // printf("r %d nvm ends %lld  @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, reshuffle_t0);
-
-          }
-          else
-          {
-            cur_nvm_served_r_w++;
-          }
-        }
-        else
-        {
-          if (cur_dram_served_r_w == dram_to_serve_reshuffle_w)
-          {
-            w_ended_dram++;
-            reshuffle_wait_dram += request->completion_time - reshuffle_t0;
-            cur_dram_served_r_w = 0;
-            // printf("r %d dram ends %lld @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, reshuffle_t0);
-          }
-          else
-          {
-            cur_dram_served_r_w++;
-          }
-        }
-      }
-      else if (request->op_type == 'm' )//&& request->oramid == cur_evict)
-      {
-        if (request->nvm_access)
-        {
-          // if (cur_nvm_served_m_w == nvm_to_serve_meta_w)
-          // {
-          //   meta_wait_nvm += request->completion_time - meta_t0;
-          //   cur_nvm_served_m_w = 0;
-          // }
-          // else
-          // {
-          //   cur_nvm_served_m_w++;
-          // }
-        }
-        else
-        {
-          if (cur_dram_served_m_w == dram_to_serve_meta_w)
-          {
-            // printf("curwrite %d   oramid %d     curaccess %lld \n", cur_dram_served_e_w, request->oramid, cur_evict);
-            meta_ended++;
-            meta_wait_dram += request->completion_time - meta_t0;
-            cur_dram_served_m_w = 0;
-            // printf("m %d dram ends %lld @ %lld  started %lld\n", request->oramid, request->completion_time, CYCLE_VAL, meta_t0);
-          }
-          else
-          {
-            cur_dram_served_m_w++;
-          }
-        }
-      }
+      
      
      
      
