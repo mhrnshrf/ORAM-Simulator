@@ -354,6 +354,9 @@ extern int cur_dram_served;
 extern int cur_nvm_served;
 
 extern int determineReq;
+extern long long int determineCycle;
+extern long long int comptime_max;
+
 
 void oram_alloc();
 void oram_init();

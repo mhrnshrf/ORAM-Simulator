@@ -42,7 +42,7 @@ long long int dead_on_path = 0;
 long long int dead_on_path_dram = 0;
 long long int dead_on_path_arr[100] = {0};
 
-
+long long int comptime_max;
 
 long long int ring_G = 0;
 long long int ring_round = 0;
@@ -137,6 +137,7 @@ int w_ended_nvm = 0;
 
 int reqcount = 0;
 int determineReq = 0;
+long long int determineCycle = 0;
 
 void test_ring(){
   unsigned long long int addr = 0;
@@ -6475,7 +6476,16 @@ update_write_queue_commands (int channel)
 }
 
 
+void set_comptime_max(long long int t){
+  if (t > comptime_max)
+  {
+    comptime_max = t;
+  }
+  
+}
+
 void update_served_count(request_t * request){
+  set_comptime_max(request->completion_time);
   if(request->operation_type == READ)
   {
     // printf("in read \n");
@@ -6763,21 +6773,26 @@ void determine_served_all(request_t * request){
   if (request->op_type == 'o')
   { 
 
-    // printf("b4 req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
+    printf("b4 req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
+    printf("comp detreq %lld    comp max %lld\n", request->completion_time, comptime_max);
     if (!last_read_deleted)
     {
       last_read_deleted = (cur_dram_served_o == dram_to_serve_o) && (cur_nvm_served_o == nvm_to_serve_o);
       if (last_read_deleted)
       {
         determineReq = request->reqid;
+        determineCycle = comptime_max;
         cur_dram_served_o = 0;
         cur_nvm_served_o = 0;
       }
     }
-    // printf("af req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
+    printf("af req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
   }
   else if (request->op_type == 'e')
   {
+    printf("b4 req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_e_r, cur_nvm_served_e_r,  last_read_deleted);
+    printf("b4 req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_e_w, cur_nvm_served_e_w,  last_read_deleted);
+    printf("comp detreq %lld    comp max %lld\n", request->completion_time, comptime_max);
     if (!last_read_deleted)
     {
       last_read_deleted = (type == READ) ? (cur_dram_served_e_r == dram_to_serve_e_r) && (cur_nvm_served_e_r == nvm_to_serve_e_r)
@@ -6785,6 +6800,7 @@ void determine_served_all(request_t * request){
       if (last_read_deleted)
       {
         determineReq = request->reqid;
+        determineCycle = comptime_max;
         if (type == READ)
         {
           cur_dram_served_e_r = 0;
@@ -6797,6 +6813,9 @@ void determine_served_all(request_t * request){
         }
       }
     }
+    printf("af req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_e_r, cur_nvm_served_e_r,  last_read_deleted);
+    printf("af req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_e_w, cur_nvm_served_e_w,  last_read_deleted);
+
   }
   else if (request->op_type == 'r')
   {
@@ -6807,6 +6826,7 @@ void determine_served_all(request_t * request){
       if (last_read_deleted)
       {
         determineReq = request->reqid;
+        determineCycle = comptime_max;
         if (type == READ)
         {
           cur_dram_served_r_r = 0;
@@ -6831,6 +6851,7 @@ void determine_served_all(request_t * request){
       if (last_read_deleted)
       {
         determineReq = request->reqid;
+        determineCycle = comptime_max;
         if (type == READ)
         {
           cur_dram_served_m_r = 0;
@@ -6866,7 +6887,7 @@ clean_queues (int channel)
     if (rd_ptr->request_served == 1) // && rd_ptr->completion_time <= CYCLE_VAL)
     {
       // printf("%c %d delete @ %lld  comp time %lld   %s rob%d req%d\n", rd_ptr->op_type, rd_ptr->oramid, CYCLE_VAL, rd_ptr->completion_time, rd_ptr->last_read?" last ":" ", rd_ptr->instruction_id, rd_ptr->reqid);
-      // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
+      printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
       update_served_count(rd_ptr);
       determine_served_all(rd_ptr);
 
@@ -6891,7 +6912,7 @@ clean_queues (int channel)
   {
     if (wrt_ptr->request_served == 1) // && wrt_ptr->completion_time <= CYCLE_VAL)
     {
-      // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
+      printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
       update_served_count(wrt_ptr);
       determine_served_all(wrt_ptr);
 

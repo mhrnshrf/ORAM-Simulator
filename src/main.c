@@ -983,6 +983,13 @@ int main(int argc, char * argv[])
       while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
 		//   printf("while rob inflight %d\n", tracectr);
         /* Keep retiring until retire width is consumed or ROB is empty. */
+		if (!last_read_served)
+		{
+			if (determineCycle < CYCLE_VAL)
+			{
+				last_read_served = true;
+			}
+		}
         if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {  
 			if (ROB[numc].waited_on[ROB[numc].head])
 			{
@@ -992,13 +999,13 @@ int main(int argc, char * argv[])
 			}
 			//  if (ROB[numc].waited_on[ROB[numc].head])
 			// {
-				if (!last_read_served)
-				{
-					if (ROB[numc].reqid[ROB[numc].head] == determineReq)
-					{
-						last_read_served = true;
-					}
-				}
+				// if (!last_read_served)
+				// {
+				// 	if (ROB[numc].reqid[ROB[numc].head] == determineReq)
+				// 	{
+				// 		last_read_served = true;
+				// 	}
+				// }
 				
 				// printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
 				// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
@@ -1298,7 +1305,7 @@ int main(int argc, char * argv[])
 				// if (last_read[numc])
 				// {
 					// printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
-					// printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+					printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 					
 					if (op_type[numc] == 'o')
 					{
@@ -1390,7 +1397,7 @@ int main(int argc, char * argv[])
 			{
 				// start = clock();
 				// printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
-				// printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				
 				if (last_read[numc])
 				{
@@ -1990,6 +1997,7 @@ int main(int argc, char * argv[])
 
 			if (pN->beginning)
 			{
+				comptime_max = 0;
 				// printf("%c %d begin @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 				if (op_type[numc] == 'o')
 				{
