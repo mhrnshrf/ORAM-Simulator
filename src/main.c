@@ -991,11 +991,12 @@ int main(int argc, char * argv[])
 			}
 			//  if (ROB[numc].waited_on[ROB[numc].head])
 			// {
-				// printf("%c %d served %c @ %lld	comp time %lld	%s	rob%d	req%d\n", 
+				// printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
 				// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
+				// ROB[numc].reqid[ROB[numc].head],
 				// CYCLE_VAL, 
 				// ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
-				// ROB[numc].head, ROB[numc].reqid[ROB[numc].head]);
+				// ROB[numc].head);
 
 				if (ROB[numc].op_type[ROB[numc].head] == 'o')
 				{
@@ -1288,7 +1289,7 @@ int main(int argc, char * argv[])
 				// if (last_read[numc])
 				// {
 					// printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
-					printf("%c %d read req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+					// printf("%c %d read req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 					
 					if (op_type[numc] == 'o')
 					{
@@ -1378,7 +1379,7 @@ int main(int argc, char * argv[])
 			{
 				// start = clock();
 				// printf("%c %d write @ %lld	comp time %lld\n", op_type[numc], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail]);
-				printf("%c %d write req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				// printf("%c %d write req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				
 				if (last_read[numc])
 				{
@@ -1977,7 +1978,7 @@ int main(int argc, char * argv[])
 
 			if (pN->beginning)
 			{
-				printf("%c %d begin @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
+				// printf("%c %d begin @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 				if (op_type[numc] == 'o')
 				{
 					// printf("o %d begin @ %lld\n", pN->oramid, CYCLE_VAL);

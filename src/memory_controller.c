@@ -6845,10 +6845,10 @@ clean_queues (int channel)
   // Delete all READ requests whose completion time has been determined i.e. COL_RD has been issued
   LL_FOREACH_SAFE (read_queue_head[channel], rd_ptr, rd_tmp) 
   {
-    if (rd_ptr->request_served == 1)
+    if (rd_ptr->request_served == 1) // && rd_ptr->completion_time <= CYCLE_VAL)
     {
       // printf("%c %d delete @ %lld  comp time %lld   %s rob%d req%d\n", rd_ptr->op_type, rd_ptr->oramid, CYCLE_VAL, rd_ptr->completion_time, rd_ptr->last_read?" last ":" ", rd_ptr->instruction_id, rd_ptr->reqid);
-      printf("%c %d deleter req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
+      // printf("%c %d deleter req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
       update_served_count(rd_ptr);
       determine_served_all(rd_ptr);
 
@@ -6871,9 +6871,9 @@ clean_queues (int channel)
   // Delete all WRITE requests whose completion time has been determined i.e COL_WRITE has been issued
   LL_FOREACH_SAFE (write_queue_head[channel], wrt_ptr, wrt_tmp) 
   {
-    if (wrt_ptr->request_served == 1)
+    if (wrt_ptr->request_served == 1) // && wrt_ptr->completion_time <= CYCLE_VAL)
     {
-      printf("%c %d deletew req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
+      // printf("%c %d deletew req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
       update_served_count(wrt_ptr);
       determine_served_all(wrt_ptr);
 
@@ -7039,7 +7039,7 @@ issue_request_command (request_t * request, char rwt)
       // if (request->last_read)
       // {
         // printf("%c %d issue @ %lld  comp time %lld   %s rob%d req%d\n", request->op_type, request->oramid, CYCLE_VAL, request->completion_time, request->last_read?" last ":" ", request->instruction_id, request->reqid);
-				printf("%c %d issuer req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
+				// printf("%c %d issuer req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
 
       // }
       // else{
@@ -7159,12 +7159,12 @@ issue_request_command (request_t * request, char rwt)
       }
 
       // set the completion time of this write request
-      printf("%c %d issuew req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
+      // printf("%c %d issuew req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
 
       request->completion_time = CYCLE_VAL + T_DATA_TRANS + T_WR;
       if (request->nvm_access && NVM_ENABLE)
       {
-        request->completion_time += NVM_LATENCY*2;
+        request->completion_time += NVM_LATENCY*8;
       }
 
       
