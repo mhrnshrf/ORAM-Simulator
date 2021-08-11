@@ -1618,7 +1618,8 @@ void read_path(int label){
               }
               
               
-              bool nvm_access = is_nvm_addr(mem_addr);
+              // bool nvm_access = is_nvm_addr(mem_addr);
+              bool nvm_access = in_nvm(i);
 
               reqmade++;
               if (i == TOP_CACHE_VAR && reqmade == RING_Z)
@@ -1735,7 +1736,8 @@ void read_path(int label){
             }
             
             int mem_addr = calc_mem_addr(index, sd, 'R');
-            bool nvm_access = is_nvm_addr(mem_addr);
+            // bool nvm_access = is_nvm_addr(mem_addr);
+            bool nvm_access = in_nvm(i);
             if (SIM_ENABLE_VAR)
             {
               bool beginning = false;
@@ -1964,7 +1966,8 @@ void write_path(int label){
             int index_prime = calc_index(label, i_prime);
             addr = SubMap[index_prime] + j_prime;
           }
-          bool nvm_access = is_nvm_addr(mem_addr);
+          // bool nvm_access = is_nvm_addr(mem_addr);
+          bool nvm_access = in_nvm(i);
           bool beginning = false;
           bool ending = (i == TOP_CACHE_VAR && j == LZ_VAR[i]-1);
           bool last_read = (i == TOP_CACHE_VAR && j == LZ_VAR[i]-1);
@@ -4503,7 +4506,7 @@ int remote_access(int index, int offset, int level){
 }
 
 bool in_nvm(int level){
-  if (level >= NVM_START)
+  if (NVM_ENABLE && level >= NVM_START)
   {
     return true;
   }
@@ -4770,7 +4773,8 @@ void ring_read_path(int label, int addr){
       {
         last_read = true;
       }
-      bool nvm_access = is_nvm_addr(mem_addr);
+      // bool nvm_access = is_nvm_addr(mem_addr);
+      bool nvm_access = in_nvm(i);
       bool beginning = (i == TOP_CACHE_VAR);
       bool ending = (i == LEVEL-1);
       char op_type = 'o';
@@ -5021,7 +5025,8 @@ void ring_early_reshuffle(int label){
           }
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-            bool nvm_access = is_nvm_addr(mem_addr);
+            // bool nvm_access = is_nvm_addr(mem_addr);
+            bool nvm_access = in_nvm(i);
             bool beginning = (reqmade == 1);
             bool ending = false;
             char op_type = 'r';
@@ -5075,7 +5080,8 @@ void ring_early_reshuffle(int label){
           int mem_addr = calc_mem_addr(index, sd, 'R');
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
-              bool nvm_access = is_nvm_addr(mem_addr);
+              // bool nvm_access = is_nvm_addr(mem_addr);
+              bool nvm_access = in_nvm(i);
               bool beginning = (reqcont == 1);
               bool ending = false;
               bool last_read = (reqcont == RING_Z);
@@ -5105,7 +5111,8 @@ void ring_early_reshuffle(int label){
 
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
-          bool nvm_access = is_nvm_addr(mem_addr);
+          // bool nvm_access = is_nvm_addr(mem_addr);
+          bool nvm_access = in_nvm(i);
           bool beginning = false;
           bool ending = (j == LZ_VAR[i]-1);
           bool last_read = (j == LZ_VAR[i]-1);
@@ -7070,7 +7077,7 @@ issue_request_command (request_t * request, char rwt)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
-      if (request->nvm_access && NVM_ENABLE)
+      if (is_nvm_channel(request->dram_addr.channel) && NVM_ENABLE)
       {
         // int coef = (rwt == 'R')? 1 : 3;
         request->completion_time += NVM_LATENCY;
@@ -7195,7 +7202,7 @@ issue_request_command (request_t * request, char rwt)
       // printf("%c %d issueW req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
 
       request->completion_time = CYCLE_VAL + T_DATA_TRANS + T_WR;
-      if (request->nvm_access && NVM_ENABLE)
+      if (is_nvm_channel(request->dram_addr.channel) && NVM_ENABLE)
       {
         request->completion_time += NVM_LATENCY*8;
       }
