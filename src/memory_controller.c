@@ -43,7 +43,12 @@ long long int dead_on_path_dram = 0;
 long long int dead_on_path_arr[100] = {0};
 
 long long int comptime_max;
+long long int nvm_tmax;
+long long int dram_tmax;
 int longest_req;
+int longest_dram;
+int longest_nvm;
+bool nvmt0_set;
 
 long long int ring_G = 0;
 long long int ring_round = 0;
@@ -138,6 +143,8 @@ int w_ended_nvm = 0;
 
 int reqcount = 0;
 int determineReq = 0;
+int detnvm = 0;
+int detdram = 0;
 long long int determineCycle = 0;
 
 void test_ring(){
@@ -5479,15 +5486,15 @@ void export_csv(char * argv[]){
   }
 
   fprintf(fp,"Benchmark,%s\n", bench);
-  fprintf(fp,"exe_time,%f\n", exe_time);
+  // fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
   // fprintf(fp, "mem_clk,%lld\n", mem_clk);
   fprintf(fp, "invokectr,%d\n", invokectr);
   // fprintf(fp, "oramctr,%d\n", oramctr);
   // fprintf(fp, "dummyctr,%d\n", dummyctr);
-  fprintf(fp, "pos1_access,%d\n", pos1_access);
-  fprintf(fp, "pos2_access,%d\n", pos2_access);
+  // fprintf(fp, "pos1_access,%d\n", pos1_access);
+  // fprintf(fp, "pos2_access,%d\n", pos2_access);
   // fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
   // fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
   // fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
@@ -5497,11 +5504,11 @@ void export_csv(char * argv[]){
   // fprintf(fp, "plbaccess0,%lld\n", plbaccess[0]);
   // fprintf(fp, "plbaccess1,%lld\n", plbaccess[1]);
   // fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
-  fprintf(fp, "oramQ_size,%d\n", oramQ->size);
+  // fprintf(fp, "oramQ_size,%d\n", oramQ->size);
   // fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
   // fprintf(fp, "Bk_Evict,%d\n", bkctr);
-  fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
-  fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
+  // fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  // fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
   // fprintf(fp, "rho_hit,%f%%\n", 100*(double)rho_hit/(invokectr));
   // fprintf(fp, "rhoctr,%d\n", rhoctr);
   // fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
@@ -5519,9 +5526,9 @@ void export_csv(char * argv[]){
   // fprintf(fp, "stash_removed,%d\n", stash_removed);
   // fprintf(fp, "fillhit,%d\n", fillhit);
   // fprintf(fp, "fillmiss,%d\n", fillmiss);
-  fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
-  fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
-  fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+  // fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+  // fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+  // fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
   // fprintf(fp, "stashctr,%d\n", stashctr);
   // fprintf(fp, "stash_cont,%d\n", stash_cont);
   // fprintf(fp, "linger_discard,%d\n", linger_discard);
@@ -5536,7 +5543,7 @@ void export_csv(char * argv[]){
   // fprintf(fp, "writectr,%d\n", writectr);
   // fprintf(fp, "wskip,%d\n", wskip);
   // fprintf(fp, "mem_req_late,%f\n", (double)mem_req_latencies/(invokectr));
-  fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
+  // fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
   // fprintf(fp, "missl1wb,%lld\n", missl1wb);
   // fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
   // fprintf(fp, "wbshuff,%d\n", wbshuff);
@@ -5560,8 +5567,8 @@ void export_csv(char * argv[]){
   // }
   if (RING_ENABLE)
   {
-    fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
-    fprintf(fp, "dead_on_path_dram,%d\n", (int)dead_on_path_dram/ring_evictctr);
+    // fprintf(fp, "dead_on_path,%d\n", (int)dead_on_path/ring_evictctr);
+    // fprintf(fp, "dead_on_path_dram,%d\n", (int)dead_on_path_dram/ring_evictctr);
   }
   
   // for (int i = 0; i < 31; i++)
@@ -5579,18 +5586,18 @@ void export_csv(char * argv[]){
   //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
   //   }
   // }
-  fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
-  fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
-  fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
-  fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
-  fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
-  fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
-  fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
-  fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
-  fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
-  fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
-  fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
-  fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
+  // fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
+  // fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
+  // fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
+  // fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
+  // fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
+  // fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
+  // fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
+  // fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
+  // fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
+  // fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
+  // fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
+  // fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
   // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
   // fprintf(fp, "deadQ-size,%d\n", deadQ->size);
   fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
@@ -5633,14 +5640,14 @@ void export_csv(char * argv[]){
     
     fprintf(fp, "Reads_chan[%d],%-7lld\n", c, stats_reads_completed[c]);
     fprintf(fp, "Writes_chan[%d],%-7lld\n", c, stats_writes_completed[c]);
-    // fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
-    // fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_queue_latency[c]);
-    // fprintf(fp, "W_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_latency[c]);
-    // fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
+    fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
+    fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_queue_latency[c]);
+    fprintf(fp, "W_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_latency[c]);
+    fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
   }
 
-  fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
-  fprintf(fp, "W_NVM/DRAM_T,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
+  // fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
+  // fprintf(fp, "W_NVM/DRAM_T,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
   
   fprintf(fp, "All_R,%lld\n", all_r);
   fprintf(fp, "All_W,%lld\n", all_w);
@@ -5658,17 +5665,31 @@ void export_csv(char * argv[]){
   fprintf(fp, "reshuffle_wait_dram,%lld\n", reshuffle_wait_dram);
   fprintf(fp, "reshuffle_wait_nvm,%lld\n", reshuffle_wait_nvm);
   fprintf(fp, "meta_wait_dram,%lld\n", meta_wait_dram);
-  fprintf(fp, "online_r,%d\n", online_r);
-  fprintf(fp, "evict_r,%d\n", evict_r);
-  fprintf(fp, "reshuffle_r,%d\n", reshuffle_r);
-  fprintf(fp, "evict_w,%d\n", evict_w);
-  fprintf(fp, "reshuffle_w,%d\n", reshuffle_w);
-  fprintf(fp, "w_ended,%d\n", w_ended);
-  fprintf(fp, "r_ended,%d\n", r_ended);
-  fprintf(fp, "r_ended_o,%d\n", r_ended_o);
-  fprintf(fp, "w_ended_dram,%d\n", w_ended_dram);
-  fprintf(fp, "w_ended_nvm,%d\n", w_ended_nvm);
-  fprintf(fp, "meta_ended,%d\n", meta_ended);
+
+  int dramchan = NUM_CHANNELS-NVM_CHANNEL;
+  int draml = NVM_START - TOP_CACHE;
+  int nvml = LEVEL - NVM_START;
+
+  fprintf(fp, "online_wait_dram_perAcc,%f\n", (double)online_wait_dram/((ringctr*draml)/dramchan));
+  fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/NVM_CHANNEL));
+  fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*RING_Z+RING_S))/dramchan));
+  fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/NVM_CHANNEL));
+  fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/dramchan));
+  fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/NVM_CHANNEL));
+  fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/dramchan));
+
+
+  // fprintf(fp, "online_r,%d\n", online_r);
+  // fprintf(fp, "evict_r,%d\n", evict_r);
+  // fprintf(fp, "reshuffle_r,%d\n", reshuffle_r);
+  // fprintf(fp, "evict_w,%d\n", evict_w);
+  // fprintf(fp, "reshuffle_w,%d\n", reshuffle_w);
+  // fprintf(fp, "w_ended,%d\n", w_ended);
+  // fprintf(fp, "r_ended,%d\n", r_ended);
+  // fprintf(fp, "r_ended_o,%d\n", r_ended_o);
+  // fprintf(fp, "w_ended_dram,%d\n", w_ended_dram);
+  // fprintf(fp, "w_ended_nvm,%d\n", w_ended_nvm);
+  // fprintf(fp, "meta_ended,%d\n", meta_ended);
 
   
   fclose(fp);
@@ -6077,6 +6098,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
     if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) )// || physical_address >= metadata_nvm_byte)
     {
       this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
+      // this_a->bank = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
     }
     else
     {
@@ -6484,7 +6506,10 @@ update_write_queue_commands (int channel)
 }
 
 
-void set_comptime_max(long long int t, int req){
+void set_comptime_max(request_t * request){
+  long long int t = request->completion_time;
+  int req = request->reqid;
+  
   if (t > comptime_max)
   {
     comptime_max = t;
@@ -6492,10 +6517,28 @@ void set_comptime_max(long long int t, int req){
     
   }
   
+  if (request->nvm_access)
+  {
+    if (t > nvm_tmax)
+    {
+      nvm_tmax = t;
+      longest_nvm = req;
+    }
+  }
+  else
+  {
+    if (t > dram_tmax)
+    {
+      dram_tmax = t;
+      longest_dram = req;
+    }
+
+  }
+  
 }
 
 void update_served_count(request_t * request){
-  set_comptime_max(request->completion_time, request->reqid);
+  set_comptime_max(request);
   if(request->operation_type == READ)
   {
     // printf("in read \n");
@@ -6516,7 +6559,9 @@ void update_served_count(request_t * request){
             cur_nvm_served_o++;
             if (cur_nvm_served_o == nvm_to_serve_o)
             {
-            online_wait_nvm += request->completion_time - online_t0;
+              // online_wait_nvm += nvm_tmax - online_t0;
+              detnvm = longest_nvm;
+            // online_wait_nvm += request->completion_time - online_t0;
             // online_wait_nvm += CYCLE_VAL - online_t0;
               /* code */
             }
@@ -6537,7 +6582,9 @@ void update_served_count(request_t * request){
             cur_dram_served_o++;
             if (cur_dram_served_o == dram_to_serve_o)
             {
-            online_wait_dram += request->completion_time - online_t0;
+              // online_wait_dram += dram_tmax - online_t0;
+              detdram = longest_dram;
+            // online_wait_dram += request->completion_time - online_t0;
             // online_wait_dram += CYCLE_VAL - online_t0;
               /* code */
             }
@@ -6661,7 +6708,9 @@ void update_served_count(request_t * request){
             cur_nvm_served_e_w++;
             if (cur_nvm_served_e_w == nvm_to_serve_e_w)
             {
-              evict_wait_nvm += request->completion_time - evict_t0;
+              // evict_wait_nvm += nvm_tmax - evict_t0;
+              detnvm = longest_nvm;
+              // evict_wait_nvm += request->completion_time - evict_t0;
               // evict_wait_nvm += CYCLE_VAL - evict_t0;
 
             }
@@ -6683,7 +6732,9 @@ void update_served_count(request_t * request){
             cur_dram_served_e_w++;
             if (cur_dram_served_e_w == dram_to_serve_e_w)
             {
-              evict_wait_dram += request->completion_time - evict_t0;
+              // evict_wait_dram += dram_tmax - evict_t0;
+              detdram = longest_dram;
+              // evict_wait_dram += request->completion_time - evict_t0;
               // evict_wait_dram += CYCLE_VAL - evict_t0;
 
             }
@@ -6713,7 +6764,9 @@ void update_served_count(request_t * request){
             if (cur_nvm_served_r_w == nvm_to_serve_r_w)
             {
               w_ended_nvm++;
-              reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
+              // reshuffle_wait_nvm += nvm_tmax - reshuffle_t0;
+              detnvm = longest_nvm;
+              // reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
               // reshuffle_wait_nvm += CYCLE_VAL - reshuffle_t0;
 
             }
@@ -6733,7 +6786,9 @@ void update_served_count(request_t * request){
             cur_dram_served_r_w++;
             if (cur_dram_served_r_w == dram_to_serve_r_w)
             {
-              reshuffle_wait_dram += request->completion_time - reshuffle_t0;
+              // reshuffle_wait_dram += dram_tmax - reshuffle_t0;
+              detdram = longest_dram;
+              // reshuffle_wait_dram += request->completion_time - reshuffle_t0;
               // reshuffle_wait_dram += CYCLE_VAL - reshuffle_t0;
             }
           }
@@ -6769,7 +6824,10 @@ void update_served_count(request_t * request){
             if (cur_dram_served_m_w == dram_to_serve_m_w)
             {
               meta_ended++;
-              meta_wait_dram += request->completion_time - meta_t0;
+              // meta_wait_dram += dram_tmax - meta_t0;
+              detdram = longest_dram;
+
+              // meta_wait_dram += request->completion_time - meta_t0;
               // meta_wait_dram += CYCLE_VAL - meta_t0;
             }
           }
@@ -6778,13 +6836,65 @@ void update_served_count(request_t * request){
   }
 }
 
+void calc_wait_value(char op_type, int reqid){
+  if (op_type == 'o')
+  {
+    if (reqid == detnvm)
+    {
+      online_wait_nvm += CYCLE_VAL - online_t0;
+      detnvm = 0;
+    }
+    else if (reqid == detdram)
+    {
+      online_wait_dram += CYCLE_VAL - online_t0;
+      detdram = 0;
+    }
+    
+  }
+  else if (op_type == 'e')
+  {
+    if (reqid == detnvm)
+    {
+      evict_wait_nvm += CYCLE_VAL - evict_t0;
+      detnvm = 0;
+    }
+    else if (reqid == detdram)
+    {
+      evict_wait_dram += CYCLE_VAL - evict_t0;
+      detdram = 0;
+    }
+  }
+  else if (op_type == 'r')
+  {
+    if (reqid == detnvm)
+    {
+      reshuffle_wait_nvm += CYCLE_VAL - reshuffle_t0;
+      detnvm = 0;
+    }
+    else if (reqid == detdram)
+    {
+      reshuffle_wait_dram += CYCLE_VAL - reshuffle_t0;
+      detdram = 0;
+    }
+  }
+  else if (op_type == 'm')
+  {
+    if (reqid == detdram)
+    {
+      meta_wait_dram += CYCLE_VAL - meta_t0;
+      detdram = 0;
+    }
+  }
+  
+}
+
 void determine_served_all(request_t * request){
   optype_t type = request->operation_type;
   if (request->op_type == 'o')
   { 
 
-    // printf("b4 req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
-    // printf("comp detreq %lld    comp max %lld\n", request->completion_time, comptime_max);
+    printf("b4 req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
+    printf("comp detreq %lld    comp max %lld\n", request->completion_time, comptime_max);
     if (!last_read_deleted)
     {
       last_read_deleted = (cur_dram_served_o == dram_to_serve_o) && (cur_nvm_served_o == nvm_to_serve_o);
@@ -6796,7 +6906,7 @@ void determine_served_all(request_t * request){
         cur_nvm_served_o = 0;
       }
     }
-    // printf("af req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
+    printf("af req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
   }
   else if (request->op_type == 'e')
   {
@@ -6853,7 +6963,10 @@ void determine_served_all(request_t * request){
   }
   else if (request->op_type == 'm')
   {
-    // printf("b4 req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
+    printf("b4 req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
+    printf("b4 req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_deleted);
+    printf("comp req%d %lld    comp max %lld\n", request->reqid, request->completion_time, comptime_max);
+
     if (!last_read_deleted)
     {
       last_read_deleted = (type == READ) ? (cur_dram_served_m_r == dram_to_serve_m_r) && (cur_nvm_served_m_r == nvm_to_serve_m_r)
@@ -6874,7 +6987,8 @@ void determine_served_all(request_t * request){
         }
       }                  
     }
-    // printf("af req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
+    printf("af req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
+    printf("af req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_deleted);
 
   }
   
@@ -7085,6 +7199,37 @@ issue_request_command (request_t * request, char rwt)
         // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
       }
 				// printf("%c %d issueR req%d	 @ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
+        // if (request->beginning)
+				// {
+					
+				// 	if (request->op_type == 'o')
+				// 	{
+				// 		online_t0 = CYCLE_VAL;
+				// 		cur_online = request->oramid;
+				// 	}
+				// 	else if (request->op_type== 'e')
+				// 	{
+				// 		evict_t0 = CYCLE_VAL;
+				// 		cur_evict = request->oramid;
+				// 	}
+				// 	else if (request->op_type== 'r')
+				// 	{
+				// 		reshuffle_t0 = CYCLE_VAL;
+				// 		cur_reshuffle = request->oramid;
+				// 	}
+				// 	else if (request->op_type== 'm')
+				// 	{
+				// 		meta_t0 = CYCLE_VAL;
+				// 		cur_meta = request->oramid;
+				// 	}
+				// }
+
+        // if (request->nvm_access && !nvmt0_set)
+        // {
+        //   online_t0 = CYCLE_VAL;
+        //   nvmt0_set = true;
+        // }
+        
 
       
       

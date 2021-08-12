@@ -354,9 +354,15 @@ extern int cur_dram_served;
 extern int cur_nvm_served;
 
 extern int determineReq;
+extern int detnvm;
+extern int detdram;
 extern long long int determineCycle;
 extern long long int comptime_max;
 extern int longest_req;
+extern long long int nvm_tmax;
+extern long long int dram_tmax;
+extern bool nvmt0_set;
+
 
 
 void oram_alloc();
@@ -462,6 +468,7 @@ void switch_dead_enable_to(bool tf);
 void update_count_stat(int count, int level);
 void update_ddr_timing_param(int channel);
 void reset_profile_counters();
+void calc_wait_value(char op_type, int reqid);
 
 
 // Mehrnoosh.

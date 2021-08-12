@@ -16,6 +16,8 @@ long long int BIGNUM = 1000000;
 
 
 bool last_lock_released;
+bool last_lock_released_prev;
+bool tail_written;
 
 int expt_done=0;  
 
@@ -980,6 +982,7 @@ int main(int argc, char * argv[])
 	{
     for (numc = 0; numc < NUMCORES; numc++) {
       num_ret = 0;
+	//   printf("before 	rob head %d		rob tail %d\n", ROB[numc].head, ROB[numc].tail);
       while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
 		//   printf("while rob inflight %d\n", tracectr);
         /* Keep retiring until retire width is consumed or ROB is empty. */
@@ -993,11 +996,13 @@ int main(int argc, char * argv[])
 			}
 			//  if (ROB[numc].waited_on[ROB[numc].head])
 			// {
+				calc_wait_value(ROB[numc].op_type[ROB[numc].head], ROB[numc].reqid[ROB[numc].head]);
 				if (!last_read_served)
 				{
 					if (ROB[numc].reqid[ROB[numc].head] == determineReq)
 					{
 						last_read_served = true;
+						determineReq = 0;
 						// printf("last read served @ %lld\n", CYCLE_VAL);		
 					}
 				}
@@ -1076,6 +1081,7 @@ int main(int argc, char * argv[])
 	else  /* Instruction not complete.  Stop retirement for this core. */
 	  break;
       }  /* End of while loop that is retiring instruction for one core. */
+	//   printf("after 	rob head %d		rob tail %d\n", ROB[numc].head, ROB[numc].tail);
 
     }  /* End of for loop that is retiring instructions for all cores. */
 
@@ -1121,7 +1127,8 @@ int main(int argc, char * argv[])
 		// printf("in for\n");
       if (!ROB[numc].tracedone) { /* Try to fetch if EOF has not been encountered. */
         num_fetch = 0;
-        while (((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) /* || ( !SIM_ENABLE && (tracectr < TRACE_SIZE ))*/ ) {
+        while (((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) )	// || ( !SIM_ENABLE && (tracectr < TRACE_SIZE )) ) 
+		{
 		// printf("while fetch %d\n", tracectr);
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
@@ -1230,9 +1237,8 @@ int main(int argc, char * argv[])
 
 
 
-
 	//Mehrnoosh:
-	  if (nonmemops_timing[numc]) {  /* Have some non-memory-ops to consume. */
+	  if (nonmemops_timing[numc] && last_lock_released) {  /* Have some non-memory-ops to consume. */
 	//   if (nonmemops[numc]) {  /* Have some non-memory-ops to consume. */
 	//Mehrnoosh.
 		// printf("%c nonmemops @ %lld \n", op_type[numc], CYCLE_VAL);
@@ -1269,7 +1275,7 @@ int main(int argc, char * argv[])
 	  else { /* Done consuming non-memory-ops.  Must now consume the memory rd or wr. */
 			// Mehrnoosh:
 			// printf("cycle %lld   main: mem 	 trace: %d		req: %d\n", CYCLE_VAL, tracectr, reqctr);
-
+			tail_written = false;
 			// Mehrnoosh.
 	      if (opertype[numc] == 'R' && last_lock_released) {
 			// printf("@ %lld serve R\n", CYCLE_VAL);
@@ -1287,6 +1293,7 @@ int main(int argc, char * argv[])
 	          ROB[numc].oramid[ROB[numc].tail] = oramid[numc];
 	          ROB[numc].waited_on[ROB[numc].tail] = last_read[numc];
 	          ROB[numc].reqid[ROB[numc].tail] = reqid[numc];
+			  tail_written = true;
 
 		
 		  // Check to see if the read is for buffered data in write queue - 
@@ -1298,9 +1305,9 @@ int main(int argc, char * argv[])
 		  }
 		  else {
 			// Mehrnoosh:
-				// if (last_read[numc])
-				// {
 					// printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				if (beginning[numc])
+				{
 					
 					if (op_type[numc] == 'o')
 					{
@@ -1322,7 +1329,7 @@ int main(int argc, char * argv[])
 						meta_t0 = CYCLE_VAL;
 						cur_meta = oramid[numc];
 					}
-				// }
+				}
 
 			// start = clock();
 			if (NONSEC_ENABLE)
@@ -1345,6 +1352,7 @@ int main(int argc, char * argv[])
 				if (last_read[numc])
 				{
 					last_read_served = false;
+					last_lock_released_prev = last_lock_released;
 					last_lock_released = false;
 					last_read_deleted = false;
 				}
@@ -1380,6 +1388,7 @@ int main(int argc, char * argv[])
 	          ROB[numc].oramid[ROB[numc].tail] = oramid[numc];
 	          ROB[numc].waited_on[ROB[numc].tail] = last_read[numc];
 	          ROB[numc].reqid[ROB[numc].tail] = reqid[numc];
+			  tail_written = true;
 
 		      /* Also, add this to the write queue. */
 
@@ -1392,6 +1401,7 @@ int main(int argc, char * argv[])
 				if (last_read[numc])
 				{
 					last_read_served = false;
+					last_lock_released_prev = last_lock_released;
 					last_lock_released = false;
 					last_read_deleted = false;
 				}
@@ -1422,10 +1432,20 @@ int main(int argc, char * argv[])
 		  return -1;
 		}
 	      }
-	      ROB[numc].tail = (ROB[numc].tail +1) % ROBSIZE;
+	      
+		// 	if (!tail_written)
+		// 	{
+		// 		printf("tail not written tail %d and last_lock_released %d and lsr %d \n", ROB[numc].tail,  last_lock_released, last_read_served);
+		// 	}
+		//   if (tail_written)
+		//   {
+			
+		  ROB[numc].tail = (ROB[numc].tail +1) % ROBSIZE;
 	      ROB[numc].inflight++;
 	      fetched[numc]++;
 	      num_fetch++;
+		//   }
+		  
 
 	      /* Done consuming one line of the trace file.  Read in the next. */
 		// Mehrnoosh:
@@ -1948,6 +1968,11 @@ int main(int argc, char * argv[])
 			
 
 			still_same_access = true;
+			// if (!last_lock_released)
+			// {
+			// 	num_fetch = MAX_FETCH;
+			// }
+			
 			last_lock_released = true;
 			
 			int nonmemsaved = nonmemops[numc];
@@ -1988,6 +2013,9 @@ int main(int argc, char * argv[])
 			if (pN->beginning)
 			{
 				comptime_max = 0;
+				nvm_tmax = 0;
+				dram_tmax = 0;
+				nvmt0_set = false;
 				// printf("%c %d begin @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 				if (op_type[numc] == 'o')
 				{
