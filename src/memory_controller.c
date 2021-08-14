@@ -147,6 +147,16 @@ int detnvm = 0;
 int detdram = 0;
 long long int determineCycle = 0;
 
+int onvm = 0;
+int envm = 0;
+int rnvm = 0;
+int odram = 0;
+int edram = 0;
+int rdram = 0;
+int mdram = 0;
+int lrs_ctr = 0;
+
+
 void test_ring(){
   unsigned long long int addr = 0;
   printf("Testing Ring ORAM...\n");
@@ -2545,7 +2555,7 @@ void take_snapshot(char * argv[]){
       {
         if (i % 4000000 == 0 )
         {
-          export_csv_intermed(exp_name, i/1000000, util_avg);
+          export_intermed(exp_name, i/1000000, util_avg);
           // reset_util_level();
         }
       }
@@ -2553,7 +2563,7 @@ void take_snapshot(char * argv[]){
       {
         if (i % 20000000 == 0 )
         {
-          export_csv_intermed(exp_name, i/1000000, util_avg);
+          export_intermed(exp_name, i/1000000, util_avg);
           // reset_util_level();
         }
       }
@@ -2561,7 +2571,7 @@ void take_snapshot(char * argv[]){
       {
         if (i % 50000000 == 0 )
         {
-          export_csv_intermed(exp_name, i/1000000, util_avg);
+          export_intermed(exp_name, i/1000000, util_avg);
           // reset_util_level();
         }
       }
@@ -2569,13 +2579,13 @@ void take_snapshot(char * argv[]){
       {
         if (i % 10000000 == 0 )
         {
-          export_csv_intermed(exp_name, i/1000000, util_avg);
+          export_intermed(exp_name, i/1000000, util_avg);
           // reset_util_level();
         }
 
         if (i == 400000000 )
         {
-         export_csv_intermed(exp_name, 401, util_overall);
+         export_intermed(exp_name, 401, util_overall);
         }
 
       }
@@ -5310,7 +5320,7 @@ void print_count_stat(FILE *fp){
 }
 
 
-void export_csv_intermed(char exp_name[], int ind, long double *arr){
+void export_intermed(char exp_name[], int ind, long double *arr){
   FILE *fp;
   // char *filename = (char *)malloc(sizeof(char)*100);
   // filename = "";
@@ -5586,18 +5596,18 @@ void export_csv(char * argv[]){
   //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
   //   }
   // }
-  // fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
-  // fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
-  // fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
-  // fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
-  // fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
-  // fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
-  // fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
-  // fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
-  // fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
-  // fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
-  // fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
-  // fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
+  fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
+  fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
+  fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
+  fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
+  fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
+  fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
+  fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
+  fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
+  fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
+  fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
+  fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
+  fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
   // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
   // fprintf(fp, "deadQ-size,%d\n", deadQ->size);
   fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
@@ -5643,7 +5653,7 @@ void export_csv(char * argv[]){
     fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
     fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_queue_latency[c]);
     fprintf(fp, "W_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_latency[c]);
-    fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
+    fprintf(fp, "W_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
   }
 
   // fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
@@ -5677,6 +5687,15 @@ void export_csv(char * argv[]){
   fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/dramchan));
   fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/NVM_CHANNEL));
   fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/dramchan));
+
+  fprintf(fp, "odram,%d\n", odram);
+  fprintf(fp, "onvm,%d\n", onvm);
+  fprintf(fp, "envm,%d\n", envm);
+  fprintf(fp, "edram,%d\n", edram);
+  fprintf(fp, "rnvm,%d\n", rnvm);
+  fprintf(fp, "rdram,%d\n", rdram);
+  fprintf(fp, "mdram,%d\n", mdram);
+  fprintf(fp, "lrs_ctr,%d\n", lrs_ctr);
 
 
   // fprintf(fp, "online_r,%d\n", online_r);
@@ -6098,6 +6117,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
     if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) )// || physical_address >= metadata_nvm_byte)
     {
       this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
+      // this_a->bank = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
       // this_a->bank = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
     }
     else
@@ -6836,17 +6856,22 @@ void update_served_count(request_t * request){
   }
 }
 
-void calc_wait_value(char op_type, int reqid){
+void calc_wait_value(char op_type, int reqid, long long int comptime){
+  long long int t1 = comptime - PIPELINEDEPTH;
+  // long long int t1 = CYCLE_VAL;
   if (op_type == 'o')
   {
     if (reqid == detnvm)
     {
-      online_wait_nvm += CYCLE_VAL - online_t0;
+      // printf("online t0 %lld\n", online_t0);
+      onvm++;
+      online_wait_nvm += t1 - online_t0;
       detnvm = 0;
     }
     else if (reqid == detdram)
     {
-      online_wait_dram += CYCLE_VAL - online_t0;
+      odram++;
+      online_wait_dram += t1 - online_t0;
       detdram = 0;
     }
     
@@ -6855,12 +6880,14 @@ void calc_wait_value(char op_type, int reqid){
   {
     if (reqid == detnvm)
     {
-      evict_wait_nvm += CYCLE_VAL - evict_t0;
+      envm++;
+      evict_wait_nvm += t1 - evict_t0;
       detnvm = 0;
     }
     else if (reqid == detdram)
     {
-      evict_wait_dram += CYCLE_VAL - evict_t0;
+      edram++;
+      evict_wait_dram += t1 - evict_t0;
       detdram = 0;
     }
   }
@@ -6868,12 +6895,14 @@ void calc_wait_value(char op_type, int reqid){
   {
     if (reqid == detnvm)
     {
-      reshuffle_wait_nvm += CYCLE_VAL - reshuffle_t0;
+      rnvm++;
+      reshuffle_wait_nvm += t1 - reshuffle_t0;
       detnvm = 0;
     }
     else if (reqid == detdram)
     {
-      reshuffle_wait_dram += CYCLE_VAL - reshuffle_t0;
+      rdram++;
+      reshuffle_wait_dram += t1 - reshuffle_t0;
       detdram = 0;
     }
   }
@@ -6881,7 +6910,8 @@ void calc_wait_value(char op_type, int reqid){
   {
     if (reqid == detdram)
     {
-      meta_wait_dram += CYCLE_VAL - meta_t0;
+      mdram++;
+      meta_wait_dram += t1 - meta_t0;
       detdram = 0;
     }
   }
@@ -6893,8 +6923,8 @@ void determine_served_all(request_t * request){
   if (request->op_type == 'o')
   { 
 
-    printf("b4 req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
-    printf("comp detreq %lld    comp max %lld\n", request->completion_time, comptime_max);
+    // printf("b4 req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
+    // printf("comp detreq %lld    comp max %lld\n", request->completion_time, comptime_max);
     if (!last_read_deleted)
     {
       last_read_deleted = (cur_dram_served_o == dram_to_serve_o) && (cur_nvm_served_o == nvm_to_serve_o);
@@ -6906,7 +6936,7 @@ void determine_served_all(request_t * request){
         cur_nvm_served_o = 0;
       }
     }
-    printf("af req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
+    // printf("af req%d dram %d   nvm %d  lsr %d\n", request->reqid, cur_dram_served_o, cur_nvm_served_o,  last_read_deleted);
   }
   else if (request->op_type == 'e')
   {
@@ -6963,9 +6993,9 @@ void determine_served_all(request_t * request){
   }
   else if (request->op_type == 'm')
   {
-    printf("b4 req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
-    printf("b4 req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_deleted);
-    printf("comp req%d %lld    comp max %lld\n", request->reqid, request->completion_time, comptime_max);
+    // printf("b4 req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
+    // printf("b4 req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_deleted);
+    // printf("comp req%d %lld    comp max %lld\n", request->reqid, request->completion_time, comptime_max);
 
     if (!last_read_deleted)
     {
@@ -6987,8 +7017,8 @@ void determine_served_all(request_t * request){
         }
       }                  
     }
-    printf("af req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
-    printf("af req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_deleted);
+    // printf("af req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
+    // printf("af req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_deleted);
 
   }
   
@@ -7198,7 +7228,7 @@ issue_request_command (request_t * request, char rwt)
         // printf("nvm  @ %lld\n", CYCLE_VAL);
         // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
       }
-				// printf("%c %d issueR req%d	 @ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
+				// printf("%c %d issueR req%d	 @ %lld     comp %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, request->completion_time);
         // if (request->beginning)
 				// {
 					

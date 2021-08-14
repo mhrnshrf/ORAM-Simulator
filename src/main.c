@@ -109,7 +109,8 @@ long long int instctr= 0;
 double rmpki;
 double wmpki;
 
-
+int cur_oramid;
+char cur_op;
 
 int path_access_latency = 0;
 double path_access_latency_avg = 0;
@@ -986,23 +987,26 @@ int main(int argc, char * argv[])
       while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
 		//   printf("while rob inflight %d\n", tracectr);
         /* Keep retiring until retire width is consumed or ROB is empty. */
+		
 
-        if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {  
-			if (ROB[numc].waited_on[ROB[numc].head])
-			{
-				// printf("retired %c %d @ %lld comp time %lld\n",   ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], CYCLE_VAL, ROB[numc].comptime[ROB[numc].head]);
-				// last_read_served = true;
-				// last_req_served = true;
-			}
-			//  if (ROB[numc].waited_on[ROB[numc].head])
-			// {
-				calc_wait_value(ROB[numc].op_type[ROB[numc].head], ROB[numc].reqid[ROB[numc].head]);
+        if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {
+				if (ROB[numc].oramid[ROB[numc].head] == cur_oramid && ROB[numc].op_type[ROB[numc].head] == cur_op)
+				{
+					num_ret--;
+				}
+				else if (ROB[numc].op_type[ROB[numc].head] != 'n')
+				{
+					cur_oramid = ROB[numc].oramid[ROB[numc].head];
+					cur_op = ROB[numc].op_type[ROB[numc].head];
+				}
+				calc_wait_value(ROB[numc].op_type[ROB[numc].head], ROB[numc].reqid[ROB[numc].head], ROB[numc].comptime[ROB[numc].head]);
 				if (!last_read_served)
 				{
 					if (ROB[numc].reqid[ROB[numc].head] == determineReq)
 					{
 						last_read_served = true;
 						determineReq = 0;
+						lrs_ctr++;
 						// printf("last read served @ %lld\n", CYCLE_VAL);		
 					}
 				}
@@ -1040,37 +1044,8 @@ int main(int argc, char * argv[])
 				// meta_t0 = CYCLE_VAL;
 				// cur_meta = request->oramid;
 				}
-			// }
 
-			// if (ROB[numc].ending[ROB[numc].head])
-			// {
-			// 	if (ROB[numc].op_type[ROB[numc].head] == 'o')
-			// 	{
-			// 		if (curr_online == ROB[numc].oramid[ROB[numc].head])
-			// 		{
-			// 			if (curr_online == ROB[numc].nvm_access[ROB[numc].head])
-			// 			{
-							
-			// 			}
-						
-			// 		}
-					
-			// 	}
-			// 	else if (ROB[numc].op_type[ROB[numc].head] == 'e')
-			// 	{
-			// 		/* code */
-			// 	}
-			// 	else if (ROB[numc].op_type[ROB[numc].head] == 'r')
-			// 	{
-			// 		/* code */
-			// 	}
-				
-			// }
 			
-			// else{
-			// 	printf("retired  DRAM @ %lld \n", CYCLE_VAL);
-
-			// }
 	  /* Keep retiring instructions if they are done. */
 	  ROB[numc].head = (ROB[numc].head + 1) % ROBSIZE;
 	  ROB[numc].inflight--;
@@ -1264,7 +1239,7 @@ int main(int argc, char * argv[])
 		// if (!last_read_served)
 		// {
 		// }
-		// printf("%c %d insert @ %lld	comp time %lld %s	rob%d	req%d\n", ROB[numc].op_type[ROB[numc].tail], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
+		printf("%c insert %d @ %lld	comp time %lld %s	rob%d	req%d\n", ROB[numc].op_type[ROB[numc].tail], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
 		
 
 		trace_clk++;
@@ -1305,9 +1280,9 @@ int main(int argc, char * argv[])
 		  }
 		  else {
 			// Mehrnoosh:
-					// printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				if (beginning[numc])
 				{
+					printf("%c %d begin req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 					
 					if (op_type[numc] == 'o')
 					{
@@ -1330,6 +1305,8 @@ int main(int argc, char * argv[])
 						cur_meta = oramid[numc];
 					}
 				}
+
+				printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 
 			// start = clock();
 			if (NONSEC_ENABLE)
@@ -1396,7 +1373,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 			{
 				// start = clock();
-				// printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				
 				if (last_read[numc])
 				{
@@ -1757,7 +1734,7 @@ int main(int argc, char * argv[])
 								// if (tracectr > 1 && tracectr % 10000000 == 0)
 								// {
 								// 	int ind = tracectr/1000000;
-								// 	export_csv_intermed(exp_name, ind, shuff_interval);
+								// 	export_intermed(exp_name, ind, shuff_interval);
 								// 	reset_shuff_interval();
 								// }
 								

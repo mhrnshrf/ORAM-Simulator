@@ -362,6 +362,7 @@ extern int longest_req;
 extern long long int nvm_tmax;
 extern long long int dram_tmax;
 extern bool nvmt0_set;
+extern int lrs_ctr;
 
 
 
@@ -452,7 +453,7 @@ int remote_allocate(int index, int offset);
 bool remove_dead(Queue *pQueue, int key1, int key2);
 void reset_shuff_interval();
 void print_array(int * arr, int size, FILE *fp);
-void export_csv_intermed(char * exp_name, int ind, long double *arr);
+void export_intermed(char * exp_name, int ind, long double *arr);
 void record_util_level();
 void reset_util_level();
 void print_array_double(long double * arr, int size, FILE *fp);
@@ -468,7 +469,7 @@ void switch_dead_enable_to(bool tf);
 void update_count_stat(int count, int level);
 void update_ddr_timing_param(int channel);
 void reset_profile_counters();
-void calc_wait_value(char op_type, int reqid);
+void calc_wait_value(char op_type, int reqid, long long int comptime);
 
 
 // Mehrnoosh.
