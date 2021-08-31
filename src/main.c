@@ -907,6 +907,12 @@ int main(int argc, char * argv[])
 //   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
 
+	// if (tracectr % 100 == 0)
+	// {
+	// 	printf("@ %d\n", tracectr);
+	// }
+	
+
 
 	// Mehrnoosh:
 	// printf("@ %lld\n", CYCLE_VAL);
@@ -1010,13 +1016,17 @@ int main(int argc, char * argv[])
 						// printf("last read served @ %lld\n", CYCLE_VAL);		
 					}
 				}
-				
+
+				// if (tracectr > 2200)
+				// {
 				// printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
 				// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
 				// ROB[numc].reqid[ROB[numc].head],
 				// CYCLE_VAL, 
 				// ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
 				// ROB[numc].head);
+				// }
+				
 
 				if (ROB[numc].op_type[ROB[numc].head] == 'o')
 				{
@@ -1282,7 +1292,11 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 				if (beginning[numc])
 				{
-					// printf("%c %d begin req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+					if (tracectr > 2200)
+					{
+					printf("%c %d begin req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+
+					}
 					
 					if (op_type[numc] == 'o')
 					{
@@ -1306,7 +1320,11 @@ int main(int argc, char * argv[])
 					}
 				}
 
+				if (tracectr > 2200)
+				{
 				// printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				}
+				
 
 			// start = clock();
 			if (NONSEC_ENABLE)
@@ -1373,7 +1391,10 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 			{
 				// start = clock();
+				if (tracectr > 2200)
+				{
 				// printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				}
 				
 				if (last_read[numc])
 				{

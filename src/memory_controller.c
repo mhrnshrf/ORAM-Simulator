@@ -6989,10 +6989,22 @@ void determine_served_all(request_t * request){
   {
     if (!last_read_deleted)
     {
-      last_read_deleted = (type == READ) ? (cur_dram_served_r_r == dram_to_serve_r_r) && (cur_nvm_served_r_r == nvm_to_serve_r_r)
-                                       : (cur_dram_served_r_w == dram_to_serve_r_w) && (cur_nvm_served_r_w == nvm_to_serve_r_w);
+      if (request->nvm_access)
+      {
+        last_read_deleted = (type == READ) ?  (cur_nvm_served_r_r == nvm_to_serve_r_r)
+                                       :  (cur_nvm_served_r_w == nvm_to_serve_r_w);
+      }
+      else
+      {
+        last_read_deleted = (type == READ) ? (cur_dram_served_r_r == dram_to_serve_r_r) 
+                                       : (cur_dram_served_r_w == dram_to_serve_r_w);
+      }
+      
+
+
       if (last_read_deleted)
       {
+        // printf("detreq r: %d\n", request->reqid);
         determineReq = longest_req;
         determineCycle = comptime_max;
         if (type == READ)
@@ -7058,7 +7070,10 @@ clean_queues (int channel)
   {
     if (rd_ptr->request_served == 1) // && rd_ptr->completion_time <= CYCLE_VAL)
     {
+      if (tracectr > 2200)
+			{
       // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
+			}
       update_served_count(rd_ptr);
       determine_served_all(rd_ptr);
 
@@ -7083,7 +7098,11 @@ clean_queues (int channel)
   {
     if (wrt_ptr->request_served == 1) // && wrt_ptr->completion_time <= CYCLE_VAL)
     {
+      if (tracectr > 2200)
+      {
       // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
+      }
+
       update_served_count(wrt_ptr);
       determine_served_all(wrt_ptr);
 
