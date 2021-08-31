@@ -674,6 +674,23 @@ bool is_nvm_addr(int addr){
   return false;
 }
 
+
+bool is_nvm_addr_byte(long long int physical_address){
+    if (!NVM_ENABLE)
+    {
+      return false;
+    }
+    
+    unsigned long long int data_addr_byte = (unsigned long long int) DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE);
+    unsigned long long int metadata_nvm_byte = DATA_ADDR_SPACE + (pow(2, NVM_START)-1)*1;
+    metadata_nvm_byte =  (unsigned long long int) metadata_nvm_byte << (int)log2(BLOCK_SIZE);
+    if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) )// || physical_address >= metadata_nvm_byte)
+    {
+      return true;
+    }
+    return false;
+}
+
 void var_init(){
   TREE_VAR = ORAM;
   LEVEL_VAR = LEVEL;
@@ -5813,6 +5830,7 @@ bool is_nvm_channel(int channel){
 
 void update_ddr_timing_param(int channel){
   bool nvm = is_nvm_channel(channel);
+  nvm = false;
 
   T_RCD        = nvm ?   88       :        44;                  // 88
   T_RP         = nvm ?   240      :        44;  // 60 ~ 5 / 528 // 240
@@ -7221,7 +7239,7 @@ issue_request_command (request_t * request, char rwt)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
-      if (is_nvm_channel(request->dram_addr.channel) && NVM_ENABLE)
+      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
       {
         // int coef = (rwt == 'R')? 1 : 3;
         request->completion_time += NVM_LATENCY;
@@ -7377,7 +7395,7 @@ issue_request_command (request_t * request, char rwt)
       // printf("%c %d issueW req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
 
       request->completion_time = CYCLE_VAL + T_DATA_TRANS + T_WR;
-      if (is_nvm_channel(request->dram_addr.channel) && NVM_ENABLE)
+      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
       {
         request->completion_time += NVM_LATENCY*8;
       }
