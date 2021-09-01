@@ -5019,7 +5019,6 @@ int calc_range(int i){
 
 void ring_early_reshuffle(int label){
   // printf("reshuffle trace %d\n", tracectr);
-  bool last_read = false;
   int shufcount = 0;
   int stashb4 = stashctr;
   // for (int i = 0; i < LEVEL; i++)
@@ -5053,16 +5052,13 @@ void ring_early_reshuffle(int label){
         {
           int mem_addr = calc_mem_addr(index, j, 'R');
           reqmade++;
-          if (reqmade == RING_Z)
-          {
-            last_read = true;
-          }
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
             // bool nvm_access = is_nvm_addr(mem_addr);
             bool nvm_access = in_nvm(i);
             bool beginning = (reqmade == 1);
             bool ending = false;
+            bool last_read = (reqmade == RING_Z);
             char op_type = 'r';
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
           }
@@ -7070,7 +7066,7 @@ clean_queues (int channel)
   {
     if (rd_ptr->request_served == 1) // && rd_ptr->completion_time <= CYCLE_VAL)
     {
-      if (tracectr > 2200)
+      if (rd_ptr->oramid == 18163)
 			{
       // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
 			}
@@ -7098,7 +7094,7 @@ clean_queues (int channel)
   {
     if (wrt_ptr->request_served == 1) // && wrt_ptr->completion_time <= CYCLE_VAL)
     {
-      if (tracectr > 2200)
+      if (wrt_ptr->oramid == 18163)
       {
       // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
       }
