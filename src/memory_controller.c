@@ -7254,13 +7254,7 @@ issue_request_command (request_t * request, char rwt)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
-      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
-      {
-        // int coef = (rwt == 'R')? 1 : 3;
-        request->completion_time += NVM_LATENCY;
-        // printf("nvm  @ %lld\n", CYCLE_VAL);
-        // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
-      }
+
 				// printf("%c %d issueR req%d	 @ %lld     comp %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, request->completion_time);
         // if (request->beginning)
 				// {
@@ -7299,6 +7293,17 @@ issue_request_command (request_t * request, char rwt)
       
       
       request->latency = request->completion_time - request->arrival_time;
+
+      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
+      {
+        // int coef = (rwt == 'R')? 1 : 3;
+        // request->completion_time += NVM_LATENCY;
+        request->completion_time += (request->latency) * NVM_LATENCY;
+        // printf("nvm  @ %lld\n", CYCLE_VAL);
+        // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
+      }
+
+
       request->dispatch_time = CYCLE_VAL;
       request->request_served = 1;
       // Mehrnoosh:
@@ -7410,16 +7415,14 @@ issue_request_command (request_t * request, char rwt)
       // printf("%c %d issueW req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
 
       request->completion_time = CYCLE_VAL + T_DATA_TRANS + T_WR;
-      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
-      {
-        request->completion_time += NVM_LATENCY*8;
-      }
-
-      
-     
-     
      
       request->latency = request->completion_time - request->arrival_time;
+
+      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
+      {
+        request->completion_time += (request->latency) * NVM_LATENCY;
+      }
+
       request->dispatch_time = CYCLE_VAL;
       request->request_served = 1;
       stats_writes_completed[channel]++;
