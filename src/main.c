@@ -987,88 +987,120 @@ int main(int argc, char * argv[])
     /* For each core, retire instructions if they have finished. */
 	if (last_read_deleted || !WAIT_ENABLE)
 	{
-    for (numc = 0; numc < NUMCORES; numc++) {
-      num_ret = 0;
-	//   printf("before 	rob head %d		rob tail %d\n", ROB[numc].head, ROB[numc].tail);
-      while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
-		//   printf("while rob inflight %d\n", tracectr);
-        /* Keep retiring until retire width is consumed or ROB is empty. */
-		
-
-        if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {
-				if (ROB[numc].oramid[ROB[numc].head] == cur_oramid && ROB[numc].op_type[ROB[numc].head] == cur_op)
-				{
-					num_ret--;
-				}
-				else if (ROB[numc].op_type[ROB[numc].head] != 'n')
-				{
-					cur_oramid = ROB[numc].oramid[ROB[numc].head];
-					cur_op = ROB[numc].op_type[ROB[numc].head];
-				}
-				calc_wait_value(ROB[numc].op_type[ROB[numc].head], ROB[numc].reqid[ROB[numc].head], ROB[numc].comptime[ROB[numc].head]);
-				if (!last_read_served)
-				{
-					if (ROB[numc].reqid[ROB[numc].head] == determineReq)
-					{
-						last_read_served = true;
-						determineReq = 0;
-						lrs_ctr++;
-						// printf("last read served @ %lld\n", CYCLE_VAL);		
-					}
-				}
-
-				// if (ROB[numc].oramid[ROB[numc].head] == 18163)
-				// {
-				// printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
-				// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
-				// ROB[numc].reqid[ROB[numc].head],
-				// CYCLE_VAL, 
-				// ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
-				// ROB[numc].head);
-				// }
-				
-
-				if (ROB[numc].op_type[ROB[numc].head] == 'o')
-				{
-				// online_t0 = CYCLE_VAL;
-				// cur_online = request->oramid;
-				}
-				else if (ROB[numc].op_type[ROB[numc].head]== 'e')
-				{
-					// printf("e %d served @ %lld\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL);
-				// printf("e\n");
-				// evict_t0 = CYCLE_VAL;
-				// cur_evict = request->oramid;
-				}
-				else if (ROB[numc].op_type[ROB[numc].head] == 'r')
-				{
-				// printf("r\n");
-					// printf("r %d served @ %lld\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL);
-				// reshuffle_t0 = CYCLE_VAL;
-				// cur_reshuffle = request->oramid;
-				}
-				else if (ROB[numc].op_type[ROB[numc].head] == 'm')
-				{
-					// printf("m %d served @ %lld	comp time %lld	%s	%d\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL, ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", ROB[numc].head);
-				// printf("r\n");
-				// meta_t0 = CYCLE_VAL;
-				// cur_meta = request->oramid;
-				}
-
+		for (numc = 0; numc < NUMCORES; numc++) {
+		num_ret = 0;
+		//   printf("before 	rob head %d		rob tail %d\n", ROB[numc].head, ROB[numc].tail);
+		while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
+			//   printf("while rob inflight %d\n", tracectr);
+			/* Keep retiring until retire width is consumed or ROB is empty. */
 			
-	  /* Keep retiring instructions if they are done. */
-	  ROB[numc].head = (ROB[numc].head + 1) % ROBSIZE;
-	  ROB[numc].inflight--;
-	  committed[numc]++;
-	  num_ret++;
-	  
-        }
-	else  /* Instruction not complete.  Stop retirement for this core. */
-	  break;
-      }  /* End of while loop that is retiring instruction for one core. */
-	//   printf("after 	rob head %d		rob tail %d\n", ROB[numc].head, ROB[numc].tail);
 
-    }  /* End of for loop that is retiring instructions for all cores. */
+			if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {
+
+					if (ROB[numc].optype[ROB[numc].head]  == 'W')
+					{
+						request_t * req_ptr = form_request(ROB[numc].optype[ROB[numc].head], 
+														ROB[numc].oramid[ROB[numc].head], 
+														ROB[numc].op_type[ROB[numc].head], 
+														ROB[numc].reqid[ROB[numc].head], 
+														ROB[numc].nvm_access[ROB[numc].head],
+														ROB[numc].comptime[ROB[numc].head]);
+						
+						update_served_count(req_ptr);
+						determine_served_all(req_ptr);
+						free(req_ptr);
+					}
+
+					if (ROB[numc].optype[ROB[numc].head]  == 'D')
+					{
+						num_ret--;
+					}
+					else if (ROB[numc].oramid[ROB[numc].head] == cur_oramid && ROB[numc].op_type[ROB[numc].head] == cur_op)
+					{
+						num_ret--;
+					}
+					else if (ROB[numc].op_type[ROB[numc].head] != 'n')
+					{
+						cur_oramid = ROB[numc].oramid[ROB[numc].head];
+						cur_op = ROB[numc].op_type[ROB[numc].head];
+					}
+
+					if (ROB[numc].optype[ROB[numc].head]  != 'D')
+					{
+						calc_wait_value(ROB[numc].op_type[ROB[numc].head], ROB[numc].reqid[ROB[numc].head], ROB[numc].comptime[ROB[numc].head]);
+					}
+
+
+					if (!last_read_served && ROB[numc].optype[ROB[numc].head]  == 'R')
+					{
+						if (ROB[numc].reqid[ROB[numc].head] == determineReq)
+						{
+							last_read_served = true;
+							determineReq = 0;
+							lrs_ctr++;
+							// printf("last read served @ %lld\n", CYCLE_VAL);	
+							// printf("%c %d served %c req%d @ %lld  DETREQ SERVED	comp time %lld	rob%d \n", 
+							// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
+							// ROB[numc].reqid[ROB[numc].head],
+							// CYCLE_VAL, 
+							// ROB[numc].comptime[ROB[numc].head], 
+							// ROB[numc].head);	
+						}
+					}
+
+					// if (tracectr >= 4200)
+					// {
+					// printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
+					// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
+					// ROB[numc].reqid[ROB[numc].head],
+					// CYCLE_VAL, 
+					// ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
+					// ROB[numc].head);
+					// }
+					
+
+					if (ROB[numc].op_type[ROB[numc].head] == 'o')
+					{
+					// online_t0 = CYCLE_VAL;
+					// cur_online = request->oramid;
+					}
+					else if (ROB[numc].op_type[ROB[numc].head]== 'e')
+					{
+						// printf("e %d served @ %lld\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL);
+					// printf("e\n");
+					// evict_t0 = CYCLE_VAL;
+					// cur_evict = request->oramid;
+					}
+					else if (ROB[numc].op_type[ROB[numc].head] == 'r')
+					{
+					// printf("r\n");
+						// printf("r %d served @ %lld\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL);
+					// reshuffle_t0 = CYCLE_VAL;
+					// cur_reshuffle = request->oramid;
+					}
+					else if (ROB[numc].op_type[ROB[numc].head] == 'm')
+					{
+						// printf("m %d served @ %lld	comp time %lld	%s	%d\n", ROB[numc].oramid[ROB[numc].head], CYCLE_VAL, ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", ROB[numc].head);
+					// printf("r\n");
+					// meta_t0 = CYCLE_VAL;
+					// cur_meta = request->oramid;
+					}
+
+				
+		/* Keep retiring instructions if they are done. */
+		ROB[numc].optype[ROB[numc].head] = 'D';
+		ROB[numc].head = (ROB[numc].head + 1) % ROBSIZE;
+		ROB[numc].inflight--;
+		committed[numc]++;
+		num_ret++;
+		
+			}
+		else  /* Instruction not complete.  Stop retirement for this core. */
+		break;
+		}  /* End of while loop that is retiring instruction for one core. */
+		//   printf("after 	rob head %d		rob tail %d\n", ROB[numc].head, ROB[numc].tail);
+
+		}  /* End of for loop that is retiring instructions for all cores. */
 
 	}
 
@@ -1114,7 +1146,7 @@ int main(int argc, char * argv[])
         num_fetch = 0;
         while (((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) )	// || ( !SIM_ENABLE && (tracectr < TRACE_SIZE )) ) 
 		{
-		// printf("while fetch %d\n", tracectr);
+		// printf("while fetch %lld\n", CYCLE_VAL);
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
 	  /* Read the corresponding trace file and populate the tail of the ROB data structure. */
@@ -1249,7 +1281,7 @@ int main(int argc, char * argv[])
 		// if (!last_read_served)
 		// {
 		// }
-		// printf("%c insert %d @ %lld	comp time %lld %s	rob%d	req%d\n", ROB[numc].op_type[ROB[numc].tail], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
+		// printf("%c insertN %d @ %lld	comp time %lld %s	rob%d	req%d\n", ROB[numc].op_type[ROB[numc].tail], oramid[numc], CYCLE_VAL, ROB[numc].comptime[ROB[numc].tail],  last_read[numc]?" last ":" ", ROB[numc].tail, reqid[numc]);
 		
 
 		trace_clk++;
@@ -1263,7 +1295,8 @@ int main(int argc, char * argv[])
 			tail_written = false;
 			// Mehrnoosh.
 	      if (opertype[numc] == 'R' && last_lock_released) {
-			// printf("@ %lld serve R\n", CYCLE_VAL);
+
+			// printf("@ %lld add R to rob\n", CYCLE_VAL);
 
 		  addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 	          ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
@@ -1285,7 +1318,9 @@ int main(int argc, char * argv[])
 		  // return constant latency if match in WQ
 		  // add in read queue otherwise
 		  int lat = read_matches_write_or_read_queue(addr[numc]);
-		  if(lat) {
+		  if(false) // (lat) 
+		  {
+			//   printf("lat\n");
 			ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+lat+PIPELINEDEPTH;
 		  }
 		  else {
@@ -1320,11 +1355,11 @@ int main(int argc, char * argv[])
 					}
 				}
 
-				if (oramid[numc] == 18163)
-				{
+				// if (tracectr >= 4200)
+				// {
 				// printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				// printf("beginning? %d	ending? %d 	last read?  %d\n", beginning[numc], ending[numc], last_read[numc]);
-				}
+				// }
 				
 
 			// start = clock();
@@ -1351,6 +1386,7 @@ int main(int argc, char * argv[])
 					last_lock_released_prev = last_lock_released;
 					last_lock_released = false;
 					last_read_deleted = false;
+
 				}
 				
 				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], reqid[numc]);
@@ -1369,13 +1405,13 @@ int main(int argc, char * argv[])
 	      }
 	      else if (last_lock_released){  /* This must be a 'W'.  We are confirming that while reading the trace. */
 	        if (opertype[numc] == 'W') {
-			// printf("@ %lld serve W\n", CYCLE_VAL);
+			// printf("@ %lld add W to rob\n", CYCLE_VAL);
 
 		      addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 		      ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
 		      ROB[numc].optype[ROB[numc].tail] = opertype[numc];
-		    //   ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
-		      ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL + BIGNUM;
+		      ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+PIPELINEDEPTH;
+		    //   ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL + BIGNUM;
 
 			  ROB[numc].beginning[ROB[numc].tail] = beginning[numc];
 	          ROB[numc].ending[ROB[numc].tail] = ending[numc];
@@ -1392,7 +1428,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 			{
 				// start = clock();
-				// if (oramid[numc] == 18163)
+				// if (tracectr >= 4200)
 				// {
 				// printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				// }
@@ -1402,13 +1438,20 @@ int main(int argc, char * argv[])
 					last_read_served = false;
 					last_lock_released_prev = last_lock_released;
 					last_lock_released = false;
-					last_read_deleted = false;
+					last_read_deleted = true;
+					// determineReq = reqid[numc];
 				}
 
-				// if (SIM_ENABLE)
+				// if (last_read[numc])
 				// {
-					insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], last_read[numc], reqid[numc]);
+				// 	last_read_served = true;
+				// 	last_lock_released_prev = last_lock_released;
+				// 	last_lock_released = true;
+				// 	last_read_deleted = true;
 				// }
+
+
+				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], last_read[numc], reqid[numc]);
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
@@ -1438,7 +1481,7 @@ int main(int argc, char * argv[])
 		// 	}
 		//   if (tail_written)
 		//   {
-			
+			// printf("rob tail++\n");	
 		  ROB[numc].tail = (ROB[numc].tail +1) % ROBSIZE;
 	      ROB[numc].inflight++;
 	      fetched[numc]++;
@@ -2003,6 +2046,12 @@ int main(int argc, char * argv[])
             op_type[numc] = pN->op_type;
             reqid[numc] = pN->reqid;
 
+			// if (opertype[numc] == 'W')
+			// {
+			// 	last_read[numc] = false;
+			// }
+			
+
 			if (!last_read_served)
 			{
 				printf("last read not served yet!!!\n");
@@ -2071,6 +2120,8 @@ int main(int argc, char * argv[])
 			// nonmemops[numc] = 0; // ??? not sure about this one ~~~> guess resolved
 			
 			// printf("\ndequeued: oramid: %d	req: %d \n", pN->oramid, reqctr);
+			// printf("%c %d dequeue req%d	@ %lld	lrs %d	llr %d  %c\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL, last_read_served, last_lock_released, opertype[numc]);
+
 
 			if (oram_just_invoked)
 			{

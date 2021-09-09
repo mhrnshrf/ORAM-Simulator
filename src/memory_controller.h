@@ -550,6 +550,7 @@ typedef struct req
   char op_type;
   bool last_req;
   int reqid;
+  int countdown;
 
   // Mehrnoosh.
 } request_t;
@@ -734,6 +735,13 @@ void print_stats();
 
 // calculate power for each channel
 float calculate_power(int channel, int rank, int print_stats_type, int chips_per_rank);
+
+
+// Mehrnoosh:
+request_t * form_request(int operation_type, int oramid, char op_type, int reqid, bool nvm_access, long long int completion_time);
+void determine_served_all(request_t * request);
+void update_served_count(request_t * request);
+// Mehrnoosh.
 
 
 

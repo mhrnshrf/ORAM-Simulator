@@ -1140,6 +1140,17 @@ void oram_alloc(){
   // nvm_to_serve_m_r = (LEVEL - NVM_START)*(1);
   // nvm_to_serve_m_w = (LEVEL - NVM_START)*(1);
 
+
+  // cur_dram_served_e_w = dram_to_serve_e_w;
+  // cur_nvm_served_e_w = nvm_to_serve_e_w;
+  // cur_dram_served_m_w = dram_to_serve_m_w;
+  // // cur_nvm_served_m_w = 0;
+  // cur_dram_served_r_w = dram_to_serve_r_w;
+  // cur_nvm_served_r_w = nvm_to_serve_r_w;
+
+
+
+
   for (int i = 0; i < LEVEL; i++)
 	{
 		path_length += LZ[i];
@@ -1615,7 +1626,8 @@ void read_path(int label){
     }
     
 
-    for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+    // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
@@ -1656,7 +1668,8 @@ void read_path(int label){
               bool nvm_access = in_nvm(i);
 
               reqmade++;
-              if (i == TOP_CACHE_VAR && reqmade == RING_Z)
+              // if (i == TOP_CACHE_VAR && reqmade == RING_Z)
+              if (i == LEVEL_VAR-1 && reqmade == RING_Z)
               {
                 last_read = true;
                 // printf("reqmade is true\n");
@@ -1666,7 +1679,8 @@ void read_path(int label){
 
               if (SIM_ENABLE_VAR)
               {
-                bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
+                // bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
+                bool beginning = (i ==  TOP_CACHE_VAR && reqmade == 1);
                 bool ending = false;
                 char op_type = 'e';
                 insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
@@ -1763,7 +1777,8 @@ void read_path(int label){
 
             reqcont++;
 
-            if (i == TOP_CACHE_VAR && reqcont == RING_Z)
+            // if (i == TOP_CACHE_VAR && reqcont == RING_Z)
+            if (i == LEVEL_VAR-1 && reqcont == RING_Z)
             {
               // printf("reqcont is true\n");
               last_read = true;
@@ -1774,7 +1789,7 @@ void read_path(int label){
             bool nvm_access = in_nvm(i);
             if (SIM_ENABLE_VAR)
             {
-              bool beginning = false;
+              bool beginning = (i ==  TOP_CACHE_VAR && reqcont == 1);
               bool ending = false;
               char op_type = 'e';
 
@@ -6183,6 +6198,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->ending = ending;
     new_node->op_type = op_type;
     new_node->reqid = reqid;
+    new_node->countdown = (!nvm_access) ? 0 : (type == READ) ? 180 : 384 ;
     // if (nvm_access)
     // {
     //   printf("nvm   ");
@@ -6346,6 +6362,13 @@ update_read_queue_commands (int channel)
 
     // ignore the requests whose completion time has been determined
     // these requests will be removed this very cycle 
+    if (curr->countdown > 0)
+    {
+      curr->countdown--;
+      continue;
+    }
+    
+
     if (curr->request_served == 1)
       continue;
     int bank = curr->dram_addr.bank;
@@ -6452,6 +6475,12 @@ update_write_queue_commands (int channel)
   request_t * curr = NULL;
   LL_FOREACH (write_queue_head[channel], curr) 
   {
+    if (curr->countdown > 0)
+    {
+      curr->countdown--;
+      continue;
+    }
+
     if (curr->request_served == 1)
       continue;
     int bank = curr->dram_addr.bank;
@@ -6746,7 +6775,6 @@ void update_served_count(request_t * request){
               detnvm = longest_nvm;
               // evict_wait_nvm += request->completion_time - evict_t0;
               // evict_wait_nvm += CYCLE_VAL - evict_t0;
-
             }
           }
         }
@@ -6934,6 +6962,8 @@ void calc_wait_value(char op_type, int reqid, long long int comptime){
 
 void determine_served_all(request_t * request){
   optype_t type = request->operation_type;
+
+  // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
   if (request->op_type == 'o')
   { 
 
@@ -6954,102 +6984,184 @@ void determine_served_all(request_t * request){
   }
   else if (request->op_type == 'e')
   {
-    // printf("b4 req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_e_r, cur_nvm_served_e_r,  last_read_deleted);
-    // printf("b4 req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_e_w, cur_nvm_served_e_w,  last_read_deleted);
     // printf("comp detreq %lld    comp max %lld\n", request->completion_time, comptime_max);
-    if (!last_read_deleted)
+    if (type == READ)
     {
-      last_read_deleted = (type == READ) ? (cur_dram_served_e_r == dram_to_serve_e_r) && (cur_nvm_served_e_r == nvm_to_serve_e_r)
-                                       : (cur_dram_served_e_w == dram_to_serve_e_w) && (cur_nvm_served_e_w == nvm_to_serve_e_w);
-      if (last_read_deleted)
+      // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
+      // printf("b4 req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_e_r, cur_nvm_served_e_r,  last_read_deleted);
+      if (!last_read_deleted)
       {
-        determineReq = longest_req;
-        determineCycle = comptime_max;
-        if (type == READ)
+        // last_read_deleted = (type == READ) ? (cur_dram_served_e_r == dram_to_serve_e_r) && (cur_nvm_served_e_r == nvm_to_serve_e_r)
+        //                                 : (cur_dram_served_e_w == dram_to_serve_e_w) && (cur_nvm_served_e_w == nvm_to_serve_e_w);
+        last_read_deleted = (cur_dram_served_e_r == dram_to_serve_e_r) && (cur_nvm_served_e_r == nvm_to_serve_e_r);
+
+        if (last_read_deleted)
         {
-          cur_dram_served_e_r = 0;
-          cur_nvm_served_e_r = 0;
+          // if (type == READ)
+          // {
+            determineReq = longest_req;
+            determineCycle = comptime_max;
+            cur_dram_served_e_r = 0;
+            cur_nvm_served_e_r = 0;
+          // }
+          // else 
+          // {
+          //   cur_dram_served_e_w = 0;
+          //   cur_nvm_served_e_w = 0;
+          // }
         }
-        else 
+      }
+      // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
+      // printf("af req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_e_r, cur_nvm_served_e_r,  last_read_deleted);
+    }
+    else if (type == WRITE)
+    {
+      // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
+      // printf("b4 req%d dramW %d   nvmW %d  lsw %d\n", request->reqid, cur_dram_served_e_w, cur_nvm_served_e_w,  last_read_served);
+      if (!last_read_served)
+      { 
+        last_read_served = (cur_dram_served_e_w == dram_to_serve_e_w) && (cur_nvm_served_e_w == nvm_to_serve_e_w);
+        if (last_read_served)
         {
           cur_dram_served_e_w = 0;
           cur_nvm_served_e_w = 0;
         }
       }
+      // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
+      // printf("af req%d dramW %d   nvmW %d  lsw %d\n", request->reqid, cur_dram_served_e_w, cur_nvm_served_e_w,  last_read_served);
     }
-    // printf("af req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_e_r, cur_nvm_served_e_r,  last_read_deleted);
-    // printf("af req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_e_w, cur_nvm_served_e_w,  last_read_deleted);
+    
 
   }
   else if (request->op_type == 'r')
   {
-    if (!last_read_deleted)
+    if (type == READ)
     {
-      if (request->nvm_access)
+      if (!last_read_deleted)
       {
-        last_read_deleted = (type == READ) ?  (cur_nvm_served_r_r == nvm_to_serve_r_r)
-                                       :  (cur_nvm_served_r_w == nvm_to_serve_r_w);
-      }
-      else
-      {
-        last_read_deleted = (type == READ) ? (cur_dram_served_r_r == dram_to_serve_r_r) 
-                                       : (cur_dram_served_r_w == dram_to_serve_r_w);
-      }
-      
-
-
-      if (last_read_deleted)
-      {
-        // printf("detreq r: %d\n", request->reqid);
-        determineReq = longest_req;
-        determineCycle = comptime_max;
-        if (type == READ)
+        if (request->nvm_access)
         {
-          cur_dram_served_r_r = 0;
-          cur_nvm_served_r_r = 0;
+          last_read_deleted = (cur_nvm_served_r_r == nvm_to_serve_r_r);
+          // last_read_deleted = (type == READ) ?  (cur_nvm_served_r_r == nvm_to_serve_r_r)
+          //                               :  (cur_nvm_served_r_w == nvm_to_serve_r_w);
         }
-        else 
+        else
+        {
+          last_read_deleted = (cur_dram_served_r_r == dram_to_serve_r_r) ;
+          // last_read_deleted = (type == READ) ? (cur_dram_served_r_r == dram_to_serve_r_r) 
+          //                               : (cur_dram_served_r_w == dram_to_serve_r_w);
+        }
+        
+
+
+        if (last_read_deleted)
+        {
+          // printf("detreq r: %d\n", request->reqid);
+          // if (type == READ)
+          // {
+            determineReq = longest_req;
+            determineCycle = comptime_max;
+            cur_dram_served_r_r = 0;
+            cur_nvm_served_r_r = 0;
+          // }
+          // else 
+          // {
+          //   cur_dram_served_r_w = 0;
+          //   cur_nvm_served_r_w = 0;
+          // }
+        }                  
+      }
+    }
+    else if (type == WRITE)
+    {
+      if (!last_read_served)
+      { 
+         if (request->nvm_access)
+        {
+          last_read_served = (cur_nvm_served_r_w == nvm_to_serve_r_w);
+        }
+        else
+        {
+          last_read_served = (cur_dram_served_r_w == dram_to_serve_r_w) ;
+        }
+        if (last_read_served)
         {
           cur_dram_served_r_w = 0;
           cur_nvm_served_r_w = 0;
         }
-      }                  
+      }
     }
 
   }
   else if (request->op_type == 'm')
   {
-    // printf("b4 req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
-    // printf("b4 req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_deleted);
     // printf("comp req%d %lld    comp max %lld\n", request->reqid, request->completion_time, comptime_max);
 
-    if (!last_read_deleted)
+    if (type == READ)
     {
-      last_read_deleted = (type == READ) ? (cur_dram_served_m_r == dram_to_serve_m_r) && (cur_nvm_served_m_r == nvm_to_serve_m_r)
-                                       : (cur_dram_served_m_w == dram_to_serve_m_w) && (cur_nvm_served_m_w == nvm_to_serve_m_w);
-      if (last_read_deleted)
+      // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
+      // printf("b4 req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
+      if (!last_read_deleted)
       {
-        determineReq = longest_req;
-        determineCycle = comptime_max;
-        if (type == READ)
+        last_read_deleted = (cur_dram_served_m_r == dram_to_serve_m_r) && (cur_nvm_served_m_r == nvm_to_serve_m_r);
+        // last_read_deleted = (type == READ) ? (cur_dram_served_m_r == dram_to_serve_m_r) && (cur_nvm_served_m_r == nvm_to_serve_m_r)
+        //                                 : (cur_dram_served_m_w == dram_to_serve_m_w) && (cur_nvm_served_m_w == nvm_to_serve_m_w);
+        if (last_read_deleted)
         {
-          cur_dram_served_m_r = 0;
-          cur_nvm_served_m_r = 0;
-        }
-        else 
+          // if (type == READ)
+          // {
+            determineReq = longest_req;
+            determineCycle = comptime_max;
+            cur_dram_served_m_r = 0;
+            cur_nvm_served_m_r = 0;
+          // }
+          // else 
+          // {
+          //   cur_dram_served_m_w = 0;
+          //   cur_nvm_served_m_w = 0;
+          // }
+        }                  
+      }
+      // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
+      // printf("af req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
+    }
+    else if (type == WRITE)
+    {
+      // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
+      // printf("b4 req%d dramW %d   nvmW %d  lsw %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_served);
+      if (!last_read_served)
+      { 
+        last_read_served = (cur_dram_served_m_w == dram_to_serve_m_w) && (cur_nvm_served_m_w == nvm_to_serve_m_w);
+        if (last_read_served)
         {
           cur_dram_served_m_w = 0;
           cur_nvm_served_m_w = 0;
         }
-      }                  
+      }
+      // printf("%c %d req%d ", request->op_type, request->oramid, request->reqid);
+      // printf("af req%d dramW %d   nvmW %d  lsw %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_served);
     }
-    // printf("af req%d dramR %d   nvmR %d  lsr %d\n", request->reqid, cur_dram_served_m_r, cur_nvm_served_m_r,  last_read_deleted);
-    // printf("af req%d dramW %d   nvmW %d  lsr %d\n", request->reqid, cur_dram_served_m_w, cur_nvm_served_m_w,  last_read_deleted);
+    
 
   }
   
 }
 
+
+request_t * form_request(int operation_type, int oramid, char op_type, int reqid, bool nvm_access, long long int completion_time){
+  request_t * req = (request_t *) malloc (sizeof (request_t));
+  req->completion_time = completion_time;
+  req->reqid = reqid;
+  req->oramid = oramid;
+  req->nvm_access = nvm_access;
+  req->op_type = op_type;
+  req->operation_type = (operation_type == 'R') ? READ : WRITE;
+  return req;
+}
+
+// void count_w_served(char op_type, ){
+
+// }
 
 
 // Remove finished requests from the queues.
@@ -7064,12 +7176,12 @@ clean_queues (int channel)
   // Delete all READ requests whose completion time has been determined i.e. COL_RD has been issued
   LL_FOREACH_SAFE (read_queue_head[channel], rd_ptr, rd_tmp) 
   {
-    if (rd_ptr->request_served == 1) // && rd_ptr->completion_time <= CYCLE_VAL)
+    if (rd_ptr->request_served == 1)  // && rd_ptr->completion_time <= CYCLE_VAL)
     {
-      if (rd_ptr->oramid == 18163)
-			{
+      // if (tracectr >= 4200)
+			// {
       // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
-			}
+			// }
       update_served_count(rd_ptr);
       determine_served_all(rd_ptr);
 
@@ -7094,13 +7206,13 @@ clean_queues (int channel)
   {
     if (wrt_ptr->request_served == 1) // && wrt_ptr->completion_time <= CYCLE_VAL)
     {
-      if (wrt_ptr->oramid == 18163)
-      {
+      // if (tracectr >= 4200)
+      // {
       // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
-      }
+      // }
 
-      update_served_count(wrt_ptr);
-      determine_served_all(wrt_ptr);
+      // update_served_count(wrt_ptr);
+      // determine_served_all(wrt_ptr);
 
       assert (wrt_ptr->next_command == COL_WRITE_CMD);
       LL_DELETE (write_queue_head[channel], wrt_ptr);
@@ -7171,9 +7283,10 @@ issue_request_command (request_t * request, char rwt)
   //   }
   // }
 
-  if (NVM_ENABLE)
+  if (NVM_ENABLE && is_nvm_addr_byte(request->physical_address))
   {
     update_ddr_timing_param(channel);
+    // T_RCD = 44 * 5;
   }
 
   switch (cmd)
@@ -7420,7 +7533,7 @@ issue_request_command (request_t * request, char rwt)
 
       if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
       {
-        request->completion_time += (request->latency) * NVM_LATENCY;
+        request->completion_time += (request->latency) * NVM_LATENCY * 1;
       }
 
       request->dispatch_time = CYCLE_VAL;
@@ -7440,7 +7553,7 @@ issue_request_command (request_t * request, char rwt)
       //UT_MEM_DEBUG("Req:%lld finishes at Cycle: %lld\n", request->id, request->completion_time);
 
       // Mehrnoosh: rob comp time added for write as well
-      ROB[request->thread_id].comptime[request->instruction_id] = request->completion_time + PIPELINEDEPTH;
+      // ROB[request->thread_id].comptime[request->instruction_id] = request->completion_time + PIPELINEDEPTH;
       // Mehrnoosh.
      
       //printf("Cycle: %10lld, Writes Completed = %5lld, this_latency= %5lld, latency = %f\n", CYCLE_VAL, stats_writes_completed[channel], request->latency, stats_average_write_latency[channel]);   
@@ -7552,7 +7665,9 @@ issue_request_command (request_t * request, char rwt)
     default:
       break;
   }
+  T_RCD = 44;
   return 1;
+
 }
 
 
