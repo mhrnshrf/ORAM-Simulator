@@ -6772,7 +6772,8 @@ void update_served_count(request_t * request){
             if (cur_nvm_served_e_w == nvm_to_serve_e_w)
             {
               // evict_wait_nvm += nvm_tmax - evict_t0;
-              detnvm = longest_nvm;
+              // detnvm = longest_nvm;
+              detnvm = request->reqid;
               // evict_wait_nvm += request->completion_time - evict_t0;
               // evict_wait_nvm += CYCLE_VAL - evict_t0;
             }
@@ -6795,7 +6796,10 @@ void update_served_count(request_t * request){
             if (cur_dram_served_e_w == dram_to_serve_e_w)
             {
               // evict_wait_dram += dram_tmax - evict_t0;
-              detdram = longest_dram;
+              // detdram = longest_dram;
+              detdram = request->reqid;
+
+              // detdram = request->reqid;
               // evict_wait_dram += request->completion_time - evict_t0;
               // evict_wait_dram += CYCLE_VAL - evict_t0;
 
@@ -6827,7 +6831,9 @@ void update_served_count(request_t * request){
             {
               w_ended_nvm++;
               // reshuffle_wait_nvm += nvm_tmax - reshuffle_t0;
-              detnvm = longest_nvm;
+              // detnvm = longest_nvm;
+              detnvm = request->reqid;
+
               // reshuffle_wait_nvm += request->completion_time - reshuffle_t0;
               // reshuffle_wait_nvm += CYCLE_VAL - reshuffle_t0;
 
@@ -6849,7 +6855,9 @@ void update_served_count(request_t * request){
             if (cur_dram_served_r_w == dram_to_serve_r_w)
             {
               // reshuffle_wait_dram += dram_tmax - reshuffle_t0;
-              detdram = longest_dram;
+              // detdram = longest_dram;
+              detdram = request->reqid;
+
               // reshuffle_wait_dram += request->completion_time - reshuffle_t0;
               // reshuffle_wait_dram += CYCLE_VAL - reshuffle_t0;
             }
@@ -6887,7 +6895,9 @@ void update_served_count(request_t * request){
             {
               meta_ended++;
               // meta_wait_dram += dram_tmax - meta_t0;
-              detdram = longest_dram;
+              // detdram = longest_dram;
+              detdram = request->reqid;
+
 
               // meta_wait_dram += request->completion_time - meta_t0;
               // meta_wait_dram += CYCLE_VAL - meta_t0;
