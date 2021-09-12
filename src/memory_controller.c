@@ -5704,17 +5704,18 @@ void export_csv(char * argv[]){
   fprintf(fp, "reshuffle_wait_nvm,%lld\n", reshuffle_wait_nvm);
   fprintf(fp, "meta_wait_dram,%lld\n", meta_wait_dram);
 
-  int dramchan = NUM_CHANNELS-NVM_CHANNEL;
+  // int dramchan = NUM_CHANNELS-NVM_CHANNEL;
+  // int dramchan = NUM_CHANNELS;
   int draml = NVM_START - TOP_CACHE;
   int nvml = LEVEL - NVM_START;
 
-  fprintf(fp, "online_wait_dram_perAcc,%f\n", (double)online_wait_dram/((ringctr*draml)/dramchan));
-  fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/NVM_CHANNEL));
-  fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*RING_Z+RING_S))/dramchan));
-  fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/NVM_CHANNEL));
-  fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/dramchan));
-  fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/NVM_CHANNEL));
-  fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/dramchan));
+  fprintf(fp, "online_wait_dram_perAcc,%f\n", (double)online_wait_dram/((ringctr*draml)/NUM_CHANNELS));
+  fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/ceil(nvml/NUM_CHANNELS)));
+  fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*RING_Z+RING_S))/NUM_CHANNELS));
+  fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/ceil(nvml/NUM_CHANNELS)));
+  fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
+  fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/ceil(nvml/NUM_CHANNELS)));
+  fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/NUM_CHANNELS));
 
   fprintf(fp, "odram,%d\n", odram);
   fprintf(fp, "onvm,%d\n", onvm);
@@ -6073,7 +6074,7 @@ log_base2 (unsigned int new_value)
 dram_address_t * calc_dram_addr (long long int physical_address) 
 {
   long long int input_a, temp_b, temp_a;
-  long long int blkaddr;
+  // long long int blkaddr;
   int channelBitWidth = log_base2 (NUM_CHANNELS);
   int rankBitWidth = log_base2 (NUM_RANKS);
   int bankBitWidth = log_base2 (NUM_BANKS);
@@ -6085,7 +6086,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   this_a->actual_address = physical_address;
   input_a = physical_address;
   input_a = input_a >> byteOffsetWidth;	// strip out the cache_offset
-  blkaddr = input_a;
+  // blkaddr = input_a;
   if (ADDRESS_MAPPING == 1)
 
   {
@@ -6136,33 +6137,21 @@ dram_address_t * calc_dram_addr (long long int physical_address)
     this_a->row = temp_a ^ temp_b;	// strip out the row number
   }
 
-  if (NVM_ENABLE)
-  {
-    int cur_chan = this_a->channel;
-    int dram_chan = NUM_CHANNELS - NVM_CHANNEL;
-    unsigned long long int data_addr_byte = (unsigned long long int) DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE);
-    unsigned long long int metadata_nvm_byte = DATA_ADDR_SPACE + (pow(2, NVM_START)-1)*1;
-    metadata_nvm_byte =  (unsigned long long int) metadata_nvm_byte << (int)log2(BLOCK_SIZE);
-    if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) )// || physical_address >= metadata_nvm_byte)
-    {
-      this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
-      // this_a->bank = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
-      // this_a->bank = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
-    }
-    else
-    {
-      // if (this_a->channel >= NUM_CHANNELS - NVM_CHANNEL)
-      // {
-      //   this_a->channel = cur_chan % dram_chan;
-      //   // printf("%d\n", this_a->channel);
-      //   // dram_leftover++;
-      // }
-      this_a->channel = blkaddr % dram_chan;
-    }
-  }
-  // else
+  // if (NVM_ENABLE)
   // {
-  //     this_a->channel = blkaddr % NUM_CHANNELS;
+  //   int cur_chan = this_a->channel;
+  //   int dram_chan = NUM_CHANNELS - NVM_CHANNEL;
+  //   unsigned long long int data_addr_byte = (unsigned long long int) DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE);
+  //   unsigned long long int metadata_nvm_byte = DATA_ADDR_SPACE + (pow(2, NVM_START)-1)*1;
+  //   metadata_nvm_byte =  (unsigned long long int) metadata_nvm_byte << (int)log2(BLOCK_SIZE);
+  //   if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) )// || physical_address >= metadata_nvm_byte)
+  //   {
+  //     this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
+  //   }
+  //   else
+  //   {
+  //     this_a->channel = blkaddr % dram_chan;
+  //   }
   // }
   
   return (this_a);
@@ -6198,7 +6187,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->ending = ending;
     new_node->op_type = op_type;
     new_node->reqid = reqid;
-    new_node->countdown = (!nvm_access) ? 0 : (type == READ) ? 180 : 384 ;
+    new_node->countdown = (!is_nvm_addr_byte(physical_address)) ? 0 : (type == READ) ? 60*NVM_LATENCY : 64*NVM_LATENCY*2 ;
     // if (nvm_access)
     // {
     //   printf("nvm   ");
@@ -6908,9 +6897,16 @@ void update_served_count(request_t * request){
   }
 }
 
-void calc_wait_value(char op_type, int reqid, long long int comptime){
+void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid){
   long long int t1 = comptime - PIPELINEDEPTH;
   // long long int t1 = CYCLE_VAL;
+  if (reqid == detnvm || reqid == detdram)
+  {
+    // bool isnvm = (reqid == detnvm);
+    // printf("%c %d end %s req%d	@ %lld\n", op_type, oramid, isnvm?"nvm":"dram", reqid, CYCLE_VAL);
+  }
+  
+  
   if (op_type == 'o')
   {
     if (reqid == detnvm)
@@ -7417,14 +7413,14 @@ issue_request_command (request_t * request, char rwt)
       
       request->latency = request->completion_time - request->arrival_time;
 
-      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
-      {
-        // int coef = (rwt == 'R')? 1 : 3;
-        // request->completion_time += NVM_LATENCY;
-        request->completion_time += (request->latency) * NVM_LATENCY;
-        // printf("nvm  @ %lld\n", CYCLE_VAL);
-        // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
-      }
+      // if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
+      // {
+      //   // int coef = (rwt == 'R')? 1 : 3;
+      //   // request->completion_time += NVM_LATENCY;
+      //   request->completion_time += (request->latency) * NVM_LATENCY;
+      //   // printf("nvm  @ %lld\n", CYCLE_VAL);
+      //   // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
+      // }
 
 
       request->dispatch_time = CYCLE_VAL;
@@ -7541,10 +7537,10 @@ issue_request_command (request_t * request, char rwt)
      
       request->latency = request->completion_time - request->arrival_time;
 
-      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
-      {
-        request->completion_time += (request->latency) * NVM_LATENCY * 1;
-      }
+      // if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
+      // {
+      //   request->completion_time += (request->latency) * NVM_LATENCY * 2 ;
+      // }
 
       request->dispatch_time = CYCLE_VAL;
       request->request_served = 1;

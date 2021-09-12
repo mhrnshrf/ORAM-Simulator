@@ -469,7 +469,7 @@ void switch_dead_enable_to(bool tf);
 void update_count_stat(int count, int level);
 void update_ddr_timing_param(int channel);
 void reset_profile_counters();
-void calc_wait_value(char op_type, int reqid, long long int comptime);
+void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid);
 
 
 // Mehrnoosh.

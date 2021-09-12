@@ -907,7 +907,7 @@ int main(int argc, char * argv[])
 //   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
 
-	if (tracectr % 100 == 0)
+	if (tracectr % 1000 == 0)
 	{
 		// printf("@ %d\n", tracectr);
 	}
@@ -1027,7 +1027,7 @@ int main(int argc, char * argv[])
 
 					if (ROB[numc].optype[ROB[numc].head]  != 'D')
 					{
-						calc_wait_value(ROB[numc].op_type[ROB[numc].head], ROB[numc].reqid[ROB[numc].head], ROB[numc].comptime[ROB[numc].head]);
+						calc_wait_value(ROB[numc].op_type[ROB[numc].head], ROB[numc].reqid[ROB[numc].head], ROB[numc].comptime[ROB[numc].head], ROB[numc].oramid[ROB[numc].head]);
 					}
 
 
@@ -1327,11 +1327,11 @@ int main(int argc, char * argv[])
 			// Mehrnoosh:
 				if (beginning[numc])
 				{
-					if (tracectr > 2200)
-					{
+					// if (tracectr > 2200)
+					// {
 					// printf("%c %d begin req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 
-					}
+					// }
 					
 					if (op_type[numc] == 'o')
 					{
