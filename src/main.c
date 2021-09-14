@@ -777,6 +777,11 @@ int main(int argc, char * argv[])
 			endpoint = WARMUP_CACHE + WARMUP_TREE + 492000;
 			TIMING_INTERVAL = T1_INTERVAL;
 		}
+		else if (strcmp(bench, "wrf") == 0)
+		{
+			endpoint = WARMUP_CACHE + WARMUP_TREE + 592000;
+			TIMING_INTERVAL = T1_INTERVAL;
+		}
 		//  else if (strcmp(bench, "wrf") == 0) // this added for nonsec exp
 		//  {
 		// 	 endpoint = 3327000;
