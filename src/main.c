@@ -907,7 +907,7 @@ int main(int argc, char * argv[])
 //   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
 
-	if (tracectr % 1000 == 0)
+	if (tracectr % 10000 == 0)
 	{
 		// printf("@ %d\n", tracectr);
 	}
@@ -1313,19 +1313,8 @@ int main(int argc, char * argv[])
 	          ROB[numc].reqid[ROB[numc].tail] = reqid[numc];
 			  tail_written = true;
 
-		
-		  // Check to see if the read is for buffered data in write queue - 
-		  // return constant latency if match in WQ
-		  // add in read queue otherwise
-		  int lat = read_matches_write_or_read_queue(addr[numc]);
-		  if(false) // (lat) 
-		  {
-			//   printf("lat\n");
-			ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+lat+PIPELINEDEPTH;
-		  }
-		  else {
-			// Mehrnoosh:
-				if (beginning[numc])
+
+			if (beginning[numc])
 				{
 					// if (tracectr > 2200)
 					// {
@@ -1354,6 +1343,53 @@ int main(int argc, char * argv[])
 						cur_meta = oramid[numc];
 					}
 				}
+		
+		  // Check to see if the read is for buffered data in write queue - 
+		  // return constant latency if match in WQ
+		  // add in read queue otherwise
+		  int lat = read_matches_write_or_read_queue(addr[numc]);
+		  if (lat) //(false) // (lat) 
+		  {
+			//   printf("lat\n");
+			ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+lat+PIPELINEDEPTH;
+
+			request_t * req_ptr = form_request(opertype[numc], oramid[numc], op_type[numc], reqid[numc], nvm_access[numc], ROB[numc].comptime[ROB[numc].tail]);
+						
+			update_served_count(req_ptr);
+			free(req_ptr);
+
+		  }
+		  else {
+			// Mehrnoosh:
+				// if (beginning[numc])
+				// {
+				// 	// if (tracectr > 2200)
+				// 	// {
+				// 	// printf("%c %d begin req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+
+				// 	// }
+					
+				// 	if (op_type[numc] == 'o')
+				// 	{
+				// 		online_t0 = CYCLE_VAL;
+				// 		cur_online = oramid[numc];
+				// 	}
+				// 	else if (op_type[numc] == 'e')
+				// 	{
+				// 		evict_t0 = CYCLE_VAL;
+				// 		cur_evict = oramid[numc];
+				// 	}
+				// 	else if (op_type[numc] == 'r')
+				// 	{
+				// 		reshuffle_t0 = CYCLE_VAL;
+				// 		cur_reshuffle = oramid[numc];
+				// 	}
+				// 	else if (op_type[numc] == 'm')
+				// 	{
+				// 		meta_t0 = CYCLE_VAL;
+				// 		cur_meta = oramid[numc];
+				// 	}
+				// }
 
 				// if (tracectr >= 4200)
 				// {

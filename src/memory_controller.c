@@ -5710,11 +5710,11 @@ void export_csv(char * argv[]){
   int nvml = LEVEL - NVM_START;
 
   fprintf(fp, "online_wait_dram_perAcc,%f\n", (double)online_wait_dram/((ringctr*draml)/NUM_CHANNELS));
-  fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/ceil(nvml/NUM_CHANNELS)));
+  fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/ceil((double)nvml/NUM_CHANNELS)));
   fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/ceil(nvml/NUM_CHANNELS)));
+  fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/ceil((double)nvml/NUM_CHANNELS)));
   fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/ceil(nvml/NUM_CHANNELS)));
+  fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/ceil((double)nvml/NUM_CHANNELS)));
   fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/NUM_CHANNELS));
 
   fprintf(fp, "odram,%d\n", odram);
