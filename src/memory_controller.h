@@ -470,6 +470,7 @@ void update_count_stat(int count, int level);
 void update_ddr_timing_param(int channel);
 void reset_profile_counters();
 void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid);
+long long int sum_wait_sofar();
 
 
 // Mehrnoosh.

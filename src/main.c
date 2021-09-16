@@ -996,8 +996,9 @@ int main(int argc, char * argv[])
 		num_ret = 0;
 		//   printf("before 	rob head %d		rob tail %d\n", ROB[numc].head, ROB[numc].tail);
 		while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
-			//   printf("while rob inflight %d\n", tracectr);
+			//   printf("@ %lld fetch \n", CYCLE_VAL);
 			/* Keep retiring until retire width is consumed or ROB is empty. */
+			
 			
 
 			if (ROB[numc].comptime[ROB[numc].head] < CYCLE_VAL) {
@@ -1112,6 +1113,7 @@ int main(int argc, char * argv[])
     if(CYCLE_VAL%PROCESSOR_CLK_MULTIPLIER == 0)
     { 
       /* Execute function to find ready instructions. */
+	//   printf("@ %lld update mem \n", CYCLE_VAL);
       update_memory();
 
       /* Execute user-provided function to select ready instructions for issue. */
@@ -1264,7 +1266,7 @@ int main(int argc, char * argv[])
 	//   if (nonmemops[numc]) {  /* Have some non-memory-ops to consume. */
 	//Mehrnoosh.
 		// printf("%c nonmemops @ %lld \n", op_type[numc], CYCLE_VAL);
-		// printf("@ %lld serve N\n", CYCLE_VAL);
+		// printf("@ %lld add N \n", CYCLE_VAL);
 
 
 	    ROB[numc].optype[ROB[numc].tail] = 'N';
@@ -1301,7 +1303,7 @@ int main(int argc, char * argv[])
 			// Mehrnoosh.
 	      if (opertype[numc] == 'R' && last_lock_released) {
 
-			// printf("@ %lld add R to rob\n", CYCLE_VAL);
+			// printf("@ %lld add R \n", CYCLE_VAL);
 
 		  addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 	          ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
@@ -1323,7 +1325,8 @@ int main(int argc, char * argv[])
 				{
 					// if (tracectr > 2200)
 					// {
-					// printf("%c %d begin req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+					// long long int sum_val = sum_wait_sofar();
+					// printf("%c %d begin req%d	@ %lld		sum %lld 	%s\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL, sum_val, (CYCLE_VAL < sum_val)?"exceed":"");
 
 					// }
 					
@@ -1348,7 +1351,16 @@ int main(int argc, char * argv[])
 						cur_meta = oramid[numc];
 					}
 				}
-		
+
+				if (last_read[numc])
+				{
+					last_read_served = false;
+					last_lock_released_prev = last_lock_released;
+					last_lock_released = false;
+					last_read_deleted = false;
+
+				}
+
 		  // Check to see if the read is for buffered data in write queue - 
 		  // return constant latency if match in WQ
 		  // add in read queue otherwise
@@ -1361,6 +1373,7 @@ int main(int argc, char * argv[])
 			request_t * req_ptr = form_request(opertype[numc], oramid[numc], op_type[numc], reqid[numc], nvm_access[numc], ROB[numc].comptime[ROB[numc].tail]);
 						
 			update_served_count(req_ptr);
+			determine_served_all(req_ptr);
 			free(req_ptr);
 
 		  }
@@ -1398,7 +1411,7 @@ int main(int argc, char * argv[])
 
 				// if (tracectr >= 4200)
 				// {
-				// printf("%c %d insertR req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+				// printf("%c %d insertR req%d	@ %lld	last read? %d \n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL, last_read[numc]);
 				// printf("beginning? %d	ending? %d 	last read?  %d\n", beginning[numc], ending[numc], last_read[numc]);
 				// }
 				
@@ -1421,14 +1434,7 @@ int main(int argc, char * argv[])
 				// 	printf("%c %d insert @ %lld \n", op_type[numc], oramid[numc], CYCLE_VAL);
 				// }
 
-				if (last_read[numc])
-				{
-					last_read_served = false;
-					last_lock_released_prev = last_lock_released;
-					last_lock_released = false;
-					last_read_deleted = false;
-
-				}
+				
 				
 				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], reqid[numc]);
 			// }
@@ -1446,7 +1452,7 @@ int main(int argc, char * argv[])
 	      }
 	      else if (last_lock_released){  /* This must be a 'W'.  We are confirming that while reading the trace. */
 	        if (opertype[numc] == 'W') {
-			// printf("@ %lld add W to rob\n", CYCLE_VAL);
+			// printf("@ %lld add W \n", CYCLE_VAL);
 
 		      addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 		      ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
@@ -2242,6 +2248,7 @@ int main(int argc, char * argv[])
     //}
 
     CYCLE_VAL++;  /* Advance the simulation cycle. */
+	// printf("cycle++ %lld\n", CYCLE_VAL);
 
 	// Mehrnoosh:
 	gettimeofday(&eday, NULL);

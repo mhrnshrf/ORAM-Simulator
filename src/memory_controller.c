@@ -43,8 +43,8 @@ long long int dead_on_path_dram = 0;
 long long int dead_on_path_arr[100] = {0};
 
 long long int comptime_max;
-long long int nvm_tmax;
-long long int dram_tmax;
+long long int nvm_tmax = 0;
+long long int dram_tmax = 0;
 int longest_req;
 int longest_dram;
 int longest_nvm;
@@ -6897,27 +6897,46 @@ void update_served_count(request_t * request){
   }
 }
 
+long long int sum_wait_sofar(){
+  long long int sum = 0;
+  sum +=  max(online_wait_dram, online_wait_nvm);
+  sum += max(evict_wait_dram, evict_wait_nvm);
+  sum += reshuffle_wait_dram + reshuffle_wait_nvm;
+  sum += meta_wait_dram;
+  return sum;
+}
+
 void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid){
-  long long int t1 = comptime - PIPELINEDEPTH;
-  // long long int t1 = CYCLE_VAL;
-  if (reqid == detnvm || reqid == detdram)
-  {
-    // bool isnvm = (reqid == detnvm);
-    // printf("%c %d end %s req%d	@ %lld\n", op_type, oramid, isnvm?"nvm":"dram", reqid, CYCLE_VAL);
-  }
-  
+  // long long int t1 = comptime - PIPELINEDEPTH;
+  long long int t1 = CYCLE_VAL;
+  // bool isnvm;
+  // bool end = false;
+
+  // if (reqid == detnvm || reqid == detdram)
+  // {
+  //   isnvm = (reqid == detnvm);
+  //   end = true;
+  // }
   
   if (op_type == 'o')
   {
     if (reqid == detnvm)
     {
-      // printf("online t0 %lld\n", online_t0);
+      // if (t1 - online_t0 > 899)
+      // {
+        // printf("waitO %lld\n", t1 - online_t0);
+      // }
       onvm++;
       online_wait_nvm += t1 - online_t0;
       detnvm = 0;
     }
     else if (reqid == detdram)
     {
+      // if (t1 - online_t0 > 899)
+      // {
+        // printf("waitO %lld\n", t1 - online_t0);
+      // }
+      
       odram++;
       online_wait_dram += t1 - online_t0;
       detdram = 0;
@@ -6928,12 +6947,14 @@ void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid
   {
     if (reqid == detnvm)
     {
+      // printf("waitE %lld\n", t1 - evict_t0);
       envm++;
       evict_wait_nvm += t1 - evict_t0;
       detnvm = 0;
     }
     else if (reqid == detdram)
     {
+      // printf("waitE %lld\n", t1 - evict_t0);
       edram++;
       evict_wait_dram += t1 - evict_t0;
       detdram = 0;
@@ -6943,12 +6964,14 @@ void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid
   {
     if (reqid == detnvm)
     {
+      // printf("waitR %lld\n", t1 - reshuffle_t0);
       rnvm++;
       reshuffle_wait_nvm += t1 - reshuffle_t0;
       detnvm = 0;
     }
     else if (reqid == detdram)
     {
+      // printf("waitR %lld\n", t1 - reshuffle_t0);
       rdram++;
       reshuffle_wait_dram += t1 - reshuffle_t0;
       detdram = 0;
@@ -6958,12 +6981,20 @@ void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid
   {
     if (reqid == detdram)
     {
+      // printf("waitM %lld\n", t1 - meta_t0);
       mdram++;
       meta_wait_dram += t1 - meta_t0;
       detdram = 0;
     }
   }
+
+  // if (end)
+  // {
+    // long long int sum_val = sum_wait_sofar();
+    // printf("%c %d end %s req%d	@ %lld    sum %lld  %s  comp %lld\n", op_type, oramid, isnvm?"nvm":"dram", reqid, CYCLE_VAL, sum_val, (CYCLE_VAL < sum_val)?"exceed":"", comptime);
+  // }
   
+
 }
 
 void determine_served_all(request_t * request){
@@ -6978,8 +7009,12 @@ void determine_served_all(request_t * request){
     if (!last_read_deleted)
     {
       last_read_deleted = (cur_dram_served_o == dram_to_serve_o) && (cur_nvm_served_o == nvm_to_serve_o);
+
       if (last_read_deleted)
       {
+        // printf("curdram %d   dramserv %d   curnvm %d    nvmserv %d\n", cur_dram_served_o, dram_to_serve_o, cur_nvm_served_o, nvm_to_serve_o);
+        // printf("%c %d detserve req%d	@ %lld  longestReq %d   comptime %lld   longestNVM %d comp %lld   curnvm %d \n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, longest_req, comptime_max, longest_nvm, nvm_tmax, cur_nvm_served_o);
+
         determineReq = longest_req;
         determineCycle = comptime_max;
         cur_dram_served_o = 0;
@@ -7116,6 +7151,8 @@ void determine_served_all(request_t * request){
         {
           // if (type == READ)
           // {
+            // printf("curdram %d   dramserv %d   curnvm %d    nvmserv %d\n", cur_dram_served_m_r, dram_to_serve_m_r, cur_nvm_served_m_r, nvm_to_serve_m_r);
+            // printf("%c %d detserve req%d	@ %lld  longestReq %d   comptime %lld   longestNVM %d comp %lld   curnvm %d \n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, longest_req, comptime_max, longest_nvm, nvm_tmax, cur_nvm_served_o);
             determineReq = longest_req;
             determineCycle = comptime_max;
             cur_dram_served_m_r = 0;
