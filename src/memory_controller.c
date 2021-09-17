@@ -5545,8 +5545,8 @@ void export_csv(char * argv[]){
   // fprintf(fp, "oramQ_size,%d\n", oramQ->size);
   // fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
   // fprintf(fp, "Bk_Evict,%d\n", bkctr);
-  // fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
-  // fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
+  fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
   // fprintf(fp, "rho_hit,%f%%\n", 100*(double)rho_hit/(invokectr));
   // fprintf(fp, "rhoctr,%d\n", rhoctr);
   // fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
@@ -5712,9 +5712,9 @@ void export_csv(char * argv[]){
   fprintf(fp, "online_wait_dram_perAcc,%f\n", (double)online_wait_dram/((ringctr*draml)/NUM_CHANNELS));
   fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/ceil((double)nvml/NUM_CHANNELS)));
   fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/ceil((double)nvml/NUM_CHANNELS)));
+  fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/NUM_CHANNELS));
   fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/ceil((double)nvml/NUM_CHANNELS)));
+  fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
   fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/NUM_CHANNELS));
 
   fprintf(fp, "odram,%d\n", odram);
@@ -6924,7 +6924,7 @@ void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid
     {
       // if (t1 - online_t0 > 899)
       // {
-        // printf("waitO %lld\n", t1 - online_t0);
+        // printf("%c %d waitO %lld\n", op_type, oramid, t1 - online_t0);
       // }
       onvm++;
       online_wait_nvm += t1 - online_t0;
@@ -6934,7 +6934,7 @@ void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid
     {
       // if (t1 - online_t0 > 899)
       // {
-        // printf("waitO %lld\n", t1 - online_t0);
+        // printf("%c %d waitO %lld\n", op_type, oramid, t1 - online_t0);
       // }
       
       odram++;
