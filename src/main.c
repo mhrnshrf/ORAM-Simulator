@@ -1620,8 +1620,13 @@ int main(int argc, char * argv[])
 						switch_sim_enable_to(SIM_ENABLE);
 						switch_cache_enable_to(CACHE_ENABLE);
 						reset_profile_counters();
+
 						// switch_dead_enable_to(DEAD_ENABLE);
-						break;
+						if (WARMUP_CACHE == 0)
+						{
+							break;
+						}
+						
 					}
 					
 					cache_clk++;
@@ -1665,9 +1670,9 @@ int main(int argc, char * argv[])
 						
 
 						if (sscanf(newstr,"%d %c",&nonmemops[numc],&opertype[numc]) > 0) {
-								// if (tracectr >= 17000000)
+								// if (tracectr % 100000 == 0)
 								// {
-								// 	printf("new trace %d\n", tracectr);
+								// 	printf("scanf @ %d\n", tracectr);
 								// }
 							
 								tracectr++;
@@ -1826,7 +1831,7 @@ int main(int argc, char * argv[])
 									
 
 								}
-								if (tracectr < WARMUP_CACHE)
+								if (tracectr < WARMUP_TREE + WARMUP_CACHE && tracectr >= WARMUP_TREE)
 								{
 									no_miss_occured = true;
 									waited_for_evicted[numc].valid = false;
@@ -1837,6 +1842,7 @@ int main(int argc, char * argv[])
 									cache_dirty = 0;
 									nonmemops_sum = 0;
 									missl1wb = 0;
+									reset_profile_counters();
 								}
 							}
 							else if (!CACHE_ENABLE_VAR)
@@ -1980,13 +1986,17 @@ int main(int argc, char * argv[])
 				// printf("@- %d\n", tracectr);
 				if (!NONSEC_ENABLE)
 				{
+					// if (tracectr % 100000 == 0)
+					// {
+					// 	printf("@ %d\n", tracectr);
+					// }
+					
 					invoke_oram(addr[numc], CYCLE_VAL, numc, 0, instrpc[numc], opertype[numc]); // ??? argumnets: cycle_val, numc, 0 are not actually used...
 					oram_just_invoked = true;
 					curr_trace = addr[numc];
 					mem_req_start = CYCLE_VAL;
 					dirty_evict = false;
 				}
-				// printf("@> %d\n", tracectr);
 
 			}
 			skip_invokation = false;

@@ -5547,6 +5547,8 @@ void export_csv(char * argv[]){
   // fprintf(fp, "Bk_Evict,%d\n", bkctr);
   fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
   fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
+  fprintf(fp, "hitctr,%d\n", hitctr);
+  fprintf(fp, "missctr,%d\n", missctr);
   // fprintf(fp, "rho_hit,%f%%\n", 100*(double)rho_hit/(invokectr));
   // fprintf(fp, "rhoctr,%d\n", rhoctr);
   // fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
