@@ -1245,6 +1245,15 @@ void oram_alloc(){
 
 }
 
+int calc_deadQ_size(){
+  int sum = 0;
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  {
+    sum += deadQ_arr[i]->size;
+  }
+  return sum;
+}
+
 // initialize the oram tree by assigning a random path to each addr of address space
 void oram_init(){
   for(int i = 0; i < BLOCK; i++)
@@ -1975,7 +1984,7 @@ void write_path(int label){
       update_count_stat(GlobTree[index].count, i);
       GlobTree[index].count = 0; // for ring oram evict path
       deadctr -= GlobTree[index].dumdead;
-      if (i < NVM_START)
+      if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
         dead_dram -= GlobTree[index].dumdead;
       }
@@ -4660,7 +4669,7 @@ int calc_mem_addr(int index, int offset, char type)
     {
       mem_addr = -1;
       // printf("level %d\n", level);
-      if ((remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ) ) && (level == NVM_START)) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      if ((remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ) ) && (level == NVM_START) && calc_deadQ_size() > 840) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4836,7 +4845,7 @@ void ring_read_path(int label, int addr){
     {
       GlobTree[index].dumdead++;
       deadctr++;
-      if (i < NVM_START)
+      if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
         dead_dram++;
       }
@@ -5183,7 +5192,7 @@ void ring_early_reshuffle(int label){
 
       GlobTree[index].count = 0;
       deadctr -= GlobTree[index].dumdead;
-      if (i < NVM_START)
+      if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
         dead_dram -= GlobTree[index].dumdead;
       }
@@ -5600,7 +5609,7 @@ void export_csv(char * argv[]){
   // }
   // fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   // fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
-  // fprintf(fp, "deadctr,%lld\n", deadctr);
+  fprintf(fp, "deadctr,%lld\n", deadctr);
   // for (int i = 0; i < 31; i++)
   // {
   //   fprintf(fp, "%dm,%lld\n", i*10, deadarr[i]);
@@ -5658,7 +5667,7 @@ void export_csv(char * argv[]){
   // }
 
   fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);
-  // fprintf(fp, "dead_dram,%lld\n", dead_dram);
+  fprintf(fp, "dead_dram,%lld\n", dead_dram);
   // print_lifetime_stat(fp);
   
   // print_count_stat(fp);
