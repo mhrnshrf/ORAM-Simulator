@@ -1247,7 +1247,7 @@ void oram_alloc(){
 
 int calc_deadQ_size(){
   int sum = 0;
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < NVM_START; i++)
   {
     sum += deadQ_arr[i]->size;
   }
