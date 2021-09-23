@@ -44,7 +44,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -138,8 +138,8 @@ enum{
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
   Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1    Z-5
   Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : (RING_ENABLE && RSTL_ENABLE)? Z-5:Z,   // # slots per bucket upto L3   Z-10
-  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 3 : (RING_ENABLE && RSTL_ENABLE)? Z:Z,   // # slots per bucket upto L3   Z-10
+  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-2: Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + ((RING_ENABLE)?Z4:Z)*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
@@ -210,6 +210,7 @@ typedef struct Element_t{
   bool ending;
   char op_type;
   int reqid;
+  int level;
 }Element;
 
 
@@ -364,6 +365,9 @@ extern long long int dram_tmax;
 extern bool nvmt0_set;
 extern int lrs_ctr;
 
+extern int dram_to_serve_e_w;
+extern int nvm_to_serve_e_w;
+
 
 
 void oram_alloc();
@@ -405,7 +409,7 @@ bool Enqueue(Queue *pQueue, Element *item);
 Element *Dequeue(Queue *pQueue);
 bool isEmpty(Queue* pQueue);
 void test_queue();
-void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending);
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, int level);
 void test_subtree();
 void dummy_access(TreeType tree);
 void switch_enqueue_to(EnqueueType enqueue);
@@ -471,6 +475,7 @@ void update_ddr_timing_param(int channel);
 void reset_profile_counters();
 void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid);
 long long int sum_wait_sofar();
+void set_reshuffle_w(int level);
 
 
 // Mehrnoosh.

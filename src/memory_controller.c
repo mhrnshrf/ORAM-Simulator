@@ -960,7 +960,7 @@ void test_queue(){
 	exit(0);
 }
 
-void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending) {
+void insert_oramQ(long long int addr, long long int cycle, int thread, int instr, long long int pc, char type, bool last_read, bool nvm_access, char op_type, bool beginning, bool ending, int level) {
   addr = addr << (int)log2(BLOCK_SIZE);
   reqcount++;
   Element *pN = (Element*) malloc(sizeof (Element));
@@ -981,6 +981,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->beginning = beginning;
   pN->ending = ending;
   pN->reqid = reqcount;
+  pN->level = level;
   
   bool added = false;
   if (ENQUEUE_VAR == TAIL)
@@ -1128,26 +1129,38 @@ void oram_alloc(){
   dram_to_serve_o = NVM_START - TOP_CACHE;
   nvm_to_serve_o = LEVEL - NVM_START;
   dram_to_serve_e_r = (NVM_START - TOP_CACHE)*(RING_Z); 
-  dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
+  // dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
   nvm_to_serve_e_r = (LEVEL - NVM_START)*(RING_Z);
-  nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
+  // nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
   dram_to_serve_r_r = 1*(RING_Z);
   dram_to_serve_r_w = 1*(Z);
   nvm_to_serve_r_r = 1*(RING_Z);
   nvm_to_serve_r_w = 1*(Z);
   dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
   dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
+
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  {
+    if (in_nvm(i))
+    {
+      nvm_to_serve_e_w += LZ[i];
+    }
+    else
+    {
+      dram_to_serve_e_w += LZ[i];
+    }
+  }
+  
   // nvm_to_serve_m_r = (LEVEL - NVM_START)*(1);
   // nvm_to_serve_m_w = (LEVEL - NVM_START)*(1);
 
-
+  
   // cur_dram_served_e_w = dram_to_serve_e_w;
   // cur_nvm_served_e_w = nvm_to_serve_e_w;
   // cur_dram_served_m_w = dram_to_serve_m_w;
   // // cur_nvm_served_m_w = 0;
   // cur_dram_served_r_w = dram_to_serve_r_w;
   // cur_nvm_served_r_w = nvm_to_serve_r_w;
-
 
 
 
@@ -1243,6 +1256,17 @@ void oram_alloc(){
   }
   
 
+}
+
+void set_reshuffle_w(int level){
+  if (in_nvm(level))
+  {
+    nvm_to_serve_r_w = LZ[level];
+  }
+  else
+  {
+    dram_to_serve_r_w = LZ[level];
+  }
 }
 
 int calc_deadQ_size(){
@@ -1692,7 +1716,7 @@ void read_path(int label){
                 bool beginning = (i ==  TOP_CACHE_VAR && reqmade == 1);
                 bool ending = false;
                 char op_type = 'e';
-                insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
+                insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
               }
               
               // printf("%d: slot %d accessed ~> real? %s\n", reqmade, j,  GlobTree[index].slot[j].isReal?"yes":"no");
@@ -1802,7 +1826,7 @@ void read_path(int label){
               bool ending = false;
               char op_type = 'e';
 
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
               /* code */
             }
             
@@ -1894,7 +1918,7 @@ void stale_access(int index, int h, char type){
         bool beginning = false;
         bool ending = false;
         char op_type = 's';
-        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, false, op_type, beginning, ending);
+        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, false, op_type, beginning, ending, GL[h]);
       }
     }
 }
@@ -2031,7 +2055,7 @@ void write_path(int label){
           bool last_read = (i == TOP_CACHE_VAR && j == LZ_VAR[i]-1);
           // last_read = false;
           char op_type = 'e';
-          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', last_read, nvm_access, op_type, beginning, ending);
+          insert_oramQ (addr, orig_cycle, orig_thread, orig_instr, 0, 'W', last_read, nvm_access, op_type, beginning, ending, i);
         }
 
 
@@ -4305,16 +4329,16 @@ void bin(unsigned int n)
 
 
 
-void bucket_meta_access(int index){
-  int mem_addr = DATA_ADDR_SPACE + index;
-  // bool nvm_access = is_nvm_addr(mem_addr);
-  // bool nvm_access = in_nvm(i);
-  bool beginning = false;
-  bool ending = false;
-  char op_type = 'b';
-  insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, false, op_type, beginning, ending);
-  insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, false, op_type, beginning, ending);
-}
+// void bucket_meta_access(int index){
+//   int mem_addr = DATA_ADDR_SPACE + index;
+//   // bool nvm_access = is_nvm_addr(mem_addr);
+//   // bool nvm_access = in_nvm(i);
+//   bool beginning = false;
+//   bool ending = false;
+//   char op_type = 'b';
+//   insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', false, false, op_type, beginning, ending);
+//   insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', false, false, op_type, beginning, ending);
+// }
 
 void metadata_access(int label, char type){
   int last_read = false;
@@ -4333,7 +4357,7 @@ void metadata_access(int label, char type){
       bool beginning = (type == 'R') && (i == LEVEL-1);
       bool ending = (type == 'W') && (i == TOP_CACHE_VAR);
       char op_type = 'm';
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access, op_type, beginning, ending);
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access, op_type, beginning, ending, i);
     }
   }
 
@@ -4669,7 +4693,7 @@ int calc_mem_addr(int index, int offset, char type)
     {
       mem_addr = -1;
       // printf("level %d\n", level);
-      if ( /*(remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ) )  && */ (level == NVM_START) && calc_deadQ_size() > 840) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      if ( (remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ) )  &&  (level == NVM_START) && calc_deadQ_size() > 840) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
@@ -4836,7 +4860,7 @@ void ring_read_path(int label, int addr){
       bool beginning = (i == TOP_CACHE_VAR);
       bool ending = (i == LEVEL-1);
       char op_type = 'o';
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
+      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
     }
 
     GlobTree[index].count++;
@@ -5084,7 +5108,7 @@ void ring_early_reshuffle(int label){
             bool ending = false;
             bool last_read = (reqmade == RING_Z);
             char op_type = 'r';
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
           }
         }
         
@@ -5140,7 +5164,7 @@ void ring_early_reshuffle(int label){
               bool ending = false;
               bool last_read = (reqcont == RING_Z);
               char op_type = 'r';
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending);
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
               // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
           }
           dum_cand[ri] = -1;
@@ -5171,7 +5195,7 @@ void ring_early_reshuffle(int label){
           bool ending = (j == LZ_VAR[i]-1);
           bool last_read = (j == LZ_VAR[i]-1);
           char op_type = 'r';
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending);
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, i);
         }
 
         

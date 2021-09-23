@@ -509,6 +509,7 @@ int main(int argc, char * argv[])
 
 //   oramid = (int *)malloc(sizeof(int)*NUMCORES);
   int oramid[NCORES];
+  int level[NCORES];
 //   tree = (int *)malloc(sizeof(int)*NUMCORES);
   int tree[NCORES];
 //   last_read = (bool *)malloc(sizeof(bool)*NUMCORES);
@@ -854,7 +855,13 @@ int main(int argc, char * argv[])
 	
 	oram_alloc();
 
+	// printf("dram_to_serve_e_w %d\n", dram_to_serve_e_w);
+	// printf("nvm_to_serve_e_w %d\n", nvm_to_serve_e_w);
+
+	// exit(0);
+
 	rho_alloc();
+
 
 	if (SNAPSHOT_ENABLE)
 	{
@@ -1344,6 +1351,7 @@ int main(int argc, char * argv[])
 					{
 						reshuffle_t0 = CYCLE_VAL;
 						cur_reshuffle = oramid[numc];
+						set_reshuffle_w(level[numc]);
 					}
 					else if (op_type[numc] == 'm')
 					{
@@ -2102,6 +2110,7 @@ int main(int argc, char * argv[])
             ending[numc] = pN->ending;
             op_type[numc] = pN->op_type;
             reqid[numc] = pN->reqid;
+            level[numc] = pN->level;
 
 			// if (opertype[numc] == 'W')
 			// {
