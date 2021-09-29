@@ -960,10 +960,10 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	if (tracectr >= TRACE_SIZE-3 || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_CACHE) */)
-	{
-		break;
-	}
+	// if (tracectr >= TRACE_SIZE-3 || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_CACHE) */)
+	// {
+	// 	break;
+	// }
 
 	if (TIMEOUT_ENABLE && exe_time >= TIMEOUT_THRESHOLD)
 	{
@@ -1603,7 +1603,7 @@ int main(int argc, char * argv[])
 			// else if(CACHE_ENABLE)
 			// {
 				// printf("cache enable if: @ trace %d\n", tracectr);
-				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
+				while ((no_miss_occured && !expt_done && tracectr <= endpoint) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
 				{
 					// if (tracectr % 50000 == 0)
 					// {

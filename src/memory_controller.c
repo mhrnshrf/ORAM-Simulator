@@ -5529,7 +5529,7 @@ void reset_profile_counters(){
   // remote_nvms = 0;
   dram_elselevel = 0;
   nvm_elselevel = 0;
-  surplus_dead = 0;
+  // surplus_dead = 0;
   surplus_in_use = 0;
   rmiss = 0;
   wmiss = 0;
@@ -5713,8 +5713,8 @@ void export_csv(char * argv[]){
 
   // fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
   // fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
-  // fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
-  // fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
+  fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
+  fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
   // fprintf(fp, "rmiss,%d\n", rmiss);
   // fprintf(fp, "wmiss,%d\n", wmiss);
   // fprintf(fp, "deadrem,%lld\n", deadrem);
