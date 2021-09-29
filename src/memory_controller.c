@@ -1683,8 +1683,8 @@ void read_path(int label){
     // int start = RING_ENABLE ? EMPTY_TOP_VAR : LEVEL_VAR - 1;
     // int end = RING_ENABLE ?
 
-    for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-    // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+    // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);

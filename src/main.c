@@ -933,7 +933,6 @@ int main(int argc, char * argv[])
 	// else
 	// {
 	// 	printf("--------------------------------------\n");
-
 	// }
 	
 	// printf("\n@ trace %d	writeq length: %lld \n", tracectr, write_queue_length[numc]);
