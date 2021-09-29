@@ -18,6 +18,7 @@ long long int BIGNUM = 1000000;
 bool last_lock_released;
 bool last_lock_released_prev;
 bool tail_written;
+bool newtrace_consumed;
 
 int expt_done=0;  
 
@@ -350,6 +351,7 @@ int main(int argc, char * argv[])
 	last_read_deleted = true;
 	last_req_served = true;
 	last_lock_released = true;
+	newtrace_consumed = false;
   
   printf("---------------------------------------------\n");
   printf("-- USIMM: the Utah SImulated Memory Module --\n");
@@ -923,7 +925,7 @@ int main(int argc, char * argv[])
 
 
 	// Mehrnoosh:
-	// printf("@ %lld\n", CYCLE_VAL);
+	// printf("@ %lld  trace %d\n", CYCLE_VAL, tracectr);
 	// if (last_read_served)
 	// {
 	// 	printf("serveddddddddddddddddddddddddddddddddd\n");
@@ -960,10 +962,10 @@ int main(int argc, char * argv[])
 
 	no_miss_occured = true;
 
-	// if (tracectr >= TRACE_SIZE-3 || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_CACHE) */)
-	// {
-	// 	break;
-	// }
+	if (tracectr >= TRACE_SIZE-3 || tracectr >= endpoint /* || mem_clk >= (TRACE_SIZE - WARMUP_CACHE) */)
+	{
+		break;
+	}
 
 	if (TIMEOUT_ENABLE && exe_time >= TIMEOUT_THRESHOLD)
 	{
@@ -1308,7 +1310,8 @@ int main(int argc, char * argv[])
 			// printf("cycle %lld   main: mem 	 trace: %d		req: %d\n", CYCLE_VAL, tracectr, reqctr);
 			tail_written = false;
 			// Mehrnoosh.
-	      if (opertype[numc] == 'R' && last_lock_released) {
+	      if (opertype[numc] == 'R' && last_lock_released ) { // && !newtrace_consumed
+			//   newtrace_consumed = true;
 
 			// printf("@ %lld add R \n", CYCLE_VAL);
 
@@ -1458,9 +1461,10 @@ int main(int argc, char * argv[])
 			// Mehrnoosh.
 		 	 }
 	      }
-	      else if (last_lock_released){  /* This must be a 'W'.  We are confirming that while reading the trace. */
+	      else if (last_lock_released ){  // && !newtrace_consumed  /* This must be a 'W'.  We are confirming that while reading the trace. */ 
 	        if (opertype[numc] == 'W') {
 			// printf("@ %lld add W \n", CYCLE_VAL);
+				// newtrace_consumed = true;
 
 		      addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 		      ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
@@ -1603,7 +1607,7 @@ int main(int argc, char * argv[])
 			// else if(CACHE_ENABLE)
 			// {
 				// printf("cache enable if: @ trace %d\n", tracectr);
-				while ((no_miss_occured && !expt_done && tracectr <= endpoint) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) )
+				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) ) //  && tracectr <= endpoint
 				{
 					// if (tracectr % 50000 == 0)
 					// {
@@ -2081,6 +2085,8 @@ int main(int argc, char * argv[])
 			// }
 			
 			last_lock_released = true;
+
+			// newtrace_consumed = false;
 			
 			int nonmemsaved = nonmemops[numc];
 			Element *pN = Dequeue(oramQ);

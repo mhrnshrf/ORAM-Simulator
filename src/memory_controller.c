@@ -4728,7 +4728,7 @@ int calc_mem_addr(int index, int offset, char type)
     {
       mem_addr = -1;
       // printf("level %d\n", level);
-      if ( (remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ) )  &&  (level == NVM_START) && calc_deadQ_size() > 840) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      if ( (remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram) + surplus_dead )  &&  (level == NVM_START) && calc_deadQ_size() > 840) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
       {
         mem_addr = remote_allocate(index, offset);
       }
