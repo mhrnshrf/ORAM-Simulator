@@ -1116,51 +1116,73 @@ int concat(int a, int b) {
 
 /********************************/
 
+void set_to_serves(){
+
+  if (RING_ENABLE)
+  {
+    dram_to_serve_o = NVM_START - TOP_CACHE;
+    nvm_to_serve_o = LEVEL - NVM_START;
+    dram_to_serve_e_r = (NVM_START - TOP_CACHE)*(RING_Z); 
+    // dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
+    nvm_to_serve_e_r = (LEVEL - NVM_START)*(RING_Z);
+    // nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
+    dram_to_serve_r_r = 1*(RING_Z);
+    dram_to_serve_r_w = 1*(Z);
+    nvm_to_serve_r_r = 1*(RING_Z);
+    nvm_to_serve_r_w = 1*(Z);
+    dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
+    dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
+
+    for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+    {
+      if (in_nvm(i))
+      {
+        nvm_to_serve_e_w += LZ[i];
+      }
+      else
+      {
+        dram_to_serve_e_w += LZ[i];
+      }
+    }
+    
+    // nvm_to_serve_m_r = (LEVEL - NVM_START)*(1);
+    // nvm_to_serve_m_w = (LEVEL - NVM_START)*(1);
+
+    
+    // cur_dram_served_e_w = dram_to_serve_e_w;
+    // cur_nvm_served_e_w = nvm_to_serve_e_w;
+    // cur_dram_served_m_w = dram_to_serve_m_w;
+    // // cur_nvm_served_m_w = 0;
+    // cur_dram_served_r_w = dram_to_serve_r_w;
+    // cur_nvm_served_r_w = nvm_to_serve_r_w;
+  }
+  else
+  {
+    for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+    {
+      dram_to_serve_e_r += LZ[i]; 
+      dram_to_serve_e_w += LZ[i];
+    }
+
+    nvm_to_serve_e_r = 0 ; 
+    nvm_to_serve_e_w = 0;
+  }
+  
+
+
+
+}
+
 void oram_alloc(){
   STALE_TH = STALE_BUF_SIZE-1;
   GATHER_START = TOP_CACHE + DEAD_GATHER_OFFSET;
   GREEN_BLOCK = CB_ENABLE ? CB_GREEN_MAX : 0;
+
   if (!NVM_ENABLE)
   {
     NVM_START = LEVEL;
   }
   
-
-  dram_to_serve_o = NVM_START - TOP_CACHE;
-  nvm_to_serve_o = LEVEL - NVM_START;
-  dram_to_serve_e_r = (NVM_START - TOP_CACHE)*(RING_Z); 
-  // dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
-  nvm_to_serve_e_r = (LEVEL - NVM_START)*(RING_Z);
-  // nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
-  dram_to_serve_r_r = 1*(RING_Z);
-  dram_to_serve_r_w = 1*(Z);
-  nvm_to_serve_r_r = 1*(RING_Z);
-  nvm_to_serve_r_w = 1*(Z);
-  dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
-  dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
-
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
-  {
-    if (in_nvm(i))
-    {
-      nvm_to_serve_e_w += LZ[i];
-    }
-    else
-    {
-      dram_to_serve_e_w += LZ[i];
-    }
-  }
-  
-  // nvm_to_serve_m_r = (LEVEL - NVM_START)*(1);
-  // nvm_to_serve_m_w = (LEVEL - NVM_START)*(1);
-
-  
-  // cur_dram_served_e_w = dram_to_serve_e_w;
-  // cur_nvm_served_e_w = nvm_to_serve_e_w;
-  // cur_dram_served_m_w = dram_to_serve_m_w;
-  // // cur_nvm_served_m_w = 0;
-  // cur_dram_served_r_w = dram_to_serve_r_w;
-  // cur_nvm_served_r_w = nvm_to_serve_r_w;
 
 
 
@@ -1658,9 +1680,11 @@ void read_path(int label){
       discard_stale(label);
     }
     
+    // int start = RING_ENABLE ? EMPTY_TOP_VAR : LEVEL_VAR - 1;
+    // int end = RING_ENABLE ?
 
-    // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+    for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+    // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
@@ -1702,18 +1726,26 @@ void read_path(int label){
 
               reqmade++;
               // if (i == TOP_CACHE_VAR && reqmade == RING_Z)
-              if (i == LEVEL_VAR-1 && reqmade == RING_Z)
+              if (RING_ENABLE)
               {
-                last_read = true;
-                // printf("reqmade is true\n");
+                if (i == LEVEL_VAR-1 && reqmade == RING_Z)
+                {
+                  last_read = true;
+                  // printf("reqmade is true\n");
+                }
               }
+              else
+              {
+                last_read = (i == EMPTY_TOP_VAR && j == LZ_VAR[i] - 1);
+              }
+              
               
 
 
               if (SIM_ENABLE_VAR)
               {
                 // bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
-                bool beginning = (i ==  TOP_CACHE_VAR && reqmade == 1);
+                bool beginning = RING_ENABLE ? (i ==  TOP_CACHE_VAR && reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
                 bool ending = false;
                 char op_type = 'e';
                 insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
@@ -4466,7 +4498,7 @@ int remote_allocate(int index, int offset){
       break;
     }
 
-    // printf("hereeeeeeeeeeee taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
+    // printf("SAME level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
     // printf("hereeeeeeeeeeee taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED":"unknown", tracectr);
     free(cand);
   }
@@ -4504,6 +4536,9 @@ int remote_allocate(int index, int offset){
             free(cand);
             break;
           }
+          // printf("ESLE level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
+
+
           free(cand);
         }
         if (i != -1 && j != -1)
