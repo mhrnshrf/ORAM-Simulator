@@ -1183,7 +1183,7 @@ void oram_alloc(){
     NVM_START = LEVEL;
   }
   
-
+  set_to_serves();
 
 
   for (int i = 0; i < LEVEL; i++)
