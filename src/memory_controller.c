@@ -1683,8 +1683,8 @@ void read_path(int label){
     // int start = RING_ENABLE ? EMPTY_TOP_VAR : LEVEL_VAR - 1;
     // int end = RING_ENABLE ?
 
-    for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-    // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+    // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
@@ -1727,8 +1727,8 @@ void read_path(int label){
               reqmade++;
               if (RING_ENABLE)
               {
-                if (i == TOP_CACHE_VAR && reqmade == RING_Z)
-                // if (i == LEVEL_VAR-1 && reqmade == RING_Z)
+                // if (i == TOP_CACHE_VAR && reqmade == RING_Z)
+                if (i == LEVEL_VAR-1 && reqmade == RING_Z)
                 {
                   last_read = true;
                   // printf("reqmade is true\n");
@@ -1745,8 +1745,8 @@ void read_path(int label){
               if (SIM_ENABLE_VAR)
               {
                 // bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
-                // bool beginning = RING_ENABLE ? (i ==  TOP_CACHE_VAR && reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
-                bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
+                bool beginning = RING_ENABLE ? (i ==  TOP_CACHE_VAR && reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
+                // bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
                 bool ending = false;
                 char op_type = 'e';
                 insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
@@ -1843,8 +1843,8 @@ void read_path(int label){
 
             reqcont++;
 
-            if (i == TOP_CACHE_VAR && reqcont == RING_Z)
-            // if (i == LEVEL_VAR-1 && reqcont == RING_Z)
+            // if (i == TOP_CACHE_VAR && reqcont == RING_Z)
+            if (i == LEVEL_VAR-1 && reqcont == RING_Z)
             {
               // printf("reqcont is true\n");
               last_read = true;
@@ -1855,8 +1855,8 @@ void read_path(int label){
             bool nvm_access = in_nvm(i);
             if (SIM_ENABLE_VAR)
             {
-              // bool beginning = (i ==  TOP_CACHE_VAR && reqcont == 1);
-              bool beginning = (i ==  LEVEL_VAR-1 && reqcont == 1);
+              bool beginning = (i ==  TOP_CACHE_VAR && reqcont == 1);
+              // bool beginning = (i ==  LEVEL_VAR-1 && reqcont == 1);
               bool ending = false;
               char op_type = 'e';
 
@@ -4782,8 +4782,8 @@ void ring_read_path(int label, int addr){
   
 
 
-  // for (int i = 0; i < LEVEL; i++)
-  for (int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+  for (int i = 0; i < LEVEL; i++)
+  // for (int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
     int index = calc_index(label, i);
 
@@ -4889,17 +4889,17 @@ void ring_read_path(int label, int addr){
 
     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
-      // if (i == LEVEL-1)
-      if (i == TOP_CACHE_VAR)
+      if (i == LEVEL-1)
+      // if (i == TOP_CACHE_VAR)
       {
         last_read = true;
       }
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(i);
-      // bool beginning = (i == TOP_CACHE_VAR);
-      bool beginning = (i == LEVEL_VAR-1);
-      // bool ending = (i == LEVEL-1);
-      bool ending = (i == TOP_CACHE_VAR);
+      bool beginning = (i == TOP_CACHE_VAR);
+      // bool beginning = (i == LEVEL_VAR-1);
+      bool ending = (i == LEVEL-1);
+      // bool ending = (i == TOP_CACHE_VAR);
       char op_type = 'o';
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
     }
