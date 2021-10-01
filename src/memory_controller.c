@@ -1736,7 +1736,7 @@ void read_path(int label){
               }
               else
               {
-                last_read = (i == EMPTY_TOP_VAR && j == LZ_VAR[i] - 1);
+                last_read = (i == TOP_CACHE_VAR && j == LZ_VAR[i] - 1);
               }
               
               

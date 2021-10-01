@@ -1371,6 +1371,12 @@ int main(int argc, char * argv[])
 
 				}
 
+				// if (tracectr >= 4200)
+				// {
+				// printf("%c %d insertR req%d	@ %lld	last read? %d \n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL, last_read[numc]);
+				// printf("beginning? %d	ending? %d 	last read?  %d\n", beginning[numc], ending[numc], last_read[numc]);
+				// }
+
 		  // Check to see if the read is for buffered data in write queue - 
 		  // return constant latency if match in WQ
 		  // add in read queue otherwise
@@ -1419,11 +1425,7 @@ int main(int argc, char * argv[])
 				// 	}
 				// }
 
-				// if (tracectr >= 4200)
-				// {
-				// printf("%c %d insertR req%d	@ %lld	last read? %d \n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL, last_read[numc]);
-				// printf("beginning? %d	ending? %d 	last read?  %d\n", beginning[numc], ending[numc], last_read[numc]);
-				// }
+				
 				
 
 			// start = clock();
