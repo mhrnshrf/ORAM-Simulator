@@ -2592,7 +2592,7 @@ void take_snapshot(char * argv[]){
   char newstr[64];
 
   FILE *tif; 
-  FILE *tifrep; 
+  // FILE *tifrep; 
   int nonmemops;
   char opertype;
   long long int taddr;
@@ -2600,11 +2600,12 @@ void take_snapshot(char * argv[]){
 
 
   tif = fopen(argv[2], "r");
-  tifrep = fopen(argv[2], "r");
+  // tifrep = fopen(argv[2], "r");
 
   int addr;
   int label;
-  int trace_max = 400000001;
+  int trace_max = 1000000001;
+
   if (RAND_ENABLE)
   {
     trace_max = 10000001;
@@ -2615,21 +2616,38 @@ void take_snapshot(char * argv[]){
   {
     if (!RAND_ENABLE)
     {
-      if (fgets(newstr,64,tif)) {
-        if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
-          printf("Panic.  Poor trace format.\n");
-          print_oram_stats();
-          exit(1);
-          }
-        addr = block_addr(byte_addr(taddr));
-      }
-      else if (fgets(newstr,64,tifrep)) {
-        if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
-          printf("Panic.  Poor trace format.\n");
-          print_oram_stats();
-          exit(1);
-          }
-        addr = block_addr(byte_addr(taddr));
+      // if (fgets(newstr,64,tif)) {
+      //   if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+      //     printf("Panic.  Poor trace format.\n");
+      //     print_oram_stats();
+      //     exit(1);
+      //     }
+      //   addr = block_addr(byte_addr(taddr));
+      // }
+      // else if (fgets(newstr,64,tifrep)) {
+      //   if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+      //     printf("Panic.  Poor trace format.\n");
+      //     print_oram_stats();
+      //     exit(1);
+      //     }
+      //   addr = block_addr(byte_addr(taddr));
+      // }
+      if (i < 850000000)
+      {
+        if (!fgets(newstr,64,tif)) {
+          fclose(tif);
+          tif = fopen(argv[2], "r");
+          fgets(newstr,64,tif);
+        }
+        else 
+        {
+          if (sscanf(newstr,"%d %c %Lx %Lx",&nonmemops,&opertype,&taddr,&instrpc) < 1) {
+            printf("Panic.  Poor trace format.\n");
+            print_oram_stats();
+            exit(1);
+            }
+          addr = block_addr(byte_addr(taddr));
+        }
       }
       else
       {
@@ -2648,47 +2666,65 @@ void take_snapshot(char * argv[]){
     record_util_level();
     record_util_snap();
 
-    if (true) //(!RAND_ENABLE)
+    // if (true) //(!RAND_ENABLE)
+    // {
+    //   if (i <= 10000000 )
+    //   {
+    //     if (i % 4000000 == 0 )
+    //     {
+    //       export_intermed(exp_name, i/1000000, util_avg);
+    //       // reset_util_level();
+    //     }
+    //   }
+    //   else if(i <= 90000000 )
+    //   {
+    //     if (i % 20000000 == 0 )
+    //     {
+    //       export_intermed(exp_name, i/1000000, util_avg);
+    //       // reset_util_level();
+    //     }
+    //   }
+    //   else if(i <= 300000000 )
+    //   {
+    //     if (i % 50000000 == 0 )
+    //     {
+    //       export_intermed(exp_name, i/1000000, util_avg);
+    //       // reset_util_level();
+    //     }
+    //   }
+    //   else if(i <= 400000000 )
+    //   {
+    //     if (i % 10000000 == 0 )
+    //     {
+    //       export_intermed(exp_name, i/1000000, util_avg);
+    //       // reset_util_level();
+    //     }
+
+    //     if (i == 400000000 )
+    //     {
+    //      export_intermed(exp_name, 401, util_overall);
+    //     }
+
+    //   }
+    // }
+
+    if (i % 50000000 == 0)
     {
-      if (i <= 10000000 )
-      {
-        if (i % 4000000 == 0 )
-        {
-          export_intermed(exp_name, i/1000000, util_avg);
-          // reset_util_level();
-        }
-      }
-      else if(i <= 90000000 )
-      {
-        if (i % 20000000 == 0 )
-        {
-          export_intermed(exp_name, i/1000000, util_avg);
-          // reset_util_level();
-        }
-      }
-      else if(i <= 300000000 )
-      {
-        if (i % 50000000 == 0 )
-        {
-          export_intermed(exp_name, i/1000000, util_avg);
-          // reset_util_level();
-        }
-      }
-      else if(i <= 400000000 )
-      {
-        if (i % 10000000 == 0 )
-        {
-          export_intermed(exp_name, i/1000000, util_avg);
-          // reset_util_level();
-        }
-
-        if (i == 400000000 )
-        {
-         export_intermed(exp_name, 401, util_overall);
-        }
-
-      }
+       export_intermed(exp_name, i/1000000, util_avg, 50);
     }
+
+    if (i % 20000000 == 0)
+    {
+       export_intermed(exp_name, i/1000000, util_avg, 20);
+    }
+
+    if (i == 1000000000)
+    {
+       export_intermed(exp_name, i/1000000, util_overall, 0);
+    }
+    
+    
+    
     
 
   
@@ -5422,15 +5458,15 @@ void print_count_stat(FILE *fp){
 }
 
 
-void export_intermed(char exp_name[], int ind, long double *arr){
+void export_intermed(char exp_name[], int ind, long double *arr, int suffix){
   FILE *fp;
   // char *filename = (char *)malloc(sizeof(char)*100);
   // filename = "";
   char filename[100];
 
-  if (chdir("../oram/log") != 0)  
+  if (chdir("log") != 0)  
   {
-    perror("chdir() to ../oram/log failed"); 
+    perror("chdir() to log failed"); 
   }
 
   // char str[20];
@@ -5445,7 +5481,7 @@ void export_intermed(char exp_name[], int ind, long double *arr){
   // filename = strcat(filename, ".csv");
   // // printf("filename csv: %s\n", filename);
 
-  sprintf(filename, "%s-%d.csv", exp_name, ind);
+  sprintf(filename, "%s%d-%d.csv", exp_name, suffix, ind);
   // printf("filename: %s\n", filename);
 
 
@@ -5598,13 +5634,13 @@ void export_csv(char * argv[]){
   }
 
   fprintf(fp,"Benchmark,%s\n", bench);
-  // fprintf(fp,"exe_time,%f\n", exe_time);
+  fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
   // fprintf(fp, "mem_clk,%lld\n", mem_clk);
   fprintf(fp, "invokectr,%d\n", invokectr);
-  // fprintf(fp, "oramctr,%d\n", oramctr);
-  // fprintf(fp, "dummyctr,%d\n", dummyctr);
+  fprintf(fp, "oramctr,%d\n", oramctr);
+  fprintf(fp, "dummyctr,%d\n", dummyctr);
   // fprintf(fp, "pos1_access,%d\n", pos1_access);
   // fprintf(fp, "pos2_access,%d\n", pos2_access);
   // fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
@@ -5618,7 +5654,7 @@ void export_csv(char * argv[]){
   // fprintf(fp, "plbaccess2,%lld\n", plbaccess[2]);
   // fprintf(fp, "oramQ_size,%d\n", oramQ->size);
   // fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
-  // fprintf(fp, "Bk_Evict,%d\n", bkctr);
+  fprintf(fp, "Bk_Evict,%d\n", bkctr);
   fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
   fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
   fprintf(fp, "hitctr,%d\n", hitctr);
@@ -5640,10 +5676,10 @@ void export_csv(char * argv[]){
   // fprintf(fp, "stash_removed,%d\n", stash_removed);
   // fprintf(fp, "fillhit,%d\n", fillhit);
   // fprintf(fp, "fillmiss,%d\n", fillmiss);
-  // fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
-  // fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
-  // fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
-  // fprintf(fp, "stashctr,%d\n", stashctr);
+  fprintf(fp, "topctr,%f%%\n", 100*(double)topctr/(topctr+midctr+botctr));
+  fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
+  fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
+  fprintf(fp, "stashctr,%d\n", stashctr);
   // fprintf(fp, "stash_cont,%d\n", stash_cont);
   // fprintf(fp, "linger_discard,%d\n", linger_discard);
   fprintf(fp, "ringctr,%d\n", ringctr);

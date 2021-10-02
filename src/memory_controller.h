@@ -457,7 +457,7 @@ int remote_allocate(int index, int offset);
 bool remove_dead(Queue *pQueue, int key1, int key2);
 void reset_shuff_interval();
 void print_array(int * arr, int size, FILE *fp);
-void export_intermed(char * exp_name, int ind, long double *arr);
+void export_intermed(char * exp_name, int ind, long double *arr, int suffix);
 void record_util_level();
 void reset_util_level();
 void print_array_double(long double * arr, int size, FILE *fp);
