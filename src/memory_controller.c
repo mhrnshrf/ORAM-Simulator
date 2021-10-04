@@ -2604,7 +2604,7 @@ void take_snapshot(char * argv[]){
 
   int addr;
   int label;
-  int trace_max = 4000000001;
+  unsigned long long int trace_max = 4000000001;
 
   if (RAND_ENABLE)
   {
@@ -2612,7 +2612,7 @@ void take_snapshot(char * argv[]){
   }
   
 
-  for(int i = 0; i < trace_max; i++)
+  for(unsigned long long int i = 0; i < trace_max; i++)
   {
     if (!RAND_ENABLE)
     {
@@ -5463,7 +5463,7 @@ void print_count_stat(FILE *fp){
 }
 
 
-void export_intermed(char exp_name[], int ind, long double *arr, int suffix){
+void export_intermed(char exp_name[], unsigned long long int ind, long double *arr, unsigned long long int suffix){
   FILE *fp;
   // char *filename = (char *)malloc(sizeof(char)*100);
   // filename = "";
@@ -5486,13 +5486,13 @@ void export_intermed(char exp_name[], int ind, long double *arr, int suffix){
   // filename = strcat(filename, ".csv");
   // // printf("filename csv: %s\n", filename);
 
-  sprintf(filename, "%s%d-%d.csv", exp_name, suffix, ind);
+  sprintf(filename, "%s%lld-%lld.csv", exp_name, suffix, ind);
   // printf("filename: %s\n", filename);
 
 
   fp = fopen(filename,"w+");
   
-  fprintf(fp,"series,%d\n", ind);
+  fprintf(fp,"series,%lld\n", ind);
   // print_array(arr, LEVEL, fp);
   print_array_double(arr, LEVEL, fp);
 
