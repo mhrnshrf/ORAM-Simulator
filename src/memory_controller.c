@@ -2604,7 +2604,7 @@ void take_snapshot(char * argv[]){
 
   int addr;
   int label;
-  int trace_max = 1000000001;
+  int trace_max = 400000001;
 
   if (RAND_ENABLE)
   {

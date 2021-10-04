@@ -18,7 +18,7 @@ long long int BIGNUM = 1000000;
 bool last_lock_released;
 bool last_lock_released_prev;
 bool tail_written;
-bool newtrace_consumed;
+bool newreq_consumed;
 
 int expt_done=0;  
 
@@ -351,7 +351,7 @@ int main(int argc, char * argv[])
 	last_read_deleted = true;
 	last_req_served = true;
 	last_lock_released = true;
-	newtrace_consumed = false;
+	newreq_consumed = false;
   
   printf("---------------------------------------------\n");
   printf("-- USIMM: the Utah SImulated Memory Module --\n");
@@ -926,6 +926,7 @@ int main(int argc, char * argv[])
 
 	// Mehrnoosh:
 	// printf("@ %lld  trace %d\n", CYCLE_VAL, tracectr);
+	// printf("@ %lld  trace %d\n", CYCLE_VAL, tracectr);
 	// if (last_read_served)
 	// {
 	// 	printf("serveddddddddddddddddddddddddddddddddd\n");
@@ -1309,8 +1310,8 @@ int main(int argc, char * argv[])
 			// printf("cycle %lld   main: mem 	 trace: %d		req: %d\n", CYCLE_VAL, tracectr, reqctr);
 			tail_written = false;
 			// Mehrnoosh.
-	      if (opertype[numc] == 'R' && last_lock_released ) { // && !newtrace_consumed
-			//   newtrace_consumed = true;
+	      if (opertype[numc] == 'R' && last_lock_released ) { // && !newreq_consumed
+			//   newreq_consumed = true;
 
 			// printf("@ %lld add R \n", CYCLE_VAL);
 
@@ -1462,10 +1463,10 @@ int main(int argc, char * argv[])
 			// Mehrnoosh.
 		 	 }
 	      }
-	      else if (last_lock_released ){  // && !newtrace_consumed  /* This must be a 'W'.  We are confirming that while reading the trace. */ 
+	      else if (last_lock_released ){  // && !newreq_consumed  /* This must be a 'W'.  We are confirming that while reading the trace. */ 
 	        if (opertype[numc] == 'W') {
 			// printf("@ %lld add W \n", CYCLE_VAL);
-				// newtrace_consumed = true;
+				// newreq_consumed = true;
 
 		      addr[numc] = addr[numc] + (long long int)((long long int)prefixtable[numc] << (ADDRESS_BITS - log_base2(NUMCORES)));    // Add MSB bits so each trace accesses a different address space.
 		      ROB[numc].mem_address[ROB[numc].tail] = addr[numc];
@@ -2087,7 +2088,7 @@ int main(int argc, char * argv[])
 			
 			last_lock_released = true;
 
-			// newtrace_consumed = false;
+			// newreq_consumed = false;
 			
 			int nonmemsaved = nonmemops[numc];
 			Element *pN = Dequeue(oramQ);
