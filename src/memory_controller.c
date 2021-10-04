@@ -2604,7 +2604,7 @@ void take_snapshot(char * argv[]){
 
   int addr;
   int label;
-  int trace_max = 400000001;
+  int trace_max = 4000000001;
 
   if (RAND_ENABLE)
   {
@@ -2632,7 +2632,7 @@ void take_snapshot(char * argv[]){
       //     }
       //   addr = block_addr(byte_addr(taddr));
       // }
-      if (i < 850000000)
+      if (i < 3700000000)
       {
         if (!fgets(newstr,64,tif)) {
           fclose(tif);
@@ -2708,6 +2708,11 @@ void take_snapshot(char * argv[]){
     //   }
     // }
 
+    if (i % 100000000 == 0)
+    {
+       export_intermed(exp_name, i/1000000, util_avg, 100);
+    }
+
     if (i % 50000000 == 0)
     {
        export_intermed(exp_name, i/1000000, util_avg, 50);
@@ -2718,9 +2723,9 @@ void take_snapshot(char * argv[]){
        export_intermed(exp_name, i/1000000, util_avg, 20);
     }
 
-    if (i == 1000000000)
+    if (i % 1000000000 == 0)
     {
-       export_intermed(exp_name, i/1000000, util_overall, 0);
+       export_intermed(exp_name, i/1000000, util_overall, i % 1000000000);
     }
     
     
@@ -7178,6 +7183,7 @@ void determine_served_all(request_t * request){
         last_read_served = (cur_dram_served_e_w == dram_to_serve_e_w) && (cur_nvm_served_e_w == nvm_to_serve_e_w);
         if (last_read_served)
         {
+          // printf("%c %d servedW req%d dramW %d   nvmW %d  lsw %d\n", request->op_type, request->oramid, request->reqid, cur_dram_served_e_w, cur_nvm_served_e_w,  last_read_served);
           cur_dram_served_e_w = 0;
           cur_nvm_served_e_w = 0;
         }

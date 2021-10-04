@@ -1050,7 +1050,7 @@ int main(int argc, char * argv[])
 							determineReq = 0;
 							lrs_ctr++;
 							// printf("last read served @ %lld\n", CYCLE_VAL);	
-							// printf("%c %d served %c req%d @ %lld  DETREQ SERVED	comp time %lld	rob%d \n", 
+							// printf("%c %d servedR %c req%d @ %lld  DETREQ SERVED	comp time %lld	rob%d \n", 
 							// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
 							// ROB[numc].reqid[ROB[numc].head],
 							// CYCLE_VAL, 
