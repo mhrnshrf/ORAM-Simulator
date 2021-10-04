@@ -448,7 +448,7 @@ long long int nvm_elselevel = 0;
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
 
-int cl_interval = 0;
+unsigned long long int cl_interval = 0;
 
 int stale_reduction = 0;
 
