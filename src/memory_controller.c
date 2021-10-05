@@ -976,7 +976,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->oramid = (ENQUEUE_VAR == HEAD) ? -1 : pN->oramid;   // in case of dummy access set oram id to -1
   pN->tree = TREE_VAR;
   pN->orig_addr = orig_addr;
-  pN->last_read = (ENQUEUE_VAR == HEAD) ? false : last_read;
+  pN->last_read = (!RING_ENABLE) ? false : last_read;
   pN->nvm_access = nvm_access;
   pN->op_type = op_type;
   pN->beginning = (ENQUEUE_VAR == HEAD) ? false : beginning;
