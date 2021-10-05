@@ -2138,7 +2138,7 @@ int main(int argc, char * argv[])
 				nvm_tmax = 0;
 				dram_tmax = 0;
 				nvmt0_set = false;
-				// printf("%c %d begin @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
+				// printf("%c %d deqbegin @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 				if (op_type[numc] == 'o')
 				{
 					// online_t0 = CYCLE_VAL;
@@ -2174,6 +2174,7 @@ int main(int argc, char * argv[])
 			{
 				// last_read_served = false;
 
+				// printf("%c %d deqlast @ %lld req%d\n", pN->op_type, pN->oramid, CYCLE_VAL, pN->reqid);
 				// if (pN->op_type == 'e')
 				// {
 				// 	printf("@ %d oramid %d stall\n", tracectr, pN->oramid);
