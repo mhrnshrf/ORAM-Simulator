@@ -5763,8 +5763,8 @@ void export_csv(char * argv[]){
   // fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);
   fprintf(fp, "surplus_dead,%lld\n", surplus_dead);
   fprintf(fp, "surplus_in_use,%lld\n", surplus_in_use);
-  // fprintf(fp, "rmiss,%d\n", rmiss);
-  // fprintf(fp, "wmiss,%d\n", wmiss);
+  fprintf(fp, "rmiss,%d\n", rmiss);
+  fprintf(fp, "wmiss,%d\n", wmiss);
   // fprintf(fp, "deadrem,%lld\n", deadrem);
 
 
