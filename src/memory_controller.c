@@ -5699,7 +5699,7 @@ void export_csv(char * argv[]){
   // fprintf(fp, "writectr,%d\n", writectr);
   // fprintf(fp, "wskip,%d\n", wskip);
   // fprintf(fp, "mem_req_late,%f\n", (double)mem_req_latencies/(invokectr));
-  // fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
+  fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
   // fprintf(fp, "missl1wb,%lld\n", missl1wb);
   // fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
   // fprintf(fp, "wbshuff,%d\n", wbshuff);
@@ -5844,6 +5844,9 @@ void export_csv(char * argv[]){
   fprintf(fp, "mdram,%d\n", mdram);
   fprintf(fp, "lrs_ctr,%d\n", lrs_ctr);
   fprintf(fp, "deadQs,%d\n", calc_deadQ_size());
+  fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_executed/1000));
+  fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_executed/1000));
+
 
 
   // fprintf(fp, "online_r,%d\n", online_r);
