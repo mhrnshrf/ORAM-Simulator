@@ -5549,7 +5549,7 @@ void reset_profile_counters(){
   writectr = 0;
   wskip = 0;
   mem_req_latencies = 0;
-  nonmemops_sum = 0;
+  // nonmemops_sum = 0;
   missl1wb = 0;
   wbshuff = 0;
   ringdumctr = 0;
@@ -5844,8 +5844,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "mdram,%d\n", mdram);
   fprintf(fp, "lrs_ctr,%d\n", lrs_ctr);
   fprintf(fp, "deadQs,%d\n", calc_deadQ_size());
-  fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_executed/1000));
-  fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_executed/1000));
+  fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_sum/1000));
+  fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_sum/1000));
 
 
 
