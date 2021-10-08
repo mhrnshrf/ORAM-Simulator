@@ -867,8 +867,8 @@ int main(int argc, char * argv[])
 
 	if (SNAPSHOT_ENABLE)
 	{
-		oram_init_path();
-		// oram_init();
+		// oram_init_path();
+		oram_init();
 		take_snapshot(argv);
 	}
 		

@@ -244,22 +244,22 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 
 
 		// if needed to evict a block
-        if (ipval != 0x7fbe48b439c0)
+        // if (ipval != 0x7fbe48b439c0)
         {
             if (victim != -1)
             {
                 v = (unsigned int)victim;
-                fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
+                fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
                 }
                 nonmemops = L2_LATENCY;
         }
-        else
-        {
-            skip = true;
-        }
+        // else
+        // {
+        //     skip = true;
+        // }
         
         if (!skip){
-	    fprintf(trace,"%d R 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr));
+	    fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
         }
 	    nonmemops = 0;	
 	}
@@ -302,24 +302,24 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             victim = cache_fill(addrval, 'W');
 
             // if needed to evict a block
-            if (ipval != 0x7fbe48b439c0)
+            // if (ipval != 0x7fbe48b439c0)
 			{
                 if (victim != -1)
                 {
                     v = (unsigned int)victim;
-                    fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, v, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
+                    fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
                 
                     
                     nonmemops = L2_LATENCY;
                 }
             }
-            else
-            {
-                skip = true;
-            }
+            // else
+            // {
+            //     skip = true;
+            // }
 
             if (!skip){
-            fprintf(trace,"%d W 0x%x %p     %f      %f\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr));
+            fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
             }
 
             nonmemops = 0;	

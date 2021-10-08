@@ -5517,8 +5517,8 @@ void reset_profile_counters(){
   plbaccess[1] = 0;
   plbaccess[2] = 0;
   bkctr = 0;
-  hitctr = 0;
-  missctr = 0;
+  // hitctr = 0;
+  // missctr = 0;
   evictctr = 0;
   rho_hit = 0;
   rhoctr = 0;
@@ -5579,10 +5579,10 @@ void reset_profile_counters(){
   nvm_elselevel = 0;
   // surplus_dead = 0;
   surplus_in_use = 0;
-  rmiss = 0;
-  wmiss = 0;
+  // rmiss = 0;
+  // wmiss = 0;
   deadrem = 0;
-  nonmemops_executed = 0;
+  // nonmemops_executed = 0;
   // dead_dram = 0;
   for (int i = 0; i < LEVEL; i++)
   {
