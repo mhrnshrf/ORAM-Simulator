@@ -1850,11 +1850,11 @@ int main(int argc, char * argv[])
 									no_miss_occured = true;
 									waited_for_evicted[numc].valid = false;
 									eviction_writeback[numc] = false;
-									hitctr = 0;
-									missctr = 0;
+									// hitctr = 0;
+									// missctr = 0;
 									evictctr = 0;
 									cache_dirty = 0;
-									nonmemops_sum = 0;
+									// nonmemops_sum = 0;
 									missl1wb = 0;
 									reset_profile_counters();
 								}
