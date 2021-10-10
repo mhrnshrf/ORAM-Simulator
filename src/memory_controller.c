@@ -5669,7 +5669,7 @@ void export_csv(char * argv[]){
   // fprintf(fp, "rhoctr,%d\n", rhoctr);
   // fprintf(fp, "rho_dummyctr,%d\n", rho_dummyctr);
   // fprintf(fp, "rho_bkctr,%f%%\n", 100*(double)rho_bkctr/rho_hit);
-  // fprintf(fp, "earlyctr,%d\n", earlyctr);
+  fprintf(fp, "earlyctr,%d\n", earlyctr);
   // fprintf(fp, "dirty_pointctr,%d\n", dirty_pointctr);
   // fprintf(fp, "cache_dirty,%d\n", cache_dirty);
   // fprintf(fp, "ptr_fail,%d\n", ptr_fail);

@@ -249,7 +249,8 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
             if (victim != -1)
             {
                 v = (unsigned int)victim;
-                fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+                // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+                fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
                 }
                 nonmemops = L2_LATENCY;
         }
@@ -259,7 +260,8 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
         // }
         
         if (!skip){
-	    fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
+	    // fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
+	    fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
         }
 	    nonmemops = 0;	
 	}
@@ -307,7 +309,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
                 if (victim != -1)
                 {
                     v = (unsigned int)victim;
-                    fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+                    // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v, ip);
                 
                     
                     nonmemops = L2_LATENCY;
@@ -319,7 +322,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             // }
 
             if (!skip){
-            fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+            // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+            fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
             }
 
             nonmemops = 0;	
