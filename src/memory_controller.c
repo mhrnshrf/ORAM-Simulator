@@ -6309,8 +6309,8 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->ending = ending;
     new_node->op_type = op_type;
     new_node->reqid = reqid;
-    // new_node->countdown = (!is_nvm_addr_byte(physical_address)) ? 0 : (type == READ) ? 60*NVM_LATENCY : 64*NVM_LATENCY*2 ;
-    new_node->countdown = 0;
+    new_node->countdown = (!is_nvm_addr_byte(physical_address)) ? 0 : (type == READ) ? 60*NVM_LATENCY : 64*NVM_LATENCY*2 ;
+    // new_node->countdown = 0;
     // if (nvm_access)
     // {
     //   printf("nvm   ");
@@ -6474,11 +6474,11 @@ update_read_queue_commands (int channel)
 
     // ignore the requests whose completion time has been determined
     // these requests will be removed this very cycle 
-    if (curr->countdown > 0)
-    {
-      curr->countdown--;
-      continue;
-    }
+    // if (curr->countdown > 0)
+    // {
+    //   curr->countdown--;
+    //   continue;
+    // }
     
 
     if (curr->request_served == 1)
@@ -6587,11 +6587,11 @@ update_write_queue_commands (int channel)
   request_t * curr = NULL;
   LL_FOREACH (write_queue_head[channel], curr) 
   {
-    if (curr->countdown > 0)
-    {
-      curr->countdown--;
-      continue;
-    }
+    // if (curr->countdown > 0)
+    // {
+    //   curr->countdown--;
+    //   continue;
+    // }
 
     if (curr->request_served == 1)
       continue;
@@ -7349,6 +7349,12 @@ clean_queues (int channel)
 			// {
       // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
 			// }
+      if (rd_ptr->countdown > 0 )
+      {
+        rd_ptr->countdown--;
+        continue;
+      }
+      
       update_served_count(rd_ptr);
       determine_served_all(rd_ptr);
 
@@ -7377,6 +7383,13 @@ clean_queues (int channel)
       // {
       // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
       // }
+
+      if (wrt_ptr->countdown > 0 )
+      {
+        wrt_ptr->countdown--;
+        continue;
+      }
+      
 
       // update_served_count(wrt_ptr);
       // determine_served_all(wrt_ptr);
@@ -7571,14 +7584,14 @@ issue_request_command (request_t * request, char rwt)
       
       
       
-      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
-      {
-        // int coef = (rwt == 'R')? 1 : 3;
-        // request->completion_time += NVM_LATENCY;
-        request->completion_time += 60*NVM_LATENCY;
-        // printf("nvm  @ %lld\n", CYCLE_VAL);
-        // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
-      }
+      // if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
+      // {
+      //   // int coef = (rwt == 'R')? 1 : 3;
+      //   // request->completion_time += NVM_LATENCY;
+      //   request->completion_time += 60*NVM_LATENCY;
+      //   // printf("nvm  @ %lld\n", CYCLE_VAL);
+      //   // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
+      // }
       
       request->latency = request->completion_time - request->arrival_time;
 
