@@ -5966,8 +5966,8 @@ void update_ddr_timing_param(int channel){
   bool nvm = is_nvm_channel(channel);
   nvm = false;
 
-  T_RCD        = nvm ?   88       :        44;                  // 88
-  T_RP         = nvm ?   240      :        44;  // 60 ~ 5 / 528 // 240
+  T_RCD        = nvm ?   44      :        44;                  // 88
+  T_RP         = nvm ?   44      :        44;  // 60 ~ 5 / 528 // 240
 
   T_CAS        = nvm ?    44      :        44;
   T_RC         = nvm ?   156      :       156;
@@ -5990,6 +5990,13 @@ void update_ddr_timing_param(int channel){
   T_DATA_TRANS = nvm ?    16      :        16;
 }
 
+
+void adjust_ddr(int addr){
+  bool nvm = is_nvm_addr_byte(addr) && NVM_ENABLE;
+
+  T_RCD        = nvm ?   44*NVM_LATENCY      :        44;                 
+  T_CAS        = nvm ?   44*NVM_LATENCY      :        44;
+}
 // Mehrnoosh.
 
 
@@ -7349,11 +7356,11 @@ clean_queues (int channel)
 			// {
       // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
 			// }
-      if (rd_ptr->countdown > 0 )
-      {
-        rd_ptr->countdown--;
-        continue;
-      }
+      // if (rd_ptr->countdown > 0 )
+      // {
+      //   rd_ptr->countdown--;
+      //   continue;
+      // }
       
       update_served_count(rd_ptr);
       determine_served_all(rd_ptr);
@@ -7384,11 +7391,11 @@ clean_queues (int channel)
       // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
       // }
 
-      if (wrt_ptr->countdown > 0 )
-      {
-        wrt_ptr->countdown--;
-        continue;
-      }
+      // if (wrt_ptr->countdown > 0 )
+      // {
+      //   wrt_ptr->countdown--;
+      //   continue;
+      // }
       
 
       // update_served_count(wrt_ptr);
@@ -7462,6 +7469,9 @@ issue_request_command (request_t * request, char rwt)
   //     cur_meta = request->oramid;
   //   }
   // }
+
+  adjust_ddr(request->physical_address);
+
 
   if (NVM_ENABLE && is_nvm_addr_byte(request->physical_address))
   {
