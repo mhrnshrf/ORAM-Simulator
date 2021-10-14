@@ -3,12 +3,12 @@ ORAM Simulator is written in C programming language. It simulates the behaviour 
 <!-- reference shoud be added--> 
 
 ## Simulator Features
-ORAM simulator implements a baseline ORAM that [Freecursive ORAM ](https://dl.acm.org/doi/10.1145/2775054.2694353) paper introduced. In this baseline, position map blocks and data blocks are stored in a unified full binary tree and one can not tell data access and position map access apart. On top of this baseline, MIR-ORAM Simulator implements other features. Some of these features are from prior work and other ones are contribution of [MIR-ORAM](https://dl.acm.org/doi/10.1145/2775054.2694353) paper. The list below summerizes all features. 
+ORAM simulator implements a baseline ORAM that [Freecursive ORAM ](https://dl.acm.org/doi/10.1145/2775054.2694353) paper introduced. In this baseline, position map blocks and data blocks are stored in a unified full binary tree and one can not tell data access and position map access apart. 
 <!-- ### MIR-ORAM Feautres
 * __Volcano__     
 * __Write Bypass__ 
 * __Prefetch__     -->
-### Prior Work Feautres
+### Baseline Feautres
 * __Cache__   a set associative last level cache
 * __Subtree__ an efficient address mapping introduced by [Design space exploration and optimization of path oblivious RAM in secure processors](https://dl.acm.org/doi/10.1145/2508148.2485971) paper.
 * __Rho__ the state-of-the-art introduced by [Relaxed Hierarchical ORAM](https://dl.acm.org/doi/10.1145/3297858.3304045) paper.
