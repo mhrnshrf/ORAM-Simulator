@@ -1,5 +1,5 @@
 # ORAM Simulator
-MIR-ORAM Simulator is written in C programming language. It simulates the behaviour of path **O**blivious **RAM** and on top of that implements several features for **M**emory request **I**ntensity **R**eduction. For the memory side, it is integrated with [USIMM](http://utaharch.blogspot.com/2012/02/usimm.html) (the Utah SImulated Memory Module) that simulates the memory operations. 
+ORAM Simulator is written in C programming language. It simulates the behaviour of path **O**blivious **RAM**. For the DRAM operations simulation, it is integrated with [USIMM](http://utaharch.blogspot.com/2012/02/usimm.html) (the Utah SImulated Memory Module). 
 <!-- reference shoud be added--> 
 
 ## Simulator Features
