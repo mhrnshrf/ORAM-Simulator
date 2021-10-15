@@ -6594,11 +6594,11 @@ update_write_queue_commands (int channel)
   request_t * curr = NULL;
   LL_FOREACH (write_queue_head[channel], curr) 
   {
-    // if (curr->countdown > 0)
-    // {
-    //   curr->countdown--;
-    //   continue;
-    // }
+    if (curr->countdown > 0)
+    {
+      curr->countdown--;
+      continue;
+    }
 
     if (curr->request_served == 1)
       continue;
@@ -7470,7 +7470,7 @@ issue_request_command (request_t * request, char rwt)
   //   }
   // }
 
-  adjust_ddr(request->physical_address);
+  // adjust_ddr(request->physical_address);
 
 
   if (NVM_ENABLE && is_nvm_addr_byte(request->physical_address))
@@ -7594,14 +7594,14 @@ issue_request_command (request_t * request, char rwt)
       
       
       
-      // if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
-      // {
-      //   // int coef = (rwt == 'R')? 1 : 3;
-      //   // request->completion_time += NVM_LATENCY;
-      //   request->completion_time += 60*NVM_LATENCY;
-      //   // printf("nvm  @ %lld\n", CYCLE_VAL);
-      //   // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
-      // }
+      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
+      {
+        // int coef = (rwt == 'R')? 1 : 3;
+        // request->completion_time += NVM_LATENCY;
+        request->completion_time += 60*NVM_LATENCY;
+        // printf("nvm  @ %lld\n", CYCLE_VAL);
+        // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
+      }
       
       request->latency = request->completion_time - request->arrival_time;
 
