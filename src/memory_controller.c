@@ -5964,12 +5964,12 @@ bool is_nvm_channel(int channel){
 
 void update_ddr_timing_param(int channel){
   bool nvm = is_nvm_channel(channel);
-  nvm = false;
+  nvm = true;
 
-  T_RCD        = nvm ?   44      :        44;                  // 88
+  T_RCD        = nvm ?   44*NVM_LATENCY      :        44;                  // 88
   T_RP         = nvm ?   44      :        44;  // 60 ~ 5 / 528 // 240
 
-  T_CAS        = nvm ?    44      :        44;
+  T_CAS        = nvm ?    44*NVM_LATENCY      :        44;
   T_RC         = nvm ?   156      :       156;
   T_RAS        = nvm ?   112      :       112;
 
@@ -6594,11 +6594,11 @@ update_write_queue_commands (int channel)
   request_t * curr = NULL;
   LL_FOREACH (write_queue_head[channel], curr) 
   {
-    if (curr->countdown > 0)
-    {
-      curr->countdown--;
-      continue;
-    }
+    // if (curr->countdown > 0)
+    // {
+    //   curr->countdown--;
+    //   continue;
+    // }
 
     if (curr->request_served == 1)
       continue;
