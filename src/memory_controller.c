@@ -5973,7 +5973,7 @@ void update_ddr_timing_param(int channel){
   T_RC         = nvm ?   156      :       156;
   T_RAS        = nvm ?   112      :       112;
 
-  T_RRD        = nvm ?    44      :        20;                  // 44
+  T_RRD        = nvm ?    20      :        20;                  // 44
 
   T_FAW        = nvm ?   128      :       128;
   T_WR         = nvm ?    48      :        48;
