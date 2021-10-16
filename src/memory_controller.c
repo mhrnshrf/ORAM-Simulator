@@ -7598,7 +7598,7 @@ issue_request_command (request_t * request, char rwt)
       {
         // int coef = (rwt == 'R')? 1 : 3;
         // request->completion_time += NVM_LATENCY;
-        request->completion_time += 60*NVM_LATENCY;
+        // request->completion_time += 60*NVM_LATENCY;
         // printf("nvm  @ %lld\n", CYCLE_VAL);
         // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
       }
