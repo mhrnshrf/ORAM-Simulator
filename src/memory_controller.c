@@ -5964,7 +5964,7 @@ bool is_nvm_channel(int channel){
 
 void update_ddr_timing_param(int channel){
   bool nvm = is_nvm_channel(channel);
-  nvm = true;
+  nvm = false;
 
   T_RCD        = nvm ?   44*NVM_LATENCY      :        44;                  // 88
   T_RP         = nvm ?   44      :        44;  // 60 ~ 5 / 528 // 240
@@ -7470,7 +7470,7 @@ issue_request_command (request_t * request, char rwt)
   //   }
   // }
 
-  // adjust_ddr(request->physical_address);
+  adjust_ddr(request->physical_address);
 
 
   if (NVM_ENABLE && is_nvm_addr_byte(request->physical_address))
