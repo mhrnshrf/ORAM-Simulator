@@ -7396,6 +7396,12 @@ clean_queues (int channel)
       //   wrt_ptr->countdown--;
       //   continue;
       // }
+
+       if (wrt_ptr->completion_time > CYCLE_VAL)
+      {
+        // wrt_ptr->countdown--;
+        continue;
+      }
       
 
       // update_served_count(wrt_ptr);
