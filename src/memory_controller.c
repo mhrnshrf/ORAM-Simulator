@@ -5993,6 +5993,7 @@ void update_ddr_timing_param(int channel){
 
 void adjust_ddr(int addr){
   bool nvm = is_nvm_addr_byte(addr) && NVM_ENABLE;
+  nvm = true;
 
   T_RCD        = nvm ?   44*NVM_LATENCY      :        44;                 
   T_CAS        = nvm ?   44*NVM_LATENCY      :        44;
