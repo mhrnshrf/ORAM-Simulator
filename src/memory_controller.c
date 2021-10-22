@@ -5996,6 +5996,8 @@ void adjust_ddr(int addr){
 
   T_RCD        = nvm ?   44*NVM_LATENCY      :        44;                 
   T_CAS        = nvm ?   44*NVM_LATENCY      :        44;
+  T_WR        = nvm ?   48*NVM_LATENCY      :        48;
+  T_WTR        = nvm ?   24*NVM_LATENCY      :        24;
 }
 // Mehrnoosh.
 
@@ -7397,11 +7399,11 @@ clean_queues (int channel)
       //   continue;
       // }
 
-       if (wrt_ptr->completion_time > CYCLE_VAL)
-      {
-        // wrt_ptr->countdown--;
-        continue;
-      }
+      //  if (wrt_ptr->completion_time > CYCLE_VAL)
+      // {
+      //   // wrt_ptr->countdown--;
+      //   continue;
+      // }
       
 
       // update_served_count(wrt_ptr);
@@ -7678,7 +7680,7 @@ issue_request_command (request_t * request, char rwt)
       //   return 0;
       // }
       
-      assert (dram_state[channel][rank][bank].state == ROW_ACTIVE);
+      assert (dram_state[channel][rank][bank].state == ROW_ACTIVE); 
 
       //UT_MEM_DEBUG("\nCycle: %lld Cmd: COL_WRITE Req:%lld Chan:%d Rank:%d Bank:%d \n", CYCLE_VAL, request->id, channel, rank, bank);
       dram_state[channel][rank][bank].next_pre =
