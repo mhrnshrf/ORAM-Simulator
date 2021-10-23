@@ -472,6 +472,8 @@ int plb_interval[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1};
 int plb_temp[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1}; 
 
 long long int shuff[LEVEL] = {0};
+long long int realcount[LEVEL] = {0};
+long long int dumcount[LEVEL] = {0};
 long long int shuff_total = 0;
 int wb[LEVEL] = {0};
 int ref_close[LEVEL] = {0};
@@ -4853,6 +4855,7 @@ void ring_read_path(int label, int addr){
         if (GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].addr == addr)
         {
           // printf("\n offset trace %d\n", tracectr);
+          
           offset = j;
 
           // profiling
@@ -4885,6 +4888,7 @@ void ring_read_path(int label, int addr){
 
       if (GlobTree[index].slot[offset].isReal)
       {
+        realcount[i]++;
         
         if(add_to_stash(GlobTree[index].slot[offset]) != -1)
         {
@@ -4899,6 +4903,10 @@ void ring_read_path(int label, int addr){
           print_oram_stats();
           exit(1);
         }
+      }
+      else
+      {
+        dumcount[i]++;
       }
     }
     
@@ -5584,10 +5592,10 @@ void reset_profile_counters(){
   deadrem = 0;
   // nonmemops_executed = 0;
   // dead_dram = 0;
-  for (int i = 0; i < LEVEL; i++)
-  {
-    shuff[i] = 0;
-  }
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   shuff[i] = 0;
+  // }
 }
 
 
@@ -5847,8 +5855,6 @@ void export_csv(char * argv[]){
   fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_sum/1000));
   fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_sum/1000));
 
-
-
   // fprintf(fp, "online_r,%d\n", online_r);
   // fprintf(fp, "evict_r,%d\n", evict_r);
   // fprintf(fp, "reshuffle_r,%d\n", reshuffle_r);
@@ -5860,6 +5866,21 @@ void export_csv(char * argv[]){
   // fprintf(fp, "w_ended_dram,%d\n", w_ended_dram);
   // fprintf(fp, "w_ended_nvm,%d\n", w_ended_nvm);
   // fprintf(fp, "meta_ended,%d\n", meta_ended);
+
+   for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
+  }
+
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "realcount[%d],%lld\n", i, realcount[i]);
+  }
+
+   for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "dumcount[%d],%lld\n", i, dumcount[i]);
+  }
 
   
   fclose(fp);
@@ -5995,11 +6016,13 @@ void adjust_ddr(long long int addr){
   bool nvm = is_nvm_addr_byte(addr) && NVM_ENABLE;
   // nvm = true;
 
-  T_RCD        = nvm ?   44*NVM_LATENCY      :        44;                 
+  T_RCD = nvm ?   44*NVM_LATENCY      :        44;                 
   // T_CAS        = nvm ?   44*NVM_LATENCY      :        44;
   // T_WR        = nvm ?   48*NVM_LATENCY      :        48;
   // T_WTR        = nvm ?   24*NVM_LATENCY      :        24;
-  T_RP        = nvm ?   44*NVM_LATENCY      :        44;
+  T_RP = nvm ?   44*NVM_LATENCY      :        44;
+  // T_RRD = nvm ?    20*NVM_LATENCY      :        20;                  // 44
+
 
   // if (nvm)
   // {
