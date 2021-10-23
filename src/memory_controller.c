@@ -5991,14 +5991,20 @@ void update_ddr_timing_param(int channel){
 }
 
 
-void adjust_ddr(int addr){
+void adjust_ddr(long long int addr){
   bool nvm = is_nvm_addr_byte(addr) && NVM_ENABLE;
-  nvm = true;
+  // nvm = true;
 
   T_RCD        = nvm ?   44*NVM_LATENCY      :        44;                 
   T_CAS        = nvm ?   44*NVM_LATENCY      :        44;
   T_WR        = nvm ?   48*NVM_LATENCY      :        48;
   T_WTR        = nvm ?   24*NVM_LATENCY      :        24;
+
+  // if (nvm)
+  // {
+    // printf("@ % lld T_RCD  %d, T_CAS %d\n", CYCLE_VAL, T_RCD, T_CAS);
+  // }
+  
 }
 // Mehrnoosh.
 
@@ -7481,10 +7487,16 @@ issue_request_command (request_t * request, char rwt)
 
   adjust_ddr(request->physical_address);
 
+  // bool isNVM =  (NVM_ENABLE && is_nvm_addr_byte(request->physical_address));
+  // if (NVM_ENABLE && is_nvm_addr_byte(request->physical_address))
+  // {
+    // printf("AFTER ::: T_RCD  %d, T_CAS %d  @ %lld nvm? %d\n", T_RCD, T_CAS, CYCLE_VAL, isNVM);
+  // }
+
 
   if (NVM_ENABLE && is_nvm_addr_byte(request->physical_address))
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
     // T_RCD = 44 * 5;
   }
 
@@ -7499,6 +7511,7 @@ issue_request_command (request_t * request, char rwt)
       //UT_MEM_DEBUG("\nCycle: %lld Cmd:ACT Req:%lld Chan:%d Rank:%d Bank:%d Row:%lld\n", CYCLE_VAL, request->id, channel, rank, bank, row);
 
       // open row
+
       dram_state[channel][rank][bank].state = ROW_ACTIVE;
       dram_state[channel][rank][bank].active_row = row;
       dram_state[channel][rank][bank].next_pre =
@@ -7534,6 +7547,13 @@ issue_request_command (request_t * request, char rwt)
       command_issued_current_cycle[channel] = 1;
       break;
     case COL_READ_CMD:
+        // if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE){
+        //   printf("next read: % lld\n", dram_state[channel][rank][bank].next_read);
+        //   // printf("cycle + T_RCD: % lld\n", cycle + T_RCD);
+        //   printf("T_RCD: %d @ %lld\n", T_RCD, CYCLE_VAL);
+        //   printf("T_CAS: %d @ %lld\n", T_CAS, CYCLE_VAL);
+        //   printf("max(): % lld\n", max (cycle + T_RCD, dram_state[channel][rank][bank].next_read));
+        // }
       assert (dram_state[channel][rank][bank].state == ROW_ACTIVE);
       dram_state[channel][rank][bank].next_pre =
         max (cycle + T_RTP, dram_state[channel][rank][bank].next_pre);
@@ -7603,17 +7623,17 @@ issue_request_command (request_t * request, char rwt)
       
       
       
+      
+      request->latency = request->completion_time - request->arrival_time;
+
       if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE)
       {
         // int coef = (rwt == 'R')? 1 : 3;
         // request->completion_time += NVM_LATENCY;
         // request->completion_time += 60*NVM_LATENCY;
-        // printf("nvm  @ %lld\n", CYCLE_VAL);
+        // printf("nvm  latency: %lld\n", request->latency);
         // printf("coef %d %s\n", coef, (rwt == 'R')? "R":"W");
       }
-      
-      request->latency = request->completion_time - request->arrival_time;
-
 
 
       request->dispatch_time = CYCLE_VAL;
@@ -7864,7 +7884,7 @@ issue_request_command (request_t * request, char rwt)
     default:
       break;
   }
-  T_RCD = 44;
+  // T_RCD = 44;
   return 1;
 
 }
@@ -7877,7 +7897,7 @@ is_powerdown_fast_allowed (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   int flag = 0;
 
@@ -7915,7 +7935,7 @@ is_powerdown_slow_allowed (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   int flag = 0;
   if (command_issued_current_cycle[channel]
@@ -7955,7 +7975,7 @@ is_powerup_allowed (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   if (command_issued_current_cycle[channel]
       || forced_refresh_mode_on[channel][rank])
@@ -7991,7 +8011,7 @@ is_activate_allowed (int channel, int rank, int bank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   if (command_issued_current_cycle[channel]
       || forced_refresh_mode_on[channel][rank]
@@ -8015,7 +8035,7 @@ is_autoprecharge_allowed (int channel, int rank, int bank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   } 
   long long int start_precharge = 0;
   if (cas_issued_current_cycle[channel][rank][bank] == 1)
@@ -8045,7 +8065,7 @@ is_precharge_allowed (int channel, int rank, int bank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
 
   if (command_issued_current_cycle[channel]
@@ -8070,7 +8090,7 @@ is_all_bank_precharge_allowed (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
 
   int flag = 0;
@@ -8101,7 +8121,7 @@ is_refresh_allowed (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
 
   if (command_issued_current_cycle[channel]
@@ -8123,7 +8143,7 @@ issue_powerdown_command (int channel, int rank, command_t cmd)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   if (command_issued_current_cycle[channel])
   {
@@ -8204,7 +8224,7 @@ issue_powerup_command (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
 
   if (!is_powerup_allowed (channel, rank))
@@ -8290,7 +8310,7 @@ issue_autoprecharge (int channel, int rank, int bank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   if (!is_autoprecharge_allowed (channel, rank, bank))
     return 0;
@@ -8338,7 +8358,7 @@ issue_activate_command (int channel, int rank, int bank, long long int row)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   if (!is_activate_allowed (channel, rank, bank))
 
@@ -8393,7 +8413,7 @@ issue_precharge_command (int channel, int rank, int bank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   if (!is_precharge_allowed (channel, rank, bank))
 
@@ -8431,7 +8451,7 @@ issue_all_bank_precharge_command (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   if (!is_all_bank_precharge_allowed (channel, rank))
 
@@ -8462,7 +8482,7 @@ issue_refresh_command (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   if (!is_refresh_allowed (channel, rank))
 
@@ -8603,7 +8623,7 @@ issue_forced_refresh_commands (int channel, int rank)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   for (int b = 0; b < NUM_BANKS; b++)
 
@@ -8624,7 +8644,7 @@ gather_stats (int channel)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   for (int i = 0; i < NUM_RANKS; i++)
 
@@ -8665,7 +8685,7 @@ print_stats (int channel)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   long long int activates_for_reads = 0;
   long long int activates_for_spec = 0;
@@ -8717,7 +8737,7 @@ update_issuable_commands (int channel)
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   for (int rank = 0; rank < NUM_RANKS; rank++)
 
@@ -8747,7 +8767,7 @@ update_memory ()
   {
     if (NVM_ENABLE)
     {
-      update_ddr_timing_param(channel);
+      // update_ddr_timing_param(channel);
     }
     // make every channel ready to receive a new command
     command_issued_current_cycle[channel] = 0;
@@ -8832,7 +8852,7 @@ calculate_power (int channel, int rank, int print_stats_type,
 {
   if (NVM_ENABLE)
   {
-    update_ddr_timing_param(channel);
+    // update_ddr_timing_param(channel);
   }
   /*
      Power is calculated using the equations from Technical Note "TN-41-01: Calculating Memory System Power for DDR"
