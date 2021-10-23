@@ -5996,9 +5996,10 @@ void adjust_ddr(long long int addr){
   // nvm = true;
 
   T_RCD        = nvm ?   44*NVM_LATENCY      :        44;                 
-  T_CAS        = nvm ?   44*NVM_LATENCY      :        44;
-  T_WR        = nvm ?   48*NVM_LATENCY      :        48;
-  T_WTR        = nvm ?   24*NVM_LATENCY      :        24;
+  // T_CAS        = nvm ?   44*NVM_LATENCY      :        44;
+  // T_WR        = nvm ?   48*NVM_LATENCY      :        48;
+  // T_WTR        = nvm ?   24*NVM_LATENCY      :        24;
+  T_RP        = nvm ?   44*NVM_LATENCY      :        44;
 
   // if (nvm)
   // {
