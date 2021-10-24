@@ -1852,11 +1852,11 @@ int main(int argc, char * argv[])
 									eviction_writeback[numc] = false;
 									// hitctr = 0;
 									// missctr = 0;
-									evictctr = 0;
-									cache_dirty = 0;
+									// evictctr = 0;
+									// cache_dirty = 0;
 									// nonmemops_sum = 0;
-									missl1wb = 0;
-									reset_profile_counters();
+									// missl1wb = 0;
+									// reset_profile_counters();
 								}
 							}
 							else if (!CACHE_ENABLE_VAR)
