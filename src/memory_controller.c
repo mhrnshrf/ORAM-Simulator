@@ -272,6 +272,10 @@ typedef struct Bucket{
   char greenctr;
 }Bucket;
 
+typedef struct BucketShell{
+  char count;  // added for ring oram
+}BucketShell;
+
 typedef struct Entry{
   int addr;       // address of block e.g. A, B
   int label;      // path label e.g. 0 (=> L0)
@@ -334,7 +338,7 @@ BucketMet Metadata[GL_COUNT][META_MAX_SIZE];      // meta data tree for ring ora
 
 Slot StaleBuffer[STALE_BUF_SIZE];
 
-Bucket SuperNode[4194304];
+BucketShell SuperNode[4194304];
 
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on
@@ -347,9 +351,9 @@ typedef struct RhoBucket{
 }RhoBucket;
 
 RhoBucket RhoTree[RHO_NODE];      // rho tree
-int TagArray[RHO_SET][RHO_WAY];         // rho postion map that store tags ~~~> pararell to tag array label
+int TagArray[RHO_SET][RHO_WAY];         // rho postion map that store tags ~~~> parallel to tag array label
 int TagArrayLabel[RHO_SET][RHO_WAY];     // rho postion map that store the corresponding label~~~>  parallel to tag array
-long long int TagArrayLRU[RHO_SET][RHO_WAY];      // rho lru policiy for eviction ~~~>  parallel to tag array
+long long int TagArrayLRU[RHO_SET][RHO_WAY];      // rho lru policy for eviction ~~~>  parallel to tag array
 Slot RhoStash[RHO_STASH_SIZE];       // rho stash
 int RhoSubMap[NODE];              // rho subtree address map
 
@@ -1093,6 +1097,15 @@ int  calc_index(int label,  int l){
 
   // int a = pow(2,LEVEL-1)/pow(2,l);
   index = sum + floor(label/pow(2,(LEVEL_VAR-l-1)));
+
+  return index;
+}
+
+int  calc_super(int label,  int l){
+  int index = -1;
+
+  // int a = pow(2,LEVEL-1)/pow(2,l);
+  index = floor(label/pow(2,(LEVEL_VAR-l-1)));
 
   return index;
 }
@@ -2072,7 +2085,7 @@ void write_path(int label){
       GlobTree[index].count = 0; // for ring oram evict path
       if (i >= LEVEL-2)
       {
-        int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+        int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
         SuperNode[sind].count = 0;
       }
       deadctr -= GlobTree[index].dumdead;
@@ -4922,7 +4935,7 @@ void ring_read_path(int label, int addr){
         realcount[i]++;
         if (i >= LEVEL-2)
         {
-          int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+          int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
           supreal[sind]++;
         }
         
@@ -4946,7 +4959,7 @@ void ring_read_path(int label, int addr){
         dumcount[i]++;
         if (i >= LEVEL-2)
         {
-          int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+          int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
           supdum[sind]++;
         }
       }
@@ -4999,7 +5012,7 @@ void ring_read_path(int label, int addr){
     GlobTree[index].count++;
     if (i >= LEVEL-2)
     {
-      int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+      int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
       SuperNode[sind].count++;
     }
 
@@ -5223,7 +5236,7 @@ void ring_early_reshuffle(int label){
 
     if (i >= LEVEL-2)
     {
-      int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+      int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
       if (SuperNode[sind].count >= 3*RING_S - 1)
       {
         SuperNode[sind].count = 0;
@@ -5365,7 +5378,7 @@ void ring_early_reshuffle(int label){
 
       if (i >= LEVEL-2)
       {
-        int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+        int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
         if (SuperNode[sind].count < 3*RING_S  && SuperNode[sind].count >= 0)
         {
           int cid = SuperNode[sind].count;

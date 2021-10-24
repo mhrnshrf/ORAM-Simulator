@@ -925,10 +925,10 @@ int main(int argc, char * argv[])
 
 
 	// Mehrnoosh:
-	if (tracectr % 1000000 == 0)
-	{
-		printf("@ trace %d\n", tracectr);
-	}
+	// if (tracectr % 1000000 == 0)
+	// {
+	// 	printf("@ trace %d\n", tracectr);
+	// }
 	
 	// printf("@ %lld  trace %d\n", CYCLE_VAL, tracectr);
 	// if (last_read_served)
@@ -1615,10 +1615,10 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) ) //  && tracectr <= endpoint
 				{
-					if (tracectr % 1000000 == 0)
-					{
-						printf("%d\n", tracectr);
-					}
+					// if (tracectr % 1000000 == 0)
+					// {
+						// printf("%d\n", tracectr);
+					// }
 					// if (tracectr % 50000 == 0)
 					// {
 						// printf("@ %d no miss\n", tracectr);
@@ -1858,9 +1858,9 @@ int main(int argc, char * argv[])
 									no_miss_occured = true;
 									waited_for_evicted[numc].valid = false;
 									eviction_writeback[numc] = false;
-									// hitctr = 0;
-									// missctr = 0;
-									// evictctr = 0;
+									hitctr = 0;
+									missctr = 0;
+									evictctr = 0;
 									// cache_dirty = 0;
 									// nonmemops_sum = 0;
 									// missl1wb = 0;
