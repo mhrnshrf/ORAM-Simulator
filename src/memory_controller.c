@@ -334,6 +334,8 @@ BucketMet Metadata[GL_COUNT][META_MAX_SIZE];      // meta data tree for ring ora
 
 Slot StaleBuffer[STALE_BUF_SIZE];
 
+Bucket SuperNode[4194304];
+
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on
 void pinOff() {pinFlag = false;}  // turn the pin flag off
@@ -479,6 +481,8 @@ int supdum[4194304] = {0};
 long long int shuff_total = 0;
 int wb[LEVEL] = {0};
 int ref_close[LEVEL] = {0};
+int supshuf_total = 0;
+int supcount_dist[3*RING_S] = {0};
 
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
 int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4}; 
@@ -1215,6 +1219,12 @@ void oram_alloc(){
     sub_cap += LZ[i]*pow(2,i-(CAP_LEVEL));
     
   }
+
+  for (int i = 0; i < 4194304; i++)
+  {
+    SuperNode[i].count = 0;
+  }
+  
   
   for (int i = 0 ; i < NODE; i++) 
   {
@@ -2060,6 +2070,11 @@ void write_path(int label){
       }
       update_count_stat(GlobTree[index].count, i);
       GlobTree[index].count = 0; // for ring oram evict path
+      if (i >= LEVEL-2)
+      {
+        int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+        SuperNode[sind].count = 0;
+      }
       deadctr -= GlobTree[index].dumdead;
       if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
@@ -4982,6 +4997,11 @@ void ring_read_path(int label, int addr){
     }
 
     GlobTree[index].count++;
+    if (i >= LEVEL-2)
+    {
+      int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+      SuperNode[sind].count++;
+    }
 
     if (!GlobTree[index].slot[offset].isReal)
     {
@@ -5200,6 +5220,17 @@ void ring_early_reshuffle(int label){
       // printf("index %d\n", index);
       // printf("heloooooo\n");
       // printf("flush ctr %d\n", stale_flush_ctr);
+
+    if (i >= LEVEL-2)
+    {
+      int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+      if (SuperNode[sind].count >= 3*RING_S - 1)
+      {
+        SuperNode[sind].count = 0;
+        supshuf_total++;
+      }
+    }  
+
     if (GlobTree[index].count >= LS[i] + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       int valnum = GlobTree[index].dumval;
@@ -5331,6 +5362,22 @@ void ring_early_reshuffle(int label){
           remove_from_stash(candidate[j]);
         }
       }
+
+      if (i >= LEVEL-2)
+      {
+        int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+        if (SuperNode[sind].count < 3*RING_S  && SuperNode[sind].count >= 0)
+        {
+          int cid = SuperNode[sind].count;
+          supcount_dist[cid]++;
+        }
+        else
+        {
+          printf("ERROR: reshuffle sup count %d beyond range! \n", SuperNode[sind].count);
+          exit(1);
+        }
+        
+      } 
 
       GlobTree[index].count = 0;
       deadctr -= GlobTree[index].dumdead;
@@ -5881,6 +5928,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "deadQs,%d\n", calc_deadQ_size());
   fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_sum/1000));
   fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_sum/1000));
+  fprintf(fp, "supshuf_total,%d\n", supshuf_total);
 
   // fprintf(fp, "online_r,%d\n", online_r);
   // fprintf(fp, "evict_r,%d\n", evict_r);
@@ -5907,6 +5955,12 @@ void export_csv(char * argv[]){
    for (int i = 0; i < LEVEL; i++)
   {
     fprintf(fp, "dumcount[%d],%lld\n", i, dumcount[i]);
+  }
+
+
+   for (int i = 0; i < 3*RING_S; i++)
+  {
+    fprintf(fp, "supcount_dist[%d],%d\n", i, supcount_dist[i]);
   }
 
   char real[5] = "real";

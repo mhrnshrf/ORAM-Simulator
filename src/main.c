@@ -925,7 +925,11 @@ int main(int argc, char * argv[])
 
 
 	// Mehrnoosh:
-	// printf("@ %lld  trace %d\n", CYCLE_VAL, tracectr);
+	if (tracectr % 1000000 == 0)
+	{
+		printf("@ trace %d\n", tracectr);
+	}
+	
 	// printf("@ %lld  trace %d\n", CYCLE_VAL, tracectr);
 	// if (last_read_served)
 	// {
@@ -1611,9 +1615,13 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) ) //  && tracectr <= endpoint
 				{
+					if (tracectr % 1000000 == 0)
+					{
+						printf("%d\n", tracectr);
+					}
 					// if (tracectr % 50000 == 0)
 					// {
-					// 	printf("@ %d\n", tracectr);
+						// printf("@ %d no miss\n", tracectr);
 					// }
 					// if (tracectr >= 17000000)
 					// {
@@ -1633,7 +1641,7 @@ int main(int argc, char * argv[])
 					{
 						switch_sim_enable_to(SIM_ENABLE);
 						switch_cache_enable_to(CACHE_ENABLE);
-						reset_profile_counters();
+						// reset_profile_counters();
 
 						// switch_dead_enable_to(DEAD_ENABLE);
 						if (WARMUP_CACHE == 0)
@@ -2311,7 +2319,7 @@ int main(int argc, char * argv[])
     core_power = core_power/2.0 ;
   }
 
-
+  printf("Exporing csv...\n");
   export_csv(argv);
 
 
