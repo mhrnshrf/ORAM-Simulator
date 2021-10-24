@@ -474,6 +474,8 @@ int plb_temp[PLB_SIZE] =  {[0 ... PLB_SIZE-1] = -1};
 long long int shuff[LEVEL] = {0};
 long long int realcount[LEVEL] = {0};
 long long int dumcount[LEVEL] = {0};
+int supreal[4194304] = {0};
+int supdum[4194304] = {0};
 long long int shuff_total = 0;
 int wb[LEVEL] = {0};
 int ref_close[LEVEL] = {0};
@@ -654,6 +656,20 @@ void print_array(int * arr, int size, FILE *fp){
     fprintf(fp, "arr[%d],%d\n", i, arr[i]);
   }
   // printf("\n");
+}
+
+void print_super_node(int * arr, char * exp, char * bench, char * realdum){
+  FILE *fp;
+  char supfile[100];
+  sprintf(supfile, "supnode-%s-%s.csv", exp, bench);
+  fp = fopen(supfile,"w+");
+
+  for (int i = 0; i < 4194304; i++)
+  {
+    fprintf(fp, "%d\n", arr[i]);
+  }
+
+  fclose(fp);
 }
 
 void print_array_double(long double * arr, int size, FILE *fp){
@@ -4889,6 +4905,12 @@ void ring_read_path(int label, int addr){
       if (GlobTree[index].slot[offset].isReal)
       {
         realcount[i]++;
+        if (i >= LEVEL-2)
+        {
+          int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+          supreal[sind]++;
+        }
+        
         
         if(add_to_stash(GlobTree[index].slot[offset]) != -1)
         {
@@ -4907,6 +4929,11 @@ void ring_read_path(int label, int addr){
       else
       {
         dumcount[i]++;
+        if (i >= LEVEL-2)
+        {
+          int sind = (i == LEVEL-2) ? index : calc_index(label, i-1);
+          supdum[sind]++;
+        }
       }
     }
     
@@ -5882,6 +5909,11 @@ void export_csv(char * argv[]){
     fprintf(fp, "dumcount[%d],%lld\n", i, dumcount[i]);
   }
 
+  char real[5] = "real";
+  char dum[5] = "dum";
+
+  print_super_node(supreal, argv[3], bench, real);
+  print_super_node(supdum, argv[3], bench, dum);
   
   fclose(fp);
 }

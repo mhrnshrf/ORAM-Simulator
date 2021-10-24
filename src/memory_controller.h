@@ -477,6 +477,7 @@ void calc_wait_value(char op_type, int reqid, long long int comptime, int oramid
 long long int sum_wait_sofar();
 void set_reshuffle_w(int level);
 void adjust_ddr(long long int addr);
+void print_super_node(int * arr, char * exp, char * bench, char * realdum);
 
 
 // Mehrnoosh.
