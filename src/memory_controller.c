@@ -339,6 +339,8 @@ BucketMet Metadata[GL_COUNT][META_MAX_SIZE];      // meta data tree for ring ora
 Slot StaleBuffer[STALE_BUF_SIZE];
 
 BucketShell SuperNode[4194304];
+BucketShell SuperHoriz1[2097152];
+BucketShell SuperHoriz2[4194304];
 
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on
@@ -486,7 +488,11 @@ long long int shuff_total = 0;
 int wb[LEVEL] = {0};
 int ref_close[LEVEL] = {0};
 int supshuf_total = 0;
+int supshuf_horiz1 = 0;
+int supshuf_horiz2 = 0;
 int supcount_dist[3*RING_S] = {0};
+int suphoriz1_dist[2*RING_S] = {0};
+int suphoriz2_dist[2*RING_S] = {0};
 
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
 int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4}; 
@@ -669,7 +675,7 @@ void print_array(int * arr, int size, FILE *fp){
 void print_super_node(int * arr, char * exp, char * bench, char * realdum){
   FILE *fp;
   char supfile[100];
-  sprintf(supfile, "supnode-%s-%s.csv", exp, bench);
+  sprintf(supfile, "supnode-%s-%s-%s.csv", exp, bench, realdum);
   fp = fopen(supfile,"w+");
 
   for (int i = 0; i < 4194304; i++)
@@ -1101,7 +1107,17 @@ int  calc_index(int label,  int l){
   return index;
 }
 
+
+int  calc_tri(int label,  int l){
+  int sum = 0;
+  for(int i = 0; i < l; i++)
+    sum += pow(2,i);
+
+  return sum;
+}
+
 int  calc_super(int label,  int l){
+
   int index = -1;
 
   // int a = pow(2,LEVEL-1)/pow(2,l);
@@ -1236,6 +1252,11 @@ void oram_alloc(){
   for (int i = 0; i < 4194304; i++)
   {
     SuperNode[i].count = 0;
+    SuperHoriz2[i].count = 0;
+  }
+  for (int i = 0; i < 2097152; i++)
+  {
+    SuperHoriz1[i].count = 0;
   }
   
   
@@ -2087,6 +2108,15 @@ void write_path(int label){
       {
         int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
         SuperNode[sind].count = 0;
+        int hind = (index - calc_tri(label, i))/2;
+        if (i == LEVEL-2)
+        {
+          SuperHoriz1[hind].count = 0;
+        }
+        else
+        {
+          SuperHoriz2[hind].count = 0;
+        }
       }
       deadctr -= GlobTree[index].dumdead;
       if (i < NVM_START && i >= TOP_CACHE_VAR)
@@ -5014,6 +5044,16 @@ void ring_read_path(int label, int addr){
     {
       int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
       SuperNode[sind].count++;
+      int hind = (index - calc_tri(label, i))/2;
+      if (i == LEVEL-2)
+      {
+        SuperHoriz1[hind].count++;
+      }
+      else
+      {
+        SuperHoriz2[hind].count++;
+      }
+      
     }
 
     if (!GlobTree[index].slot[offset].isReal)
@@ -5242,6 +5282,23 @@ void ring_early_reshuffle(int label){
         SuperNode[sind].count = 0;
         supshuf_total++;
       }
+      int hind = (index - calc_tri(label, i))/2;
+      if (i == LEVEL-2)
+      {
+        if (SuperHoriz1[hind].count >= 2*RING_S - 1)
+        {
+          SuperHoriz1[hind].count = 0;
+          supshuf_horiz1++;
+        }
+      }
+      else
+      {
+        if (SuperHoriz2[hind].count >= 2*RING_S - 1)
+        {
+          SuperHoriz2[hind].count = 0;
+          supshuf_horiz2++;
+        }
+      }
     }  
 
     if (GlobTree[index].count >= LS[i] + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
@@ -5388,6 +5445,32 @@ void ring_early_reshuffle(int label){
         {
           printf("ERROR: reshuffle sup count %d beyond range! \n", SuperNode[sind].count);
           exit(1);
+        }
+
+        int hind = (index - calc_tri(label, i))/2;
+        if (i == LEVEL-2)
+        {
+          if (SuperHoriz1[hind].count < 2*RING_S && SuperHoriz1[hind].count >= 0)
+          {
+            suphoriz1_dist[(int)SuperHoriz1[hind].count]++;
+          }
+          else
+          {
+            printf("ERROR: reshuffle sup horiz1 count %d beyond range! \n", SuperHoriz1[hind].count );
+            exit(1);
+          }
+        }
+        else
+        {
+          if (SuperHoriz2[hind].count < 2*RING_S && SuperHoriz2[hind].count >= 0)
+          {
+            suphoriz2_dist[(int)SuperHoriz2[hind].count]++;
+          }
+          else
+          {
+            printf("ERROR: reshuffle sup horiz2 count %d beyond range! \n", SuperHoriz1[hind].count);
+            exit(1);
+          }
         }
         
       } 
@@ -5975,12 +6058,20 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "supcount_dist[%d],%d\n", i, supcount_dist[i]);
   }
+   for (int i = 0; i < 2*RING_S; i++)
+  {
+    fprintf(fp, "suphoriz1_dist[%d],%d\n", i, suphoriz1_dist[i]);
+  }
+   for (int i = 0; i < 2*RING_S; i++)
+  {
+    fprintf(fp, "suphoriz2_dist[%d],%d\n", i, suphoriz1_dist[i]);
+  }
 
   char real[5] = "real";
   char dum[5] = "dum";
 
-  print_super_node(supreal, argv[3], bench, real);
-  print_super_node(supdum, argv[3], bench, dum);
+  print_super_node(supreal, exp_name, bench, real);
+  print_super_node(supdum, exp_name, bench, dum);
   
   fclose(fp);
 }

@@ -479,6 +479,7 @@ void set_reshuffle_w(int level);
 void adjust_ddr(long long int addr);
 void print_super_node(int * arr, char * exp, char * bench, char * realdum);
 int  calc_super(int label,  int l);
+int  calc_tri(int label,  int l);
 
 // Mehrnoosh.
 
