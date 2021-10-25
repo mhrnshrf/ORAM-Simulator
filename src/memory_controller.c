@@ -2085,7 +2085,7 @@ void write_path(int label){
       GlobTree[index].count = 0; // for ring oram evict path
       if (i >= LEVEL-2)
       {
-        int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
+        int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
         SuperNode[sind].count = 0;
       }
       deadctr -= GlobTree[index].dumdead;
@@ -4935,7 +4935,7 @@ void ring_read_path(int label, int addr){
         realcount[i]++;
         if (i >= LEVEL-2)
         {
-          int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
+          int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
           supreal[sind]++;
         }
         
@@ -4959,7 +4959,7 @@ void ring_read_path(int label, int addr){
         dumcount[i]++;
         if (i >= LEVEL-2)
         {
-          int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
+          int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
           supdum[sind]++;
         }
       }
@@ -5012,7 +5012,7 @@ void ring_read_path(int label, int addr){
     GlobTree[index].count++;
     if (i >= LEVEL-2)
     {
-      int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
+      int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
       SuperNode[sind].count++;
     }
 
@@ -5236,7 +5236,7 @@ void ring_early_reshuffle(int label){
 
     if (i >= LEVEL-2)
     {
-      int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
+      int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
       if (SuperNode[sind].count >= 3*RING_S - 1)
       {
         SuperNode[sind].count = 0;
@@ -5378,7 +5378,7 @@ void ring_early_reshuffle(int label){
 
       if (i >= LEVEL-2)
       {
-        int sind = (i == LEVEL-2) ? index : calc_super(label, i-1);
+        int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
         if (SuperNode[sind].count < 3*RING_S  && SuperNode[sind].count >= 0)
         {
           int cid = SuperNode[sind].count;
