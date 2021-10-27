@@ -130,6 +130,8 @@
 #define DD_SATURATE 30000000
 #define NCORES 1
 
+#define SUP_HORIZ_MAX 7
+
 
 
 enum{

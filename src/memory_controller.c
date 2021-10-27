@@ -491,8 +491,8 @@ int supshuf_total = 0;
 int supshuf_horiz1 = 0;
 int supshuf_horiz2 = 0;
 int supcount_dist[3*RING_S] = {0};
-int suphoriz1_dist[2*RING_S] = {0};
-int suphoriz2_dist[2*RING_S] = {0};
+int suphoriz1_dist[SUP_HORIZ_MAX+1] = {0};
+int suphoriz2_dist[SUP_HORIZ_MAX+1] = {0};
 
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
 int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4}; 
@@ -5292,7 +5292,7 @@ void ring_early_reshuffle(int label){
         hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
       if (i == LEVEL-2)
       {
-        if (SuperHoriz1[hind].count >= 2*RING_S - 1)
+        if (SuperHoriz1[hind].count >= SUP_HORIZ_MAX)
         {
           SuperHoriz1[hind].count = 0;
           supshuf_horiz1++;
@@ -5300,7 +5300,7 @@ void ring_early_reshuffle(int label){
       }
       else
       {
-        if (SuperHoriz2[hind].count >= 2*RING_S - 1)
+        if (SuperHoriz2[hind].count >= SUP_HORIZ_MAX)
         {
           SuperHoriz2[hind].count = 0;
           supshuf_horiz2++;
@@ -5459,7 +5459,7 @@ void ring_early_reshuffle(int label){
         hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
         if (i == LEVEL-2)
         {
-          if (SuperHoriz1[hind].count < 2*RING_S && SuperHoriz1[hind].count >= 0)
+          if (SuperHoriz1[hind].count <= SUP_HORIZ_MAX && SuperHoriz1[hind].count >= 0)
           {
             suphoriz1_dist[(int)SuperHoriz1[hind].count]++;
           }
@@ -5471,7 +5471,7 @@ void ring_early_reshuffle(int label){
         }
         else
         {
-          if (SuperHoriz2[hind].count < 2*RING_S && SuperHoriz2[hind].count >= 0)
+          if (SuperHoriz2[hind].count <= SUP_HORIZ_MAX && SuperHoriz2[hind].count >= 0)
           {
             suphoriz2_dist[(int)SuperHoriz2[hind].count]++;
           }
@@ -6069,11 +6069,11 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "supcount_dist[%d],%d\n", i, supcount_dist[i]);
   }
-   for (int i = 0; i < 2*RING_S; i++)
+   for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
   {
     fprintf(fp, "suphoriz1_dist[%d],%d\n", i, suphoriz1_dist[i]);
   }
-   for (int i = 0; i < 2*RING_S; i++)
+   for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
   {
     fprintf(fp, "suphoriz2_dist[%d],%d\n", i, suphoriz2_dist[i]);
   }
