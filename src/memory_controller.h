@@ -124,13 +124,14 @@
 // #define WL_CAP 100000        // cap on wl feature
 #define STALE_CAP 56          // cap on stale for each 5 levels each of which is 64 bit
 #define STALE_BUF_SIZE 300   //size of stale buffer
-#define GL_COUNT 3          // # gathering levels
+#define GL_COUNT 3          // # gathering levelss
 #define GLMAX 15          // last level gl
 
 #define DD_SATURATE 30000000
 #define NCORES 1
 
 #define SUP_HORIZ_MAX 7
+
 
 
 
@@ -482,6 +483,7 @@ void adjust_ddr(long long int addr);
 void print_super_node(int * arr, char * exp, char * bench, char * realdum);
 int  calc_super(int label,  int l);
 int  calc_tri(int label,  int l);
+int calc_horiz(int index, int label, int i);
 
 // Mehrnoosh.
 

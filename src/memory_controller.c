@@ -490,9 +490,13 @@ int ref_close[LEVEL] = {0};
 int supshuf_total = 0;
 int supshuf_horiz1 = 0;
 int supshuf_horiz2 = 0;
+int supep_horiz1 = 0;
+int supep_horiz2 = 0;
 int supcount_dist[3*RING_S] = {0};
 int suphoriz1_dist[SUP_HORIZ_MAX+1] = {0};
 int suphoriz2_dist[SUP_HORIZ_MAX+1] = {0};
+int ephoriz1_dist[SUP_HORIZ_MAX+1] = {0};
+int ephoriz2_dist[SUP_HORIZ_MAX+1] = {0};
 
 // these are constants used for oram alg, by defualt initialized to oram params unless the tree is switched to rho
 int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L3+1 ... LEVEL-1] = Z4}; 
@@ -1124,6 +1128,13 @@ int  calc_super(int label,  int l){
   index = floor(label/pow(2,(LEVEL_VAR-l-1)));
 
   return index;
+}
+
+int calc_horiz(int index, int label, int i){
+  int hind = (index - calc_tri(label, i))/2;
+  // int hind = (index - calc_tri(label, i));
+  // hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
+  return hind;
 }
 
 
@@ -2108,16 +2119,19 @@ void write_path(int label){
       {
         int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
         SuperNode[sind].count = 0;
-        // int hind = (index - calc_tri(label, i))/2;
-        int hind = (index - calc_tri(label, i));
-        hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
+        int hind = calc_horiz(index, label, i);
+        
 
         if (i == LEVEL-2)
         {
+          supep_horiz1 += SuperHoriz1[hind].count;
+          ephoriz1_dist[(int)SuperHoriz1[hind].count]++;
           SuperHoriz1[hind].count = 0;
         }
         else
         {
+          supep_horiz2 += SuperHoriz2[hind].count;
+          ephoriz2_dist[(int)SuperHoriz2[hind].count]++;
           SuperHoriz2[hind].count = 0;
         }
       }
@@ -5047,9 +5061,7 @@ void ring_read_path(int label, int addr){
     {
       int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
       SuperNode[sind].count++;
-      // int hind = (index - calc_tri(label, i))/2;
-        int hind = (index - calc_tri(label, i));
-        hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
+      int hind = calc_horiz(index, label, i);
       if (i == LEVEL-2)
       {
         SuperHoriz1[hind].count++;
@@ -5287,9 +5299,7 @@ void ring_early_reshuffle(int label){
         SuperNode[sind].count = 0;
         supshuf_total++;
       }
-      // int hind = (index - calc_tri(label, i))/2;
-        int hind = (index - calc_tri(label, i));
-        hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
+      int hind = calc_horiz(index, label, i);
       if (i == LEVEL-2)
       {
         if (SuperHoriz1[hind].count >= SUP_HORIZ_MAX)
@@ -5454,9 +5464,7 @@ void ring_early_reshuffle(int label){
           exit(1);
         }
 
-        // int hind = (index - calc_tri(label, i))/2;
-        int hind = (index - calc_tri(label, i));
-        hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
+        int hind = calc_horiz(index, label, i);
         if (i == LEVEL-2)
         {
           if (SuperHoriz1[hind].count <= SUP_HORIZ_MAX && SuperHoriz1[hind].count >= 0)
@@ -6036,6 +6044,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "supshuf_total,%d\n", supshuf_total);
   fprintf(fp, "supshuf_horiz1,%d\n", supshuf_horiz1);
   fprintf(fp, "supshuf_horiz2,%d\n", supshuf_horiz2);
+  fprintf(fp, "supep_horiz1,%d\n", supep_horiz1);
+  fprintf(fp, "supep_horiz2,%d\n", supep_horiz2);
 
   // fprintf(fp, "online_r,%d\n", online_r);
   // fprintf(fp, "evict_r,%d\n", evict_r);
@@ -6076,6 +6086,15 @@ void export_csv(char * argv[]){
    for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
   {
     fprintf(fp, "suphoriz2_dist[%d],%d\n", i, suphoriz2_dist[i]);
+  }
+
+  for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
+  {
+    fprintf(fp, "ephoriz1_dist[%d],%d\n", i, ephoriz1_dist[i]);
+  }
+  for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
+  {
+    fprintf(fp, "ephoriz2_dist[%d],%d\n", i, ephoriz2_dist[i]);
   }
 
   char real[5] = "real";
