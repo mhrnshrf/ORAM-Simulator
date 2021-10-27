@@ -2108,7 +2108,10 @@ void write_path(int label){
       {
         int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
         SuperNode[sind].count = 0;
-        int hind = (index - calc_tri(label, i))/2;
+        // int hind = (index - calc_tri(label, i))/2;
+        int hind = (index - calc_tri(label, i));
+        hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
+
         if (i == LEVEL-2)
         {
           SuperHoriz1[hind].count = 0;
@@ -5044,7 +5047,9 @@ void ring_read_path(int label, int addr){
     {
       int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
       SuperNode[sind].count++;
-      int hind = (index - calc_tri(label, i))/2;
+      // int hind = (index - calc_tri(label, i))/2;
+        int hind = (index - calc_tri(label, i));
+        hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
       if (i == LEVEL-2)
       {
         SuperHoriz1[hind].count++;
@@ -5282,7 +5287,9 @@ void ring_early_reshuffle(int label){
         SuperNode[sind].count = 0;
         supshuf_total++;
       }
-      int hind = (index - calc_tri(label, i))/2;
+      // int hind = (index - calc_tri(label, i))/2;
+        int hind = (index - calc_tri(label, i));
+        hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
       if (i == LEVEL-2)
       {
         if (SuperHoriz1[hind].count >= 2*RING_S - 1)
@@ -5447,7 +5454,9 @@ void ring_early_reshuffle(int label){
           exit(1);
         }
 
-        int hind = (index - calc_tri(label, i))/2;
+        // int hind = (index - calc_tri(label, i))/2;
+        int hind = (index - calc_tri(label, i));
+        hind = (hind >= pow(2, i-1)) ? hind - pow(2, i-1) : hind;
         if (i == LEVEL-2)
         {
           if (SuperHoriz1[hind].count < 2*RING_S && SuperHoriz1[hind].count >= 0)
@@ -6066,7 +6075,7 @@ void export_csv(char * argv[]){
   }
    for (int i = 0; i < 2*RING_S; i++)
   {
-    fprintf(fp, "suphoriz2_dist[%d],%d\n", i, suphoriz1_dist[i]);
+    fprintf(fp, "suphoriz2_dist[%d],%d\n", i, suphoriz2_dist[i]);
   }
 
   char real[5] = "real";
