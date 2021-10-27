@@ -6025,6 +6025,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_sum/1000));
   fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_sum/1000));
   fprintf(fp, "supshuf_total,%d\n", supshuf_total);
+  fprintf(fp, "supshuf_horiz1,%d\n", supshuf_horiz1);
+  fprintf(fp, "supshuf_horiz2,%d\n", supshuf_horiz2);
 
   // fprintf(fp, "online_r,%d\n", online_r);
   // fprintf(fp, "evict_r,%d\n", evict_r);
