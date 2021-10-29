@@ -108,7 +108,7 @@
 
 // ring oram invariant
 // #define RING_A 5
-#define RING_S 7
+#define RING_S 5
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 
 #define RING_REV 512
@@ -130,7 +130,7 @@
 #define DD_SATURATE 30000000
 #define NCORES 1
 
-#define SUP_HORIZ_MAX 7
+#define SUP_HORIZ_MAX 8
 
 
 
