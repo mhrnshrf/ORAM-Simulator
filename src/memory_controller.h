@@ -108,7 +108,7 @@
 
 // ring oram invariant
 // #define RING_A 5
-#define RING_S 5
+#define RING_S 7
 #define RING_Z 5
 #define INT_BITS LEVEL - 1 
 #define RING_REV 512
