@@ -199,6 +199,7 @@ bool DEAD_ENABLE    ;     // 0/1 flag that indicates whether dead block reuse op
 bool NVM_ENABLE     ;     // 0/1 flag that indicates whether nvm memory fixed latency is applied enabled
 bool SURONLY_ENABLE ;     // 0/1 flag that indicates whether only surplus slots are used for remote allocation
 bool CB_ENABLE      ;     // 0/1 flag that indicates whether compact bucket feature of string oram paper is enabled
+bool DYNAMIC_S      ;     // 0/1 flag that indicates whether dynamic s setting is enabled
 
 
 long long int TRACE_SIZE ;       // # addr read from trace file
@@ -233,6 +234,7 @@ int CB_GREEN_MAX  ;         // number of green blocks in compact bucket feature 
 int NVM_LATENCY  ;          // nvm latency in terms of DRAM cycle
 int REMOTE_START_OFF;  // offset in terms of number of trace, how earlier than warmup start the remote alloc
 int NVM_CHANNEL ;  // number of channels dedicated to nvm
+int S_INC ;  // the amount by which a dynamic s can be incremented
 
 
 

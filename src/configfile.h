@@ -122,6 +122,8 @@ typedef enum {
 	NVM_LATENCY_token ,
 	REMOTE_START_OFF_token ,
 	NVM_CHANNEL_token ,
+	DYNAMIC_S_token ,
+	S_INC_token ,
 
 	comment_token,
 	unknown_token
@@ -341,6 +343,10 @@ token_t tokenize(char * input){
 	return REMOTE_START_OFF_token;
   } else if (strncmp(input, "NVM_CHANNEL",length) == 0) {
 	return NVM_CHANNEL_token;
+  } else if (strncmp(input, "DYNAMIC_S",length) == 0) {
+	return DYNAMIC_S_token;
+  } else if (strncmp(input, "S_INC",length) == 0) {
+	return S_INC_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -833,6 +839,14 @@ void read_config_file(FILE * fin)
 			case NVM_CHANNEL_token:
 				fscanf(fin,"%d",&input_int);
 				NVM_CHANNEL = input_int;
+				break;
+			case DYNAMIC_S_token:
+				fscanf(fin,"%d",&input_int);
+				DYNAMIC_S = input_int;
+				break;
+			case S_INC_token:
+				fscanf(fin,"%d",&input_int);
+				S_INC = input_int;
 				break;
 
 			case unknown_token:

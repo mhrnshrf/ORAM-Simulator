@@ -270,6 +270,7 @@ typedef struct Bucket{
   char dumdead; // added for ring oram, # dummy slots that are dead
   char allctr;
   char greenctr;
+  char s;
 }Bucket;
 
 typedef struct BucketShell{
@@ -503,6 +504,7 @@ int LZ_VAR[LEVEL] = {[0 ... L1] = Z1, [L1+1 ... L2] = Z2, [L2+1 ... L3] = Z3, [L
 TreeType TREE_VAR;
 int LEVEL_VAR;
 int Z_VAR;
+int S_INC_VAR;
 int STASH_SIZE_VAR;
 int OV_THRESHOLD_VAR;  
 int BK_EVICTION_VAR;
@@ -745,6 +747,7 @@ void var_init(){
   NVM_ADDR_VAR = (pow(2, NVM_START)-1)*Z_VAR;
   NVM_ADDR_BYTE = NVM_ADDR_VAR << (int)log2(BLOCK_SIZE);
   DEAD_ENABLE_VAR = DEAD_ENABLE;
+  S_INC_VAR = DYNAMIC_S ? S_INC : 0;
 }
 
 unsigned long long int byte_addr(long long int physical_addr){
@@ -1278,6 +1281,7 @@ void oram_alloc(){
      GlobTree[i].dumdead = 0;
      GlobTree[i].allctr = 0;
      GlobTree[i].greenctr = 0;
+     GlobTree[i].s = LS[l];
     for (int k = 0; k < Z; ++k)
     {
       GlobTree[i].slot[k].addr = -1;
@@ -1339,9 +1343,11 @@ void oram_alloc(){
     revarr[i] = reverse_lex(i);
   }
 
-  for (int i = NVM_START-1; i >= GATHER_START; i--)
+  for (int i = LEVEL-1; i >= GATHER_START; i--)
   {
-    int qs = (int)floor(pow(1.5, i));
+    // int constant = (i < 16) ? 1.7 : 1.5;
+    double constant = 1.5;
+    int qs = (int)floor(pow(constant, i));
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -1367,7 +1373,8 @@ void set_reshuffle_w(int level){
 
 int calc_deadQ_size(){
   int sum = 0;
-  for (int i = GATHER_START; i < NVM_START; i++)
+  int end = DYNAMIC_S ? LEVEL : NVM_START;
+  for (int i = GATHER_START; i < end; i++)
   {
     sum += deadQ_arr[i]->size;
   }
@@ -1771,8 +1778,16 @@ void read_path(int label){
           int dum_cand[Z] = {0};
           int cand_ind = 0;
         // }
+
+        int slotCount = DYNAMIC_S ? (LZ_VAR[i] + GlobTree[index].s - LS[i]): LZ_VAR[i];  
+
+        if (slotCount < 0 || slotCount > Z)
+        {
+          printf("ERROR: read evict path slot count %d out of range!\n", slotCount);
+          exit(1);
+        }
         
-        for(int j = 0; j < LZ_VAR[i]; j++)
+        for(int j = 0; j < slotCount; j++)
         {
           // printf("j: %d \n", j);
           gi++;
@@ -1988,7 +2003,17 @@ int calc_gl(int level){
   return -1;
 }
 
-
+int calc_ring_s(int index, int level){
+  if (DYNAMIC_S)
+  {
+    return GlobTree[index].s;
+  }
+  else
+  {
+    return LS[level];
+  }
+  
+}
 
 int gl_index(int index, int h){
   return index - (pow(2,GL[h]) - 1);
@@ -2115,6 +2140,8 @@ void write_path(int label){
       }
       update_count_stat(GlobTree[index].count, i);
       GlobTree[index].count = 0; // for ring oram evict path
+      GlobTree[index].s = LS[i];
+
       if (i >= LEVEL-2)
       {
         int sind = (i == LEVEL-2) ? calc_super(label, i) : calc_super(label, i-1);
@@ -2243,6 +2270,30 @@ void write_path(int label){
 
           }
 
+        }
+        if (i >= TOP_CACHE_VAR && RING_ENABLE && DYNAMIC_S)
+        {
+          for (int j = LZ_VAR[i]; j < LZ_VAR[i] + S_INC; j++)
+          {
+            int mem_addr = calc_mem_addr(index, j, 'W');
+            if (mem_addr != -1)
+            {
+              GlobTree[index].slot[j].valid = true;
+              if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+              {
+                // bool nvm_access = is_nvm_addr(mem_addr);
+                bool nvm_access = in_nvm(i);
+                bool beginning = false;
+                // bool ending = (j == LZ_VAR[i]-1);
+                // bool last_read = (j == LZ_VAR[i]-1);
+                bool ending = false;
+                bool last_read = false;
+                char op_type = 'e';
+                insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, i);
+              }
+              GlobTree[index].s++;
+            }
+          }
         }
 
 
@@ -4537,14 +4588,17 @@ void metadata_access(int label, char type){
 // gathering dead blk info into the queue
 void gather_dead(int index, int i){
   // if it's not last level (leaf level) add to deadq
-  if (i < NVM_START && i >= GATHER_START)
+  int upperBound = DYNAMIC_S ? LEVEL : NVM_START;
+  if (i < upperBound && i >= GATHER_START)
   {
+    // printf("deadQ[%d] : %d\n", i, deadQ_arr[i]->size);
     int start = SURONLY_ENABLE ? LZ[i] : 0 ;
-    for (int j = start; j < Z; j++)
+    int end = DYNAMIC_S ? LZ[i] : Z;
+    for (int j = start; j < end; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
       {
-        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < RING_S) // 2nd condtion added on 4/13/2021 9:04 pm
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < RING_Z ) 
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
@@ -4602,12 +4656,12 @@ int remote_allocate(int index, int offset){
   int i = -1;
   int j = -1;
   int level = calc_level(index);
-  int input_level = level;
+  // int input_level = level;
 
-  if (in_nvm(level))
-  {
-    level = NVM_START-1;
-  }
+  // if (in_nvm(level))
+  // {
+  //   level = NVM_START-1;
+  // }
   
 
   // preferred level to look for dead blk
@@ -4640,19 +4694,11 @@ int remote_allocate(int index, int offset){
     free(cand);
   }
 
-  // if not found look for dead blk at every level else and start from the bottom 
+    // if not found look for dead blk at every level else and start from the bottom 
   if (i == -1 && j == -1)
   {
-    if (in_nvm(input_level))
-    {
-      dram_elselevel++;
-    }
-    else
-    {
-      nvm_elselevel++;
-    }
-    
-    for (int l = NVM_START-1; l >= GATHER_START; l--)
+   
+    for (int l = LEVEL-1; l >= GATHER_START; l--)
     {
       if (l != level)
       {
@@ -4690,8 +4736,6 @@ int remote_allocate(int index, int offset){
       
     }
   }
-  
-  
 
   if (i != -1 && j != -1)
   {
@@ -4706,6 +4750,116 @@ int remote_allocate(int index, int offset){
   }
   return -1;
 }
+
+// int remote_allocate(int index, int offset){
+//   // Element *cand;
+//   int i = -1;
+//   int j = -1;
+//   int level = calc_level(index);
+//   int input_level = level;
+
+//   if (in_nvm(level))
+//   {
+//     level = NVM_START-1;
+//   }
+  
+
+//   // preferred level to look for dead blk
+//   while (deadQ_arr[level]->size != 0)
+//   {
+//     // printf("here\n");
+//     Element *cand = Dequeue(deadQ_arr[level]);
+//     int i_tmp = cand->index;
+//     int j_tmp = cand->offset;
+//     // ??? taken condition to be deleted, a slot in queue not supposed to be taken ever
+//     bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+  
+//     if (!taken)
+//     {
+//       // printf("break\n");
+//       deadrem--;
+//       i = cand->index;
+//       j = cand->offset;
+//       if (j >= LZ[level])
+//       {
+//         surplus_in_use++;
+//       }
+      
+//       free(cand);
+//       break;
+//     }
+
+//     // printf("SAME level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
+//     // printf("hereeeeeeeeeeee taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED":"unknown", tracectr);
+//     free(cand);
+//   }
+
+//   // if not found look for dead blk at every level else and start from the bottom 
+//   if (i == -1 && j == -1)
+//   {
+//     if (in_nvm(input_level))
+//     {
+//       dram_elselevel++;
+//     }
+//     else
+//     {
+//       nvm_elselevel++;
+//     }
+    
+//     for (int l = NVM_START-1; l >= GATHER_START; l--)
+//     {
+//       if (l != level)
+//       {
+//         while (deadQ_arr[l]->size != 0)
+//         {
+//           // printf("here\n");
+//           Element *cand = Dequeue(deadQ_arr[l]);
+//           int i_tmp = cand->index;
+//           int j_tmp = cand->offset;
+//           bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+        
+//           if (!taken)
+//           {
+//             // printf("break\n");
+//             deadrem--;
+//             i = cand->index;
+//             j = cand->offset;
+//             free(cand);
+//             break;
+//           }
+//           // printf("ESLE level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
+
+
+//           free(cand);
+//         }
+//         if (i != -1 && j != -1)
+//         {
+//           if (j >= LZ[l])
+//           {
+//             surplus_in_use++;
+//           }
+//           break;
+//         }
+//       }
+      
+//     }
+//   }
+  
+  
+
+//   if (i != -1 && j != -1)
+//   {
+//     GlobTree[i].slot[j].dd = ALLOCATED;
+//     // GlobTree[i].allctr++;
+//     GlobTree[index].slot[offset].redirect = true;
+//     GlobTree[index].slot[offset].remote_index = i;
+//     GlobTree[index].slot[offset].remote_offset = j;
+//     int mem_addr = i*Z_VAR + j;
+//     // bucket_meta_access(i);
+//     return mem_addr;
+//   }
+//   return -1;
+// }
 
 int inplace_allocate(int index, int offset){
   // if (GlobTree[index].slot[offset].dd == REMEMBERED)
@@ -4791,13 +4945,11 @@ int calc_mem_addr(int index, int offset, char type)
   {
     if (type == 'R')
     {
-      nvm_norm_r = in_nvm(level) ? nvm_norm_r+1 : nvm_norm_r;
-      dram_norm_r = (!in_nvm(level)) ? dram_norm_r+1 : dram_norm_r;
+      dram_norm_r++;
     }
     else if (type == 'W')
     {
-      nvm_norm_w = in_nvm(level) ? nvm_norm_w+1 : nvm_norm_w;
-      dram_norm_w = (!in_nvm(level)) ? dram_norm_w+1 : dram_norm_w;
+      dram_norm_w++;
     }
     mem_addr = index*Z_VAR + offset;
   }
@@ -4807,41 +4959,24 @@ int calc_mem_addr(int index, int offset, char type)
     {
       mem_addr = remote_access(index, offset, level);
 
-      nvm_remote_r = in_nvm(level) ? nvm_remote_r+1 : nvm_remote_r;
-      dram_remote_r = (!in_nvm(level)) ? dram_remote_r+1 : dram_remote_r;
-      remote_nvms = in_nvm(level) ? remote_nvms-1 : remote_nvms;
-      
+      dram_remote_r++;
     }
     else
     {
       mem_addr = inplace_access(index, offset);
 
-      nvm_inplace_r = in_nvm(level) ? nvm_inplace_r+1 : nvm_inplace_r;
-      dram_inplace_r = (!in_nvm(level)) ? dram_inplace_r+1 : dram_inplace_r;
+      dram_inplace_r++;
     }
   }
   else if (type == 'W')
   {
-    if (!in_nvm(level)) // for levels in dram
+    if (offset < LZ[level]) // for slots within original Z + S (5 + 5)
     {
       if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
       {
         mem_addr = inplace_allocate(index, offset);
         dram_inplace_w++;
       }
-      // else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue? $$$ no removing for now
-      // {
-      //   mem_addr = inplace_allocate(index, offset);
-      //   // bool discarded = remove_dead(deadQ, index, offset);
-      //   // if (!discarded)
-      //   // {
-      //   //   printf("ERROR: calc mem addr remembered block not found in the queue!\n");
-      //   //   export_csv(pargv);
-      //   //   exit(1);
-      //   // }
-        
-      //   dram_inplace_w_remembered++;
-      // }
       else if (GlobTree[index].slot[offset].dd == ALLOCATED || GlobTree[index].slot[offset].dd == REMEMBERED) // the case that redirect needed ~> find another dead blk to fill in from the queue
       {
         // if (deadQ->size == 0)
@@ -4861,33 +4996,18 @@ int calc_mem_addr(int index, int offset, char type)
         dram_remote_w++;
       }
     }
-    else  // for the levels in nvm
+    else  // for slots beyond original Z + S (5 + 5)
     {
       mem_addr = -1;
       // printf("level %d\n", level);
-      if ( (remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ))  &&  (level == NVM_START) && calc_deadQ_size() > 840) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
-      {
+      // if ( (remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ))  &&  (level == NVM_START) && calc_deadQ_size() > 840) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+      // {
         mem_addr = remote_allocate(index, offset);
-      }
+      // }
       
-      if (mem_addr == -1)
+      if (mem_addr != -1)
       {
-        if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED)
-        {
-          mem_addr = inplace_allocate(index, offset);
-        }
-        else
-        {
-          printf("ERROR: calc mem addr nvm level allocation failed!\n");
-          export_csv(pargv);
-          exit(1);
-        }
-        nvm_inplace_w++;
-      }
-      else
-      {
-        nvm_remote_w++;
-        remote_nvms++;
+        dram_remote_w++;
       }
 
     }
@@ -4902,6 +5022,141 @@ int calc_mem_addr(int index, int offset, char type)
   }
   return mem_addr;
 }
+
+
+// int calc_mem_addr(int index, int offset, char type)
+//  {
+//   int mem_addr = 0;
+//   int level = calc_level(index);
+
+//   // if (type == 'W')
+//   // {
+//   // }
+
+//   // printf("%d %c\n", level, type);
+  
+
+
+//   if (level < TOP_CACHE)
+//   {
+//     return 0;
+//   }
+
+//   if (!DEAD_ENABLE_VAR)
+//   {
+//     if (type == 'R')
+//     {
+//       nvm_norm_r = in_nvm(level) ? nvm_norm_r+1 : nvm_norm_r;
+//       dram_norm_r = (!in_nvm(level)) ? dram_norm_r+1 : dram_norm_r;
+//     }
+//     else if (type == 'W')
+//     {
+//       nvm_norm_w = in_nvm(level) ? nvm_norm_w+1 : nvm_norm_w;
+//       dram_norm_w = (!in_nvm(level)) ? dram_norm_w+1 : dram_norm_w;
+//     }
+//     mem_addr = index*Z_VAR + offset;
+//   }
+//   else if (type == 'R')
+//   {
+//     if (GlobTree[index].slot[offset].redirect)
+//     {
+//       mem_addr = remote_access(index, offset, level);
+
+//       nvm_remote_r = in_nvm(level) ? nvm_remote_r+1 : nvm_remote_r;
+//       dram_remote_r = (!in_nvm(level)) ? dram_remote_r+1 : dram_remote_r;
+//       remote_nvms = in_nvm(level) ? remote_nvms-1 : remote_nvms;
+      
+//     }
+//     else
+//     {
+//       mem_addr = inplace_access(index, offset);
+
+//       nvm_inplace_r = in_nvm(level) ? nvm_inplace_r+1 : nvm_inplace_r;
+//       dram_inplace_r = (!in_nvm(level)) ? dram_inplace_r+1 : dram_inplace_r;
+//     }
+//   }
+//   else if (type == 'W')
+//   {
+//     if (!in_nvm(level)) // for levels in dram
+//     {
+//       if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
+//       {
+//         mem_addr = inplace_allocate(index, offset);
+//         dram_inplace_w++;
+//       }
+//       // else if (GlobTree[index].slot[offset].dd == REMEMBERED)  // use this dead blk and remove it from the queue? $$$ no removing for now
+//       // {
+//       //   mem_addr = inplace_allocate(index, offset);
+//       //   // bool discarded = remove_dead(deadQ, index, offset);
+//       //   // if (!discarded)
+//       //   // {
+//       //   //   printf("ERROR: calc mem addr remembered block not found in the queue!\n");
+//       //   //   export_csv(pargv);
+//       //   //   exit(1);
+//       //   // }
+        
+//       //   dram_inplace_w_remembered++;
+//       // }
+//       else if (GlobTree[index].slot[offset].dd == ALLOCATED || GlobTree[index].slot[offset].dd == REMEMBERED) // the case that redirect needed ~> find another dead blk to fill in from the queue
+//       {
+//         // if (deadQ->size == 0)
+//         // {
+//         //   printf("ERROR: calc mem addr queue empty!\n");
+//         //   export_csv(pargv);
+//         //   exit(1);
+//         // }
+
+//         mem_addr = remote_allocate(index, offset);
+//         if (mem_addr == -1)
+//         {
+//           printf("ERROR: calc mem addr @ level %d no available cand in queue!\n", level);
+//           export_csv(pargv);
+//           exit(1);
+//         }
+//         dram_remote_w++;
+//       }
+//     }
+//     else  // for the levels in nvm
+//     {
+//       mem_addr = -1;
+//       // printf("level %d\n", level);
+//       if ( (remote_nvms < REMOTE_ALLOC_RATIO*(dead_dram + surplus_dead ))  &&  (level == NVM_START) && calc_deadQ_size() > 840) // && tracectr > 5000000 stop remote allocate if dead blk allocated to leaf is more than a threshold
+//       {
+//         mem_addr = remote_allocate(index, offset);
+//       }
+      
+//       if (mem_addr == -1)
+//       {
+//         if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED)
+//         {
+//           mem_addr = inplace_allocate(index, offset);
+//         }
+//         else
+//         {
+//           printf("ERROR: calc mem addr nvm level allocation failed!\n");
+//           export_csv(pargv);
+//           exit(1);
+//         }
+//         nvm_inplace_w++;
+//       }
+//       else
+//       {
+//         nvm_remote_w++;
+//         remote_nvms++;
+//       }
+
+//     }
+    
+    
+//   }
+//   else
+//   {
+//     printf("ERROR: calc mem addr %d %d %c\n", index, offset, type);
+//     export_csv(pargv);
+//     exit(1);
+//   }
+//   return mem_addr;
+// }
 
 
 void ring_read_path(int label, int addr){
@@ -4928,8 +5183,15 @@ void ring_read_path(int label, int addr){
     // }
     
 
+    int slotCount = DYNAMIC_S ? (LZ_VAR[i] + GlobTree[index].s - LS[i]): LZ_VAR[i];  
 
-    int offset = rand() % LZ_VAR[i]; // ??? should change to chose randomly from dummies
+    if (slotCount < 0 || slotCount > Z)
+    {
+      printf("ERROR: read path slot count %d out of range!\n", slotCount);
+      exit(1);
+    }
+    
+    int offset = rand() % slotCount; 
     while (GlobTree[index].slot[offset].isReal ||  !GlobTree[index].slot[offset].valid )
     {
       offset = rand() % LZ_VAR[i];
@@ -5318,7 +5580,7 @@ void ring_early_reshuffle(int label){
       }
     }  
 
-    if (GlobTree[index].count >= LS[i] + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
+    if (GlobTree[index].count >= calc_ring_s(index, i) + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       int valnum = GlobTree[index].dumval;
       dumval_dist[valnum]++;
@@ -5328,8 +5590,16 @@ void ring_early_reshuffle(int label){
       shuff_total++;
       shuff_interval[i]++;
       shufcount++;
+
+      int slotCount = DYNAMIC_S ? (LZ_VAR[i] + GlobTree[index].s - LS[i]): LZ_VAR[i];  
+
+      if (slotCount < 0 || slotCount > Z)
+      {
+        printf("ERROR: reshuffle slot count %d out of range!\n", slotCount);
+        exit(1);
+      }
       
-      for (int j = 0; j < LZ_VAR[i]; j++)
+      for (int j = 0; j < slotCount; j++)
       {
 
         if (GlobTree[index].slot[j].isReal)
@@ -5435,7 +5705,6 @@ void ring_early_reshuffle(int label){
         }
 
         
-        
         if (candidate[j] != -1 && GlobTree[index].dumnum > LS[i])
         {
           // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
@@ -5447,6 +5716,32 @@ void ring_early_reshuffle(int label){
           GlobTree[index].dumval--;
 
           remove_from_stash(candidate[j]);
+        }
+        
+      }
+
+      if (i >= TOP_CACHE_VAR && DYNAMIC_S)
+      {
+        for (int j = LZ_VAR[i]; j < LZ_VAR[i] + S_INC; j++)
+        {
+          int mem_addr = calc_mem_addr(index, j, 'W');
+          if (mem_addr != -1)
+          {
+            GlobTree[index].slot[j].valid = true;
+            if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+            {
+              // bool nvm_access = is_nvm_addr(mem_addr);
+              bool nvm_access = in_nvm(i);
+              bool beginning = false;
+              // bool ending = (j == LZ_VAR[i]-1);
+              // bool last_read = (j == LZ_VAR[i]-1);
+              bool ending = false;
+              bool last_read = false;
+              char op_type = 'r';
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, i);
+            }
+            GlobTree[index].s++;
+          }
         }
       }
 
@@ -5493,6 +5788,7 @@ void ring_early_reshuffle(int label){
       } 
 
       GlobTree[index].count = 0;
+      GlobTree[index].s = LS[i];
       deadctr -= GlobTree[index].dumdead;
       if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
