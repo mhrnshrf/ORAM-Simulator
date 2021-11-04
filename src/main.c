@@ -1162,9 +1162,9 @@ int main(int argc, char * argv[])
         num_fetch = 0;
         while (((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) )	// || ( !SIM_ENABLE && (tracectr < TRACE_SIZE )) ) 
 		{
-			if (tracectr % 1000 == 0)
+			if (tracectr % 1000000 == 0)
 			{
-				// printf("@ %d\n", tracectr);
+				printf("@ %d\n", tracectr);
 			}
 		// printf("while fetch %lld\n", CYCLE_VAL);
 			// printf("writeq isn't full\n");

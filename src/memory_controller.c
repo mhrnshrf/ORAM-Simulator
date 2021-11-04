@@ -5194,7 +5194,7 @@ void ring_read_path(int label, int addr){
     int offset = rand() % slotCount; 
     while (GlobTree[index].slot[offset].isReal ||  !GlobTree[index].slot[offset].valid )
     {
-      offset = rand() % LZ_VAR[i];
+      offset = rand() % slotCount;
       
     }
 
