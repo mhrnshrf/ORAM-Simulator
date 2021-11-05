@@ -1162,10 +1162,10 @@ int main(int argc, char * argv[])
         num_fetch = 0;
         while (((num_fetch < MAX_FETCH) && (ROB[numc].inflight != ROBSIZE) && (!writeqfull)) )	// || ( !SIM_ENABLE && (tracectr < TRACE_SIZE )) ) 
 		{
-			if (tracectr % 1000000 == 0)
-			{
-				printf("@ %d\n", tracectr);
-			}
+			// if (tracectr % 1000000 == 0)
+			// {
+			// 	printf("@ %d\n", tracectr);
+			// }
 		// printf("while fetch %lld\n", CYCLE_VAL);
 			// printf("writeq isn't full\n");
           /* Keep fetching until fetch width or ROB capacity or WriteQ are fully consumed. */
@@ -1621,9 +1621,9 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) ) //  && tracectr <= endpoint
 				{
-					if (tracectr % 10 == 0)
+					if (tracectr % 1000000 == 0)
 					{
-						// printf("%d\n", tracectr);
+						printf("%d\n", tracectr);
 					}
 					// if (tracectr % 50000 == 0)
 					// {
