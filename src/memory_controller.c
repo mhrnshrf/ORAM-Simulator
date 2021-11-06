@@ -1346,7 +1346,7 @@ void oram_alloc(){
   for (int i = LEVEL-1; i >= GATHER_START; i--)
   {
     // int constant = (i < 16) ? 1.7 : 1.5;
-    double constant = 1.5;
+    double constant = 1.6;
     int qs = (int)floor(pow(constant, i));
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
@@ -2271,7 +2271,7 @@ void write_path(int label){
           }
 
         }
-        if (i >= TOP_CACHE_VAR && RING_ENABLE && DYNAMIC_S)
+        if (i >= TOP_CACHE_VAR && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR)
         {
           for (int j = LZ_VAR[i]; j < LZ_VAR[i] + S_INC; j++)
           {
@@ -5721,7 +5721,7 @@ void ring_early_reshuffle(int label){
         
       }
 
-      if (i >= TOP_CACHE_VAR && DYNAMIC_S)
+      if (i >= TOP_CACHE_VAR && DYNAMIC_S && DEAD_ENABLE_VAR)
       {
         for (int j = LZ_VAR[i]; j < LZ_VAR[i] + S_INC; j++)
         {
@@ -6093,10 +6093,10 @@ void export_csv(char * argv[]){
     perror("chdir() to log failed"); 
   }
 
-  // if (chdir("../oram/log") != 0)  
-  // {
-  //   perror("chdir() to ../oram/log failed"); 
-  // }
+  if (chdir("../oram/log") != 0)  
+  {
+    perror("chdir() to ../oram/log failed"); 
+  }
 
 
   filename = "";
