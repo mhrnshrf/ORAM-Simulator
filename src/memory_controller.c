@@ -1346,7 +1346,7 @@ void oram_alloc(){
   for (int i = LEVEL-1; i >= GATHER_START; i--)
   {
     // int constant = (i < 16) ? 1.7 : 1.5;
-    double constant = 1.6;
+    double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
@@ -4696,47 +4696,47 @@ int remote_allocate(int index, int offset){
   }
 
     // if not found look for dead blk at every level else and start from the bottom 
-  if (i == -1 && j == -1)
-  {
+  // if (i == -1 && j == -1)
+  // {
    
-    for (int l = LEVEL-1; l >= GATHER_START; l--)
-    {
-      if (l != level)
-      {
-        while (deadQ_arr[l]->size != 0)
-        {
-          // printf("here\n");
-          Element *cand = Dequeue(deadQ_arr[l]);
-          int i_tmp = cand->index;
-          int j_tmp = cand->offset;
-          bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+  //   for (int l = LEVEL-1; l >= GATHER_START; l--)
+  //   {
+  //     if (l != level)
+  //     {
+  //       while (deadQ_arr[l]->size != 0)
+  //       {
+  //         // printf("here\n");
+  //         Element *cand = Dequeue(deadQ_arr[l]);
+  //         int i_tmp = cand->index;
+  //         int j_tmp = cand->offset;
+  //         bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
         
-          if (!taken)
-          {
-            // printf("break\n");
-            deadrem--;
-            i = cand->index;
-            j = cand->offset;
-            free(cand);
-            break;
-          }
-          // printf("ESLE level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
+  //         if (!taken)
+  //         {
+  //           // printf("break\n");
+  //           deadrem--;
+  //           i = cand->index;
+  //           j = cand->offset;
+  //           free(cand);
+  //           break;
+  //         }
+  //         // printf("ESLE level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
 
 
-          free(cand);
-        }
-        if (i != -1 && j != -1)
-        {
-          if (j >= LZ[l])
-          {
-            surplus_in_use++;
-          }
-          break;
-        }
-      }
+  //         free(cand);
+  //       }
+  //       if (i != -1 && j != -1)
+  //       {
+  //         if (j >= LZ[l])
+  //         {
+  //           surplus_in_use++;
+  //         }
+  //         break;
+  //       }
+  //     }
       
-    }
-  }
+  //   }
+  // }
 
   if (i != -1 && j != -1)
   {
@@ -6088,10 +6088,10 @@ void export_csv(char * argv[]){
 
   FILE *fp;
   char *filename;
-  if (chdir("log") != 0)  
-  {
-    perror("chdir() to log failed"); 
-  }
+  // if (chdir("log") != 0)  
+  // {
+  //   perror("chdir() to log failed"); 
+  // }
 
   if (chdir("../oram/log") != 0)  
   {
