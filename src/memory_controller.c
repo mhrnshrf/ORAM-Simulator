@@ -1348,6 +1348,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
+    qs = 3000;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
