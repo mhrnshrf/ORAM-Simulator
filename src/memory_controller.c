@@ -2176,6 +2176,8 @@ void write_path(int label){
       pick_candidate(index, label, i);
       int stt_cand = -1;
 
+      bool runOutOfRemote = false;
+
       for(int j = 0; j < LZ_VAR[i]; j++)
       {
         GlobTree[index].slot[j].valid = true;  // added for ring oram
@@ -2191,6 +2193,20 @@ void write_path(int label){
         gi++;
         
         int mem_addr = calc_mem_addr(index, j, 'W');
+
+        if (mem_addr == -1)
+        {
+          runOutOfRemote = true;
+
+          if (j < RING_Z) // if less than Z + 1 (S) is allocated exit with error
+          {
+            printf("ERROR: early reshuffle only %d slots less than minimum allocated!\n", j+1);
+            exit(1);
+          }
+          
+          GlobTree[index].s -= (LZ_VAR[i] - 1 - j);
+          break; 
+        }
 
         if (i >= TOP_CACHE_VAR  && SIM_ENABLE_VAR)
         {
@@ -2272,7 +2288,7 @@ void write_path(int label){
           }
 
         }
-        if (i >= TOP_CACHE_VAR && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR)
+        if (i >= TOP_CACHE_VAR && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR && !runOutOfRemote)
         {
           for (int j = LZ_VAR[i]; j < LZ_VAR[i] + S_INC; j++)
           {
@@ -4989,12 +5005,12 @@ int calc_mem_addr(int index, int offset, char type)
         // }
 
         mem_addr = remote_allocate(index, offset);
-        if (mem_addr == -1)
-        {
-          printf("ERROR: calc mem addr @ level %d no available cand in queue!\n", level);
-          export_csv(pargv);
-          exit(1);
-        }
+        // if (mem_addr == -1)
+        // {
+        //   printf("ERROR: calc mem addr @ level %d no available cand in queue!\n", level);
+        //   export_csv(pargv);
+        //   exit(1);
+        // }
         dram_remote_w++;
       }
     }
@@ -5681,6 +5697,7 @@ void ring_early_reshuffle(int label){
 
       reset_candidate();
       pick_candidate(index, label, i);
+      bool runOutOfRemote = false;
 
       for (int j = 0; j < LZ_VAR[i]; j++)
       {
@@ -5694,6 +5711,21 @@ void ring_early_reshuffle(int label){
         }
 
         int mem_addr = calc_mem_addr(index, j, 'W');
+
+        if (mem_addr == -1)
+        {
+          runOutOfRemote = true;
+
+          if (j < RING_Z) // if less than Z + 1 (S) is allocated exit with error
+          {
+            printf("ERROR: early reshuffle only %d slots less than minimum allocated!\n", j+1);
+            exit(1);
+          }
+          
+          GlobTree[index].s -= (LZ_VAR[i] - 1 - j);
+          break; 
+        }
+        
 
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
@@ -5722,7 +5754,7 @@ void ring_early_reshuffle(int label){
         
       }
 
-      if (i >= TOP_CACHE_VAR && DYNAMIC_S && DEAD_ENABLE_VAR)
+      if (i >= TOP_CACHE_VAR && DYNAMIC_S && DEAD_ENABLE_VAR && !runOutOfRemote)
       {
         for (int j = LZ_VAR[i]; j < LZ_VAR[i] + S_INC; j++)
         {
