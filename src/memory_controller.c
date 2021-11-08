@@ -5532,7 +5532,7 @@ int detect_inplace_available(int index, int level){
     int h = 0;
     for (int j = 0; j < LZ_VAR[level]; j++)
     {
-      if (GlobTree[index].slot[j].dd == DEAD)
+      if (GlobTree[index].slot[j].dd == DEAD || GlobTree[index].slot[j].dd == REFRESHED)
       {
         dead++;
         dead_slot[k] = j;
@@ -5562,7 +5562,7 @@ void write_bucket(int index, int label, int level, char op_type){
 
   if (available < RING_Z + 1)
   {
-    printf("ERROR: write bucket only %d available less than %d!\n", available, RING_Z + 1);
+    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + 1);
     exit(1);
   }
 
