@@ -2149,7 +2149,7 @@ void write_path(int label){
       }
       update_count_stat(GlobTree[index].count, i);
       GlobTree[index].count = 0; // for ring oram evict path
-      GlobTree[index].s = LS[i];
+      // GlobTree[index].s = LS[i];
 
       if (i >= LEVEL-2)
       {
@@ -5607,7 +5607,7 @@ void write_bucket(int index, int label, int level, char op_type){
     }
 
     
-    if (candidate[k] != -1 && GlobTree[index].dumnum > LS[level])
+    if (candidate[k] != -1 && GlobTree[index].dumnum > GlobTree[index].s)
     {
       // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
       GlobTree[index].slot[j].addr = Stash[candidate[k]].addr;
@@ -5729,10 +5729,11 @@ void ring_early_reshuffle(int label){
 
     if (GlobTree[index].count >= calc_ring_s(index, i) + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
+      GlobTree[index].dumval = Z;
+      
       int valnum = GlobTree[index].dumval;
       dumval_dist[valnum]++;
       dumval_range_dist[calc_range(i)][valnum]++;
-      GlobTree[index].dumval = Z;
       shuff[i]++;
       shuff_total++;
       shuff_interval[i]++;
