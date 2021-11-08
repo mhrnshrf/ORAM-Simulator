@@ -485,6 +485,8 @@ int  calc_super(int label,  int l);
 int  calc_tri(int label,  int l);
 int calc_horiz(int index, int label, int i);
 int calc_ring_s(int index, int level);
+void write_bucket(int index, int label, int level, char op_type);
+int detect_inplace_available(int index, int level);
 
 // Mehrnoosh.
 
