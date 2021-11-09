@@ -1213,6 +1213,12 @@ void set_to_serves(){
       }
     }
     
+    if (DYNAMIC_S && DEAD_ENABLE)
+    {
+      dram_to_serve_e_w = (LEVEL - TOP_CACHE)*(RING_Z+1);
+      dram_to_serve_r_w = 1*(RING_Z+1);
+    }
+    
     // nvm_to_serve_m_r = (LEVEL - NVM_START)*(1);
     // nvm_to_serve_m_w = (LEVEL - NVM_START)*(1);
 
