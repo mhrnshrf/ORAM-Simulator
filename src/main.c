@@ -921,13 +921,15 @@ int main(int argc, char * argv[])
 //   signal(SIGINT, handle_sigint); 	
   while (!expt_done) {
 
+
+
 	
 
 
 	// Mehrnoosh:
 	// if (tracectr % 1000000 == 0)
 	// {
-	// 	printf("@ trace %d\n", tracectr);
+		// printf("@  %d while exp\n", tracectr);
 	// }
 	
 	// printf("@ %lld  trace %d\n", CYCLE_VAL, tracectr);
@@ -1005,7 +1007,7 @@ int main(int argc, char * argv[])
 		num_ret = 0;
 		//   printf("before 	rob head %d		rob tail %d\n", ROB[numc].head, ROB[numc].tail);
 		while ((num_ret < MAX_RETIRE) && ROB[numc].inflight) {
-			//   printf("@ %lld fetch \n", CYCLE_VAL);
+			//   printf("@ %d while ret \n", tracectr);
 			/* Keep retiring until retire width is consumed or ROB is empty. */
 			
 			
@@ -1164,7 +1166,7 @@ int main(int argc, char * argv[])
 		{
 			// if (tracectr % 1000000 == 0)
 			// {
-			// 	printf("@ %d\n", tracectr);
+				// printf("@ %d while fetch\n", tracectr);
 			// }
 		// printf("while fetch %lld\n", CYCLE_VAL);
 			// printf("writeq isn't full\n");
@@ -1509,7 +1511,7 @@ int main(int argc, char * argv[])
 
 				// if (DYNAMIC_S)
 				// {
-				// 	last_read_served = true;
+					last_read_served = true;
 				// }
 				
 
@@ -2407,8 +2409,8 @@ int main(int argc, char * argv[])
 // printf("Buffer pos1 #            %d\n", bufferpos1);
 // printf("Nonmemops #              %d\n\n", nonmemctr);
 
-rmpki = (1000*rctr)/instctr;
-wmpki = (1000*wctr)/instctr;
+// rmpki = (1000*rctr)/instctr;
+// wmpki = (1000*wctr)/instctr;
 
 // print_oram_stats();
 

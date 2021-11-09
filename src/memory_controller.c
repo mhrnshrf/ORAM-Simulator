@@ -1836,6 +1836,8 @@ void read_path(int label){
 
               if (SIM_ENABLE_VAR)
               {
+                // printf("ep mem addr: %d   @ L%d  j: %d \n", mem_addr, i, j);
+
                 // bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
                 // bool beginning = RING_ENABLE ? (i ==  TOP_CACHE_VAR && reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
                 bool beginning = (i ==  LEVEL_VAR-1 && reqmade == 1);
@@ -1929,6 +1931,8 @@ void read_path(int label){
             int sd = -1;
             while (sd == -1)
             {
+              // printf("@%d in ep\n", tracectr);
+
               ri = rand() % cand_ind;
               sd = dum_cand[ri];
             }
@@ -1947,6 +1951,8 @@ void read_path(int label){
             bool nvm_access = in_nvm(i);
             if (SIM_ENABLE_VAR)
             {
+                // printf("ep mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
+
               // bool beginning = (i ==  TOP_CACHE_VAR && reqcont == 1);
               bool beginning = (i ==  LEVEL_VAR-1 && reqcont == 1);
               bool ending = false;
@@ -2918,6 +2924,7 @@ void take_snapshot(char * argv[]){
   exit(0);
 
 }
+
 
 
 void free_stash(){
@@ -4583,7 +4590,7 @@ void gather_dead(int index, int i){
     {
       if (!GlobTree[index].slot[j].isReal)
       {
-        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < RING_Z ) 
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < RING_Z - 1 ) 
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
@@ -5180,6 +5187,7 @@ void ring_read_path(int label, int addr){
     int offset = rand() % slotCount; 
     while (GlobTree[index].slot[offset].isReal ||  !GlobTree[index].slot[offset].valid )
     {
+      // printf("@%d in ring read \n", tracectr);
       offset = rand() % slotCount;
       
     }
@@ -5289,6 +5297,8 @@ void ring_read_path(int label, int addr){
 
     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
+    // printf("ring read mem addr: %d   @ L%d  j: %d \n", mem_addr, i, offset);
+
       // if (i == LEVEL-1)
       if (i == TOP_CACHE_VAR)
       {
@@ -5534,6 +5544,7 @@ int detect_inplace_available(int index, int level){
     {
       if (GlobTree[index].slot[j].dd == DEAD || GlobTree[index].slot[j].dd == REFRESHED)
       {
+        // printf("dead[%d]: %d\n", k, j);
         dead++;
         dead_slot[k] = j;
         k++;
@@ -5546,6 +5557,12 @@ int detect_inplace_available(int index, int level){
     }
     return dead;
   }
+
+  for (int i = 0; i < LZ_VAR[level]; i++)
+  {
+    dead_slot[i] = i;
+  }
+  
 
   return LZ_VAR[level];
   
@@ -5588,6 +5605,8 @@ void write_bucket(int index, int label, int level, char op_type){
 
     int mem_addr = calc_mem_addr(index, j, 'W');
 
+    // printf("%c  mem addr: %d   @ L%d  j: %d \n", op_type, mem_addr, level, j);
+
     if (mem_addr == -1)
     {
      
@@ -5598,6 +5617,7 @@ void write_bucket(int index, int label, int level, char op_type){
 
     if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
+      // printf("@ level %d  mem addr: %d\n", level,  mem_addr);
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(level);
       bool beginning = false;
@@ -5730,7 +5750,7 @@ void ring_early_reshuffle(int label){
     if (GlobTree[index].count >= calc_ring_s(index, i) + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       GlobTree[index].dumval = Z;
-      
+
       int valnum = GlobTree[index].dumval;
       dumval_dist[valnum]++;
       dumval_range_dist[calc_range(i)][valnum]++;
@@ -5757,6 +5777,8 @@ void ring_early_reshuffle(int label){
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
             // bool nvm_access = is_nvm_addr(mem_addr);
+                // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, j);
+
             bool nvm_access = in_nvm(i);
             bool beginning = (reqmade == 1);
             bool ending = false;
@@ -5804,6 +5826,8 @@ void ring_early_reshuffle(int label){
           int sd = -1;
           while (sd == -1)
           {
+            // printf("@%d in reshuffle\n", tracectr);
+
             ri = rand() % cand_ind;
             sd = dum_cand[ri];
           }
@@ -5812,6 +5836,8 @@ void ring_early_reshuffle(int label){
           int mem_addr = calc_mem_addr(index, sd, 'R');
           if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
           {
+                // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
+
               // bool nvm_access = is_nvm_addr(mem_addr);
               bool nvm_access = in_nvm(i);
               bool beginning = (reqcont == 1);
@@ -7791,6 +7817,7 @@ void determine_served_all(request_t * request){
 
         if (last_read_deleted)
         {
+        // printf("%c %d detserve req%d	@ %lld  longestReq %d   comptime %lld   longestNVM %d comp %lld   curnvm %d \n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, longest_req, comptime_max, longest_nvm, nvm_tmax, cur_nvm_served_o);
           // if (type == READ)
           // {
             determineReq = longest_req;
