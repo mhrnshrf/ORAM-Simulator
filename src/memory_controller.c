@@ -4536,11 +4536,11 @@ void ring_access(int addr){
   //   printf("%d\n", diff);
   // }
   
-  printf("\n@> %d\n", ringctr);
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    printf("deadQ[%d]: %d\n", i, deadQ_arr[i]->size);
-  }
+  // printf("\n@> %d\n", ringctr);
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   printf("deadQ[%d]: %d\n", i, deadQ_arr[i]->size);
+  // }
   
 
 }
