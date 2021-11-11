@@ -1512,6 +1512,7 @@ int main(int argc, char * argv[])
 				// if (DYNAMIC_S)
 				// {
 					last_read_served = true;
+					last_lock_released = true;
 				// }
 				
 
@@ -1623,10 +1624,10 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) ) //  && tracectr <= endpoint
 				{
-					if (tracectr % 1000000 == 0)
-					{
-						printf("%d\n", tracectr);
-					}
+					// if (tracectr % 1000000 == 0)
+					// {
+						// printf("%d\n", tracectr);
+					// }
 					// if (tracectr % 50000 == 0)
 					// {
 						// printf("@ %d no miss\n", tracectr);

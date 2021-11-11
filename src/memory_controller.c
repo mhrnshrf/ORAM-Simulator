@@ -64,6 +64,7 @@ int wl_occ = 0;
 bool pause_skip = false;
 int count_level[LEVEL] = {0};
 int cap_level[LEVEL] = {0};
+int s_dist[RING_S+1] = {0};
 
 int remote_nvms = 0;
 
@@ -4592,11 +4593,12 @@ void gather_dead(int index, int i){
     // printf("deadQ[%d] : %d\n", i, deadQ_arr[i]->size);
     int start = SURONLY_ENABLE ? LZ[i] : 0 ;
     int end = DYNAMIC_S ? LZ[i] : Z;
+    int cap = i < 15 ? 1 : 4; 
     for (int j = start; j < end; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
       {
-        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < RING_Z - 1 ) 
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < cap ) 
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
@@ -5193,7 +5195,7 @@ void ring_read_path(int label, int addr){
     int offset = rand() % slotCount; 
     while (GlobTree[index].slot[offset].isReal ||  !GlobTree[index].slot[offset].valid )
     {
-      // printf("@%d in ring read \n", tracectr);
+      // printf("@%d in ring read S: %d   count: %d\n", tracectr, GlobTree[index].s, GlobTree[index].count);
       offset = rand() % slotCount;
       
     }
@@ -5590,6 +5592,7 @@ void write_bucket(int index, int label, int level, char op_type){
   }
 
   GlobTree[index].s = available - RING_Z;
+  int real = 0;
 
   for (int k = 0; k < available; k++)
   {
@@ -5633,7 +5636,7 @@ void write_bucket(int index, int label, int level, char op_type){
     }
 
     
-    if (candidate[k] != -1 && GlobTree[index].dumnum > GlobTree[index].s)
+    if (candidate[k] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
     {
       // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
       GlobTree[index].slot[j].addr = Stash[candidate[k]].addr;
@@ -5642,6 +5645,7 @@ void write_bucket(int index, int label, int level, char op_type){
       GlobTree[index].slot[j].isData = true;
       GlobTree[index].dumnum--;
       GlobTree[index].dumval--;
+      real++;
 
       remove_from_stash(candidate[k]);
     }
@@ -5753,8 +5757,19 @@ void ring_early_reshuffle(int label){
       }
     }  
 
-    if (GlobTree[index].count >= calc_ring_s(index, i) + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
+    int curS = calc_ring_s(index, i); 
+    if (GlobTree[index].count >= curS + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
+      if (curS > 0 && curS <= RING_S )
+      {
+        s_dist[curS]++;
+      }
+      else
+      {
+        printf("ERROR: early reshuffle cur S %d our of range!\n", curS);
+        exit(1);
+      }
+      
       GlobTree[index].dumval = Z;
 
       int valnum = GlobTree[index].dumval;
@@ -6498,12 +6513,15 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "ephoriz2_dist[%d],%d\n", i, ephoriz2_dist[i]);
   }
+  for (int i = 0; i < RING_S+1; i++)
+  {
+    fprintf(fp, "s_dist[%d],%d\n", i, s_dist[i]);
+  }
 
-  char real[5] = "real";
-  char dum[5] = "dum";
-
-  print_super_node(supreal, exp_name, bench, real);
-  print_super_node(supdum, exp_name, bench, dum);
+  // char real[5] = "real";
+  // char dum[5] = "dum";
+  // print_super_node(supreal, exp_name, bench, real);
+  // print_super_node(supdum, exp_name, bench, dum);
   
   fclose(fp);
 }
