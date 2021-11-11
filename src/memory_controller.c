@@ -1357,7 +1357,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    qs = 3000;
+    qs = 1000;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -4536,6 +4536,12 @@ void ring_access(int addr){
   //   printf("%d\n", diff);
   // }
   
+  printf("\n@> %d\n", ringctr);
+  for (int i = GATHER_START; i < LEVEL; i++)
+  {
+    printf("deadQ[%d]: %d\n", i, deadQ_arr[i]->size);
+  }
+  
 
 }
 
@@ -4593,7 +4599,8 @@ void gather_dead(int index, int i){
     // printf("deadQ[%d] : %d\n", i, deadQ_arr[i]->size);
     int start = SURONLY_ENABLE ? LZ[i] : 0 ;
     int end = DYNAMIC_S ? LZ[i] : Z;
-    int cap = i < 15 ? 1 : 4; 
+    // int cap = i < 15 ? 1 : 1; 
+    int cap = 1;
     for (int j = start; j < end; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
@@ -4666,7 +4673,7 @@ int remote_allocate(int index, int offset){
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  while (deadQ_arr[level]->size != 0)
+  while (deadQ_arr[level]->size > 10)
   {
     // printf("here\n");
     Element *cand = Dequeue(deadQ_arr[level]);
