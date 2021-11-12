@@ -158,6 +158,9 @@ int rdram = 0;
 int mdram = 0;
 int lrs_ctr = 0;
 
+int s_underctr = 0;
+int s_overctr = 0;
+
 
 void test_ring(){
   unsigned long long int addr = 0;
@@ -5673,6 +5676,7 @@ void write_bucket(int index, int label, int level, char op_type){
       int mem_addr = calc_mem_addr(index, j, 'W');
       if (mem_addr != -1)
       {
+        s_underctr++;
         GlobTree[index].slot[j].valid = true;
         if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
@@ -5693,6 +5697,7 @@ void write_bucket(int index, int label, int level, char op_type){
       int mem_addr = calc_mem_addr(index, j, 'W');
       if (mem_addr != -1)
       {
+        s_overctr++;
         GlobTree[index].slot[j].valid = true;
         if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
@@ -6555,6 +6560,9 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "allocS_dist[%d],%d\n", i, allocS_dist[i]);
   }
+
+  fprintf(fp, "s_underctr,%d\n", s_underctr);
+  fprintf(fp, "s_overctr,%d\n", s_overctr);
 
   // char real[5] = "real";
   // char dum[5] = "dum";
