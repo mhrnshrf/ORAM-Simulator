@@ -1357,7 +1357,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    qs = 1000;
+    // qs = 1000;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -4673,7 +4673,7 @@ int remote_allocate(int index, int offset){
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 100)
+  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.5 * deadQ_arr[level]->limit)
   {
     while (deadQ_arr[level]->size > 0)
     {
@@ -5775,7 +5775,11 @@ void ring_early_reshuffle(int label){
     {
       if (curS > 0 && curS <= RING_S )
       {
-        s_dist[curS]++;
+        if (i >= TOP_CACHE_VAR)
+        {
+          s_dist[curS]++;
+        }
+        
       }
       else
       {
