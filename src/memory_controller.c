@@ -4673,34 +4673,40 @@ int remote_allocate(int index, int offset){
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  while (deadQ_arr[level]->size > 10)
+  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 100)
   {
-    // printf("here\n");
-    Element *cand = Dequeue(deadQ_arr[level]);
-    int i_tmp = cand->index;
-    int j_tmp = cand->offset;
-    // ??? taken condition to be deleted, a slot in queue not supposed to be taken ever
-    bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
-  
-    if (!taken)
+    while (deadQ_arr[level]->size > 0)
     {
-      // printf("break\n");
-      deadrem--;
-      i = cand->index;
-      j = cand->offset;
-      if (j >= LZ[level])
+      // printf("here\n");
+      Element *cand = Dequeue(deadQ_arr[level]);
+      int i_tmp = cand->index;
+      int j_tmp = cand->offset;
+      // ??? taken condition to be deleted, a slot in queue not supposed to be taken ever
+      bool taken = (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED) || (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED);
+    
+      if (!taken)
       {
-        surplus_in_use++;
+        // printf("break\n");
+        deadrem--;
+        i = cand->index;
+        j = cand->offset;
+        if (j >= LZ[level])
+        {
+          surplus_in_use++;
+        }
+        
+        free(cand);
+        break;
       }
-      
-      free(cand);
-      break;
-    }
 
-    // printf("SAME level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
-    // printf("hereeeeeeeeeeee taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED":"unknown", tracectr);
-    free(cand);
+      // printf("SAME level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
+      // printf("hereeeeeeeeeeee taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED":"unknown", tracectr);
+      free(cand);
+    }
   }
+
+
+
 
     // if not found look for dead blk at every level else and start from the bottom 
   // if (i == -1 && j == -1 && offset < LZ[level])
