@@ -65,6 +65,7 @@ bool pause_skip = false;
 int count_level[LEVEL] = {0};
 int cap_level[LEVEL] = {0};
 int s_dist[RING_S+1] = {0};
+int allocS_dist[RING_S+1] = {0};
 
 int remote_nvms = 0;
 
@@ -1357,7 +1358,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    // qs = 1000;
+    qs = 1000;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -4673,7 +4674,7 @@ int remote_allocate(int index, int offset){
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.5 * deadQ_arr[level]->limit)
+  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.6 * deadQ_arr[level]->limit)
   {
     while (deadQ_arr[level]->size > 0)
     {
@@ -5718,7 +5719,23 @@ void write_bucket(int index, int label, int level, char op_type){
   }
   GlobTree[index].dumdead = 0;
   // wb[level] += stashb4 - stashctr;
+
+
+  int curS = GlobTree[index].s;
   
+  if (curS > 0 && curS <= RING_S )
+  {
+    if (level >= TOP_CACHE_VAR)
+    {
+      allocS_dist[curS]++;
+    }
+    
+  }
+  else
+  {
+    printf("ERROR: write bucket cur S %d our of range!\n", curS);
+    exit(1);
+  }
   
   
 }
@@ -6533,6 +6550,10 @@ void export_csv(char * argv[]){
   for (int i = 0; i < RING_S+1; i++)
   {
     fprintf(fp, "s_dist[%d],%d\n", i, s_dist[i]);
+  }
+  for (int i = 0; i < RING_S+1; i++)
+  {
+    fprintf(fp, "allocS_dist[%d],%d\n", i, allocS_dist[i]);
   }
 
   // char real[5] = "real";
