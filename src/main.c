@@ -1641,7 +1641,7 @@ int main(int argc, char * argv[])
 					// 	printf("while %d\n", tracectr);
 					// }
 					
-					if (tracectr >= WARMUP_TREE - REMOTE_START_OFF)
+					if (tracectr == WARMUP_TREE - REMOTE_START_OFF)
 					{
 						switch_dead_enable_to(DEAD_ENABLE);
 						reset_profile_counters();
