@@ -79,6 +79,7 @@ int count_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
 int count_max[LEVEL] = {0};
 long long int count_sum[LEVEL] = {0};
 int count_count[LEVEL] = {0};
+int s_under[LEVEL] = {0};
 
 int GREEN_BLOCK = 0;
 
@@ -158,8 +159,13 @@ int rdram = 0;
 int mdram = 0;
 int lrs_ctr = 0;
 
-int s_underctr = 0;
-int s_overctr = 0;
+unsigned long long int s_underctr = 0;
+unsigned long long int s_overctr = 0;
+unsigned long long int s_inctr = 0;
+unsigned long long int takenctr = 0;
+unsigned long long int extendctr = 0;
+unsigned long long int inplacectr = 0;
+
 
 
 void test_ring(){
@@ -5011,7 +5017,10 @@ int calc_mem_addr(int index, int offset, char type)
         //   export_csv(pargv);
         //   exit(1);
         // }
-        dram_remote_w++;
+        if (mem_addr != -1)
+        {
+          dram_remote_w++;
+        }
       }
     }
     else  // for slots beyond original Z + S (5 + 5)
@@ -5602,9 +5611,9 @@ void write_bucket(int index, int label, int level, char op_type){
   int available = detect_inplace_available(index, level);
 
 
-  if (available < RING_Z + 1)
+  if (available < RING_Z + 4)
   {
-    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + 1);
+    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + 4);
     exit(1);
   }
 
@@ -5643,6 +5652,7 @@ void write_bucket(int index, int label, int level, char op_type){
 
     if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
+      inplacectr++;
       // printf("@ level %d  mem addr: %d\n", level,  mem_addr);
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(level);
@@ -5666,12 +5676,17 @@ void write_bucket(int index, int label, int level, char op_type){
 
       remove_from_stash(candidate[k]);
     }
+    else
+    {
+      s_inctr++;
+    }
   }
 
   if (level >= TOP_CACHE_VAR && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR)
   {
     for (int h = 0; h < LZ_VAR[level] - available; h++)
     {
+      takenctr++;
       int j = taken_slot[h];
       int mem_addr = calc_mem_addr(index, j, 'W');
       if (mem_addr != -1)
@@ -5694,6 +5709,7 @@ void write_bucket(int index, int label, int level, char op_type){
     }
     for (int j = LZ_VAR[level]; j < LZ_VAR[level] + S_INC; j++)
     {
+      extendctr++;
       int mem_addr = calc_mem_addr(index, j, 'W');
       if (mem_addr != -1)
       {
@@ -5733,8 +5749,11 @@ void write_bucket(int index, int label, int level, char op_type){
     if (level >= TOP_CACHE_VAR)
     {
       allocS_dist[curS]++;
+      if (curS < LS[level])
+      {
+        s_under[level]++;
+      }
     }
-    
   }
   else
   {
@@ -6561,8 +6580,16 @@ void export_csv(char * argv[]){
     fprintf(fp, "allocS_dist[%d],%d\n", i, allocS_dist[i]);
   }
 
-  fprintf(fp, "s_underctr,%d\n", s_underctr);
-  fprintf(fp, "s_overctr,%d\n", s_overctr);
+  fprintf(fp, "s_underctr,%lld\n", s_underctr);
+  fprintf(fp, "s_overctr,%lld\n", s_overctr);
+  fprintf(fp, "s_inctr,%lld\n", s_inctr);
+  fprintf(fp, "inplacectr,%lld\n", inplacectr);
+  fprintf(fp, "takenctr,%lld\n", takenctr);
+  fprintf(fp, "extendctr,%lld\n", extendctr);
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "s_under[%d],%d\n", i, s_under[i]);
+  }
 
   // char real[5] = "real";
   // char dum[5] = "dum";
