@@ -1367,7 +1367,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    // qs = 1000;
+    // qs = 10;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -4683,7 +4683,7 @@ int remote_allocate(int index, int offset){
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.9 * deadQ_arr[level]->limit)
+  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.8 * deadQ_arr[level]->limit)
   {
     while (deadQ_arr[level]->size > 0)
     {
@@ -6263,10 +6263,30 @@ void reset_profile_counters(){
   deadrem = 0;
   // nonmemops_executed = 0;
   // dead_dram = 0;
-  // for (int i = 0; i < LEVEL; i++)
-  // {
-  //   shuff[i] = 0;
-  // }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    shuff[i] = 0;
+  }
+  for (int i = 0; i < RING_S+1; i++)
+  {
+    s_dist[i] = 0;
+  }
+  for (int i = 0; i < RING_S+1; i++)
+  {
+    allocS_dist[i] = 0;
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    s_under[i] = 0;
+  }
+
+  s_underctr = 0;
+  s_overctr = 0;
+  s_inctr = 0;
+  takenctr = 0;
+  extendctr = 0;
+  inplacectr = 0;
+  
 }
 
 
