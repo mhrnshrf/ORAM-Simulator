@@ -166,6 +166,11 @@ unsigned long long int takenctr = 0;
 unsigned long long int extendctr = 0;
 unsigned long long int inplacectr = 0;
 
+unsigned long long int deadctr_arr[LEVEL] = {0};
+unsigned long long int deadQ_ov[LEVEL] = {0};
+unsigned long long int deadQ_empty_s6[LEVEL] = {0};
+unsigned long long int deadQ_empty_s7[LEVEL] = {0};
+
 
 
 void test_ring(){
@@ -1367,7 +1372,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    // qs = 10;
+    // qs = 10000;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -2195,6 +2200,7 @@ void write_path(int label){
         }
       }
       deadctr -= GlobTree[index].dumdead;
+      deadctr_arr[i] -= GlobTree[index].dumdead;
       if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
         dead_dram -= GlobTree[index].dumdead;
@@ -4646,6 +4652,7 @@ void gather_dead(int index, int i){
           }
           else
           {
+            deadQ_ov[i]++;
             free(db);
           }
                     
@@ -4679,11 +4686,22 @@ int remote_allocate(int index, int offset){
   // {
   //   level = NVM_START-1;
   // }
-  
+  if (deadQ_arr[level]->size == 0)
+  {
+    if (offset == 10)
+    {
+      deadQ_empty_s6[level]++;
+    }
+    else if(offset == 11)
+    {
+      deadQ_empty_s7[level]++;
+    }
+    
+  }
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.8 * deadQ_arr[level]->limit)
+  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.6 * deadQ_arr[level]->limit)
   {
     while (deadQ_arr[level]->size > 0)
     {
@@ -5369,6 +5387,7 @@ void ring_read_path(int label, int addr){
     {
       GlobTree[index].dumdead++;
       deadctr++;
+      deadctr_arr[i]++;
       if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
         dead_dram++;
@@ -5742,6 +5761,7 @@ void write_bucket(int index, int label, int level, char op_type){
 
   GlobTree[index].count = 0;
   deadctr -= GlobTree[index].dumdead;
+  deadctr_arr[level] -= GlobTree[index].dumdead;
 
   if (level < NVM_START && level >= TOP_CACHE_VAR)
   {
@@ -6286,7 +6306,7 @@ void reset_profile_counters(){
   takenctr = 0;
   extendctr = 0;
   inplacectr = 0;
-  
+
 }
 
 
@@ -6618,6 +6638,22 @@ void export_csv(char * argv[]){
   for (int i = 0; i < LEVEL; i++)
   {
     fprintf(fp, "s_under[%d],%d\n", i, s_under[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "deadctr_arr[%d],%lld\n", i, deadctr_arr[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "deadQ_ov[%d],%lld\n", i, deadQ_ov[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "deadQ_empty_s6[%d],%lld\n", i, deadQ_empty_s6[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "deadQ_empty_s7[%d],%lld\n", i, deadQ_empty_s7[i]);
   }
 
   // char real[5] = "real";
