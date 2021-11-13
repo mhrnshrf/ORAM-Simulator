@@ -5648,11 +5648,16 @@ void write_bucket(int index, int label, int level, char op_type){
       printf("ERROR: write bucket calc mem addr not successful!\n");
       exit(1);
     }
+
+    if (level >= TOP_CACHE_VAR)
+    {
+      inplacectr++;
+    }
     
 
     if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
     {
-      inplacectr++;
+      
       // printf("@ level %d  mem addr: %d\n", level,  mem_addr);
       // bool nvm_access = is_nvm_addr(mem_addr);
       bool nvm_access = in_nvm(level);
