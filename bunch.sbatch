@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=q
+#SBATCH --job-name=q1k
 #SBATCH --account=xtang
 #SBATCH --nodes=1  #number of nodes requested
 #SBATCH --ntasks-per-node=1
@@ -42,6 +42,11 @@ echo "Running simulator..."
 #./usimm input/4channel.cfg fotonik3d  $SLURM_JOB_NAME > "$SLURM_JOB_NAME-fotonik3d.txt" 
 #./usimm input/4channel.cfg roms  $SLURM_JOB_NAME > "$SLURM_JOB_NAME-roms.txt"
 #./usimm input/4channel.cfg pop2  $SLURM_JOB_NAME > "$SLURM_JOB_NAME-pop2.txt"
+#./usimm input/4channel.cfg leela  $SLURM_JOB_NAME > "$SLURM_JOB_NAME-leela.txt"
+#./usimm input/4channel.cfg nab  $SLURM_JOB_NAME > "$SLURM_JOB_NAME-nab.txt"
+#./usimm input/4channel.cfg xz  $SLURM_JOB_NAME > "$SLURM_JOB_NAME-xz.txt"
+#./usimm input/4channel.cfg deepsjeng  $SLURM_JOB_NAME > "$SLURM_JOB_NAME-deepsjeng.txt"
 
 
 crc-job-stats.py # gives stats of job, wall time, etc.
+

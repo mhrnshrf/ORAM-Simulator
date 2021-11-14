@@ -6656,6 +6656,8 @@ void export_csv(char * argv[]){
     fprintf(fp, "deadQ_empty_s7[%d],%lld\n", i, deadQ_empty_s7[i]);
   }
 
+  print_lifetime_stat(fp);
+
   // char real[5] = "real";
   // char dum[5] = "dum";
   // print_super_node(supreal, exp_name, bench, real);
