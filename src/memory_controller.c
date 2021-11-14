@@ -171,6 +171,10 @@ unsigned long long int deadQ_ov[LEVEL] = {0};
 unsigned long long int deadQ_empty_s6[LEVEL] = {0};
 unsigned long long int deadQ_empty_s7[LEVEL] = {0};
 
+unsigned long long int Q_serve_under[LEVEL] = {0};
+unsigned long long int Q_serve_over[LEVEL] = {0};
+unsigned long long int cap_Q_full[LEVEL] = {0};
+unsigned long long int cap_Q_notfull[LEVEL] = {0};
 
 
 void test_ring(){
@@ -1372,7 +1376,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    // qs = 10000;
+    qs = 30000;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -4657,6 +4661,18 @@ void gather_dead(int index, int i){
           }
                     
         }
+        else if(GlobTree[index].allctr == cap)
+        {
+          if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
+          {
+            cap_Q_full[i]++;
+          }
+          else
+          {
+            cap_Q_notfull[i]++;
+          }
+          
+        }
       }
     }
   }
@@ -4781,6 +4797,15 @@ int remote_allocate(int index, int offset){
 
   if (i != -1 && j != -1)
   {
+    if (offset < LZ_VAR[level])
+    {
+      Q_serve_under[i]++;
+    }
+    else
+    {
+      Q_serve_over[i]++;
+    }
+    
     GlobTree[i].slot[j].dd = ALLOCATED;
     // GlobTree[i].allctr++;
     GlobTree[index].slot[offset].redirect = true;
@@ -6655,8 +6680,24 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "deadQ_empty_s7[%d],%lld\n", i, deadQ_empty_s7[i]);
   }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "Q_serve_under[%d],%lld\n", i, Q_serve_under[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "Q_serve_over[%d],%lld\n", i, Q_serve_over[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "cap_Q_full[%d],%lld\n", i, cap_Q_full[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "cap_Q_notfull[%d],%lld\n", i, cap_Q_notfull[i]);
+  }
 
-  print_lifetime_stat(fp);
+  // print_lifetime_stat(fp);
 
   // char real[5] = "real";
   // char dum[5] = "dum";
