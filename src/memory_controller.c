@@ -5710,7 +5710,7 @@ void write_bucket(int index, int label, int level, char op_type){
     }
   }
 
-  if (level >= TOP_CACHE_VAR && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR)
+  if (level >= GATHER_START && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR)
   {
     for (int h = 0; h < LZ_VAR[level] - available; h++)
     {
