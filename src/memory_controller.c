@@ -175,6 +175,7 @@ unsigned long long int Q_serve_under[LEVEL] = {0};
 unsigned long long int Q_serve_over[LEVEL] = {0};
 unsigned long long int cap_Q_full[LEVEL] = {0};
 unsigned long long int cap_Q_notfull[LEVEL] = {0};
+unsigned long long int dead_gathered[LEVEL] = {0};
 
 
 void test_ring(){
@@ -4653,6 +4654,7 @@ void gather_dead(int index, int i){
 
             deadrem++;
             Enqueue(deadQ_arr[i] , db);
+            dead_gathered[i]++;
           }
           else
           {
@@ -4665,11 +4667,11 @@ void gather_dead(int index, int i){
         {
           if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
           {
-            cap_Q_full[i]++;
+            cap_Q_notfull[i]++;
           }
           else
           {
-            cap_Q_notfull[i]++;
+            cap_Q_full[i]++;
           }
           
         }
@@ -6383,7 +6385,8 @@ void export_csv(char * argv[]){
     }
   }
 
-  fprintf(fp,"Benchmark,%s\n", bench);
+  // fprintf(fp,"Benchmark,%s\n", bench);
+  fprintf(fp,"Experiment,%s\n", exp_name);
   fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
@@ -6695,6 +6698,10 @@ void export_csv(char * argv[]){
   for (int i = 0; i < LEVEL; i++)
   {
     fprintf(fp, "cap_Q_notfull[%d],%lld\n", i, cap_Q_notfull[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "dead_gathered[%d],%lld\n", i, dead_gathered[i]);
   }
 
   // print_lifetime_stat(fp);
