@@ -4799,11 +4799,11 @@ int remote_allocate(int index, int offset){
   {
     if (offset < LZ_VAR[level])
     {
-      Q_serve_under[i]++;
+      Q_serve_under[level]++;
     }
     else
     {
-      Q_serve_over[i]++;
+      Q_serve_over[level]++;
     }
     
     GlobTree[i].slot[j].dd = ALLOCATED;
