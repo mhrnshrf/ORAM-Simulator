@@ -4636,7 +4636,7 @@ void gather_dead(int index, int i){
     int start = SURONLY_ENABLE ? LZ[i] : 0 ;
     int end = DYNAMIC_S ? LZ[i] : Z;
     // int cap = i < 15 ? 1 : 1; 
-    int cap = 1;
+    int cap = 4;
     for (int j = start; j < end; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
@@ -5672,10 +5672,11 @@ void write_bucket(int index, int label, int level, char op_type){
 
   int available = detect_inplace_available(index, level);
 
+  int min = 1;
 
-  if (available < RING_Z + 4)
+  if (available < RING_Z + min)
   {
-    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + 4);
+    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
     exit(1);
   }
 
@@ -5753,7 +5754,7 @@ void write_bucket(int index, int label, int level, char op_type){
     }
   }
 
-  if (level >= GATHER_START && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR && op_type == 'e')
+  if (level >= GATHER_START && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR )//&& op_type == 'e')
   {
     for (int h = 0; h < LZ_VAR[level] - available; h++)
     {
