@@ -134,6 +134,8 @@
 
 #define SUP_HORIZ_MAX 8
 
+#define MAX_SHUF 20
+
 
 
 

@@ -178,6 +178,7 @@ unsigned long long int cap_Q_notfull[LEVEL] = {0};
 unsigned long long int dead_gathered[LEVEL] = {0};
 
 unsigned int ep_s[LEVEL][RING_S] = {0};
+unsigned int ep_shuf[MAX_SHUF+2] = {0};
 
 
 void test_ring(){
@@ -294,6 +295,7 @@ typedef struct Bucket{
   char allctr;
   char greenctr;
   char s;
+  int reshuffled;
 }Bucket;
 
 typedef struct BucketShell{
@@ -1313,6 +1315,7 @@ void oram_alloc(){
      GlobTree[i].allctr = 0;
      GlobTree[i].greenctr = 0;
      GlobTree[i].s = LS[l];
+     GlobTree[i].reshuffled = 0;
     for (int k = 0; k < Z; ++k)
     {
       GlobTree[i].slot[k].addr = -1;
@@ -2175,6 +2178,15 @@ void write_path(int label){
       if (RING_ENABLE)
       {
         ep_s[i][(int)GlobTree[index].count]++;
+        int shuf = GlobTree[index].reshuffled;
+        if (shuf > MAX_SHUF)
+        {
+          shuf = MAX_SHUF+1;
+        }
+        
+        ep_shuf[shuf]++;
+        GlobTree[index].reshuffled = 0;
+
         write_bucket(index, label, i, 'e');
         continue;
       }
@@ -5905,6 +5917,7 @@ void ring_early_reshuffle(int label){
       shuff_total++;
       shuff_interval[i]++;
       shufcount++;
+      GlobTree[index].reshuffled++;
 
       int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
 
@@ -6721,6 +6734,10 @@ void export_csv(char * argv[]){
     {
       fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
     }
+  }
+  for (int i = 0; i < MAX_SHUF + 2; i++)
+  {
+    fprintf(fp, "ep_shuf[%d],%d\n", i, ep_shuf[i]);
   }
 
   // print_lifetime_stat(fp);
