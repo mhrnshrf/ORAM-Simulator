@@ -177,6 +177,8 @@ unsigned long long int cap_Q_full[LEVEL] = {0};
 unsigned long long int cap_Q_notfull[LEVEL] = {0};
 unsigned long long int dead_gathered[LEVEL] = {0};
 
+unsigned int ep_s[LEVEL][RING_S] = {0};
+
 
 void test_ring(){
   unsigned long long int addr = 0;
@@ -2172,6 +2174,7 @@ void write_path(int label){
       int index = calc_index(label, i);
       if (RING_ENABLE)
       {
+        ep_s[i][(int)GlobTree[index].count]++;
         write_bucket(index, label, i, 'e');
         continue;
       }
@@ -6672,7 +6675,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "inplacectr,%lld\n", inplacectr);
   fprintf(fp, "takenctr,%lld\n", takenctr);
   fprintf(fp, "extendctr,%lld\n", extendctr);
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "s_under[%d],%d\n", i, s_under[i]);
   }
@@ -6680,37 +6683,44 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "deadctr_arr[%d],%lld\n", i, deadctr_arr[i]);
   }
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "deadQ_ov[%d],%lld\n", i, deadQ_ov[i]);
   }
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "deadQ_empty_s6[%d],%lld\n", i, deadQ_empty_s6[i]);
   }
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "deadQ_empty_s7[%d],%lld\n", i, deadQ_empty_s7[i]);
   }
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "Q_serve_under[%d],%lld\n", i, Q_serve_under[i]);
   }
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "Q_serve_over[%d],%lld\n", i, Q_serve_over[i]);
   }
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "cap_Q_full[%d],%lld\n", i, cap_Q_full[i]);
   }
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "cap_Q_notfull[%d],%lld\n", i, cap_Q_notfull[i]);
   }
-  for (int i = 0; i < LEVEL; i++)
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
     fprintf(fp, "dead_gathered[%d],%lld\n", i, dead_gathered[i]);
+  }
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  {
+    for (int j = 0; j < RING_S; j++)
+    {
+      fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
+    }
   }
 
   // print_lifetime_stat(fp);
