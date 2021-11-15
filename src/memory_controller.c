@@ -4660,6 +4660,7 @@ void gather_dead(int index, int i){
           {
             deadQ_ov[i]++;
             free(db);
+            break;
           }
                     
         }
@@ -5737,7 +5738,7 @@ void write_bucket(int index, int label, int level, char op_type){
     }
   }
 
-  if (level >= GATHER_START && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR)
+  if (level >= GATHER_START && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR && op_type == 'e')
   {
     for (int h = 0; h < LZ_VAR[level] - available; h++)
     {
@@ -5761,6 +5762,10 @@ void write_bucket(int index, int label, int level, char op_type){
         }
         GlobTree[index].s++;
       }
+      else
+      {
+        break;
+      }
     }
     for (int j = LZ_VAR[level]; j < LZ_VAR[level] + S_INC; j++)
     {
@@ -5782,6 +5787,10 @@ void write_bucket(int index, int label, int level, char op_type){
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
         }
         GlobTree[index].s++;
+      }
+      else
+      {
+        break;
       }
     }
   }
