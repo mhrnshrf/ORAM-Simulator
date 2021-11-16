@@ -6386,6 +6386,7 @@ void reset_profile_counters(){
   takenctr = 0;
   extendctr = 0;
   inplacectr = 0;
+  stash_hit = 0;
 
 }
 
