@@ -4760,6 +4760,11 @@ int remote_allocate(int index, int offset){
         free(cand);
         break;
       }
+      else
+      {
+        printf("ERROR: remote allocate block in queue is taken!\n");
+        exit(1);
+      }
 
       // printf("SAME level taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED": (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED)?"REFERESHED":"unknown", tracectr);
       // printf("hereeeeeeeeeeee taken %s  %s %d\n", taken?"yes":"on", (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED)?"ALLOCATED":"unknown", tracectr);
