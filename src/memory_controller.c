@@ -179,6 +179,7 @@ unsigned long long int dead_gathered[LEVEL] = {0};
 
 unsigned int ep_s[LEVEL][RING_S] = {0};
 unsigned int ep_shuf[MAX_SHUF+2] = {0};
+unsigned int stash_hit = 0;
 
 
 void test_ring(){
@@ -1382,7 +1383,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    qs = 30000;
+    qs = 10000;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -3017,6 +3018,7 @@ void freecursive_access(int addr, char type){
 
   if (stash_contain(addr))      // check if the block is already in the stash
   {
+    stash_hit++;
     return;
   }
 
@@ -4735,7 +4737,7 @@ int remote_allocate(int index, int offset){
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.6 * deadQ_arr[level]->limit)
+  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.8 * deadQ_arr[level]->limit)
   {
     while (deadQ_arr[level]->size > 0)
     {
@@ -5672,6 +5674,11 @@ int detect_inplace_available(int index, int level){
 
 void write_bucket(int index, int label, int level, char op_type){
 
+  if (level == LEVEL - 1)
+  {
+    // printf("@%d W> %d, ", ringctr, deadQ_arr[level]->size);
+  }
+
   reset_candidate();
   pick_candidate(index, label, level);
 
@@ -5847,6 +5854,10 @@ void write_bucket(int index, int label, int level, char op_type){
     exit(1);
   }
   
+  if (level == LEVEL - 1)
+  {
+    // printf("%d\n", deadQ_arr[level]->size);
+  }
   
 }
 
@@ -6065,11 +6076,22 @@ void ring_early_reshuffle(int label){
 
     }
 
+    if (i == LEVEL - 1)
+    {
+      // printf("@%d R> %d, ", ringctr, deadQ_arr[i]->size);
+    }
+    
+
+
     if (RING_ENABLE && DEAD_ENABLE_VAR) //DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
     {
       gather_dead(index, i);
     }
 
+    if (i == LEVEL - 1)
+    {
+      // printf("%d\n", deadQ_arr[i]->size);
+    }
 
   }
 
@@ -6746,6 +6768,7 @@ void export_csv(char * argv[]){
     fprintf(fp, "ep_shuf[%d],%d\n", i, ep_shuf[i]);
   }
 
+  fprintf(fp, "stash_hit,%d\n", stash_hit);
   // print_lifetime_stat(fp);
 
   // char real[5] = "real";

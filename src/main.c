@@ -900,7 +900,7 @@ int main(int argc, char * argv[])
 	{
 		switch_sim_enable_to(false);
 		switch_cache_enable_to(false);
-		// switch_dead_enable_to(false);
+		switch_dead_enable_to(false);
 	}
 	else
 	{
@@ -1644,7 +1644,7 @@ int main(int argc, char * argv[])
 					if (tracectr == WARMUP_TREE - REMOTE_START_OFF)
 					{
 						switch_dead_enable_to(DEAD_ENABLE);
-						// reset_profile_counters();
+						reset_profile_counters();
 					}
 
 					if (SIM_ENABLE && !SIM_ENABLE_VAR && tracectr >= WARMUP_TREE)
