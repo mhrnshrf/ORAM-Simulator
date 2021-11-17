@@ -5287,7 +5287,7 @@ void ring_read_path(int label, int addr){
     }
     
     int offset = rand() % slotCount; 
-    while (GlobTree[index].slot[offset].isReal ||  !GlobTree[index].slot[offset].valid )
+    while (GlobTree[index].slot[offset].isReal || !GlobTree[index].slot[offset].valid )
     {
       // printf("@%d in ring read S: %d   count: %d\n", tracectr, GlobTree[index].s, GlobTree[index].count);
       offset = rand() % slotCount;
