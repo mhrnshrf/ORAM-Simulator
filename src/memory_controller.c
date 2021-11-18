@@ -1384,7 +1384,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    qs = 10000;
+    qs = 12;
     deadQ_arr[i] = ConstructQueue(qs);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -4639,7 +4639,7 @@ void gather_dead(int index, int i){
     int start = SURONLY_ENABLE ? LZ[i] : 0 ;
     int end = DYNAMIC_S ? LZ[i] : Z;
     // int cap = i < 15 ? 1 : 1; 
-    int cap = 4;
+    int cap = 10;
     for (int j = start; j < end; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
@@ -4739,7 +4739,7 @@ int remote_allocate(int index, int offset){
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.8 * deadQ_arr[level]->limit)
+  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0 * deadQ_arr[level]->limit)
   {
     while (deadQ_arr[level]->size > 0)
     {
@@ -5690,8 +5690,8 @@ void write_bucket(int index, int label, int level, char op_type){
 
   if (available < RING_Z + min)
   {
-    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
-    exit(1);
+    // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
+    // exit(1);
   }
 
   GlobTree[index].s = available - RING_Z;
@@ -6773,7 +6773,7 @@ void export_csv(char * argv[]){
   }
 
   fprintf(fp, "stash_hit,%d\n", stash_hit);
-  
+
   for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "dead_encountered[%d],%d\n", i, dead_encountered[i]);
