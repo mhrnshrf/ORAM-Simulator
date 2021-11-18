@@ -4638,7 +4638,7 @@ void gather_dead(int index, int i){
     int start = SURONLY_ENABLE ? LZ[i] : 0 ;
     int end = DYNAMIC_S ? LZ[i] : Z;
     // int cap = i < 15 ? 1 : 1; 
-    int cap = 4;
+    int cap = 10;
     for (int j = start; j < end; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
@@ -5700,8 +5700,8 @@ void write_bucket(int index, int label, int level, char op_type){
     int j = dead_slot[k];
     if (j == -1)
     {
-      printf("ERROR: write bucket dead slot not available!\n");
-      exit(1);
+      // printf("ERROR: write bucket dead slot not available!\n");
+      // exit(1);
     }
     
     GlobTree[index].slot[j].valid = true;
@@ -5850,7 +5850,8 @@ void write_bucket(int index, int label, int level, char op_type){
   }
   else
   {
-    printf("ERROR: write bucket cur S %d our of range!\n", curS);
+    printf("ERROR: write bucket cur S %d out of range!\n", curS);
+    export_csv(argv);
     exit(1);
   }
   
@@ -6320,7 +6321,7 @@ void reset_profile_counters(){
   midctr = 0;
   botctr = 0;
   ring_evictctr = 0;
-  stashctr = 0;
+  // stashctr = 0;
   stash_cont = 0;
   linger_discard = 0;
   ringctr = 0;
