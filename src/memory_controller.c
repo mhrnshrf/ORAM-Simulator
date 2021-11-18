@@ -180,6 +180,7 @@ unsigned long long int dead_gathered[LEVEL] = {0};
 unsigned int ep_s[LEVEL][RING_S] = {0};
 unsigned int ep_shuf[MAX_SHUF+2] = {0};
 unsigned int stash_hit = 0;
+unsigned int dead_encountered[LEVEL] = {0};
 
 
 void test_ring(){
@@ -4638,11 +4639,12 @@ void gather_dead(int index, int i){
     int start = SURONLY_ENABLE ? LZ[i] : 0 ;
     int end = DYNAMIC_S ? LZ[i] : Z;
     // int cap = i < 15 ? 1 : 1; 
-    int cap = 10;
+    int cap = 4;
     for (int j = start; j < end; j++)
     {
       if (!GlobTree[index].slot[j].isReal)
       {
+        dead_encountered[i]++;
         if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < cap ) 
         {
           Element *db = (Element*) malloc(sizeof (Element));
@@ -5688,8 +5690,8 @@ void write_bucket(int index, int label, int level, char op_type){
 
   if (available < RING_Z + min)
   {
-    // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
-    // exit(1);
+    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
+    exit(1);
   }
 
   GlobTree[index].s = available - RING_Z;
@@ -6771,6 +6773,11 @@ void export_csv(char * argv[]){
   }
 
   fprintf(fp, "stash_hit,%d\n", stash_hit);
+  
+  for (int i = GATHER_START; i < LEVEL; i++)
+  {
+    fprintf(fp, "dead_encountered[%d],%d\n", i, dead_encountered[i]);
+  }
   // print_lifetime_stat(fp);
 
   // char real[5] = "real";
