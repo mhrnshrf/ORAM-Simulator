@@ -5851,7 +5851,7 @@ void write_bucket(int index, int label, int level, char op_type){
   else
   {
     printf("ERROR: write bucket cur S %d out of range!\n", curS);
-    export_csv(argv);
+    export_csv(pargv);
     exit(1);
   }
   
