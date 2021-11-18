@@ -5688,8 +5688,8 @@ void write_bucket(int index, int label, int level, char op_type){
 
   if (available < RING_Z + min)
   {
-    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
-    exit(1);
+    // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
+    // exit(1);
   }
 
   GlobTree[index].s = available - RING_Z;
@@ -5700,8 +5700,8 @@ void write_bucket(int index, int label, int level, char op_type){
     int j = dead_slot[k];
     if (j == -1)
     {
-      // printf("ERROR: write bucket dead slot not available!\n");
-      // exit(1);
+      printf("ERROR: write bucket dead slot not available!\n");
+      exit(1);
     }
     
     GlobTree[index].slot[j].valid = true;
