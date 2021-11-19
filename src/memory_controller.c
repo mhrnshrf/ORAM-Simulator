@@ -4653,35 +4653,40 @@ void gather_dead(int index, int i){
           db->offset = j;
 
 
-          // if (deadQ->size >= deadQ->limit)
-          // {
-          //   Dequeue(deadQ);
-          //   // Element *oldest = Dequeue(deadQ);
-          //   // free(oldest);
-          // }
-          // Enqueue(deadQ, db);
-
-          // if (deadQ_arr[i]->size >= deadQ_arr[i]->limit)
-          // {
-          //   Dequeue(deadQ_arr[i]);
-          // }
-          // Enqueue(deadQ_arr[i] , db);
-
-          if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
+          if (deadQ->size >= deadQ->limit)
           {
-            GlobTree[index].slot[j].dd = REMEMBERED;
-            GlobTree[index].allctr++;
-
-            deadrem++;
-            Enqueue(deadQ_arr[i] , db);
-            dead_gathered[i]++;
+            // Dequeue(deadQ);
+            Element *oldest = Dequeue(deadQ);
+            GlobTree[oldest->index].slot[oldest->offset].dd = DEAD;
+            GlobTree[oldest->index].allctr--;
+            free(oldest);
           }
           else
           {
             deadQ_ov[i]++;
-            free(db);
-            break;
           }
+          Enqueue(deadQ, db);
+          dead_gathered[i]++;
+          deadrem++;
+          GlobTree[index].slot[j].dd = REMEMBERED;
+          GlobTree[index].allctr++;
+
+
+          // if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
+          // {
+          //   GlobTree[index].slot[j].dd = REMEMBERED;
+          //   GlobTree[index].allctr++;
+
+          //   deadrem++;
+          //   Enqueue(deadQ_arr[i] , db);
+          //   dead_gathered[i]++;
+          // }
+          // else
+          // {
+          //   deadQ_ov[i]++;
+          //   free(db);
+          //   break;
+          // }
                     
         }
         else if(GlobTree[index].allctr == cap)
