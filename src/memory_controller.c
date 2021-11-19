@@ -4642,7 +4642,8 @@ void gather_dead(int index, int i){
     int cap = 10;
     for (int j = start; j < end; j++)
     {
-      if (!GlobTree[index].slot[j].isReal)
+      // if (!GlobTree[index].slot[j].isReal)
+      if (GlobTree[index].slot[j].dd == DEAD)
       {
         dead_encountered[i]++;
         if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < cap ) 
