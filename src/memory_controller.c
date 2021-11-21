@@ -175,73 +175,16 @@ unsigned long long int Q_serve_under[LEVEL] = {0};
 unsigned long long int Q_serve_over[LEVEL] = {0};
 unsigned long long int cap_Q_full[LEVEL] = {0};
 unsigned long long int cap_Q_notfull[LEVEL] = {0};
-unsigned long long int dead_gathered[LEVEL] = {0};
 
 unsigned int ep_s[LEVEL][RING_S] = {0};
 unsigned int ep_shuf[MAX_SHUF+2] = {0};
 unsigned int stash_hit = 0;
 unsigned int dead_encountered[LEVEL] = {0};
+unsigned int dead_gathered[LEVEL] = {0};
+unsigned int dead_shadowed[LEVEL] = {0};
 
 
-void test_ring(){
-  unsigned long long int addr = 0;
-  printf("Testing Ring ORAM...\n");
-  for (int i = 0; i < TRACE_SIZE; i++)
-  {
-    addr = rand() % BLOCK;
-    // freecursive_access(addr, 'R');
-    ring_access(addr);
-  }
-  exit(0);
-}
 
-void reset_shuff_interval(){
-  for (int i = 0; i < LEVEL; i++)
-  {
-    shuff_interval[i] =0;
-  }
-}
-
-
-void update_lifetime_stat(int lifetime, int level){
-  // if (tracectr > WARMUP_TREE)
-  // {
-    if (lifetime != 0)
-    {
-      if (lifetime_min[level] > lifetime ) //&& lifetime != 1) 
-      {
-        lifetime_min[level] = lifetime;
-      }
-      if (lifetime_max[level] < lifetime)
-      {
-        lifetime_max[level] = lifetime;
-      }
-      lifetime_sum[level] += lifetime;
-      lifetime_count[level]++; 
-    }
-  // }
-  
-}
-
-void update_count_stat(int count, int level){
-  // if (tracectr > WARMUP_TREE)
-  // {
-    if (count != 0)
-    {
-      if (count_min[level] > count ) //&& lifetime != 1) 
-      {
-        count_min[level] = count;
-      }
-      if (count_max[level] < count)
-      {
-        count_max[level] = count;
-      }
-      count_sum[level] += count;
-      count_count[level]++; 
-    }
-  // }
-  
-}
 
 
 // long long int CYCLE_VAL = 0;
@@ -332,6 +275,7 @@ Queue *plbQ;
 Queue *pathQ;
 Queue *deadQ;
 Queue *deadQ_arr[LEVEL];
+Queue *deadQ_shadow[LEVEL];
 
 int revarr[RING_REV];
 
@@ -592,6 +536,67 @@ bool ring_dummy = false;
 //     util_avg[i] = 0;
 //   }
 // }
+
+
+void test_ring(){
+  unsigned long long int addr = 0;
+  printf("Testing Ring ORAM...\n");
+  for (int i = 0; i < TRACE_SIZE; i++)
+  {
+    addr = rand() % BLOCK;
+    // freecursive_access(addr, 'R');
+    ring_access(addr);
+  }
+  exit(0);
+}
+
+void reset_shuff_interval(){
+  for (int i = 0; i < LEVEL; i++)
+  {
+    shuff_interval[i] =0;
+  }
+}
+
+
+void update_lifetime_stat(int lifetime, int level){
+  // if (tracectr > WARMUP_TREE)
+  // {
+    if (lifetime != 0)
+    {
+      if (lifetime_min[level] > lifetime ) //&& lifetime != 1) 
+      {
+        lifetime_min[level] = lifetime;
+      }
+      if (lifetime_max[level] < lifetime)
+      {
+        lifetime_max[level] = lifetime;
+      }
+      lifetime_sum[level] += lifetime;
+      lifetime_count[level]++; 
+    }
+  // }
+  
+}
+
+void update_count_stat(int count, int level){
+  // if (tracectr > WARMUP_TREE)
+  // {
+    if (count != 0)
+    {
+      if (count_min[level] > count ) //&& lifetime != 1) 
+      {
+        count_min[level] = count;
+      }
+      if (count_max[level] < count)
+      {
+        count_max[level] = count;
+      }
+      count_sum[level] += count;
+      count_count[level]++; 
+    }
+  // }
+  
+}
 
 int calc_space(int * lz){
   int sum = 0;
@@ -1386,6 +1391,8 @@ void oram_alloc(){
     int qs = (int)floor(pow(constant, i));
     qs = 12;
     deadQ_arr[i] = ConstructQueue(qs);
+    int ss = 1000;
+    deadQ_shadow[i] = ConstructQueue(ss);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
 
@@ -4653,40 +4660,49 @@ void gather_dead(int index, int i){
           db->offset = j;
 
 
-          if (deadQ->size >= deadQ->limit)
-          {
-            // Dequeue(deadQ);
-            Element *oldest = Dequeue(deadQ);
-            GlobTree[oldest->index].slot[oldest->offset].dd = DEAD;
-            GlobTree[oldest->index].allctr--;
-            free(oldest);
-          }
-          else
-          {
-            deadQ_ov[i]++;
-          }
-          Enqueue(deadQ, db);
-          dead_gathered[i]++;
-          deadrem++;
-          GlobTree[index].slot[j].dd = REMEMBERED;
-          GlobTree[index].allctr++;
-
-
-          // if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
+          // if (deadQ->size >= deadQ->limit)
           // {
-          //   GlobTree[index].slot[j].dd = REMEMBERED;
-          //   GlobTree[index].allctr++;
-
-          //   deadrem++;
-          //   Enqueue(deadQ_arr[i] , db);
-          //   dead_gathered[i]++;
+          //   // Dequeue(deadQ);
+          //   Element *oldest = Dequeue(deadQ);
+          //   GlobTree[oldest->index].slot[oldest->offset].dd = DEAD;
+          //   GlobTree[oldest->index].allctr--;
+          //   free(oldest);
           // }
           // else
           // {
           //   deadQ_ov[i]++;
-          //   free(db);
-          //   break;
           // }
+          // Enqueue(deadQ, db);
+          // dead_gathered[i]++;
+          // deadrem++;
+          // GlobTree[index].slot[j].dd = REMEMBERED;
+          // GlobTree[index].allctr++;
+
+
+          if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
+          {
+            GlobTree[index].slot[j].dd = REMEMBERED;
+            GlobTree[index].allctr++;
+
+            deadrem++;
+            Enqueue(deadQ_arr[i] , db);
+            dead_gathered[i]++;
+          }
+          else
+          {
+            if (deadQ_shadow[i]->size < deadQ_shadow[i]->limit)
+            {
+              Enqueue(deadQ_shadow[i] , db);
+              dead_shadowed[i]++;
+            }
+            else
+            {
+              deadQ_ov[i]++;
+              free(db);
+              break;
+            }
+
+          }
                     
         }
         else if(GlobTree[index].allctr == cap)
@@ -5867,6 +5883,29 @@ void write_bucket(int index, int label, int level, char op_type){
   {
     // printf("%d\n", deadQ_arr[level]->size);
   }
+
+  for (int i = GATHER_START; i < LEVEL; i++)
+  {
+    while (deadQ_arr[i]->size < deadQ_arr[i]->limit)
+    {
+      while (deadQ_shadow[i]->size < deadQ_shadow[i]->limit)
+      {
+        Element * ds = Dequeue(deadQ_shadow[i]);
+        if (GlobTree[ds->index].slot[ds->offset].dd == DEAD)
+        {
+          Enqueue(deadQ_arr[i], ds);
+        }
+        else
+        {
+          free(ds);
+        }
+        
+      }
+      
+    }
+    
+  }
+  
   
 }
 
@@ -6764,7 +6803,7 @@ void export_csv(char * argv[]){
   }
   for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
-    fprintf(fp, "dead_gathered[%d],%lld\n", i, dead_gathered[i]);
+    fprintf(fp, "dead_gathered[%d],%d\n", i, dead_gathered[i]);
   }
   for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
   {
@@ -6783,6 +6822,10 @@ void export_csv(char * argv[]){
   for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "dead_encountered[%d],%d\n", i, dead_encountered[i]);
+  }
+  for (int i = GATHER_START; i < LEVEL; i++)
+  {
+    fprintf(fp, "dead_shadowed[%d],%d\n", i, dead_shadowed[i]);
   }
   // print_lifetime_stat(fp);
 
