@@ -5884,28 +5884,27 @@ void write_bucket(int index, int label, int level, char op_type){
     // printf("%d\n", deadQ_arr[level]->size);
   }
 
-  for (int i = GATHER_START; i < LEVEL; i++)
+  if (level >= GATHER_START && DEAD_ENABLE_VAR)
   {
-    while (deadQ_arr[i]->size < deadQ_arr[i]->limit)
+    while (deadQ_arr[level]->size < deadQ_arr[level]->limit)
     {
-      while (deadQ_shadow[i]->size < deadQ_shadow[i]->limit)
+      while (deadQ_shadow[level]->size > 0)
       {
-        Element * ds = Dequeue(deadQ_shadow[i]);
+        Element * ds = Dequeue(deadQ_shadow[level]);
         if (GlobTree[ds->index].slot[ds->offset].dd == DEAD)
         {
-          Enqueue(deadQ_arr[i], ds);
+          GlobTree[ds->index].slot[ds->offset].dd = REMEMBERED;
+          GlobTree[ds->index].allctr++;
+          Enqueue(deadQ_arr[level], ds);
         }
         else
         {
           free(ds);
         }
-        
       }
-      
     }
-    
+
   }
-  
   
 }
 
