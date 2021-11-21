@@ -5886,10 +5886,10 @@ void write_bucket(int index, int label, int level, char op_type){
 
   if (level >= GATHER_START && DEAD_ENABLE_VAR)
   {
-    while (deadQ_arr[level]->size < deadQ_arr[level]->limit)
+    while (deadQ_arr[level]->size < deadQ_arr[level]->limit && deadQ_shadow[level]->size > 0)
     {
-      while (deadQ_shadow[level]->size > 0)
-      {
+      // while (deadQ_shadow[level]->size > 0)
+      // {
         Element * ds = Dequeue(deadQ_shadow[level]);
         if (GlobTree[ds->index].slot[ds->offset].dd == DEAD)
         {
@@ -5901,7 +5901,7 @@ void write_bucket(int index, int label, int level, char op_type){
         {
           free(ds);
         }
-      }
+      // }
     }
 
   }
