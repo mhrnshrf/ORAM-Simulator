@@ -182,6 +182,7 @@ unsigned int stash_hit = 0;
 unsigned int dead_encountered[LEVEL] = {0};
 unsigned int dead_gathered[LEVEL] = {0};
 unsigned int dead_shadowed[LEVEL] = {0};
+unsigned int dead_scan[LEVEL] = {0};
 
 
 
@@ -1387,12 +1388,10 @@ void oram_alloc(){
   for (int i = LEVEL-1; i >= GATHER_START; i--)
   {
     // int constant = (i < 16) ? 1.7 : 1.5;
-    double constant = 1.5;
-    int qs = (int)floor(pow(constant, i));
-    qs = 2;
-    deadQ_arr[i] = ConstructQueue(qs);
-    int ss = 1000;
-    deadQ_shadow[i] = ConstructQueue(ss);
+    // double constant = 1.5;
+    // int qs = (int)floor(pow(constant, i));
+    deadQ_arr[i] = ConstructQueue(DEADQ_SIZE);
+    deadQ_shadow[i] = ConstructQueue(SHADQ_SIZE);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
 
@@ -4646,14 +4645,14 @@ void gather_dead(int index, int i){
     int start = SURONLY_ENABLE ? LZ[i] : 0 ;
     int end = DYNAMIC_S ? LZ[i] : Z;
     // int cap = i < 15 ? 1 : 1; 
-    int cap = 10;
+    // int cap = 10;
     for (int j = start; j < end; j++)
     {
       // if (!GlobTree[index].slot[j].isReal)
       if (GlobTree[index].slot[j].dd == DEAD)
       {
         dead_encountered[i]++;
-        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < cap && GlobTree[index].count < 4) 
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < REMOTE_CAP) //&& GlobTree[index].count < 4) 
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
@@ -4705,7 +4704,7 @@ void gather_dead(int index, int i){
           }
                     
         }
-        else if(GlobTree[index].allctr == cap)
+        else if(GlobTree[index].allctr == REMOTE_CAP)
         {
           if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
           {
@@ -4720,6 +4719,32 @@ void gather_dead(int index, int i){
       }
     }
   }
+}
+
+bool scan_entire_level(int level, int original_bucket, int * index, int * offset){
+
+  int start = calc_index(0, level);
+  int end = calc_index(PATH-1, level);
+
+  for (int i = start; i <= end; i++)
+  {
+
+    if (i != original_bucket)
+    {
+      for (int j = 0; j < LZ[level]; j++)
+      {
+        if (GlobTree[i].allctr < REMOTE_CAP && GlobTree[i].slot[j].dd == DEAD)
+        {
+          *index = i;
+          *offset = j;
+          return true;
+        }
+      }
+      
+    }
+  }
+  return false;
+  
 }
 
 void remote_invalidate(int index, int offset){
@@ -4843,6 +4868,21 @@ int remote_allocate(int index, int offset){
       
   //   }
   // }
+
+  if (i == -1 && j == -1)
+  {
+    bool found = scan_entire_level(level, index, &i, &j);
+    if (found && (i == -1 || j == -1))
+    {
+      printf("ERROR: remote allocate scan found but inputs not set!\n");
+      exit(1);
+    }
+    else if(found)
+    {
+      dead_scan[level]++;
+    }
+  }
+  
 
   if (i != -1 && j != -1)
   {
@@ -6825,6 +6865,10 @@ void export_csv(char * argv[]){
   for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "dead_shadowed[%d],%d\n", i, dead_shadowed[i]);
+  }
+  for (int i = GATHER_START; i < LEVEL; i++)
+  {
+    fprintf(fp, "dead_scan[%d],%d\n", i, dead_scan[i]);
   }
   // print_lifetime_stat(fp);
 

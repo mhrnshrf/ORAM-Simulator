@@ -235,6 +235,8 @@ int NVM_LATENCY  ;          // nvm latency in terms of DRAM cycle
 int REMOTE_START_OFF;  // offset in terms of number of trace, how earlier than warmup start the remote alloc
 int NVM_CHANNEL ;  // number of channels dedicated to nvm
 int S_INC ;  // the amount by which a dynamic s can be incremented
+int REMOTE_CAP ;  // the cap on the number of blocks that each bucket can give away for remote allocation at a time
+int SHADQ_SIZE ;  // capacity limit of shadow queue
 
 
 

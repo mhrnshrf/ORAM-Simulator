@@ -124,6 +124,8 @@ typedef enum {
 	NVM_CHANNEL_token ,
 	DYNAMIC_S_token ,
 	S_INC_token ,
+	REMOTE_CAP_token ,
+	SHADQ_SIZE_token ,
 
 	comment_token,
 	unknown_token
@@ -347,6 +349,10 @@ token_t tokenize(char * input){
 	return DYNAMIC_S_token;
   } else if (strncmp(input, "S_INC",length) == 0) {
 	return S_INC_token;
+  } else if (strncmp(input, "REMOTE_CAP",length) == 0) {
+	return REMOTE_CAP_token;
+  } else if (strncmp(input, "SHADQ_SIZE",length) == 0) {
+	return SHADQ_SIZE_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -847,6 +853,14 @@ void read_config_file(FILE * fin)
 			case S_INC_token:
 				fscanf(fin,"%d",&input_int);
 				S_INC = input_int;
+				break;
+			case REMOTE_CAP_token:
+				fscanf(fin,"%d",&input_int);
+				REMOTE_CAP = input_int;
+				break;
+			case SHADQ_SIZE_token:
+				fscanf(fin,"%d",&input_int);
+				SHADQ_SIZE = input_int;
 				break;
 
 			case unknown_token:
