@@ -1389,7 +1389,7 @@ void oram_alloc(){
     // int constant = (i < 16) ? 1.7 : 1.5;
     double constant = 1.5;
     int qs = (int)floor(pow(constant, i));
-    qs = 12;
+    qs = 2;
     deadQ_arr[i] = ConstructQueue(qs);
     int ss = 1000;
     deadQ_shadow[i] = ConstructQueue(ss);
@@ -4653,7 +4653,7 @@ void gather_dead(int index, int i){
       if (GlobTree[index].slot[j].dd == DEAD)
       {
         dead_encountered[i]++;
-        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < cap ) 
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < cap && GlobTree[index].count < 4) 
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
