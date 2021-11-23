@@ -4653,7 +4653,7 @@ void gather_dead(int index, int i){
       if (GlobTree[index].slot[j].dd == DEAD)
       {
         dead_encountered[i]++;
-        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < REMOTE_CAP && GlobTree[index].count < 6) 
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < REMOTE_CAP) //&& GlobTree[index].count < 6) 
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
@@ -4690,17 +4690,17 @@ void gather_dead(int index, int i){
           }
           else
           {
-            if (deadQ_shadow[i]->size < deadQ_shadow[i]->limit)
-            {
-              Enqueue(deadQ_shadow[i] , db);
-              dead_shadowed[i]++;
-            }
-            else
-            {
+            // if (deadQ_shadow[i]->size < deadQ_shadow[i]->limit)
+            // {
+            //   Enqueue(deadQ_shadow[i] , db);
+            //   dead_shadowed[i]++;
+            // }
+            // else
+            // {
               deadQ_ov[i]++;
               free(db);
               break;
-            }
+            // }
 
           }
                     
@@ -5925,26 +5925,30 @@ void write_bucket(int index, int label, int level, char op_type){
     // printf("%d\n", deadQ_arr[level]->size);
   }
 
-  if (level >= GATHER_START && DEAD_ENABLE_VAR)
+  if (level >= GATHER_START && DEAD_ENABLE_VAR && op_type == 'e')
   {
-    while (deadQ_arr[level]->size < deadQ_arr[level]->limit && deadQ_shadow[level]->size > 0)
+    while (deadQ_arr[level]->size > 0)
     {
-      // while (deadQ_shadow[level]->size > 0)
-      // {
-        Element * ds = Dequeue(deadQ_shadow[level]);
-        if (GlobTree[ds->index].slot[ds->offset].dd == DEAD)
-        {
-          shad_added[level]++;
-          GlobTree[ds->index].slot[ds->offset].dd = REMEMBERED;
-          GlobTree[ds->index].allctr++;
-          Enqueue(deadQ_arr[level], ds);
-        }
-        else
-        {
-          free(ds);
-        }
-      // }
+      Element * ds = Dequeue(deadQ_arr[level]);
+      GlobTree[ds->index].slot[ds->offset].dd = DEAD;
+      GlobTree[ds->index].allctr--;
     }
+    
+    // while (deadQ_arr[level]->size < deadQ_arr[level]->limit && deadQ_shadow[level]->size > 0)
+    // {
+    //   Element * ds = Dequeue(deadQ_shadow[level]);
+    //   if (GlobTree[ds->index].slot[ds->offset].dd == DEAD)
+    //   {
+    //     shad_added[level]++;
+    //     GlobTree[ds->index].slot[ds->offset].dd = REMEMBERED;
+    //     GlobTree[ds->index].allctr++;
+    //     Enqueue(deadQ_arr[level], ds);
+    //   }
+    //   else
+    //   {
+    //     free(ds);
+    //   }
+    // }
 
   }
   
