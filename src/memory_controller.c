@@ -5936,7 +5936,7 @@ void write_bucket(int index, int label, int level, char op_type){
     // printf("%d\n", deadQ_arr[level]->size);
   }
 
-  if (level >= GATHER_START && DEAD_ENABLE_VAR && op_type == 'e')
+  if (level >= GATHER_START && DEAD_ENABLE_VAR) // && op_type == 'e')
   {
     // while (deadQ_arr[level]->size > 0)
     // {
