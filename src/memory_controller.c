@@ -183,6 +183,7 @@ unsigned int dead_encountered[LEVEL] = {0};
 unsigned int dead_gathered[LEVEL] = {0};
 unsigned int dead_shadowed[LEVEL] = {0};
 unsigned int dead_scan[LEVEL] = {0};
+unsigned int shad_added[LEVEL] = {0};
 
 
 
@@ -5933,6 +5934,7 @@ void write_bucket(int index, int label, int level, char op_type){
         Element * ds = Dequeue(deadQ_shadow[level]);
         if (GlobTree[ds->index].slot[ds->offset].dd == DEAD)
         {
+          shad_added[level]++;
           GlobTree[ds->index].slot[ds->offset].dd = REMEMBERED;
           GlobTree[ds->index].allctr++;
           Enqueue(deadQ_arr[level], ds);
@@ -6869,6 +6871,10 @@ void export_csv(char * argv[]){
   for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "dead_scan[%d],%d\n", i, dead_scan[i]);
+  }
+  for (int i = GATHER_START; i < LEVEL; i++)
+  {
+    fprintf(fp, "shad_added[%d],%d\n", i, shad_added[i]);
   }
   // print_lifetime_stat(fp);
 
