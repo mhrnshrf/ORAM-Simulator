@@ -33,6 +33,7 @@ char bench[20];
 char exp_name[20] = "";
 
 long long int deadctr = 0;
+long long int ddctr = 0;
 long long int dead_dram = 0;
 long long int deadrem = 0;
 long long int surplus_dead = 0;
@@ -167,6 +168,7 @@ unsigned long long int extendctr = 0;
 unsigned long long int inplacectr = 0;
 
 unsigned long long int deadctr_arr[LEVEL] = {0};
+unsigned int ddctr_arr[LEVEL] = {0};
 unsigned long long int deadQ_ov[LEVEL] = {0};
 unsigned long long int deadQ_empty_s6[LEVEL] = {0};
 unsigned long long int deadQ_empty_s7[LEVEL] = {0};
@@ -4690,17 +4692,17 @@ void gather_dead(int index, int i){
           }
           else
           {
-            // if (deadQ_shadow[i]->size < deadQ_shadow[i]->limit)
-            // {
-            //   Enqueue(deadQ_shadow[i] , db);
-            //   dead_shadowed[i]++;
-            // }
-            // else
-            // {
+            if (deadQ_shadow[i]->size < deadQ_shadow[i]->limit)
+            {
+              Enqueue(deadQ_shadow[i] , db);
+              dead_shadowed[i]++;
+            }
+            else
+            {
               deadQ_ov[i]++;
               free(db);
               break;
-            // }
+            }
 
           }
                     
@@ -4897,6 +4899,8 @@ int remote_allocate(int index, int offset){
     }
     
     GlobTree[i].slot[j].dd = ALLOCATED;
+    ddctr--;
+    ddctr_arr[level]--;
     // GlobTree[i].allctr++;
     GlobTree[index].slot[offset].redirect = true;
     GlobTree[index].slot[offset].remote_index = i;
@@ -5038,6 +5042,7 @@ int inplace_allocate(int index, int offset){
   int mem_addr = index*Z_VAR + offset;
   GlobTree[index].slot[offset].redirect = false;
   GlobTree[index].slot[offset].dd = REFRESHED;
+  ddctr--;
   return mem_addr;
 }
 
@@ -5050,6 +5055,7 @@ int inplace_access(int index, int offset){
   // }
   
   GlobTree[index].slot[offset].dd = DEAD;
+  ddctr++;
   return mem_addr;
 }
 
@@ -5060,6 +5066,8 @@ int remote_access(int index, int offset, int level){
   GlobTree[index].slot[offset].redirect = false; // ??? added 4/13/2021 7:53 pm
   GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
   GlobTree[index_redir].allctr--;
+  ddctr++;
+  ddctr_arr[level]++;
   // bucket_meta_access(index_redir);
 
   if (offset_redir >= LZ[level])
@@ -5121,6 +5129,8 @@ int calc_mem_addr(int index, int offset, char type)
     else
     {
       mem_addr = inplace_access(index, offset);
+      ddctr_arr[level]++;
+
 
       dram_inplace_r++;
     }
@@ -5132,6 +5142,7 @@ int calc_mem_addr(int index, int offset, char type)
       if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
       {
         mem_addr = inplace_allocate(index, offset);
+        ddctr_arr[level]--;
         dram_inplace_w++;
       }
       else if (GlobTree[index].slot[offset].dd == ALLOCATED || GlobTree[index].slot[offset].dd == REMEMBERED) // the case that redirect needed ~> find another dead blk to fill in from the queue
@@ -5456,6 +5467,7 @@ void ring_read_path(int label, int addr){
     int mem_addr = calc_mem_addr(index, offset, 'R');
 
     ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
+    deadctr_arr[i]++;
 
     
 
@@ -5502,7 +5514,6 @@ void ring_read_path(int label, int addr){
     {
       GlobTree[index].dumdead++;
       deadctr++;
-      deadctr_arr[i]++;
       if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
         dead_dram++;
@@ -5927,28 +5938,28 @@ void write_bucket(int index, int label, int level, char op_type){
 
   if (level >= GATHER_START && DEAD_ENABLE_VAR && op_type == 'e')
   {
-    while (deadQ_arr[level]->size > 0)
-    {
-      Element * ds = Dequeue(deadQ_arr[level]);
-      GlobTree[ds->index].slot[ds->offset].dd = DEAD;
-      GlobTree[ds->index].allctr--;
-    }
-    
-    // while (deadQ_arr[level]->size < deadQ_arr[level]->limit && deadQ_shadow[level]->size > 0)
+    // while (deadQ_arr[level]->size > 0)
     // {
-    //   Element * ds = Dequeue(deadQ_shadow[level]);
-    //   if (GlobTree[ds->index].slot[ds->offset].dd == DEAD)
-    //   {
-    //     shad_added[level]++;
-    //     GlobTree[ds->index].slot[ds->offset].dd = REMEMBERED;
-    //     GlobTree[ds->index].allctr++;
-    //     Enqueue(deadQ_arr[level], ds);
-    //   }
-    //   else
-    //   {
-    //     free(ds);
-    //   }
+    //   Element * ds = Dequeue(deadQ_arr[level]);
+    //   GlobTree[ds->index].slot[ds->offset].dd = DEAD;
+    //   GlobTree[ds->index].allctr--;
     // }
+    
+    while (deadQ_arr[level]->size < deadQ_arr[level]->limit && deadQ_shadow[level]->size > 0)
+    {
+      Element * ds = Dequeue(deadQ_shadow[level]);
+      if (GlobTree[ds->index].slot[ds->offset].dd == DEAD)
+      {
+        shad_added[level]++;
+        GlobTree[ds->index].slot[ds->offset].dd = REMEMBERED;
+        GlobTree[ds->index].allctr++;
+        Enqueue(deadQ_arr[level], ds);
+      }
+      else
+      {
+        free(ds);
+      }
+    }
 
   }
   
@@ -6880,6 +6891,12 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "shad_added[%d],%d\n", i, shad_added[i]);
   }
+  fprintf(fp, "ddctr,%lld\n", ddctr);
+  for (int i = GATHER_START; i < LEVEL; i++)
+  {
+    fprintf(fp, "ddctr_arr[%d],%d\n", i, ddctr_arr[i]);
+  }
+
   // print_lifetime_stat(fp);
 
   // char real[5] = "real";
