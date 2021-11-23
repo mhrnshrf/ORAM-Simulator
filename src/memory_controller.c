@@ -4652,7 +4652,7 @@ void gather_dead(int index, int i){
       if (GlobTree[index].slot[j].dd == DEAD)
       {
         dead_encountered[i]++;
-        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < REMOTE_CAP) //&& GlobTree[index].count < 4) 
+        if (GlobTree[index].slot[j].dd == DEAD && GlobTree[index].allctr < REMOTE_CAP && GlobTree[index].count < 6) 
         {
           Element *db = (Element*) malloc(sizeof (Element));
           db->index = index;
