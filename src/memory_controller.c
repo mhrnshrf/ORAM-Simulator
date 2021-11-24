@@ -6022,7 +6022,7 @@ void ring_early_reshuffle(int label){
     {
       if (curS > 0 && curS <= RING_S )
       {
-        if (i >= TOP_CACHE_VAR)
+        if (i >= GATHER_START)
         {
           s_dist[curS]++;
         }
