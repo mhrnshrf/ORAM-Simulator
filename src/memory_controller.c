@@ -168,7 +168,7 @@ unsigned long long int extendctr = 0;
 unsigned long long int inplacectr = 0;
 
 unsigned long long int deadctr_arr[LEVEL] = {0};
-unsigned int ddctr_arr[LEVEL] = {0};
+// unsigned int ddctr_arr[LEVEL] = {0};
 unsigned long long int deadQ_ov[LEVEL] = {0};
 unsigned long long int deadQ_empty_s6[LEVEL] = {0};
 unsigned long long int deadQ_empty_s7[LEVEL] = {0};
@@ -4900,7 +4900,7 @@ int remote_allocate(int index, int offset){
     
     GlobTree[i].slot[j].dd = ALLOCATED;
     ddctr--;
-    ddctr_arr[level]--;
+    // ddctr_arr[level]--;
     // GlobTree[i].allctr++;
     GlobTree[index].slot[offset].redirect = true;
     GlobTree[index].slot[offset].remote_index = i;
@@ -5141,10 +5141,10 @@ int calc_mem_addr(int index, int offset, char type)
     {
       if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
       {
-        if (GlobTree[index].slot[offset].dd == DEAD)
-        {
-          ddctr_arr[level]--;
-        }
+        // if (GlobTree[index].slot[offset].dd == DEAD)
+        // {
+        //   ddctr_arr[level]--;
+        // }
         mem_addr = inplace_allocate(index, offset);
         dram_inplace_w++;
       }
@@ -5471,7 +5471,7 @@ void ring_read_path(int label, int addr){
 
     ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
     deadctr_arr[i]++;
-    ddctr_arr[i]++;
+    // ddctr_arr[i]++;
     
 
     
@@ -5920,7 +5920,7 @@ void write_bucket(int index, int label, int level, char op_type){
   
   if (curS > 0 && curS <= RING_S )
   {
-    if (level >= TOP_CACHE_VAR)
+    if (level >= GATHER_START)
     {
       allocS_dist[curS]++;
       if (curS < LS[level])
@@ -6896,11 +6896,11 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "shad_added[%d],%d\n", i, shad_added[i]);
   }
-  fprintf(fp, "ddctr,%lld\n", ddctr);
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "ddctr_arr[%d],%d\n", i, ddctr_arr[i]);
-  }
+  // fprintf(fp, "ddctr,%lld\n", ddctr);
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "ddctr_arr[%d],%d\n", i, ddctr_arr[i]);
+  // }
 
   // print_lifetime_stat(fp);
 
