@@ -5055,7 +5055,7 @@ int inplace_access(int index, int offset){
   // }
   
   GlobTree[index].slot[offset].dd = DEAD;
-  ddctr++;
+  // ddctr++;
   return mem_addr;
 }
 
@@ -5066,8 +5066,8 @@ int remote_access(int index, int offset, int level){
   GlobTree[index].slot[offset].redirect = false; // ??? added 4/13/2021 7:53 pm
   GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
   GlobTree[index_redir].allctr--;
-  ddctr++;
-  ddctr_arr[level]++;
+  // ddctr++;
+  // ddctr_arr[level]++;
   // bucket_meta_access(index_redir);
 
   if (offset_redir >= LZ[level])
@@ -5129,7 +5129,7 @@ int calc_mem_addr(int index, int offset, char type)
     else
     {
       mem_addr = inplace_access(index, offset);
-      ddctr_arr[level]++;
+      // ddctr_arr[level]++;
 
 
       dram_inplace_r++;
@@ -5141,8 +5141,11 @@ int calc_mem_addr(int index, int offset, char type)
     {
       if (GlobTree[index].slot[offset].dd == DEAD || GlobTree[index].slot[offset].dd == REFRESHED) 
       {
+        if (GlobTree[index].slot[offset].dd == DEAD)
+        {
+          ddctr_arr[level]--;
+        }
         mem_addr = inplace_allocate(index, offset);
-        ddctr_arr[level]--;
         dram_inplace_w++;
       }
       else if (GlobTree[index].slot[offset].dd == ALLOCATED || GlobTree[index].slot[offset].dd == REMEMBERED) // the case that redirect needed ~> find another dead blk to fill in from the queue
@@ -5468,6 +5471,8 @@ void ring_read_path(int label, int addr){
 
     ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
     deadctr_arr[i]++;
+    ddctr_arr[i]++;
+    
 
     
 
