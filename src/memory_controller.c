@@ -4721,6 +4721,47 @@ void gather_dead(int index, int i){
           
         }
       }
+      if (GlobTree[index].slot[j].redirect)
+      {
+        int rind = GlobTree[index].slot[j].remote_index;
+        int roff = GlobTree[index].slot[j].remote_offset;
+        if (GlobTree[rind].slot[roff].dd == DEAD && GlobTree[rind].allctr < REMOTE_CAP)
+        {
+          Element *db = (Element*) malloc(sizeof (Element));
+          db->index = rind;
+          db->offset = roff;
+
+          if (deadQ_arr[i]->size < deadQ_arr[i]->limit)
+          {
+            GlobTree[rind].slot[roff].dd = REMEMBERED;
+            GlobTree[rind].allctr++;
+
+            deadrem++;
+            Enqueue(deadQ_arr[i] , db);
+            dead_gathered[i]++;
+          }
+          else
+          {
+            if (deadQ_shadow[i]->size < deadQ_shadow[i]->limit)
+            {
+              Enqueue(deadQ_shadow[i] , db);
+              dead_shadowed[i]++;
+            }
+            else
+            {
+              deadQ_ov[i]++;
+              free(db);
+              break;
+            }
+
+          }
+          
+        }
+
+
+        
+      }
+      
     }
   }
 }
