@@ -186,6 +186,7 @@ unsigned int dead_gathered[LEVEL] = {0};
 unsigned int dead_shadowed[LEVEL] = {0};
 unsigned int dead_scan[LEVEL] = {0};
 unsigned int shad_added[LEVEL] = {0};
+unsigned int same_bucket = 0;
 
 
 
@@ -4902,6 +4903,11 @@ int remote_allocate(int index, int offset){
     ddctr--;
     // ddctr_arr[level]--;
     // GlobTree[i].allctr++;
+    if (offset == i)
+    {
+      same_bucket++;
+    }
+    
     GlobTree[index].slot[offset].redirect = true;
     GlobTree[index].slot[offset].remote_index = i;
     GlobTree[index].slot[offset].remote_offset = j;
@@ -6896,7 +6902,7 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "shad_added[%d],%d\n", i, shad_added[i]);
   }
-  // fprintf(fp, "ddctr,%lld\n", ddctr);
+  fprintf(fp, "same_bucket,%d\n", same_bucket);
   // for (int i = GATHER_START; i < LEVEL; i++)
   // {
   //   fprintf(fp, "ddctr_arr[%d],%d\n", i, ddctr_arr[i]);
