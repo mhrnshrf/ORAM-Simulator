@@ -432,6 +432,11 @@ long long int nvm_remote_w = 0;
 long long int dram_elselevel = 0;
 long long int nvm_elselevel = 0;
 
+long long int remote_under_r = 0;
+long long int remote_over_r = 0;
+long long int remote_under_w = 0;
+long long int remote_over_w = 0;
+
 long long int mem_req_start = 0;
 long long int mem_req_latencies = 0;
 
@@ -2196,7 +2201,11 @@ void write_path(int label){
           shuf = MAX_SHUF+1;
         }
         
-        ep_shuf[shuf]++;
+        if (i == LEVEL-1)
+        {
+          ep_shuf[shuf]++;
+        }
+        
         GlobTree[index].reshuffled = 0;
 
         write_bucket(index, label, i, 'e');
@@ -5169,6 +5178,16 @@ int calc_mem_addr(int index, int offset, char type)
       mem_addr = remote_access(index, offset, level);
 
       dram_remote_r++;
+      if (offset < LZ_VAR[level])
+      {
+        remote_under_r++;
+      }
+      else
+      {
+        remote_over_r++;
+      }
+
+      
     }
     else
     {
@@ -5211,6 +5230,7 @@ int calc_mem_addr(int index, int offset, char type)
         if (mem_addr != -1)
         {
           dram_remote_w++;
+          remote_under_w++;
         }
       }
     }
@@ -5226,6 +5246,7 @@ int calc_mem_addr(int index, int offset, char type)
       if (mem_addr != -1)
       {
         dram_remote_w++;
+        remote_over_w++;
       }
 
     }
@@ -5799,7 +5820,7 @@ int detect_inplace_available(int index, int level){
 
 void write_bucket(int index, int label, int level, char op_type){
 
-  if (level == LEVEL - 1)
+  if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 24000000)
   {
     // printf("@%d W> %d, ", ringctr, deadQ_arr[level]->size);
   }
@@ -5980,9 +6001,9 @@ void write_bucket(int index, int label, int level, char op_type){
     exit(1);
   }
   
-  if (level == LEVEL - 1)
+  if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 24000000)
   {
-    // printf("%d\n", deadQ_arr[level]->size);
+    // printf("%d      shuf: %lld\n", deadQ_arr[level]->size, shuff[LEVEL-1]);
   }
 
   if (level >= GATHER_START && DEAD_ENABLE_VAR) // && op_type == 'e')
@@ -6229,7 +6250,7 @@ void ring_early_reshuffle(int label){
 
     }
 
-    if (i == LEVEL - 1)
+    if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 24000000)
     {
       // printf("@%d R> %d, ", ringctr, deadQ_arr[i]->size);
     }
@@ -6241,9 +6262,9 @@ void ring_early_reshuffle(int label){
       gather_dead(index, i);
     }
 
-    if (i == LEVEL - 1)
+    if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 24000000)
     {
-      // printf("%d\n", deadQ_arr[i]->size);
+      // printf("%d      shuf: %lld\n", deadQ_arr[i]->size, shuff[LEVEL-1]);
     }
 
   }
@@ -6941,6 +6962,8 @@ void export_csv(char * argv[]){
     fprintf(fp, "shad_added[%d],%d\n", i, shad_added[i]);
   }
   fprintf(fp, "same_bucket,%d\n", same_bucket);
+  fprintf(fp, "remote_under,%lld\n", remote_under_w - remote_under_r);
+  fprintf(fp, "remote_over,%lld\n", remote_over_w - remote_over_r);
   // for (int i = GATHER_START; i < LEVEL; i++)
   // {
   //   fprintf(fp, "ddctr_arr[%d],%d\n", i, ddctr_arr[i]);
