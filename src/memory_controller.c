@@ -5090,43 +5090,43 @@ int remote_access(int index, int offset, int level){
     surplus_in_use--;
   }
 
-  // if (level >= GATHER_START)
-  // {
-  //   int rind = index_redir;
-  //   int roff = offset_redir;
-  //   if (GlobTree[rind].slot[roff].dd == DEAD && GlobTree[rind].allctr < REMOTE_CAP)
-  //   {
-  //     Element *db = (Element*) malloc(sizeof (Element));
-  //     db->index = rind;
-  //     db->offset = roff;
+  if (level >= GATHER_START)
+  {
+    int rind = index_redir;
+    int roff = offset_redir;
+    if (GlobTree[rind].slot[roff].dd == DEAD && GlobTree[rind].allctr < REMOTE_CAP)
+    {
+      Element *db = (Element*) malloc(sizeof (Element));
+      db->index = rind;
+      db->offset = roff;
 
-  //     if (deadQ_arr[level]->size < deadQ_arr[level]->limit)
-  //     {
-  //       GlobTree[rind].slot[roff].dd = REMEMBERED;
-  //       GlobTree[rind].allctr++;
+      if (deadQ_arr[level]->size < deadQ_arr[level]->limit)
+      {
+        GlobTree[rind].slot[roff].dd = REMEMBERED;
+        GlobTree[rind].allctr++;
 
-  //       deadrem++;
-  //       Enqueue(deadQ_arr[level] , db);
-  //       dead_gathered[level]++;
-  //     }
-  //     else
-  //     {
-  //       if (deadQ_shadow[level]->size < deadQ_shadow[level]->limit)
-  //       {
-  //         Enqueue(deadQ_shadow[level] , db);
-  //         dead_shadowed[level]++;
-  //       }
-  //       else
-  //       {
-  //         deadQ_ov[level]++;
-  //         free(db);
-  //         // break;
-  //       }
+        deadrem++;
+        Enqueue(deadQ_arr[level] , db);
+        dead_gathered[level]++;
+      }
+      else
+      {
+        if (deadQ_shadow[level]->size < deadQ_shadow[level]->limit)
+        {
+          Enqueue(deadQ_shadow[level] , db);
+          dead_shadowed[level]++;
+        }
+        else
+        {
+          deadQ_ov[level]++;
+          free(db);
+          // break;
+        }
 
-  //     }
+      }
       
-  //   }
-  // }
+    }
+  }
   
   return mem_addr;
 }
@@ -6314,10 +6314,11 @@ void ring_early_reshuffle(int label){
 
 
 void ring_invalidate(int index, int offset){
-  //  if (!GlobTree[index].slot[offset].valid)
-  // {
-  //   printf("invalidate an invalid block\n");
-  // }
+   if (!GlobTree[index].slot[offset].valid)
+  {
+    printf("invalidate an invalid block @ %d\n", tracectr);
+    exit(1);
+  }
   GlobTree[index].slot[offset].valid = false;
   if (GlobTree[index].slot[offset].dead_start == 0)
   {
