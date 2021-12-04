@@ -5090,43 +5090,43 @@ int remote_access(int index, int offset, int level){
     surplus_in_use--;
   }
 
-  if (level >= GATHER_START)
-  {
-    int rind = index_redir;
-    int roff = offset_redir;
-    if (GlobTree[rind].slot[roff].dd == DEAD && GlobTree[rind].allctr < REMOTE_CAP)
-    {
-      Element *db = (Element*) malloc(sizeof (Element));
-      db->index = rind;
-      db->offset = roff;
+  // if (level >= GATHER_START)
+  // {
+  //   int rind = index_redir;
+  //   int roff = offset_redir;
+  //   if (GlobTree[rind].slot[roff].dd == DEAD && GlobTree[rind].allctr < REMOTE_CAP)
+  //   {
+  //     Element *db = (Element*) malloc(sizeof (Element));
+  //     db->index = rind;
+  //     db->offset = roff;
 
-      if (deadQ_arr[level]->size < deadQ_arr[level]->limit)
-      {
-        GlobTree[rind].slot[roff].dd = REMEMBERED;
-        GlobTree[rind].allctr++;
+  //     if (deadQ_arr[level]->size < deadQ_arr[level]->limit)
+  //     {
+  //       GlobTree[rind].slot[roff].dd = REMEMBERED;
+  //       GlobTree[rind].allctr++;
 
-        deadrem++;
-        Enqueue(deadQ_arr[level] , db);
-        dead_gathered[level]++;
-      }
-      else
-      {
-        if (deadQ_shadow[level]->size < deadQ_shadow[level]->limit)
-        {
-          Enqueue(deadQ_shadow[level] , db);
-          dead_shadowed[level]++;
-        }
-        else
-        {
-          deadQ_ov[level]++;
-          free(db);
-          // break;
-        }
+  //       deadrem++;
+  //       Enqueue(deadQ_arr[level] , db);
+  //       dead_gathered[level]++;
+  //     }
+  //     else
+  //     {
+  //       if (deadQ_shadow[level]->size < deadQ_shadow[level]->limit)
+  //       {
+  //         Enqueue(deadQ_shadow[level] , db);
+  //         dead_shadowed[level]++;
+  //       }
+  //       else
+  //       {
+  //         deadQ_ov[level]++;
+  //         free(db);
+  //         // break;
+  //       }
 
-      }
+  //     }
       
-    }
-  }
+  //   }
+  // }
   
   return mem_addr;
 }
@@ -5535,6 +5535,7 @@ void ring_read_path(int label, int addr){
     int mem_addr = calc_mem_addr(index, offset, 'R');
 
     ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
+    GlobTree[index].dumdead++;
     deadctr_arr[i]++;
     // ddctr_arr[i]++;
     
@@ -5582,7 +5583,7 @@ void ring_read_path(int label, int addr){
 
     if (!GlobTree[index].slot[offset].isReal)
     {
-      GlobTree[index].dumdead++;
+      // GlobTree[index].dumdead++;
       deadctr++;
       if (i < NVM_START && i >= TOP_CACHE_VAR)
       {
@@ -5820,7 +5821,7 @@ int detect_inplace_available(int index, int level){
 
 void write_bucket(int index, int label, int level, char op_type){
 
-  if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 24000000)
+  if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   {
     // printf("@%d W> %d, ", ringctr, deadQ_arr[level]->size);
   }
@@ -6001,9 +6002,9 @@ void write_bucket(int index, int label, int level, char op_type){
     exit(1);
   }
   
-  if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 24000000)
+  if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   {
-    // printf("%d      shuf: %lld\n", deadQ_arr[level]->size, shuff[LEVEL-1]);
+    // printf("%d      shuf: %lld  dead encounter: %d\n", deadQ_arr[level]->size, shuff[LEVEL-1], dead_encountered[LEVEL-1]);
   }
 
   if (level >= GATHER_START && DEAD_ENABLE_VAR) // && op_type == 'e')
@@ -6250,7 +6251,7 @@ void ring_early_reshuffle(int label){
 
     }
 
-    if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 24000000)
+    if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
     {
       // printf("@%d R> %d, ", ringctr, deadQ_arr[i]->size);
     }
@@ -6262,9 +6263,9 @@ void ring_early_reshuffle(int label){
       gather_dead(index, i);
     }
 
-    if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 24000000)
+    if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
     {
-      // printf("%d      shuf: %lld\n", deadQ_arr[i]->size, shuff[LEVEL-1]);
+      // printf("%d      shuf: %lld  dead encounter: %d\n", deadQ_arr[i]->size, shuff[LEVEL-1], dead_encountered[LEVEL-1]);
     }
 
   }
