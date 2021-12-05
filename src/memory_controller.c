@@ -5792,7 +5792,7 @@ int detect_inplace_available(int index, int level){
     int h = 0;
     for (int j = 0; j < LZ_VAR[level]; j++)
     {
-      if (GlobTree[index].slot[j].dd == DEAD || GlobTree[index].slot[j].dd == REFRESHED)
+      if (GlobTree[index].slot[j].dd == DEAD )//|| GlobTree[index].slot[j].dd == REFRESHED)
       {
         // printf("dead[%d]: %d\n", k, j);
         dead++;
