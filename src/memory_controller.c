@@ -1843,13 +1843,13 @@ void read_path(int label){
         {
           // printf("j: %d \n", j);
           gi++;
+          int mem_addr;
+          if (RING_ENABLE)
+          {
+            mem_addr = calc_mem_addr(index, j, 'R');
+          }
           if (i >= TOP_CACHE_VAR)
           {
-            int mem_addr;
-            if (RING_ENABLE)
-            {
-              mem_addr = calc_mem_addr(index, j, 'R');
-            }
 
             if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
             {
