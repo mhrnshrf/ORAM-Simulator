@@ -1845,6 +1845,11 @@ void read_path(int label){
           gi++;
           if (i >= TOP_CACHE_VAR)
           {
+            if (RING_ENABLE)
+            {
+              mem_addr = calc_mem_addr(index, j, 'R');
+            }
+            
             if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
             {
               int  mem_addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
@@ -1856,10 +1861,10 @@ void read_path(int label){
                 int index_prime = calc_index(label, i_prime);
                 mem_addr = SubMap[index_prime] + j_prime;
               }
-              if (RING_ENABLE)
-              {
-                mem_addr = calc_mem_addr(index, j, 'R');
-              }
+              // if (RING_ENABLE)
+              // {
+              //   mem_addr = calc_mem_addr(index, j, 'R');
+              // }
               
               
               // bool nvm_access = is_nvm_addr(mem_addr);
