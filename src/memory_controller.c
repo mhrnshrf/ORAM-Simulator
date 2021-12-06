@@ -1847,12 +1847,12 @@ void read_path(int label){
           {
             if (RING_ENABLE)
             {
-              mem_addr = calc_mem_addr(index, j, 'R');
+              int mem_addr = calc_mem_addr(index, j, 'R');
             }
-            
+
             if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
             {
-              int  mem_addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
+              mem_addr = (!SUBTREE_ENABLE) ? (index*Z_VAR+j): (TREE_VAR == ORAM)? SubMap[index]+j : RhoSubMap[index]+j;
               if (TREE_VAR == ORAM && STL_ENABLE && SUBTREE_ENABLE && NUM_CHANNELS_SUBTREE >  1)
               {
                 int gi_prime = gi + (LEVEL-TOP_CACHE)*Z - oram_effective_pl;
