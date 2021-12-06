@@ -6771,79 +6771,79 @@ void export_csv(char * argv[]){
   // print_lifetime_stat(fp);
   
   // print_count_stat(fp);
-  long long int all_r = 0;
-  long long int all_w = 0;
+  // long long int all_r = 0;
+  // long long int all_w = 0;
 
-  long long int dram_r = 0;
-  long long int dram_w = 0;
+  // long long int dram_r = 0;
+  // long long int dram_w = 0;
 
-  for (int c = 0; c < NUM_CHANNELS; c++)
-  {
-    all_r += stats_reads_completed[c];
-    all_w += stats_writes_completed[c];
-    if (c < NUM_CHANNELS - NVM_CHANNEL)
-    {
-      dram_r += stats_reads_completed[c];
-      dram_w += stats_writes_completed[c];
-    }
+  // for (int c = 0; c < NUM_CHANNELS; c++)
+  // {
+  //   all_r += stats_reads_completed[c];
+  //   all_w += stats_writes_completed[c];
+  //   if (c < NUM_CHANNELS - NVM_CHANNEL)
+  //   {
+  //     dram_r += stats_reads_completed[c];
+  //     dram_w += stats_writes_completed[c];
+  //   }
     
-    fprintf(fp, "Reads_chan[%d],%-7lld\n", c, stats_reads_completed[c]);
-    fprintf(fp, "Writes_chan[%d],%-7lld\n", c, stats_writes_completed[c]);
-    fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
-    fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_queue_latency[c]);
-    fprintf(fp, "W_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_latency[c]);
-    fprintf(fp, "W_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
-  }
+  //   fprintf(fp, "Reads_chan[%d],%-7lld\n", c, stats_reads_completed[c]);
+  //   fprintf(fp, "Writes_chan[%d],%-7lld\n", c, stats_writes_completed[c]);
+  //   fprintf(fp, "R_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_latency[c]);
+  //   fprintf(fp, "R_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_read_queue_latency[c]);
+  //   fprintf(fp, "W_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_latency[c]);
+  //   fprintf(fp, "W_Q_Latency_chan[%d],%7.5f\n", c, (double) stats_average_write_queue_latency[c]);
+  // }
 
   // fprintf(fp, "R_NVM/DRAM_T,%f\n", (double)stats_average_read_latency[NUM_CHANNELS-1]/stats_average_read_latency[NUM_CHANNELS-2]);
   // fprintf(fp, "W_NVM/DRAM_T,%f\n", (double)stats_average_write_latency[NUM_CHANNELS-1]/stats_average_write_latency[NUM_CHANNELS-2]);
   
-  fprintf(fp, "All_R,%lld\n", all_r);
-  fprintf(fp, "All_W,%lld\n", all_w);
+  // fprintf(fp, "All_R,%lld\n", all_r);
+  // fprintf(fp, "All_W,%lld\n", all_w);
 
-  fprintf(fp, "dram_R,%lld\n", dram_r);
-  fprintf(fp, "dram_W,%lld\n", dram_w);
+  // fprintf(fp, "dram_R,%lld\n", dram_r);
+  // fprintf(fp, "dram_W,%lld\n", dram_w);
 
-  fprintf(fp, "DRAM/NVM_R#,%f\n", (double)dram_r/(all_r - dram_r));
-  fprintf(fp, "DRAM/NVM_W#,%f\n", (double)dram_w/(all_w - dram_w));
+  // fprintf(fp, "DRAM/NVM_R#,%f\n", (double)dram_r/(all_r - dram_r));
+  // fprintf(fp, "DRAM/NVM_W#,%f\n", (double)dram_w/(all_w - dram_w));
 
-  fprintf(fp, "online_wait_dram,%lld\n", online_wait_dram);
-  fprintf(fp, "online_wait_nvm,%lld\n", online_wait_nvm);
-  fprintf(fp, "evict_wait_dram,%lld\n", evict_wait_dram);
-  fprintf(fp, "evict_wait_nvm,%lld\n", evict_wait_nvm);
-  fprintf(fp, "reshuffle_wait_dram,%lld\n", reshuffle_wait_dram);
-  fprintf(fp, "reshuffle_wait_nvm,%lld\n", reshuffle_wait_nvm);
-  fprintf(fp, "meta_wait_dram,%lld\n", meta_wait_dram);
+  // fprintf(fp, "online_wait_dram,%lld\n", online_wait_dram);
+  // fprintf(fp, "online_wait_nvm,%lld\n", online_wait_nvm);
+  // fprintf(fp, "evict_wait_dram,%lld\n", evict_wait_dram);
+  // fprintf(fp, "evict_wait_nvm,%lld\n", evict_wait_nvm);
+  // fprintf(fp, "reshuffle_wait_dram,%lld\n", reshuffle_wait_dram);
+  // fprintf(fp, "reshuffle_wait_nvm,%lld\n", reshuffle_wait_nvm);
+  // fprintf(fp, "meta_wait_dram,%lld\n", meta_wait_dram);
 
   // int dramchan = NUM_CHANNELS-NVM_CHANNEL;
   // int dramchan = NUM_CHANNELS;
-  int draml = NVM_START - TOP_CACHE;
-  int nvml = LEVEL - NVM_START;
+  // int draml = NVM_START - TOP_CACHE;
+  // int nvml = LEVEL - NVM_START;
 
-  fprintf(fp, "online_wait_dram_perAcc,%f\n", (double)online_wait_dram/((ringctr*draml)/NUM_CHANNELS));
-  fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/ceil((double)nvml/NUM_CHANNELS)));
-  fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/NUM_CHANNELS));
+  // fprintf(fp, "online_wait_dram_perAcc,%f\n", (double)online_wait_dram/((ringctr*draml)/NUM_CHANNELS));
+  // fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/ceil((double)nvml/NUM_CHANNELS)));
+  // fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*RING_Z+RING_S))/NUM_CHANNELS));
+  // fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/NUM_CHANNELS));
+  // fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
+  // fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
+  // fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/NUM_CHANNELS));
 
-  fprintf(fp, "odram,%d\n", odram);
-  fprintf(fp, "onvm,%d\n", onvm);
-  fprintf(fp, "envm,%d\n", envm);
-  fprintf(fp, "edram,%d\n", edram);
-  fprintf(fp, "rnvm,%d\n", rnvm);
-  fprintf(fp, "rdram,%d\n", rdram);
-  fprintf(fp, "mdram,%d\n", mdram);
-  fprintf(fp, "lrs_ctr,%d\n", lrs_ctr);
+  // fprintf(fp, "odram,%d\n", odram);
+  // fprintf(fp, "onvm,%d\n", onvm);
+  // fprintf(fp, "envm,%d\n", envm);
+  // fprintf(fp, "edram,%d\n", edram);
+  // fprintf(fp, "rnvm,%d\n", rnvm);
+  // fprintf(fp, "rdram,%d\n", rdram);
+  // fprintf(fp, "mdram,%d\n", mdram);
+  // fprintf(fp, "lrs_ctr,%d\n", lrs_ctr);
   fprintf(fp, "deadQs,%d\n", calc_deadQ_size());
-  fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_sum/1000));
-  fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_sum/1000));
-  fprintf(fp, "supshuf_total,%d\n", supshuf_total);
-  fprintf(fp, "supshuf_horiz1,%d\n", supshuf_horiz1);
-  fprintf(fp, "supshuf_horiz2,%d\n", supshuf_horiz2);
-  fprintf(fp, "supep_horiz1,%d\n", supep_horiz1);
-  fprintf(fp, "supep_horiz2,%d\n", supep_horiz2);
+  // fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_sum/1000));
+  // fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_sum/1000));
+  // fprintf(fp, "supshuf_total,%d\n", supshuf_total);
+  // fprintf(fp, "supshuf_horiz1,%d\n", supshuf_horiz1);
+  // fprintf(fp, "supshuf_horiz2,%d\n", supshuf_horiz2);
+  // fprintf(fp, "supep_horiz1,%d\n", supep_horiz1);
+  // fprintf(fp, "supep_horiz2,%d\n", supep_horiz2);
 
   // fprintf(fp, "online_r,%d\n", online_r);
   // fprintf(fp, "evict_r,%d\n", evict_r);
@@ -6873,27 +6873,27 @@ void export_csv(char * argv[]){
   }
 
 
-   for (int i = 0; i < 3*RING_S; i++)
-  {
-    fprintf(fp, "supcount_dist[%d],%d\n", i, supcount_dist[i]);
-  }
-   for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
-  {
-    fprintf(fp, "suphoriz1_dist[%d],%d\n", i, suphoriz1_dist[i]);
-  }
-   for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
-  {
-    fprintf(fp, "suphoriz2_dist[%d],%d\n", i, suphoriz2_dist[i]);
-  }
+  //  for (int i = 0; i < 3*RING_S; i++)
+  // {
+  //   fprintf(fp, "supcount_dist[%d],%d\n", i, supcount_dist[i]);
+  // }
+  //  for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
+  // {
+  //   fprintf(fp, "suphoriz1_dist[%d],%d\n", i, suphoriz1_dist[i]);
+  // }
+  //  for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
+  // {
+  //   fprintf(fp, "suphoriz2_dist[%d],%d\n", i, suphoriz2_dist[i]);
+  // }
 
-  for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
-  {
-    fprintf(fp, "ephoriz1_dist[%d],%d\n", i, ephoriz1_dist[i]);
-  }
-  for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
-  {
-    fprintf(fp, "ephoriz2_dist[%d],%d\n", i, ephoriz2_dist[i]);
-  }
+  // for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
+  // {
+  //   fprintf(fp, "ephoriz1_dist[%d],%d\n", i, ephoriz1_dist[i]);
+  // }
+  // for (int i = 0; i < SUP_HORIZ_MAX+1; i++)
+  // {
+  //   fprintf(fp, "ephoriz2_dist[%d],%d\n", i, ephoriz2_dist[i]);
+  // }
   for (int i = 0; i < RING_S+1; i++)
   {
     fprintf(fp, "s_dist[%d],%d\n", i, s_dist[i]);
@@ -6909,7 +6909,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "inplacectr,%lld\n", inplacectr);
   fprintf(fp, "takenctr,%lld\n", takenctr);
   fprintf(fp, "extendctr,%lld\n", extendctr);
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "s_under[%d],%d\n", i, s_under[i]);
   }
@@ -6917,49 +6917,49 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "deadctr_arr[%d],%lld\n", i, deadctr_arr[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "deadQ_ov[%d],%lld\n", i, deadQ_ov[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "deadQ_empty_s6[%d],%lld\n", i, deadQ_empty_s6[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "deadQ_empty_s7[%d],%lld\n", i, deadQ_empty_s7[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "Q_serve_under[%d],%lld\n", i, Q_serve_under[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "Q_serve_over[%d],%lld\n", i, Q_serve_over[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "cap_Q_full[%d],%lld\n", i, cap_Q_full[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "cap_Q_notfull[%d],%lld\n", i, cap_Q_notfull[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = GATHER_START; i < LEVEL; i++)
   {
     fprintf(fp, "dead_gathered[%d],%d\n", i, dead_gathered[i]);
   }
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
-  {
-    for (int j = 0; j < RING_S; j++)
-    {
-      fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
-    }
-  }
-  for (int i = 0; i < MAX_SHUF + 2; i++)
-  {
-    fprintf(fp, "ep_shuf[%d],%d\n", i, ep_shuf[i]);
-  }
+  // for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  // {
+  //   for (int j = 0; j < RING_S; j++)
+  //   {
+  //     fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
+  //   }
+  // }
+  // for (int i = 0; i < MAX_SHUF + 2; i++)
+  // {
+  //   fprintf(fp, "ep_shuf[%d],%d\n", i, ep_shuf[i]);
+  // }
 
   fprintf(fp, "stash_hit,%d\n", stash_hit);
 
