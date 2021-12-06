@@ -1845,9 +1845,10 @@ void read_path(int label){
           gi++;
           if (i >= TOP_CACHE_VAR)
           {
+            int mem_addr;
             if (RING_ENABLE)
             {
-              int mem_addr = calc_mem_addr(index, j, 'R');
+              mem_addr = calc_mem_addr(index, j, 'R');
             }
 
             if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
