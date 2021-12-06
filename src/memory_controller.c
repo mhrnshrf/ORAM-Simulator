@@ -178,7 +178,7 @@ unsigned long long int Q_serve_over[LEVEL] = {0};
 unsigned long long int cap_Q_full[LEVEL] = {0};
 unsigned long long int cap_Q_notfull[LEVEL] = {0};
 
-unsigned int ep_s[LEVEL][RING_S] = {0};
+unsigned int ep_s[LEVEL][RING_S] = {{0}};
 unsigned int ep_shuf[MAX_SHUF+2] = {0};
 unsigned int stash_hit = 0;
 unsigned int dead_encountered[LEVEL] = {0};
