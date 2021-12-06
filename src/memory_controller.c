@@ -1843,13 +1843,13 @@ void read_path(int label){
         {
           // printf("j: %d \n", j);
           gi++;
-          int mem_addr;
-          if (RING_ENABLE)
-          {
-            mem_addr = calc_mem_addr(index, j, 'R');
-          }
           if (i >= TOP_CACHE_VAR)
           {
+            int mem_addr;
+            if (RING_ENABLE)
+            {
+              mem_addr = calc_mem_addr(index, j, 'R');
+            }
 
             if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
             {
@@ -5798,9 +5798,9 @@ int detect_inplace_available(int index, int level){
     int h = 0;
     for (int j = 0; j < LZ_VAR[level]; j++)
     {
-      if (GlobTree[index].slot[j].dd == DEAD )//|| GlobTree[index].slot[j].dd == REFRESHED)
+      if (GlobTree[index].slot[j].dd == DEAD || GlobTree[index].slot[j].dd == REFRESHED)
       {
-        // printf("dead[%d]: %d\n", k, j);
+        // printf("L%d: dead[%d]: %d\n", level, k, j);
         dead++;
         dead_slot[k] = j;
         k++;
@@ -5846,6 +5846,7 @@ void write_bucket(int index, int label, int level, char op_type){
   }
 
   GlobTree[index].s = available - RING_Z;
+  // printf("available %d    s %d\n", available, GlobTree[index].s);
   int real = 0;
 
   for (int k = 0; k < available; k++)
