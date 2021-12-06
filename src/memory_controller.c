@@ -1862,6 +1862,7 @@ void read_path(int label){
               if (RING_ENABLE)
               {
                 mem_addr = calc_mem_addr(index, j, 'R');
+                GlobTree[index].slot[j].valid = false;
               }
               
               
@@ -1999,6 +2000,8 @@ void read_path(int label){
             }
             
             int mem_addr = calc_mem_addr(index, sd, 'R');
+            GlobTree[index].slot[sd].valid = false;
+
             // bool nvm_access = is_nvm_addr(mem_addr);
             bool nvm_access = in_nvm(i);
             if (SIM_ENABLE_VAR)
@@ -2022,7 +2025,9 @@ void read_path(int label){
         {
           if (RING_ENABLE && GlobTree[index].slot[j].valid)
           {
-            int mem_addr = calc_mem_addr(index, j, 'R');
+            calc_mem_addr(index, j, 'R');
+            GlobTree[index].slot[j].valid = false;
+
           }
         }
         
