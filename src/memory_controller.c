@@ -2018,7 +2018,7 @@ void read_path(int label){
             dum_cand[ri] = -1;
           }
         }
-        for (int i = 0; i < slotCount; i++)
+        for (int j = 0; j < slotCount; j++)
         {
           if (RING_ENABLE && GlobTree[index].slot[j].valid)
           {
