@@ -1846,10 +1846,7 @@ void read_path(int label){
           if (i >= TOP_CACHE_VAR)
           {
             int mem_addr;
-            if (RING_ENABLE)
-            {
-              mem_addr = calc_mem_addr(index, j, 'R');
-            }
+            
 
             if(!RING_ENABLE || GlobTree[index].slot[j].isReal)
             {
@@ -1862,10 +1859,10 @@ void read_path(int label){
                 int index_prime = calc_index(label, i_prime);
                 mem_addr = SubMap[index_prime] + j_prime;
               }
-              // if (RING_ENABLE)
-              // {
-              //   mem_addr = calc_mem_addr(index, j, 'R');
-              // }
+              if (RING_ENABLE)
+              {
+                mem_addr = calc_mem_addr(index, j, 'R');
+              }
               
               
               // bool nvm_access = is_nvm_addr(mem_addr);
@@ -2021,7 +2018,14 @@ void read_path(int label){
             dum_cand[ri] = -1;
           }
         }
-
+        for (int i = 0; i < slotCount; i++)
+        {
+          if (RING_ENABLE && GlobTree[index].slot[j].valid)
+          {
+            int mem_addr = calc_mem_addr(index, j, 'R');
+          }
+        }
+        
       }
 
 
@@ -4832,7 +4836,7 @@ int remote_allocate(int index, int offset){
       }
       else
       {
-        printf("ERROR: remote allocate block in queue is taken! REFRESHED? %d ALLOCATED? %d\n", (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED), (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED));
+        printf("ERROR: remote allocate block in queue is taken! REFRESHED? %d  ALLOCATED? %d\n", (GlobTree[i_tmp].slot[j_tmp].dd == REFRESHED), (GlobTree[i_tmp].slot[j_tmp].dd == ALLOCATED));
         exit(1);
       }
 
