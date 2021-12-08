@@ -888,7 +888,7 @@ Queue *ConstructQueue(int limit) {
     if (queue == NULL) {
         return NULL;
     }
-    if (limit <= 0) {
+    if (limit < 0) {
         limit = 65535;
     }
     queue->limit = limit;
@@ -4897,19 +4897,19 @@ int remote_allocate(int index, int offset){
   //   }
   // }
 
-  // if (i == -1 && j == -1)
-  // {
-  //   bool found = scan_entire_level(level, index, &i, &j);
-  //   if (found && (i == -1 || j == -1))
-  //   {
-  //     printf("ERROR: remote allocate scan found but inputs not set!\n");
-  //     exit(1);
-  //   }
-  //   else if(found)
-  //   {
-  //     dead_scan[level]++;
-  //   }
-  // }
+  if (i == -1 && j == -1)
+  {
+    bool found = scan_entire_level(level, index, &i, &j);
+    if (found && (i == -1 || j == -1))
+    {
+      printf("ERROR: remote allocate scan found but inputs not set!\n");
+      exit(1);
+    }
+    else if(found)
+    {
+      dead_scan[level]++;
+    }
+  }
   
 
   if (i != -1 && j != -1)
@@ -6013,7 +6013,7 @@ void write_bucket(int index, int label, int level, char op_type){
   }
   else
   {
-    printf("ERROR: write bucket cur S %d out of range!\n", curS);
+    printf("ERROR: write bucket @ L%d cur S %d out of range!\n", level, curS);
     export_csv(pargv);
     exit(1);
   }
