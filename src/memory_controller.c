@@ -801,6 +801,8 @@ unsigned long long int byte_addr(long long int physical_addr){
   // unsigned long long int addr = (unsigned long long  int)(physical_addr & (0xffffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
   // unsigned long long int addr = physical_addr;  
   unsigned long long int max = ((unsigned long long int)(BLOCK-1)<<((unsigned long long int)log2(BLOCK_SIZE))) | (unsigned long long int)(BLOCK_SIZE-1);
+  printf("addr: %lld\n", addr);
+  printf("max: %lld\n", max);
   if (addr > max)
   {
     addr = max; 

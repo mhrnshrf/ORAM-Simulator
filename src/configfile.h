@@ -126,6 +126,7 @@ typedef enum {
 	S_INC_token ,
 	REMOTE_CAP_token ,
 	SHADQ_SIZE_token ,
+	SUPER_NODE_token ,
 
 	comment_token,
 	unknown_token
@@ -353,6 +354,8 @@ token_t tokenize(char * input){
 	return REMOTE_CAP_token;
   } else if (strncmp(input, "SHADQ_SIZE",length) == 0) {
 	return SHADQ_SIZE_token;
+  } else if (strncmp(input, "SUPER_NODE",length) == 0) {
+	return SUPER_NODE_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -861,6 +864,10 @@ void read_config_file(FILE * fin)
 			case SHADQ_SIZE_token:
 				fscanf(fin,"%d",&input_int);
 				SHADQ_SIZE = input_int;
+				break;
+			case SUPER_NODE_token:
+				fscanf(fin,"%d",&input_int);
+				SUPER_NODE = input_int;
 				break;
 
 			case unknown_token:

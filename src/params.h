@@ -200,6 +200,7 @@ bool NVM_ENABLE     ;     // 0/1 flag that indicates whether nvm memory fixed la
 bool SURONLY_ENABLE ;     // 0/1 flag that indicates whether only surplus slots are used for remote allocation
 bool CB_ENABLE      ;     // 0/1 flag that indicates whether compact bucket feature of string oram paper is enabled
 bool DYNAMIC_S      ;     // 0/1 flag that indicates whether dynamic s setting is enabled
+bool SUPER_NODE     ;     // 0/1 flag that indicates whether super node option is enabled
 
 
 long long int TRACE_SIZE ;       // # addr read from trace file
