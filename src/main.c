@@ -347,8 +347,8 @@ int main(int argc, char * argv[])
 
 	// random_trace();
 
-	long long int pa = 7742115263;
-	printf("byte addr %lld   : 	%lld\n", pa, byte_addr(pa));
+	// long long int pa = 7742115263;
+	// printf("byte addr %lld   : 	%lld\n", pa, byte_addr(pa));
 
 	last_read_served = true;
 	last_read_deleted = true;
