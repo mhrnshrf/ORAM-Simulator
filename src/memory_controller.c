@@ -6177,6 +6177,7 @@ void ring_early_reshuffle(int label){
           else
           {
             printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+            export_csv(pargv);
             print_oram_stats();
             exit(1);
           }
