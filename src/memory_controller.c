@@ -1963,6 +1963,7 @@ void read_path(int label){
                 printf("stash removed  %d\n", stash_removed);
                 printf("fill hit  %d\n", fillhit);
                 printf("fill miss  %d\n", fillmiss);
+                export_csv(pargv);
                 print_oram_stats();
                 exit(1);
               }
