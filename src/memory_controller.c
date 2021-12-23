@@ -5516,6 +5516,7 @@ void ring_read_path(int label, int addr){
         else
         {
           printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+          export_csv(pargv);
           print_oram_stats();
           exit(1);
         }
@@ -6633,8 +6634,8 @@ void export_csv(char * argv[]){
     }
   }
 
-  // fprintf(fp,"Benchmark,%s\n", bench);
-  fprintf(fp,"Experiment,%s\n", exp_name);
+  fprintf(fp,"Benchmark,%s\n", bench);
+  // fprintf(fp,"Experiment,%s\n", exp_name);
   fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);

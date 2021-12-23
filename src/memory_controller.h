@@ -64,7 +64,7 @@
 #define STASH_SIZE_ORG 200     // original size of stash
 // #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
-#define L2 19   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17
+#define L2 14   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17
 #define L3 22   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
