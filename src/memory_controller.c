@@ -5854,8 +5854,8 @@ void write_bucket(int index, int label, int level, char op_type){
 
   if (available < RING_Z + min)
   {
-    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
-    exit(1);
+    // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
+    // exit(1);
   }
 
   GlobTree[index].s = available - RING_Z;
