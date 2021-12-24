@@ -5854,8 +5854,8 @@ void write_bucket(int index, int label, int level, char op_type){
 
   if (available < RING_Z + min)
   {
-    // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
-    // exit(1);
+    printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
+    exit(1);
   }
 
   GlobTree[index].s = available - RING_Z;
@@ -5955,7 +5955,25 @@ void write_bucket(int index, int label, int level, char op_type){
           bool last_read = false;
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
         }
-        GlobTree[index].s++;
+
+        if (candidate[real] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
+        {
+          // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
+          GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
+          GlobTree[index].slot[j].label = Stash[candidate[real]].label;
+          GlobTree[index].slot[j].isReal = true;
+          GlobTree[index].slot[j].isData = true;
+          GlobTree[index].dumnum--;
+          GlobTree[index].dumval--;
+          real++;
+
+          remove_from_stash(candidate[real]);
+        }
+        else
+        {
+          GlobTree[index].s++;
+        }
+
       }
       else
       {
