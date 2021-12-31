@@ -187,6 +187,7 @@ unsigned int dead_shadowed[LEVEL] = {0};
 unsigned int dead_scan[LEVEL] = {0};
 unsigned int shad_added[LEVEL] = {0};
 unsigned int same_bucket = 0;
+unsigned long long int wbuck = 0;
 
 
 
@@ -1399,9 +1400,10 @@ void oram_alloc(){
   for (int i = LEVEL-1; i >= GATHER_START; i--)
   {
     // int constant = (i < 16) ? 1.7 : 1.5;
-    // double constant = 1.5;
-    // int qs = (int)floor(pow(constant, i));
-    deadQ_arr[i] = ConstructQueue(DEADQ_SIZE);
+    double constant = 1.5;
+    int qs = (int)floor(pow(constant, i));
+    qs = DEADQ_SIZE;
+    deadQ_arr[i] = ConstructQueue(qs);
     deadQ_shadow[i] = ConstructQueue(SHADQ_SIZE);
     // printf(" deadQ[%d]  ~> size: %d\n", i, qs);
   }
@@ -2065,6 +2067,16 @@ void pick_candidate(int index, int label, int i){
       }
     }
   }
+}
+
+void print_candidate(){
+  printf("candidates: ");
+  for (int i = 0; i < Z; i++)
+  {
+    printf("%d    ", candidate[i]);
+  }
+  printf("\n");
+  
 }
 
 
@@ -5839,6 +5851,8 @@ int detect_inplace_available(int index, int level){
 
 
 void write_bucket(int index, int label, int level, char op_type){
+  wbuck++;
+  int allocated = 0;
 
   if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   {
@@ -5858,7 +5872,7 @@ void write_bucket(int index, int label, int level, char op_type){
     // exit(1);
   }
 
-  GlobTree[index].s = available - RING_Z;
+  // GlobTree[index].s = available - RING_Z;
   // printf("available %d    s %d\n", available, GlobTree[index].s);
   int real = 0;
 
@@ -5872,6 +5886,7 @@ void write_bucket(int index, int label, int level, char op_type){
     }
     
     GlobTree[index].slot[j].valid = true;
+    allocated++;
 
     if (GlobTree[index].slot[j].dead_start != 0 && tracectr > DD_SATURATE)
     {
@@ -5910,18 +5925,19 @@ void write_bucket(int index, int label, int level, char op_type){
     }
 
     
-    if (candidate[k] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
+    if (candidate[real] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
     {
-      // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
-      GlobTree[index].slot[j].addr = Stash[candidate[k]].addr;
-      GlobTree[index].slot[j].label = Stash[candidate[k]].label;
+      // print_candidate();
+      // printf("%c %lld k=%d: cand[%d]: %d\n", op_type, wbuck, k, candidate[k], Stash[candidate[k]].addr);
+      GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
+      GlobTree[index].slot[j].label = Stash[candidate[real]].label;
       GlobTree[index].slot[j].isReal = true;
       GlobTree[index].slot[j].isData = true;
       GlobTree[index].dumnum--;
       GlobTree[index].dumval--;
       real++;
 
-      remove_from_stash(candidate[k]);
+      remove_from_stash(candidate[real-1]);
     }
     else
     {
@@ -5944,6 +5960,7 @@ void write_bucket(int index, int label, int level, char op_type){
       {
         s_underctr++;
         GlobTree[index].slot[j].valid = true;
+        allocated++;
         if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           // bool nvm_access = is_nvm_addr(mem_addr);
@@ -5958,7 +5975,8 @@ void write_bucket(int index, int label, int level, char op_type){
 
         if (candidate[real] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
         {
-          // printf("cand[%d]: %d\n", candidate[j], Stash[candidate[j]].addr);
+          // print_candidate();
+          // printf("%c %lld real=%d: cand[%d]: %d\n", op_type, wbuck, real, candidate[real], Stash[candidate[real]].addr);
           GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
           GlobTree[index].slot[j].label = Stash[candidate[real]].label;
           GlobTree[index].slot[j].isReal = true;
@@ -5967,11 +5985,11 @@ void write_bucket(int index, int label, int level, char op_type){
           GlobTree[index].dumval--;
           real++;
 
-          remove_from_stash(candidate[real]);
+          remove_from_stash(candidate[real-1]);
         }
         else
         {
-          GlobTree[index].s++;
+          // GlobTree[index].s++;
         }
 
       }
@@ -5988,6 +6006,7 @@ void write_bucket(int index, int label, int level, char op_type){
       {
         s_overctr++;
         GlobTree[index].slot[j].valid = true;
+        allocated++;
         if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           // bool nvm_access = is_nvm_addr(mem_addr);
@@ -5999,7 +6018,7 @@ void write_bucket(int index, int label, int level, char op_type){
           bool last_read = false;
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
         }
-        GlobTree[index].s++;
+        // GlobTree[index].s++;
       }
       else
       {
@@ -6019,6 +6038,7 @@ void write_bucket(int index, int label, int level, char op_type){
   GlobTree[index].dumdead = 0;
   // wb[level] += stashb4 - stashctr;
 
+  GlobTree[index].s = allocated - RING_Z;
 
   int curS = GlobTree[index].s;
   
