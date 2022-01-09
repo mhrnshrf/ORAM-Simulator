@@ -126,7 +126,9 @@ typedef enum {
 	S_INC_token ,
 	REMOTE_CAP_token ,
 	SHADQ_SIZE_token ,
-	SUPER_NODE_token ,
+	SUPER_ENABLE_token ,
+	SUPER_LEVEL_token ,
+	SUPER_S_token ,
 
 	comment_token,
 	unknown_token
@@ -354,8 +356,12 @@ token_t tokenize(char * input){
 	return REMOTE_CAP_token;
   } else if (strncmp(input, "SHADQ_SIZE",length) == 0) {
 	return SHADQ_SIZE_token;
-  } else if (strncmp(input, "SUPER_NODE",length) == 0) {
-	return SUPER_NODE_token;
+  } else if (strncmp(input, "SUPER_ENABLE",length) == 0) {
+	return SUPER_ENABLE_token;
+  } else if (strncmp(input, "SUPER_LEVEL",length) == 0) {
+	return SUPER_LEVEL_token;
+  } else if (strncmp(input, "SUPER_S",length) == 0) {
+	return SUPER_S_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -865,9 +871,17 @@ void read_config_file(FILE * fin)
 				fscanf(fin,"%d",&input_int);
 				SHADQ_SIZE = input_int;
 				break;
-			case SUPER_NODE_token:
+			case SUPER_ENABLE_token:
 				fscanf(fin,"%d",&input_int);
-				SUPER_NODE = input_int;
+				SUPER_ENABLE = input_int;
+				break;
+			case SUPER_LEVEL_token:
+				fscanf(fin,"%d",&input_int);
+				SUPER_LEVEL = input_int;
+				break;
+			case SUPER_S_token:
+				fscanf(fin,"%d",&input_int);
+				SUPER_S = input_int;
 				break;
 
 			case unknown_token:

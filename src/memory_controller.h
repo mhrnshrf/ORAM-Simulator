@@ -491,7 +491,9 @@ int calc_horiz(int index, int label, int i);
 int calc_ring_s(int index, int level);
 void write_bucket(int index, int label, int level, char op_type);
 int detect_inplace_available(int index, int level);
-
+bool is_super_level(int level);
+int calc_super_in_tree(int index);
+void read_bucket(int index, int i, char op_type);
 // Mehrnoosh.
 
 

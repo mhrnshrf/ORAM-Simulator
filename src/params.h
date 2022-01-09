@@ -200,7 +200,7 @@ bool NVM_ENABLE     ;     // 0/1 flag that indicates whether nvm memory fixed la
 bool SURONLY_ENABLE ;     // 0/1 flag that indicates whether only surplus slots are used for remote allocation
 bool CB_ENABLE      ;     // 0/1 flag that indicates whether compact bucket feature of string oram paper is enabled
 bool DYNAMIC_S      ;     // 0/1 flag that indicates whether dynamic s setting is enabled
-bool SUPER_NODE     ;     // 0/1 flag that indicates whether super node option is enabled
+bool SUPER_ENABLE     ;     // 0/1 flag that indicates whether super node option is enabled
 
 
 long long int TRACE_SIZE ;       // # addr read from trace file
@@ -238,6 +238,8 @@ int NVM_CHANNEL ;  // number of channels dedicated to nvm
 int S_INC ;  // the amount by which a dynamic s can be incremented
 int REMOTE_CAP ;  // the cap on the number of blocks that each bucket can give away for remote allocation at a time
 int SHADQ_SIZE ;  // capacity limit of shadow queue
+int SUPER_LEVEL ;  // level at which super node merge starts (inclusive)
+int SUPER_S ;  // s value for th super node
 
 
 

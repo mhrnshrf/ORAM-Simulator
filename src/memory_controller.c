@@ -2239,6 +2239,10 @@ void write_path(int label){
         GlobTree[index].reshuffled = 0;
 
         write_bucket(index, label, i, 'e');
+        if (SUPER_ENABLE && is_super_level(i))
+        {
+          write_bucket(calc_super_in_tree(index), label, i, 'e');
+        }
         continue;
       }
       int addr = 0;
@@ -5849,6 +5853,40 @@ int detect_inplace_available(int index, int level){
   
 }
 
+int calc_super_in_tree(int index){
+  if(index % 2 == 0){
+    return index-1;
+  }
+  else{
+    return index+1;
+  }
+
+}
+
+bool super_node_need_reshuffle(int index){
+  int level = calc_level(index);
+
+  if (!SUPER_ENABLE || level < SUPER_LEVEL)
+  {
+    return false;
+  }
+  int adj = calc_super_in_tree(index);
+  int touched = GlobTree[index].count + GlobTree[adj].count;
+  if (touched >= SUPER_S)
+  {
+    return true;
+  }
+  return false;
+}
+
+
+bool is_super_level(int level){
+  if (level >= SUPER_LEVEL)
+  {
+    return true;
+  }
+  return false;
+}
 
 void write_bucket(int index, int label, int level, char op_type){
   wbuck++;
@@ -5927,8 +5965,11 @@ void write_bucket(int index, int label, int level, char op_type){
     
     if (candidate[real] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
     {
-      // print_candidate();
-      // printf("%c %lld k=%d: cand[%d]: %d\n", op_type, wbuck, k, candidate[k], Stash[candidate[k]].addr);
+      // if (tracectr >= 39796059)
+      // {
+      //   print_candidate();
+      //   printf("%c %lld k=%d: cand[%d]: %d\n", op_type, wbuck, k, candidate[k], Stash[candidate[k]].addr);
+      // }
       GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
       GlobTree[index].slot[j].label = Stash[candidate[real]].label;
       GlobTree[index].slot[j].isReal = true;
@@ -5975,8 +6016,11 @@ void write_bucket(int index, int label, int level, char op_type){
 
         if (candidate[real] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
         {
-          // print_candidate();
-          // printf("%c %lld real=%d: cand[%d]: %d\n", op_type, wbuck, real, candidate[real], Stash[candidate[real]].addr);
+          // if (tracectr >= 39796059)
+          // {
+          //   print_candidate();
+          //   printf("%c %lld real=%d: cand[%d]: %d\n", op_type, wbuck, real, candidate[real], Stash[candidate[real]].addr);
+          // }
           GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
           GlobTree[index].slot[j].label = Stash[candidate[real]].label;
           GlobTree[index].slot[j].isReal = true;
@@ -6095,18 +6139,158 @@ void write_bucket(int index, int label, int level, char op_type){
 }
 
 
+void read_bucket(int index, int i, char op_type){
+    int reqmade = 0;
+    int dum_cand[Z] = {0};
+    int cand_ind = 0;
+    // print_oram_stats();
+      // printf("trace %d\n", tracectr);
+      // printf("i %d\n", i);
+      // printf("index %d\n", index);
+      // printf("heloooooo\n");
+      // printf("flush ctr %d\n", stale_flush_ctr);
+    
+    GlobTree[index].dumval = Z;
+
+    int valnum = GlobTree[index].dumval;
+    dumval_dist[valnum]++;
+    dumval_range_dist[calc_range(i)][valnum]++;
+    if (op_type == 'r')
+    {
+      shuff[i]++;
+      shuff_total++;
+      shuff_interval[i]++;
+      // shufcount++;
+      GlobTree[index].reshuffled++;
+    }
+
+    int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
+
+    if (slotCount < 0 || slotCount > Z)
+    {
+      printf("ERROR: reshuffle slot count %d out of range!\n", slotCount);
+      exit(1);
+    }
+    
+    for (int j = 0; j < slotCount; j++)
+    {
+
+      if (GlobTree[index].slot[j].isReal)
+      {
+        int mem_addr = calc_mem_addr(index, j, 'R');
+        reqmade++;
+        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        {
+          // bool nvm_access = is_nvm_addr(mem_addr);
+              // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, j);
+
+          bool nvm_access = in_nvm(i);
+          bool beginning = (reqmade == 1);
+          bool ending = false;
+          bool last_read = (reqmade == RING_Z);
+          char op_type = 'r';
+          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+        }
+      }
+      
+      if (GlobTree[index].slot[j].isReal)
+      {
+        // printf("j: %d real\n", j);
+        // printf("index: %d\n", index);
+        // printf("level: %d\n", i);
+        // printf("addr: %d\n", GlobTree[index].slot[j].addr);
+        // printf("label: %d\n\n", GlobTree[index].slot[j].label);
+        if(add_to_stash(GlobTree[index].slot[j]) != -1)
+        {
+          GlobTree[index].slot[j].isReal = false;
+          GlobTree[index].slot[j].addr = -1;
+          GlobTree[index].slot[j].label = -1;
+          GlobTree[index].dumnum++;
+          // GlobTree[index].dumval++;
+        }
+        else
+        {
+          printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+          export_csv(pargv);
+          print_oram_stats();
+          exit(1);
+        }
+      }
+      else if(GlobTree[index].slot[j].valid)
+      {
+        // printf("\ncand ind %d\n", cand_ind);
+        dum_cand[cand_ind] = j;
+        // printf("valid filling dum_cand[%d] %d\n", cand_ind, dum_cand[cand_ind]);
+        cand_ind++;
+      }
+    }
+
+      int reqcont = reqmade;
+      for (int k = 0; k < RING_Z-reqmade-GREEN_BLOCK; k++)
+      {
+        int ri = -1;
+        int sd = -1;
+        while (sd == -1)
+        {
+          // printf("@%d in reshuffle\n", tracectr);
+
+          ri = rand() % cand_ind;
+          sd = dum_cand[ri];
+        }
+        reqcont++;
+          
+        int mem_addr = calc_mem_addr(index, sd, 'R');
+        if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        {
+              // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
+
+            // bool nvm_access = is_nvm_addr(mem_addr);
+            bool nvm_access = in_nvm(i);
+            bool beginning = (reqcont == 1);
+            bool ending = false;
+            bool last_read = (reqcont == RING_Z);
+            char op_type = 'r';
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+            // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
+        }
+        dum_cand[ri] = -1;
+      }
+      
+
+     
+
+    // if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
+    // {
+    //   // printf("@%d R> %d, ", ringctr, deadQ_arr[i]->size);
+    // }
+    
+
+
+    if (RING_ENABLE && DEAD_ENABLE_VAR) //DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
+    {
+      gather_dead(index, i);
+    }
+
+    // if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
+    // {
+    //   // printf("%d      shuf: %lld  dead encounter: %d\n", deadQ_arr[i]->size, shuff[LEVEL-1], dead_encountered[LEVEL-1]);
+    // }
+
+
+}
+
 
 void ring_early_reshuffle(int label){
   // printf("reshuffle trace %d\n", tracectr);
-  int shufcount = 0;
+  // int shufcount = 0;
   // int stashb4 = stashctr;
   // for (int i = 0; i < LEVEL; i++)
   for (int i = LEVEL-1; i > 0; i--)
   {
     int index = calc_index(label, i);
-    int reqmade = 0;
-    int dum_cand[Z] = {0};
-    int cand_ind = 0;
+    // int reqmade = 0;
+    // int dum_cand[Z] = {0};
+    // int cand_ind = 0;
     // print_oram_stats();
       // printf("trace %d\n", tracectr);
       // printf("i %d\n", i);
@@ -6157,112 +6341,15 @@ void ring_early_reshuffle(int label){
         printf("ERROR: early reshuffle cur S %d our of range!\n", curS);
         exit(1);
       }
-      
-      GlobTree[index].dumval = Z;
 
-      int valnum = GlobTree[index].dumval;
-      dumval_dist[valnum]++;
-      dumval_range_dist[calc_range(i)][valnum]++;
-      shuff[i]++;
-      shuff_total++;
-      shuff_interval[i]++;
-      shufcount++;
-      GlobTree[index].reshuffled++;
-
-      int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
-
-      if (slotCount < 0 || slotCount > Z)
-      {
-        printf("ERROR: reshuffle slot count %d out of range!\n", slotCount);
-        exit(1);
-      }
-      
-      for (int j = 0; j < slotCount; j++)
-      {
-
-        if (GlobTree[index].slot[j].isReal)
-        {
-          int mem_addr = calc_mem_addr(index, j, 'R');
-          reqmade++;
-          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
-          {
-            // bool nvm_access = is_nvm_addr(mem_addr);
-                // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, j);
-
-            bool nvm_access = in_nvm(i);
-            bool beginning = (reqmade == 1);
-            bool ending = false;
-            bool last_read = (reqmade == RING_Z);
-            char op_type = 'r';
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
-          }
-        }
-        
-        if (GlobTree[index].slot[j].isReal)
-        {
-          // printf("j: %d real\n", j);
-          // printf("index: %d\n", index);
-          // printf("level: %d\n", i);
-          // printf("addr: %d\n", GlobTree[index].slot[j].addr);
-          // printf("label: %d\n\n", GlobTree[index].slot[j].label);
-          if(add_to_stash(GlobTree[index].slot[j]) != -1)
-          {
-            GlobTree[index].slot[j].isReal = false;
-            GlobTree[index].slot[j].addr = -1;
-            GlobTree[index].slot[j].label = -1;
-            GlobTree[index].dumnum++;
-            // GlobTree[index].dumval++;
-          }
-          else
-          {
-            printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
-            export_csv(pargv);
-            print_oram_stats();
-            exit(1);
-          }
-        }
-        else if(GlobTree[index].slot[j].valid)
-        {
-          // printf("\ncand ind %d\n", cand_ind);
-          dum_cand[cand_ind] = j;
-          // printf("valid filling dum_cand[%d] %d\n", cand_ind, dum_cand[cand_ind]);
-          cand_ind++;
-        }
-      }
-
-        int reqcont = reqmade;
-        for (int k = 0; k < RING_Z-reqmade-GREEN_BLOCK; k++)
-        {
-          int ri = -1;
-          int sd = -1;
-          while (sd == -1)
-          {
-            // printf("@%d in reshuffle\n", tracectr);
-
-            ri = rand() % cand_ind;
-            sd = dum_cand[ri];
-          }
-          reqcont++;
-           
-          int mem_addr = calc_mem_addr(index, sd, 'R');
-          if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
-          {
-                // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
-
-              // bool nvm_access = is_nvm_addr(mem_addr);
-              bool nvm_access = in_nvm(i);
-              bool beginning = (reqcont == 1);
-              bool ending = false;
-              bool last_read = (reqcont == RING_Z);
-              char op_type = 'r';
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
-              // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
-          }
-          dum_cand[ri] = -1;
-        }
-      
+      read_bucket(index, i, 'r');
       // write phase: 
       write_bucket(index, label, i, 'r');
+      if (SUPER_ENABLE && is_super_level(i))
+      {
+        write_bucket(calc_super_in_tree(index), label, i, 'r');
+      }
+      
 
      
       if (i >= LEVEL-2)
