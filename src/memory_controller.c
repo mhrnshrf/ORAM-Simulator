@@ -6194,7 +6194,6 @@ void read_bucket(int index, int i, char op_type){
           bool beginning = (reqmade == 1);
           bool ending = false;
           bool last_read = (reqmade == RING_Z);
-          char op_type = 'r';
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
         }
       }
@@ -6255,7 +6254,6 @@ void read_bucket(int index, int i, char op_type){
             bool beginning = (reqcont == 1);
             bool ending = false;
             bool last_read = (reqcont == RING_Z);
-            char op_type = 'r';
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
         }
