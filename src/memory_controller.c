@@ -6282,7 +6282,7 @@ void read_bucket(int index, int i, char op_type){
     
 
 
-    if (RING_ENABLE && DEAD_ENABLE_VAR) //DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
+    if (RING_ENABLE && DEAD_ENABLE_VAR && op_type == 'r') //DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
     {
       gather_dead(index, i);
     }
