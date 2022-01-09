@@ -1828,6 +1828,12 @@ void read_path(int label){
       if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
       {
         int index = calc_index(label, i);
+        if (RING_ENABLE)
+        {
+          read_bucket(index, i, 'e');
+          continue;
+        }
+        
         // if (RING_ENABLE)
         // {
           int reqmade = 0;
