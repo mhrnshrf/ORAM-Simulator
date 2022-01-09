@@ -1831,16 +1831,6 @@ void read_path(int label){
         if (RING_ENABLE)
         {
           read_bucket(index, i, 'e');
-          int slotCount = DYNAMIC_S ? Z : LZ_VAR[i]; 
-          for (int j = 0; j < slotCount; j++)
-          {
-            if (RING_ENABLE && GlobTree[index].slot[j].valid)
-            {
-              calc_mem_addr(index, j, 'R');
-              GlobTree[index].slot[j].valid = false;
-
-            }
-          }
           continue;
         }
         
@@ -6272,7 +6262,19 @@ void read_bucket(int index, int i, char op_type){
         dum_cand[ri] = -1;
       }
       
+      if (op_type == 'e')
+      {
+        for (int j = 0; j < slotCount; j++)
+        {
+          if (RING_ENABLE && GlobTree[index].slot[j].valid)
+          {
+            calc_mem_addr(index, j, 'R');
+            GlobTree[index].slot[j].valid = false;
 
+          }
+        }
+      }
+      
      
 
     // if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
@@ -6282,10 +6284,10 @@ void read_bucket(int index, int i, char op_type){
     
 
 
-    if (RING_ENABLE && DEAD_ENABLE_VAR && op_type == 'r') //DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
-    {
-      gather_dead(index, i);
-    }
+    // if (RING_ENABLE && DEAD_ENABLE_VAR && op_type == 'r') //DEAD_ENABLE && tracectr >= (DD_SATURATE - 1000000))
+    // {
+    //   gather_dead(index, i);
+    // }
 
     // if (i == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
     // {
