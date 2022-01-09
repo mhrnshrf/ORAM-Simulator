@@ -1831,6 +1831,16 @@ void read_path(int label){
         if (RING_ENABLE)
         {
           read_bucket(index, i, 'e');
+          int slotCount = DYNAMIC_S ? Z : LZ_VAR[i]; 
+          for (int j = 0; j < slotCount; j++)
+          {
+            if (RING_ENABLE && GlobTree[index].slot[j].valid)
+            {
+              calc_mem_addr(index, j, 'R');
+              GlobTree[index].slot[j].valid = false;
+
+            }
+          }
           continue;
         }
         
