@@ -6184,7 +6184,11 @@ void read_bucket(int index, int i, char op_type){
       if (GlobTree[index].slot[j].isReal)
       {
         int mem_addr = calc_mem_addr(index, j, 'R');
-        GlobTree[index].slot[j].valid = false;
+        if (op_type == 'e')
+        {
+          GlobTree[index].slot[j].valid = false;
+        }
+        
         reqmade++;
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
@@ -6246,7 +6250,10 @@ void read_bucket(int index, int i, char op_type){
         reqcont++;
           
         int mem_addr = calc_mem_addr(index, sd, 'R');
-        GlobTree[index].slot[sd].valid = false;
+        if (op_type == 'e')
+        {
+          GlobTree[index].slot[sd].valid = false;
+        }
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
               // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
