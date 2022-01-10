@@ -6191,17 +6191,18 @@ void read_bucket(int index, int i, char op_type){
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           int mem_addr = calc_mem_addr(index, j, 'R');
-        if (op_type == 'e')
-        {
-          GlobTree[index].slot[j].valid = false;
-        }
+          if (op_type == 'e')
+          {
+            GlobTree[index].slot[j].valid = false;
+          }
+          
           // bool nvm_access = is_nvm_addr(mem_addr);
               // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, j);
 
           bool nvm_access = in_nvm(i);
-          bool beginning = (reqmade == 1);
+          bool beginning = (op_type == 'r') ? (reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
           bool ending = false;
-          bool last_read = (reqmade == RING_Z);
+          bool last_read = (op_type == 'r') ? (reqmade == RING_Z) :  (i == TOP_CACHE_VAR && reqmade == RING_Z);
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
         }
       }
@@ -6263,9 +6264,9 @@ void read_bucket(int index, int i, char op_type){
 
             // bool nvm_access = is_nvm_addr(mem_addr);
             bool nvm_access = in_nvm(i);
-            bool beginning = (reqcont == 1);
+            bool beginning = (op_type == 'r') ? (reqcont == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
             bool ending = false;
-            bool last_read = (reqcont == RING_Z);
+            bool last_read = (op_type == 'r') ? (reqcont == RING_Z) :  (i == TOP_CACHE_VAR && reqmade == RING_Z);
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
         }
