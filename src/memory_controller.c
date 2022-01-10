@@ -5110,6 +5110,7 @@ int inplace_access(int index, int offset){
   // }
   
   GlobTree[index].slot[offset].dd = DEAD;
+  GlobTree[index].slot[offset].valid = false;
   // ddctr++;
   return mem_addr;
 }
@@ -5121,6 +5122,8 @@ int remote_access(int index, int offset, int level){
   GlobTree[index].slot[offset].redirect = false; // ??? added 4/13/2021 7:53 pm
   GlobTree[index_redir].slot[offset_redir].dd = DEAD; // invalidate the slot farther away that physically contains the current block 
   GlobTree[index_redir].allctr--;
+  
+  GlobTree[index].slot[offset].valid = false;
   // ddctr++;
   // ddctr_arr[level]++;
   // bucket_meta_access(index_redir);
@@ -6184,10 +6187,10 @@ void read_bucket(int index, int i, char op_type){
       if (GlobTree[index].slot[j].isReal)
       {
         int mem_addr = calc_mem_addr(index, j, 'R');
-        if (op_type == 'e')
-        {
-          GlobTree[index].slot[j].valid = false;
-        }
+        // if (op_type == 'e')
+        // {
+        //   GlobTree[index].slot[j].valid = false;
+        // }
         
         reqmade++;
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
@@ -6250,10 +6253,10 @@ void read_bucket(int index, int i, char op_type){
         reqcont++;
           
         int mem_addr = calc_mem_addr(index, sd, 'R');
-        if (op_type == 'e')
-        {
-          GlobTree[index].slot[sd].valid = false;
-        }
+        // if (op_type == 'e')
+        // {
+        //   GlobTree[index].slot[sd].valid = false;
+        // }
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
               // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
