@@ -6186,15 +6186,15 @@ void read_bucket(int index, int i, char op_type){
 
       if (GlobTree[index].slot[j].isReal)
       {
-        // if (op_type == 'e')
-        // {
-        //   GlobTree[index].slot[j].valid = false;
-        // }
         
         reqmade++;
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           int mem_addr = calc_mem_addr(index, j, 'R');
+        if (op_type == 'e')
+        {
+          GlobTree[index].slot[j].valid = false;
+        }
           // bool nvm_access = is_nvm_addr(mem_addr);
               // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, j);
 
@@ -6252,14 +6252,14 @@ void read_bucket(int index, int i, char op_type){
         }
         reqcont++;
           
-        // if (op_type == 'e')
-        // {
-        //   GlobTree[index].slot[sd].valid = false;
-        // }
         if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
               // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
-          int mem_addr = calc_mem_addr(index, sd, 'R');
+            int mem_addr = calc_mem_addr(index, sd, 'R');
+            if (op_type == 'e')
+            {
+              GlobTree[index].slot[sd].valid = false;
+            }
 
             // bool nvm_access = is_nvm_addr(mem_addr);
             bool nvm_access = in_nvm(i);
