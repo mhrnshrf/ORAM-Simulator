@@ -2245,10 +2245,6 @@ void write_path(int label){
         GlobTree[index].reshuffled = 0;
 
         write_bucket(index, label, i, 'e');
-        if (SUPER_ENABLE && is_super_level(i))
-        {
-          write_bucket(calc_super_in_tree(index), label, i, 'e');
-        }
         continue;
       }
       int addr = 0;
@@ -5441,6 +5437,52 @@ int calc_mem_addr(int index, int offset, char type)
 // }
 
 
+int decide_which_super(int index, int i, int addr){
+  int slotCount = DYNAMIC_S ? Z : LZ_VAR[i]; 
+  int valid = 0;
+  for (int j = 0; j < slotCount; j++)
+  {
+    if (GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].addr == addr)
+    {
+      return index;
+    }
+    else if (GlobTree[index].slot[j].valid)
+    {
+      valid++;
+    }
+  }
+
+  int valid_adj = 0;
+  int adj = calc_super_in_tree(index);
+  for (int j = 0; j < slotCount; j++)
+  {
+    if (GlobTree[adj].slot[j].isReal && GlobTree[adj].slot[j].addr == addr)
+    {
+      return adj;
+    }
+    else if (GlobTree[adj].slot[j].valid)
+    {
+      valid_adj++;
+    }
+  }
+
+  if (valid > 0 )
+  {
+    return index;
+  }
+  else if(valid_adj > 0)
+  {
+    return adj;
+  }
+  else
+  {
+    printf("ERROR: decide which super @%d  index %d adj%d i %d  addr %d\n", tracectr, index, adj, i, addr);
+    exit(1);
+  }
+
+}
+
+
 void ring_read_path(int label, int addr){
   // Element *pN = (Element*) malloc(sizeof (Element));
   // pN->addr = label;
@@ -5463,6 +5505,11 @@ void ring_read_path(int label, int addr){
     // {
     //   printf("%d\n", GlobTree[index].allctr);
     // }
+
+    if (SUPER_ENABLE)
+    {
+      index = decide_which_super(index, i, addr);
+    }
     
 
     int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
@@ -6144,6 +6191,10 @@ void write_bucket(int index, int label, int level, char op_type){
     }
 
   }
+  if (SUPER_ENABLE && is_super_level(level))
+  {
+    write_bucket(calc_super_in_tree(index), label, level, op_type);
+  }
   
 }
 
@@ -6310,7 +6361,10 @@ void read_bucket(int index, int i, char op_type){
     //   // printf("%d      shuf: %lld  dead encounter: %d\n", deadQ_arr[i]->size, shuff[LEVEL-1], dead_encountered[LEVEL-1]);
     // }
 
-
+  if (SUPER_ENABLE && is_super_level(i))
+  {
+    read_bucket(calc_super_in_tree(index), i, op_type);
+  }
 }
 
 
@@ -6360,7 +6414,9 @@ void ring_early_reshuffle(int label){
     }  
 
     int curS = calc_ring_s(index, i); 
-    if (GlobTree[index].count >= curS + GREEN_BLOCK)    // || i < TOP_CACHE  || i >= LEVEL-2 
+    bool must_reshuffle = (SUPER_ENABLE && is_super_level(i)) ? super_node_need_reshuffle(index) : (GlobTree[index].count >= curS + GREEN_BLOCK);
+
+    if (must_reshuffle)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       if (curS > 0 && curS <= RING_S )
       {
@@ -6379,11 +6435,6 @@ void ring_early_reshuffle(int label){
       read_bucket(index, i, 'r');
       // write phase: 
       write_bucket(index, label, i, 'r');
-
-      if (SUPER_ENABLE && is_super_level(i))
-      {
-        write_bucket(calc_super_in_tree(index), label, i, 'r');
-      }
       
 
      
