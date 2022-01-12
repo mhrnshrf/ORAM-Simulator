@@ -1830,7 +1830,7 @@ void read_path(int label){
         int index = calc_index(label, i);
         if (RING_ENABLE)
         {
-          read_bucket(index, i, 'e');
+          read_bucket(index, i, 'e', 0, true);
           continue;
         }
         
@@ -2244,7 +2244,7 @@ void write_path(int label){
         
         GlobTree[index].reshuffled = 0;
 
-        write_bucket(index, label, i, 'e');
+        write_bucket(index, label, i, 'e', true);
         continue;
       }
       int addr = 0;
@@ -5944,7 +5944,7 @@ bool is_super_level(int level){
   return false;
 }
 
-void write_bucket(int index, int label, int level, char op_type){
+void write_bucket(int index, int label, int level, char op_type, bool first_super){
   wbuck++;
   int allocated = 0;
 
@@ -6191,24 +6191,57 @@ void write_bucket(int index, int label, int level, char op_type){
     }
 
   }
-  if (SUPER_ENABLE && is_super_level(level))
+  if (SUPER_ENABLE && is_super_level(level) && first_super)
   {
-    write_bucket(calc_super_in_tree(index), label, level, op_type);
+    write_bucket(calc_super_in_tree(index), label, level, op_type, false);
   }
   
 }
 
+int count_bucket_dumvalid(int index, int i){
+  int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
+  int dumvalid =0;
+  for (int j = 0; j < slotCount; j++)
+  {
+    if (GlobTree[index].slot[j].valid && !GlobTree[index].slot[j].isReal)
+    {
+      dumvalid++;
+    }
+    
+  }
+  return dumvalid;
+}
 
-void read_bucket(int index, int i, char op_type){
+
+int count_bucket_real(int index, int i){
+  int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
+  int real =0;
+  for (int j = 0; j < slotCount; j++)
+  {
+    if (GlobTree[index].slot[j].valid && GlobTree[index].slot[j].isReal)
+    {
+      real++;
+    }
+    
+  }
+  return real;
+}
+
+
+void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     int reqmade = 0;
     int dum_cand[Z] = {0};
     int cand_ind = 0;
+    int passing_residue;
+    int cur_to_read = 0;
     // print_oram_stats();
       // printf("trace %d\n", tracectr);
       // printf("i %d\n", i);
       // printf("index %d\n", index);
       // printf("heloooooo\n");
       // printf("flush ctr %d\n", stale_flush_ctr);
+      
+      
     
     GlobTree[index].dumval = Z;
 
@@ -6292,55 +6325,84 @@ void read_bucket(int index, int i, char op_type){
       }
     }
 
-      int reqcont = reqmade;
-      if (i >= TOP_CACHE_VAR)
+
+    int remainCount = RING_Z-reqmade-GREEN_BLOCK; 
+
+    if (SUPER_ENABLE && is_super_level(i))
+    {
+      if (first_super)
       {
-        for (int k = 0; k < RING_Z-reqmade-GREEN_BLOCK; k++)
+        // int dum_cur = count_bucket_dumvalid(index, i);
+        int real_adj = count_bucket_real(calc_super_in_tree(index), i);
+        int req_to_made = RING_Z * 2;
+        req_to_made = req_to_made - reqmade - real_adj;
+        cur_to_read = (cand_ind < req_to_made) ? cand_ind : req_to_made;
+        if (cur_to_read < req_to_made)
         {
-          int ri = -1;
-          int sd = -1;
-          while (sd == -1)
-          {
-            // printf("@%d in reshuffle\n", tracectr);
+          passing_residue = req_to_made - cur_to_read;
+        }
+        remainCount = cur_to_read;
+      }
+      else
+      {
+        remainCount = residue;
+      }
+    }
 
-            ri = rand() % cand_ind;
-            sd = dum_cand[ri];
-          }
-          reqcont++;
-            
-          int mem_addr = calc_mem_addr(index, sd, 'R');
-          if (op_type == 'e')
-          {
-            GlobTree[index].slot[sd].valid = false;
-          }
-          if(SIM_ENABLE_VAR)
-          {
-                // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
 
-              // bool nvm_access = is_nvm_addr(mem_addr);
-              bool nvm_access = in_nvm(i);
-              bool beginning = (op_type == 'r') ? (reqcont == 1) : (i ==  LEVEL_VAR-1 && reqcont == 1);
-              bool ending = false;
-              bool last_read = (op_type == 'r') ? (reqcont == RING_Z) :  (i == TOP_CACHE_VAR && reqcont == RING_Z);
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
-              // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
-          }
-          dum_cand[ri] = -1;
+    
+
+  
+    int reqcont = reqmade;
+    if (i >= TOP_CACHE_VAR)
+    {
+      // int remaining = (SUPER_ENABLE && is_super_level(i) && (residue != 0)) ? residue : RING_Z-reqmade-GREEN_BLOCK;
+      for (int k = 0; k < remainCount; k++)
+      {
+        int ri = -1;
+        int sd = -1;
+        while (sd == -1)
+        {
+          // printf("@%d in reshuffle\n", tracectr);
+
+          ri = rand() % cand_ind;
+          sd = dum_cand[ri];
+        }
+        reqcont++;
+          
+        int mem_addr = calc_mem_addr(index, sd, 'R');
+        if (op_type == 'e')
+        {
+          GlobTree[index].slot[sd].valid = false;
+        }
+        if(SIM_ENABLE_VAR)
+        {
+              // printf("reshuffle mem addr: %d   @ L%d  j: %d \n", mem_addr, i, sd);
+
+            // bool nvm_access = is_nvm_addr(mem_addr);
+            bool nvm_access = in_nvm(i);
+            bool beginning = (op_type == 'r') ? (reqcont == 1) : (i ==  LEVEL_VAR-1 && reqcont == 1);
+            bool ending = false;
+            bool last_read = (op_type == 'r') ? (reqcont == RING_Z) :  (i == TOP_CACHE_VAR && reqcont == RING_Z);
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+            // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
+        }
+        dum_cand[ri] = -1;
+      }
+    }
+    
+    if (op_type == 'e')
+    {
+      for (int j = 0; j < slotCount; j++)
+      {
+        if (RING_ENABLE && GlobTree[index].slot[j].valid)
+        {
+          calc_mem_addr(index, j, 'R');
+          GlobTree[index].slot[j].valid = false;
+
         }
       }
-      
-      if (op_type == 'e')
-      {
-        for (int j = 0; j < slotCount; j++)
-        {
-          if (RING_ENABLE && GlobTree[index].slot[j].valid)
-          {
-            calc_mem_addr(index, j, 'R');
-            GlobTree[index].slot[j].valid = false;
-
-          }
-        }
-      }
+    }
       
      
 
@@ -6361,9 +6423,9 @@ void read_bucket(int index, int i, char op_type){
     //   // printf("%d      shuf: %lld  dead encounter: %d\n", deadQ_arr[i]->size, shuff[LEVEL-1], dead_encountered[LEVEL-1]);
     // }
 
-  if (SUPER_ENABLE && is_super_level(i))
+  if (SUPER_ENABLE && is_super_level(i) && first_super)
   {
-    read_bucket(calc_super_in_tree(index), i, op_type);
+    read_bucket(calc_super_in_tree(index), i, op_type, passing_residue, false);
   }
 }
 
@@ -6432,9 +6494,9 @@ void ring_early_reshuffle(int label){
         exit(1);
       }
 
-      read_bucket(index, i, 'r');
+      read_bucket(index, i, 'r', 0, true);
       // write phase: 
-      write_bucket(index, label, i, 'r');
+      write_bucket(index, label, i, 'r', true);
       
 
      
