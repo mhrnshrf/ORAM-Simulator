@@ -1995,8 +1995,6 @@ void read_path(int label){
             int sd = -1;
             while (sd == -1)
             {
-              // printf("@%d in ep\n", tracectr);
-
               ri = rand() % cand_ind;
               sd = dum_cand[ri];
             }
@@ -5446,7 +5444,7 @@ int decide_which_super(int index, int i, int addr){
     {
       return index;
     }
-    else if (GlobTree[index].slot[j].valid)
+    else if (!GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].valid)
     {
       valid++;
     }
@@ -5460,7 +5458,7 @@ int decide_which_super(int index, int i, int addr){
     {
       return adj;
     }
-    else if (GlobTree[adj].slot[j].valid)
+    else if (!GlobTree[adj].slot[j].isReal && GlobTree[adj].slot[j].valid)
     {
       valid_adj++;
     }
@@ -5506,9 +5504,17 @@ void ring_read_path(int label, int addr){
     //   printf("%d\n", GlobTree[index].allctr);
     // }
 
-    if (SUPER_ENABLE)
+    if (SUPER_ENABLE && is_super_level(i))
     {
+      // if (tracectr >= 3101531)
+      // {
+      //   printf("@%d L%d before decide which index %d\n", tracectr, i, index);
+      // }
       index = decide_which_super(index, i, addr);
+      // if (tracectr >= 3101531)
+      // {
+      //   printf("@%d L%d after decide which index %d\n", tracectr, i, index);
+      // }
     }
     
 
@@ -5516,47 +5522,67 @@ void ring_read_path(int label, int addr){
 
     if (slotCount < 0 || slotCount > Z)
     {
-      printf("ERROR: read path slot count %d out of range!\n", slotCount);
+      printf("ERROR: ring read path slot count %d out of range!\n", slotCount);
       exit(1);
     }
     
     int offset = rand() % slotCount; 
-    while (GlobTree[index].slot[offset].isReal || !GlobTree[index].slot[offset].valid )
+
+
+    bool contain_intended = false;
+
+    for(int j = 0; j < LZ_VAR[i]; j++)
     {
-      // printf("@%d in ring read S: %d   count: %d\n", tracectr, GlobTree[index].s, GlobTree[index].count);
-      offset = rand() % slotCount;
-      
+      if (GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].addr == addr)
+      {
+        // printf("\n offset trace %d\n", tracectr);
+        
+        offset = j;
+        contain_intended = true;
+
+        // profiling
+        if (i <= TOP_BOUNDARY)
+        {
+          topctr++;
+        }
+        else if (i <= MID_BOUNDARY)
+        {
+          midctr++;
+        }
+        else
+        {
+          botctr++;
+        }
+        break;
+      }
     }
+    
+    if(!contain_intended)
+    {
+      int dv = count_bucket_dumvalid(index, i);
+      if (dv == 0)
+      {
+        printf("ERROR: ring read @%d L%d index %d no valid dummy available! \n", tracectr, i, index);
+        exit(1);
+      }
+      while (GlobTree[index].slot[offset].isReal || !GlobTree[index].slot[offset].valid)
+      {
+        // if (tracectr >= 3101531)
+        // {
+        //   printf("@%d L%d while searching dum val  index %d\n", tracectr, i, index);
+        // }
+        
+        offset = rand() % slotCount;
+      }
+    }
+    
 
 
     
     
     if (!ring_dummy)
     {
-      for(int j = 0; j < LZ_VAR[i]; j++)
-      {
-        if (GlobTree[index].slot[j].isReal && GlobTree[index].slot[j].addr == addr)
-        {
-          // printf("\n offset trace %d\n", tracectr);
-          
-          offset = j;
-
-          // profiling
-          if (i <= TOP_BOUNDARY)
-          {
-            topctr++;
-          }
-          else if (i <= MID_BOUNDARY)
-          {
-            midctr++;
-          }
-          else
-          {
-            botctr++;
-          }
-          break;
-        }
-      }
+      
 
     // if cb enabled and runout of dummies and this bucket is not returning the block of interest, go pick a real block as a green block
     if (CB_ENABLE && GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
@@ -6232,7 +6258,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     int reqmade = 0;
     int dum_cand[Z] = {0};
     int cand_ind = 0;
-    int passing_residue;
+    int passing_residue = 0;
     int cur_to_read = 0;
     // print_oram_stats();
       // printf("trace %d\n", tracectr);
@@ -6341,13 +6367,30 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
         {
           passing_residue = req_to_made - cur_to_read;
         }
+        else
+        {
+           passing_residue = 0; 
+        }
         remainCount = cur_to_read;
+    
+        // if (passing_residue  == 8096)
+        // {
+        //   printf("real_adj %d\n", real_adj);
+        //   printf("req_to_made %d\n", req_to_made);
+        //   printf("reqmade %d\n", reqmade);
+        //   printf("cur_to_read %d\n", cur_to_read);
+        //   printf("cand_ind %d\n", cand_ind);
+        // }
+
       }
       else
       {
         remainCount = residue;
       }
     }
+
+    
+
 
 
     
@@ -6356,6 +6399,11 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     int reqcont = reqmade;
     if (i >= TOP_CACHE_VAR)
     {
+      if (remainCount > cand_ind)
+      {
+        printf("ERROR: read bucket @%d L%d remainCount %d residue %d  cand %d   first %d  reqmade %d\n", tracectr, i, remainCount, residue,  cand_ind, first_super, reqmade);
+        exit(1);
+      }
       // int remaining = (SUPER_ENABLE && is_super_level(i) && (residue != 0)) ? residue : RING_Z-reqmade-GREEN_BLOCK;
       for (int k = 0; k < remainCount; k++)
       {
@@ -6363,8 +6411,11 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
         int sd = -1;
         while (sd == -1)
         {
-          // printf("@%d in reshuffle\n", tracectr);
-
+          // if (tracectr > 3000000)
+          // {
+          //   printf("@%d read bucket  L%d remainCount %d residue %d  cand %d   first %d  reqmade %d k %d\n", tracectr, i, remainCount, residue,  cand_ind, first_super, reqmade, k);
+          // }
+          
           ri = rand() % cand_ind;
           sd = dum_cand[ri];
         }

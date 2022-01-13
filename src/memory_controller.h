@@ -495,6 +495,7 @@ bool is_super_level(int level);
 int calc_super_in_tree(int index);
 void read_bucket(int index, int i, char op_type, int residue, bool first_super);
 int decide_which_super(int index, int i, int addr);
+int count_bucket_dumvalid(int index, int i);
 // Mehrnoosh.
 
 
