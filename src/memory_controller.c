@@ -5954,7 +5954,24 @@ bool super_node_need_reshuffle(int index){
   }
   int adj = calc_super_in_tree(index);
   int touched = GlobTree[index].count + GlobTree[adj].count;
-  if (touched >= SUPER_S)
+  int extend = 0;
+  if (DYNAMIC_S && DEAD_ENABLE_VAR)
+  {
+    extend = GlobTree[index].s + GlobTree[adj].s - SUPER_S; 
+    
+  }
+  if (extend < 0)
+  {
+    printf("ERROR: super need reshuffle @%d L%d extend below zero!\n", tracectr, level);
+    exit(1);
+  }
+  // else if (extend > 0)
+  // {
+  //   printf("@%d L%d extend %d\n", tracectr, level, extend);
+  // }
+  
+  
+  if (touched >= SUPER_S + extend)
   {
     return true;
   }
@@ -6124,7 +6141,8 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
         break;
       }
     }
-    for (int j = LZ_VAR[level]; j < LZ_VAR[level] + S_INC; j++)
+    int inc_var = (SUPER_ENABLE && is_super_level(level)) ? S_INC/2 : S_INC;
+    for (int j = LZ_VAR[level]; j < LZ_VAR[level] + inc_var; j++)
     {
       extendctr++;
       int mem_addr = calc_mem_addr(index, j, 'W');
@@ -6274,7 +6292,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     int valnum = GlobTree[index].dumval;
     dumval_dist[valnum]++;
     dumval_range_dist[calc_range(i)][valnum]++;
-    if (op_type == 'r')
+    if (op_type == 'r' && first_super)
     {
       shuff[i]++;
       shuff_total++;
