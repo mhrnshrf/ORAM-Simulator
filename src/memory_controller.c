@@ -7334,7 +7334,7 @@ void export_csv(char * argv[]){
   //   fprintf(fp, "ddctr_arr[%d],%d\n", i, ddctr_arr[i]);
   // }
 
-  // print_lifetime_stat(fp);
+  print_lifetime_stat(fp);
 
   // char real[5] = "real";
   // char dum[5] = "dum";
