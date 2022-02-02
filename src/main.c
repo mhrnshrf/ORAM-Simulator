@@ -1926,6 +1926,7 @@ int main(int argc, char * argv[])
 					else {
 						if (tracectr < TRACE_SIZE)
 						{
+							fclose(tif[numc]);
 							tif[numc] = fopen(argv[numc+2], "r");
 							if (!tif[numc]) {
 							printf("ERROR: reopening input trace file %d.  Quitting. \n", numc);
