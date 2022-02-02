@@ -1924,7 +1924,16 @@ int main(int argc, char * argv[])
 					
 					}
 					else {
-						if (ROB[numc].inflight == 0) {
+						if (tracectr < TRACE_SIZE)
+						{
+							tif[numc] = fopen(argv[numc+2], "r");
+							if (!tif[numc]) {
+							printf("ERROR: reopening input trace file %d.  Quitting. \n", numc);
+							return -5;
+							}
+						}
+						
+						else if (ROB[numc].inflight == 0) {
 						num_done++;
 						if (!time_done[numc]) time_done[numc] = CYCLE_VAL;
 						}
