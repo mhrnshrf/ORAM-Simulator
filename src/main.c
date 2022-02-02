@@ -1665,7 +1665,21 @@ int main(int argc, char * argv[])
 					}
 					
 					cache_clk++;
-					if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+
+					if (!fgets(newstr,MAXTRACELINESIZE,tif[numc]))
+					{
+						fclose(tif[numc]);
+						tif[numc] = fopen(argv[numc+2], "r");
+						if (!tif[numc]) {
+							printf("ERROR: reopening input trace file %d.  Quitting. \n", numc);
+							return -5;
+						}
+						fgets(newstr,MAXTRACELINESIZE,tif[numc]);
+					}
+
+
+					// if (fgets(newstr,MAXTRACELINESIZE,tif[numc])) {
+					if (tracectr < TRACE_SIZE) {
 						// printf("while readline trace ctr: %d  \n", tracectr);
 						// if (fgets(shadstr,MAXTRACELINESIZE,shadtif[numc]))
 						// {
@@ -1709,7 +1723,7 @@ int main(int argc, char * argv[])
 								// {
 								// 	printf("scanf @ %d\n", tracectr);
 								// }
-							
+								
 								tracectr++;
 								tracectr_test++;
 							if (opertype[numc] == 'R') {
