@@ -2241,6 +2241,8 @@ void write_path(int label){
         }
         
         GlobTree[index].reshuffled = 0;
+        
+        update_count_stat(GlobTree[index].count, i);
 
         write_bucket(index, label, i, 'e', true);
         continue;
@@ -2250,7 +2252,7 @@ void write_path(int label){
       {
         ref_close[i]++;
       }
-      update_count_stat(GlobTree[index].count, i);
+      
       GlobTree[index].count = 0; // for ring oram evict path
       // GlobTree[index].s = LS[i];
 
@@ -7057,6 +7059,7 @@ void export_csv(char * argv[]){
   // fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   // fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
   fprintf(fp, "deadctr,%lld\n", deadctr);
+  fprintf(fp, "stash_hit,%d\n", stash_hit);
   // for (int i = 0; i < 31; i++)
   // {
   //   fprintf(fp, "%dm,%lld\n", i*10, deadarr[i]);
@@ -7117,7 +7120,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "dead_dram,%lld\n", dead_dram);
   // print_lifetime_stat(fp);
   
-  // print_count_stat(fp);
+  
   // long long int all_r = 0;
   // long long int all_w = 0;
 
@@ -7264,68 +7267,70 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "deadctr_arr[%d],%lld\n", i, deadctr_arr[i]);
   }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "deadQ_ov[%d],%lld\n", i, deadQ_ov[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "deadQ_empty_s6[%d],%lld\n", i, deadQ_empty_s6[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "deadQ_empty_s7[%d],%lld\n", i, deadQ_empty_s7[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "Q_serve_under[%d],%lld\n", i, Q_serve_under[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "Q_serve_over[%d],%lld\n", i, Q_serve_over[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "cap_Q_full[%d],%lld\n", i, cap_Q_full[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "cap_Q_notfull[%d],%lld\n", i, cap_Q_notfull[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "dead_gathered[%d],%d\n", i, dead_gathered[i]);
-  }
-  // for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+
+  // for (int i = GATHER_START; i < LEVEL; i++)
   // {
-  //   for (int j = 0; j < RING_S; j++)
-  //   {
-  //     fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
-  //   }
+  //   fprintf(fp, "deadQ_ov[%d],%lld\n", i, deadQ_ov[i]);
   // }
-  // for (int i = 0; i < MAX_SHUF + 2; i++)
+  // for (int i = GATHER_START; i < LEVEL; i++)
   // {
-  //   fprintf(fp, "ep_shuf[%d],%d\n", i, ep_shuf[i]);
+  //   fprintf(fp, "deadQ_empty_s6[%d],%lld\n", i, deadQ_empty_s6[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "deadQ_empty_s7[%d],%lld\n", i, deadQ_empty_s7[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "Q_serve_under[%d],%lld\n", i, Q_serve_under[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "Q_serve_over[%d],%lld\n", i, Q_serve_over[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "cap_Q_full[%d],%lld\n", i, cap_Q_full[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "cap_Q_notfull[%d],%lld\n", i, cap_Q_notfull[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "dead_gathered[%d],%d\n", i, dead_gathered[i]);
   // }
 
-  fprintf(fp, "stash_hit,%d\n", stash_hit);
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  {
+    for (int j = 0; j < RING_S; j++)
+    {
+      fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
+    }
+  }
+  for (int i = 0; i < MAX_SHUF + 2; i++)
+  {
+    fprintf(fp, "ep_shuf[%d],%d\n", i, ep_shuf[i]);
+  }
 
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "dead_encountered[%d],%d\n", i, dead_encountered[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "dead_shadowed[%d],%d\n", i, dead_shadowed[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "dead_scan[%d],%d\n", i, dead_scan[i]);
-  }
-  for (int i = GATHER_START; i < LEVEL; i++)
-  {
-    fprintf(fp, "shad_added[%d],%d\n", i, shad_added[i]);
-  }
+  
+
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "dead_encountered[%d],%d\n", i, dead_encountered[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "dead_shadowed[%d],%d\n", i, dead_shadowed[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "dead_scan[%d],%d\n", i, dead_scan[i]);
+  // }
+  // for (int i = GATHER_START; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "shad_added[%d],%d\n", i, shad_added[i]);
+  // }
   fprintf(fp, "same_bucket,%d\n", same_bucket);
   fprintf(fp, "remote_under,%lld\n", remote_under_w - remote_under_r);
   fprintf(fp, "remote_over,%lld\n", remote_over_w - remote_over_r);
@@ -7335,6 +7340,8 @@ void export_csv(char * argv[]){
   // }
 
   print_lifetime_stat(fp);
+
+  print_count_stat(fp);
 
   // char real[5] = "real";
   // char dum[5] = "dum";
