@@ -2242,7 +2242,8 @@ void write_path(int label){
         
         GlobTree[index].reshuffled = 0;
 
-        int curcount = GlobTree[index].count + GlobTree[calc_super_in_tree(index)].count;
+        // int curcount = GlobTree[index].count + GlobTree[calc_super_in_tree(index)].count;
+        int curcount = GlobTree[index].count + shuf * RING_S;
         update_count_stat(curcount, i);
 
         write_bucket(index, label, i, 'e', true);
