@@ -602,8 +602,12 @@ void update_count_stat(int count, int level){
       {
         count_max[level] = count;
       }
-      count_sum[level] += count;
-      count_count[level]++; 
+      if (count != 0)
+      {
+        count_sum[level] += count;
+        count_count[level]++; 
+      }
+      
     }
   // }
   
