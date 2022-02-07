@@ -6813,6 +6813,14 @@ void print_lifetime_stat(FILE *fp){
   {
     fprintf(fp, "lft_unused_count[%d],%d\n", i, lft_unused_count[i]);
   }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "lft_unused_min[%d],%d\n", i, lft_unused_min[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "lft_unused_max[%d],%d\n", i, lft_unused_max[i]);
+  }
 }
 
 void print_count_stat(FILE *fp){
@@ -7386,9 +7394,10 @@ void export_csv(char * argv[]){
   //   fprintf(fp, "ddctr_arr[%d],%d\n", i, ddctr_arr[i]);
   // }
 
+  print_count_stat(fp);
+  
   print_lifetime_stat(fp);
 
-  print_count_stat(fp);
 
   // char real[5] = "real";
   // char dum[5] = "dum";
