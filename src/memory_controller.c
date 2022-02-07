@@ -74,9 +74,12 @@ int lifetime_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
 int lifetime_max[LEVEL] = {0};
 long long int lifetime_sum[LEVEL] = {0};
 int lifetime_count[LEVEL] = {0};
+
+
 long long int lft_unused_sum[LEVEL] = {0};
 int lft_unused_count[LEVEL] = {0};
-
+int lft_unused_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
+int lft_unused_max[LEVEL] = {0};
 
 int count_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
 int count_max[LEVEL] = {0};
@@ -587,6 +590,25 @@ void update_lifetime_stat(int lifetime, int level){
       }
       lifetime_sum[level] += lifetime;
       lifetime_count[level]++; 
+    }
+  // }
+  
+}
+void update_lft_unused_stat(int lifetime, int unused, int level){
+  // if (tracectr > WARMUP_TREE)
+  // {
+    if (lifetime != 0)
+    {
+      if (lft_unused_min[level] > lifetime ) //&& lifetime != 1) 
+      {
+        lft_unused_min[level] = lifetime;
+      }
+      if (lft_unused_max[level] < lifetime)
+      {
+        lft_unused_max[level] = lifetime;
+      }
+      lft_unused_count[level] += unused;
+      lft_unused_sum[level] += (lifetime*unused);
     }
   // }
   
@@ -6184,8 +6206,8 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
   }
 
   int unused = RING_S - GlobTree[index].dumdead;
-  lft_unused_count[level] += unused;
-  lft_unused_sum[level] += ((ringctr - GlobTree[index].last_refresh)*unused);
+  update_lft_unused_stat((ringctr - GlobTree[index].last_refresh), unused, level);
+
   GlobTree[index].last_refresh = ringctr;
 
   GlobTree[index].count = 0;
