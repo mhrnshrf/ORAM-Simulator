@@ -74,7 +74,7 @@ int lifetime_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
 int lifetime_max[LEVEL] = {0};
 long long int lifetime_sum[LEVEL] = {0};
 int lifetime_count[LEVEL] = {0};
-int lft_unused_sum[LEVEL] = {0};
+long long int lft_unused_sum[LEVEL] = {0};
 int lft_unused_count[LEVEL] = {0};
 
 
