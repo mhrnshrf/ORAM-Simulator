@@ -74,6 +74,8 @@ int lifetime_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
 int lifetime_max[LEVEL] = {0};
 long long int lifetime_sum[LEVEL] = {0};
 int lifetime_count[LEVEL] = {0};
+int lft_unused_sum[LEVEL] = {0};
+int lft_unused_count[LEVEL] = {0};
 
 
 int count_min[LEVEL] = {[0 ... LEVEL-1] = 2147483647};
@@ -247,6 +249,7 @@ typedef struct Bucket{
   char greenctr;
   char s;
   int reshuffled;
+  int last_refresh;
 }Bucket;
 
 typedef struct BucketShell{
@@ -602,11 +605,11 @@ void update_count_stat(int count, int level){
       {
         count_max[level] = count;
       }
-      if (count != 0)
-      {
+      // if (count != 0)
+      // {
         count_sum[level] += count;
         count_count[level]++; 
-      }
+      // }
       
     }
   // }
@@ -1340,6 +1343,7 @@ void oram_alloc(){
      GlobTree[i].greenctr = 0;
      GlobTree[i].s = LS[l];
      GlobTree[i].reshuffled = 0;
+     GlobTree[i].last_refresh = 0;
     for (int k = 0; k < Z; ++k)
     {
       GlobTree[i].slot[k].addr = -1;
@@ -6179,6 +6183,11 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
     }
   }
 
+  int unused = RING_S - GlobTree[index].dumdead;
+  lft_unused_count[level] += unused;
+  lft_unused_sum[level] += ((ringctr - GlobTree[index].last_refresh)*unused);
+  GlobTree[index].last_refresh = ringctr;
+
   GlobTree[index].count = 0;
   deadctr -= GlobTree[index].dumdead;
   deadctr_arr[level] -= GlobTree[index].dumdead;
@@ -6191,6 +6200,8 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
   // wb[level] += stashb4 - stashctr;
 
   GlobTree[index].s = allocated - RING_Z;
+
+  
 
   int curS = GlobTree[index].s;
   
@@ -6771,6 +6782,14 @@ void print_lifetime_stat(FILE *fp){
   for (int i = 0; i < LEVEL; i++)
   {
     fprintf(fp, "lifetime_avg[%d],%f\n", i, (double)lifetime_sum[i]/lifetime_count[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "lft_unused_avg[%d],%f\n", i, (double)lft_unused_sum[i]/lft_unused_count[i]);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "lft_unused_count[%d],%d\n", i, lft_unused_count[i]);
   }
 }
 
