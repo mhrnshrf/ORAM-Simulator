@@ -193,6 +193,7 @@ unsigned int dead_scan[LEVEL] = {0};
 unsigned int shad_added[LEVEL] = {0};
 unsigned int same_bucket = 0;
 unsigned long long int wbuck = 0;
+unsigned long long int wslot = 0;
 
 
 
@@ -5903,9 +5904,14 @@ void ring_evict_path(int label){
 
   ring_G++;
   int b4 = stashctr;
+  // unsigned long long int b4_wbuck = wbuck;
+  // unsigned long long int b4_wslot = wslot;
   read_path(label);
+  // int af = stashctr;
   write_path(label);
   wbctr += b4 - stashctr;
+  // printf("R @%d   %d    %d    :%d\n", ringctr, af - b4, af - stashctr, stashctr);
+  // printf("W @%d   %lld    %lld    :%d\n", ringctr, wbuck - b4_wbuck, wslot - b4_wslot, stashctr);
 
 
   // ring_early_reshuffle(label);
@@ -5976,7 +5982,16 @@ int calc_super_in_tree(int index){
   else{
     return index+1;
   }
+}
 
+
+int calc_super_path(int label, int level, int index){
+  if(index % 2 == 0){
+    return label-pow(2, LEVEL-1-level);
+  }
+  else{
+    return label+pow(2, LEVEL-1-level);
+  }
 }
 
 bool super_node_need_reshuffle(int index){
@@ -6035,6 +6050,18 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
 
   int available = detect_inplace_available(index, level);
 
+  // int cands = 0;
+  // if(ringctr == 550025 && level == 23 && op_type == 'r'){
+  //   for (int i = 0; i < Z; i++)
+  //   {
+  //     if (candidate[i] != -1)
+  //     {
+  //       cands++;
+  //     }
+  //   }
+  //   printf("@%d L%d  cands %d   avail %d \n", ringctr, level, cands, available);
+  // }
+
   int min = 1;
 
   if (available < RING_Z + min)
@@ -6080,6 +6107,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
     if (level >= TOP_CACHE_VAR)
     {
       inplacectr++;
+      wslot++;
     }
     
 
@@ -6135,6 +6163,10 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
         s_underctr++;
         GlobTree[index].slot[j].valid = true;
         allocated++;
+        if (level >= TOP_CACHE_VAR)
+        {
+          wslot++;
+        }
         if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           // bool nvm_access = is_nvm_addr(mem_addr);
@@ -6185,6 +6217,10 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
         s_overctr++;
         GlobTree[index].slot[j].valid = true;
         allocated++;
+        if (level >= TOP_CACHE_VAR)
+        {
+          wslot++;
+        }
         if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
         {
           // bool nvm_access = is_nvm_addr(mem_addr);
@@ -6278,7 +6314,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
   }
   if (SUPER_ENABLE && is_super_level(level) && first_super)
   {
-    write_bucket(calc_super_in_tree(index), label, level, op_type, false);
+    write_bucket(calc_super_in_tree(index), calc_super_path(label, level, index), level, op_type, false);
   }
   
 }
@@ -6590,6 +6626,7 @@ void ring_early_reshuffle(int label){
 
     if (must_reshuffle)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
+      int stash_b4 = stashctr;
       if (curS > 0 && curS <= RING_S )
       {
         if (i >= GATHER_START)
@@ -6605,8 +6642,16 @@ void ring_early_reshuffle(int label){
       }
 
       read_bucket(index, i, 'r', 0, true);
+      
+      int afterR = stashctr;
       // write phase: 
       write_bucket(index, label, i, 'r', true);
+
+      if(stashctr > stash_b4){
+        // printf("\n@%d L%d      b4 %d     af %d   %d\n", ringctr, i, stash_b4, stashctr, stash_b4-stashctr);
+        printf("\n@%d L%d      b4 %d    mid %d  af %d   %d  read %d\n", ringctr, i, stash_b4, afterR, stashctr, stash_b4-stashctr, afterR-stash_b4 );
+        exit(1);
+      }
       
 
      
@@ -7036,7 +7081,7 @@ void export_csv(char * argv[]){
   }
 
   fprintf(fp,"Benchmark,%s\n", bench);
-  // fprintf(fp,"Experiment,%s\n", exp_name);
+  fprintf(fp,"Experiment,%s\n", exp_name);
   fprintf(fp,"exe_time,%f\n", exe_time);
   fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
   fprintf(fp,"tracectr,%d\n", tracectr);
