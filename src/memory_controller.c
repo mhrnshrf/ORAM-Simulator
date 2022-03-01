@@ -1265,13 +1265,13 @@ void set_to_serves(){
   {
     dram_to_serve_o = NVM_START - TOP_CACHE;
     nvm_to_serve_o = LEVEL - NVM_START;
-    dram_to_serve_e_r = (NVM_START - TOP_CACHE)*(RING_Z); 
+    dram_to_serve_e_r = (NVM_START - TOP_CACHE)*((LZ[0] - LS[0])); 
     // dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
-    nvm_to_serve_e_r = (LEVEL - NVM_START)*(RING_Z);
+    nvm_to_serve_e_r = (LEVEL - NVM_START)*((LZ[0] - LS[0]));
     // nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
-    dram_to_serve_r_r = 1*(RING_Z);
+    dram_to_serve_r_r = 1*((LZ[0] - LS[0]));
     dram_to_serve_r_w = 1*(Z);
-    nvm_to_serve_r_r = 1*(RING_Z);
+    nvm_to_serve_r_r = 1*((LZ[0] - LS[0]));
     nvm_to_serve_r_w = 1*(Z);
     dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
     dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
@@ -1290,8 +1290,8 @@ void set_to_serves(){
     
     if (DYNAMIC_S && DEAD_ENABLE)
     {
-      dram_to_serve_e_w = (LEVEL - TOP_CACHE)*(RING_Z+1);
-      dram_to_serve_r_w = 1*(RING_Z+1);
+      dram_to_serve_e_w = (LEVEL - TOP_CACHE)*((LZ[0] - LS[0])+1);
+      dram_to_serve_r_w = 1*((LZ[0] - LS[0])+1);
     }
     
     // nvm_to_serve_m_r = (LEVEL - NVM_START)*(1);
@@ -1913,8 +1913,8 @@ void read_path(int label){
               reqmade++;
               if (RING_ENABLE)
               {
-                if (i == TOP_CACHE_VAR && reqmade == RING_Z)
-                // if (i == LEVEL_VAR-1 && reqmade == RING_Z)
+                if (i == TOP_CACHE_VAR && reqmade == (LZ[i] - LS[i]))
+                // if (i == LEVEL_VAR-1 && reqmade == (LZ[i] - LS[i]))
                 {
                   last_read = true;
                   // printf("reqmade is true\n");
@@ -2020,7 +2020,7 @@ void read_path(int label){
         if (RING_ENABLE && i >= TOP_CACHE_VAR)
         {
           int reqcont = reqmade;
-          for (int k = 0; k < RING_Z-reqmade-GREEN_BLOCK; k++)
+          for (int k = 0; k < (LZ[i] - LS[i])-reqmade-GREEN_BLOCK; k++)
           {
             int ri = -1;
             int sd = -1;
@@ -2032,8 +2032,8 @@ void read_path(int label){
 
             reqcont++;
 
-            if (i == TOP_CACHE_VAR && reqcont == RING_Z)
-            // if (i == LEVEL_VAR-1 && reqcont == RING_Z)
+            if (i == TOP_CACHE_VAR && reqcont == (LZ[i] - LS[i]))
+            // if (i == LEVEL_VAR-1 && reqcont == (LZ[i] - LS[i]))
             {
               // printf("reqcont is true\n");
               last_read = true;
@@ -6064,13 +6064,13 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
 
   int min = 1;
 
-  if (available < RING_Z + min)
+  if (available < (LZ[level] - LS[level]) + min)
   {
-    // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, RING_Z + min);
+    // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, (LZ[i] - LS[i]) + min);
     // exit(1);
   }
 
-  // GlobTree[index].s = available - RING_Z;
+  // GlobTree[index].s = available - (LZ[i] - LS[i]);
   // printf("available %d    s %d\n", available, GlobTree[index].s);
   int real = 0;
 
@@ -6124,7 +6124,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
     }
 
     
-    if (candidate[real] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
+    if (candidate[real] != -1 && real < (LZ[level] - LS[level])) // GlobTree[index].dumnum > GlobTree[index].s)
     {
       // if (tracectr >= 39796059)
       // {
@@ -6179,7 +6179,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
         }
 
-        if (candidate[real] != -1 && real < RING_Z) // GlobTree[index].dumnum > GlobTree[index].s)
+        if (candidate[real] != -1 && real < (LZ[level] - LS[level])) // GlobTree[index].dumnum > GlobTree[index].s)
         {
           // if (tracectr >= 39796059)
           // {
@@ -6257,7 +6257,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
   GlobTree[index].dumdead = 0;
   // wb[level] += stashb4 - stashctr;
 
-  GlobTree[index].s = allocated - RING_Z;
+  GlobTree[index].s = allocated - (LZ[level] - LS[level]);
 
   
 
@@ -6408,7 +6408,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             bool nvm_access = in_nvm(i);
             bool beginning = (op_type == 'r') ? (reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
             bool ending = false;
-            bool last_read = (op_type == 'r') ? (reqmade == RING_Z) :  (i == TOP_CACHE_VAR && reqmade == RING_Z);
+            bool last_read = (op_type == 'r') ? (reqmade == (LZ[i] - LS[i])) :  (i == TOP_CACHE_VAR && reqmade == (LZ[i] - LS[i]));
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
           }
         }
@@ -6447,7 +6447,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     }
 
 
-    int remainCount = RING_Z-reqmade-GREEN_BLOCK; 
+    int remainCount = (LZ[i] - LS[i])-reqmade-GREEN_BLOCK; 
 
     if (SUPER_ENABLE && is_super_level(i))
     {
@@ -6455,7 +6455,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
       {
         // int dum_cur = count_bucket_dumvalid(index, i);
         int real_adj = count_bucket_real(calc_super_in_tree(index), i);
-        int req_to_made = RING_Z * 2;
+        int req_to_made = (LZ[i] - LS[i]) * 2;
         req_to_made = req_to_made - reqmade - real_adj;
         cur_to_read = (cand_ind < req_to_made) ? cand_ind : req_to_made;
         if (cur_to_read < req_to_made)
@@ -6499,7 +6499,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
         printf("ERROR: read bucket @%d L%d remainCount %d residue %d  cand %d   first %d  reqmade %d\n", tracectr, i, remainCount, residue,  cand_ind, first_super, reqmade);
         exit(1);
       }
-      // int remaining = (SUPER_ENABLE && is_super_level(i) && (residue != 0)) ? residue : RING_Z-reqmade-GREEN_BLOCK;
+      // int remaining = (SUPER_ENABLE && is_super_level(i) && (residue != 0)) ? residue : (LZ[i] - LS[i])-reqmade-GREEN_BLOCK;
       for (int k = 0; k < remainCount; k++)
       {
         int ri = -1;
@@ -6529,7 +6529,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             bool nvm_access = in_nvm(i);
             bool beginning = (op_type == 'r') ? (reqcont == 1) : (i ==  LEVEL_VAR-1 && reqcont == 1);
             bool ending = false;
-            bool last_read = (op_type == 'r') ? (reqcont == RING_Z) :  (i == TOP_CACHE_VAR && reqcont == RING_Z);
+            bool last_read = (op_type == 'r') ? (reqcont == (LZ[i] - LS[i])) :  (i == TOP_CACHE_VAR && reqcont == (LZ[i] - LS[i]));
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
         }
@@ -7272,10 +7272,10 @@ void export_csv(char * argv[]){
 
   // fprintf(fp, "online_wait_dram_perAcc,%f\n", (double)online_wait_dram/((ringctr*draml)/NUM_CHANNELS));
   // fprintf(fp, "online_wait_nvm_perAcc,%f\n", (double)online_wait_nvm/((ringctr*nvml)/ceil((double)nvml/NUM_CHANNELS)));
-  // fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  // fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  // fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
-  // fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*RING_Z+RING_S))/NUM_CHANNELS));
+  // fprintf(fp, "evict_wait_dram_perAcc,%f\n", (double)evict_wait_dram/((ring_evictctr*draml*(2*(LZ[i] - LS[i])+RING_S))/NUM_CHANNELS));
+  // fprintf(fp, "evict_wait_nvm_perAcc,%f\n", (double)evict_wait_nvm/((ring_evictctr*nvml*(2*(LZ[i] - LS[i])+RING_S))/NUM_CHANNELS));
+  // fprintf(fp, "reshuffle_wait_dram_perAcc,%f\n", (double)reshuffle_wait_dram/((shuffctr_dram*1*(2*(LZ[i] - LS[i])+RING_S))/NUM_CHANNELS));
+  // fprintf(fp, "reshuffle_wait_nvm_perAcc,%f\n", (double)reshuffle_wait_nvm/((shuffctr_nvm*1*(2*(LZ[i] - LS[i])+RING_S))/NUM_CHANNELS));
   // fprintf(fp, "meta_wait_dram_perAcc,%f\n", (double)meta_wait_dram/(((ring_evictctr+ringctr)*(nvml+draml)*2)/NUM_CHANNELS));
 
   // fprintf(fp, "odram,%d\n", odram);
