@@ -639,7 +639,7 @@ void update_count_stat(int count, int level){
   
 }
 
-int calc_space(int * lz){
+int calc_space(const int * lz){
   int sum = 0;
   for (int i = 0; i < LEVEL; i++)
   {
@@ -7442,6 +7442,10 @@ void export_csv(char * argv[]){
   print_count_stat(fp);
   
   print_lifetime_stat(fp);
+
+  int full[LEVEL] = {[0 ... LEVEL-1] = Z};
+  fprintf(fp, "space,%d\n", calc_space(LZ));
+	fprintf(fp, "space_ratio,%f%%\n",  100*(double)calc_space(LZ)/calc_space(full));
 
 
   // char real[5] = "real";

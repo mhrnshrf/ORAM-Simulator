@@ -65,7 +65,7 @@
 // #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 17   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17  ds15 ~> 14
-#define L3 19   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22  ds15 ~> 22
+#define L3 22   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22  ds15 ~> 22
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree invariant
@@ -146,7 +146,7 @@ enum{
   Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1    Z-5
   Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
   Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z:Z,   // # slots per bucket upto L3   Z-10
-  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-4: Z,
+  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-5: Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + ((RING_ENABLE)?Z4:Z)*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
@@ -497,6 +497,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super);
 int decide_which_super(int index, int i, int addr);
 int count_bucket_dumvalid(int index, int i);
 int calc_super_path(int label, int level, int index);
+int calc_space(const int * lz);
 // Mehrnoosh.
 
 

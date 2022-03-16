@@ -236,6 +236,10 @@ void print_oram_params(){
 	printf("\n= %d ~> oram path length\n", oram_path_length);
 	printf("  %d ~> oram effective path length\n\n", oram_effective_pl);
 
+	printf("%d\n", calc_space(LZ));
+	int full[LEVEL] = {[0 ... LEVEL-1] = Z};
+	printf("%f%%\n",  100*(double)calc_space(LZ)/calc_space(full));
+
 	printf("\n....................................................\n");
 	printf("                  Cache Config\n");
 	printf("....................................................\n");
@@ -334,6 +338,7 @@ void print_oram_params(){
 	// printf("  %d ~> ring oram effective s\n\n", ring_oram_effective_pl);
 	
 
+	
 	
 	printf("\n....................................................\n\n\n\n\n");
 
