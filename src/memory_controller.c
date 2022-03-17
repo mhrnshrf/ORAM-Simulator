@@ -1872,7 +1872,7 @@ void read_path(int label){
           int cand_ind = 0;
         // }
 
-        int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
+        int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
 
         if (slotCount < 0 || slotCount > Z)
         {
@@ -5471,7 +5471,7 @@ int calc_mem_addr(int index, int offset, char type)
 
 
 int decide_which_super(int index, int i, int addr){
-  int slotCount = DYNAMIC_S ? Z : LZ_VAR[i]; 
+  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i]; 
   int valid = 0;
   for (int j = 0; j < slotCount; j++)
   {
@@ -5553,11 +5553,11 @@ void ring_read_path(int label, int addr){
     }
     
 
-    int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
+    int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
 
     if (slotCount < 0 || slotCount > Z)
     {
-      printf("ERROR: ring read path slot count %d out of range!\n", slotCount);
+      printf("ERROR: ring read path L%d slot count %d out of range!\n", i, slotCount);
       exit(1);
     }
     
@@ -6320,7 +6320,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
 }
 
 int count_bucket_dumvalid(int index, int i){
-  int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
+  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
   int dumvalid =0;
   for (int j = 0; j < slotCount; j++)
   {
@@ -6335,7 +6335,7 @@ int count_bucket_dumvalid(int index, int i){
 
 
 int count_bucket_real(int index, int i){
-  int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
+  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
   int real =0;
   for (int j = 0; j < slotCount; j++)
   {
@@ -6378,7 +6378,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
       GlobTree[index].reshuffled++;
     }
 
-    int slotCount = DYNAMIC_S ? Z : LZ_VAR[i];  
+    int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
 
     if (slotCount < 0 || slotCount > Z)
     {
@@ -7186,21 +7186,23 @@ void export_csv(char * argv[]){
   //   }
   // }
   fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
-  fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
+  // fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
   fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
-  fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
+  fprintf(fp, "dram_total_acc,%lld\n", dram_norm_w + dram_norm_r);
+
+  // fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
   fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
   fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
-  fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
-  fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
+  // fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
+  // fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
   fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
   fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
-  fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
-  fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
+  // fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
+  // fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
   // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
   // fprintf(fp, "deadQ-size,%d\n", deadQ->size);
   fprintf(fp, "remote_drams,%lld\n", dram_remote_w - dram_remote_r);
-  fprintf(fp, "remote_nvms,%d\n", remote_nvms);
+  // fprintf(fp, "remote_nvms,%d\n", remote_nvms);
 
   // fprintf(fp, "dram_elselevel,%lld\n", dram_elselevel);
   // fprintf(fp, "nvm_elselevel,%lld\n", nvm_elselevel);

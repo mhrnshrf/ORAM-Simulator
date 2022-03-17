@@ -2352,7 +2352,7 @@ int main(int argc, char * argv[])
     core_power = core_power/2.0 ;
   }
 
-  printf("Exporing csv...\n");
+  printf("Exporting csv...\n");
   export_csv(argv);
 
 
