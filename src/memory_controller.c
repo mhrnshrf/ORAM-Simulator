@@ -4951,19 +4951,22 @@ int remote_allocate(int index, int offset){
   //   }
   // }
 
-  if (i == -1 && j == -1)
-  {
-    bool found = scan_entire_level(level, index, &i, &j);
-    if (found && (i == -1 || j == -1))
-    {
-      printf("ERROR: remote allocate scan found but inputs not set!\n");
-      exit(1);
-    }
-    else if(found)
-    {
-      dead_scan[level]++;
-    }
-  }
+
+
+
+  // if (i == -1 && j == -1)
+  // {
+  //   bool found = scan_entire_level(level, index, &i, &j);
+  //   if (found && (i == -1 || j == -1))
+  //   {
+  //     printf("ERROR: remote allocate scan found but inputs not set!\n");
+  //     exit(1);
+  //   }
+  //   else if(found)
+  //   {
+  //     dead_scan[level]++;
+  //   }
+  // }
   
 
   if (i != -1 && j != -1)
