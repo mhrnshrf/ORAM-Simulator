@@ -4868,7 +4868,7 @@ int remote_allocate(int index, int offset){
 
   // printf("level %d \n", level);
   // preferred level to look for dead blk
-  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > 0.5 * deadQ_arr[level]->limit)
+  if (offset < LZ_VAR[level] || deadQ_arr[level]->size > REMOTE_ALLOC_RATIO * deadQ_arr[level]->limit)
   {
     while (deadQ_arr[level]->size > 0)
     {
