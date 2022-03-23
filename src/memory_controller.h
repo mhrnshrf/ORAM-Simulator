@@ -65,7 +65,7 @@
 // #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 12   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17  ds15 ~> 14
-#define L3 19   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22  ds15 ~> 22
+#define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22  ds15 ~> 22
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree invariant
