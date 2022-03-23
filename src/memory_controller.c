@@ -7088,15 +7088,60 @@ void export_csv(char * argv[]){
 
   fprintf(fp,"Benchmark,%s\n", bench);
   fprintf(fp,"Experiment,%s\n", exp_name);
-  fprintf(fp,"exe_time,%f\n", exe_time);
-  fprintf(fp,"CYCLE_VAL,%lld\n", CYCLE_VAL);
+  fprintf(fp,"Time,%f\n", exe_time);
+  fprintf(fp,"Cycles,%lld\n", CYCLE_VAL);
+
+  fprintf(fp, "DEAD_ENABLE,%d\n",  DEAD_ENABLE);
+  fprintf(fp, "DYNAMIC_S,%d\n",  DYNAMIC_S);
+  fprintf(fp, "CB_ENABLE,%d\n",  CB_ENABLE);
+
+  fprintf(fp, "RSTL_ENABLE,%d\n",  RSTL_ENABLE);
+  fprintf(fp, "RING_ZSTL,%d\n",  RING_ZSTL); 
+
+  fprintf(fp, "TRACE_SIZE,%lld\n",  TRACE_SIZE);
+  fprintf(fp, "WARMUP_TREE,%d\n",  WARMUP_TREE);
+  fprintf(fp, "WARMUP_CACHE,%lld\n",  WARMUP_CACHE);
+  fprintf(fp, "DEADQ_SIZE,%d\n",  DEADQ_SIZE);
+  fprintf(fp, "GATHER_OFFSET,%d\n",  DEAD_GATHER_OFFSET);
+  fprintf(fp, "REMOTE_RATIO,%f\n",  REMOTE_ALLOC_RATIO);
+  fprintf(fp, "REMOTE_CAP,%d\n",  REMOTE_CAP);
+  fprintf(fp, "CB_MAX,%d\n",  CB_GREEN_MAX);
+  fprintf(fp, "S_INC,%d\n",  S_INC);
+
+
+  fprintf(fp, "LEVEL,%d\n",  LEVEL);
+	fprintf(fp, "PATH ,%d\n",  PATH);
+	fprintf(fp, "NODE ,%d\n", NODE);
+	fprintf(fp, "SLOT ,%d\n", SLOT);
+	fprintf(fp, "BLOCK,%d\n", BLOCK);
+	fprintf(fp, "Z    ,%d\n", Z);
+  // fprintf("L1,%d", L1);
+	// fprintf("L2,%d",L2);
+	// fprintf("L3,%d",L3);
+  // fprintf("Z1,%d",Z1);
+	// fprintf("Z2,%d",Z2);
+	// fprintf("Z3,%d",Z3);
+	// fprintf("Z4,%d",Z4);
+  int ePL =0;
+  for (int i = TOP_CACHE; i < LEVEL; i++)
+	{
+	  fprintf(fp, "L%d,%d+%d\n",i, LZ[i]-LS[i], LS[i]);
+		ePL += LZ[i];
+	}
+	fprintf(fp, "ePL,%d\n",ePL);
+  int full[LEVEL] = {[0 ... LEVEL-1] = Z};
+  fprintf(fp, "space,%d\n", calc_space(LZ));
+	fprintf(fp, "space_ratio,%f%%\n",  100*(double)calc_space(LZ)/calc_space(full));
+
+  
+
+
   fprintf(fp,"tracectr,%d\n", tracectr);
   // fprintf(fp, "mem_clk,%lld\n", mem_clk);
   fprintf(fp, "invokectr,%d\n", invokectr);
   // fprintf(fp, "oramctr,%d\n", oramctr);
   fprintf(fp, "ringctr,%d\n", ringctr);
   fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
-  fprintf(fp, "shuffctr,%d\n", shuffctr);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
   // fprintf(fp, "dummyctr,%d\n", dummyctr);
   fprintf(fp, "pos1_access,%d\n", pos1_access);
@@ -7113,8 +7158,8 @@ void export_csv(char * argv[]){
   // fprintf(fp, "oramQ_size,%d\n", oramQ->size);
   // fprintf(fp, "Bk_Evict,%f%%\n", 100*(double)bkctr/(oramctr+bkctr));
   // fprintf(fp, "Bk_Evict,%d\n", bkctr);
-  fprintf(fp, "Cache_Hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
-  fprintf(fp, "Cache Evict,%f%%\n", 100*(double)evictctr/(missctr));
+  fprintf(fp, "cache_hit,%f%%\n", 100*(double)hitctr/(hitctr+missctr));
+  fprintf(fp, "cache_evict,%f%%\n", 100*(double)evictctr/(missctr));
   fprintf(fp, "hitctr,%d\n", hitctr);
   fprintf(fp, "missctr,%d\n", missctr);
   fprintf(fp, "rmiss,%d\n", rmiss);
@@ -7317,6 +7362,7 @@ void export_csv(char * argv[]){
   {
     fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
   }
+  fprintf(fp, "shuffctr,%d\n", shuffctr);
 
   // for (int i = 0; i < LEVEL; i++)
   // {
@@ -7369,13 +7415,13 @@ void export_csv(char * argv[]){
   // {
   //   fprintf(fp, "s_under[%d],%d\n", i, s_under[i]);
   // }
+  fprintf(fp, "deadQs,%d\n", calc_deadQ_size());
+  fprintf(fp, "dead_dram,%lld\n", dead_dram);
   for (int i = 0; i < LEVEL; i++)
   {
     fprintf(fp, "deadctr_arr[%d],%lld\n", i, deadctr_arr[i]);
   }
   fprintf(fp, "deadctr,%lld\n", deadctr);
-  fprintf(fp, "dead_dram,%lld\n", dead_dram);
-  fprintf(fp, "deadQs,%d\n", calc_deadQ_size());
 
   // for (int i = GATHER_START; i < LEVEL; i++)
   // {
@@ -7452,9 +7498,7 @@ void export_csv(char * argv[]){
   
   // print_lifetime_stat(fp);
 
-  int full[LEVEL] = {[0 ... LEVEL-1] = Z};
-  fprintf(fp, "space,%d\n", calc_space(LZ));
-	fprintf(fp, "space_ratio,%f%%\n",  100*(double)calc_space(LZ)/calc_space(full));
+  
 
 
   // char real[5] = "real";
