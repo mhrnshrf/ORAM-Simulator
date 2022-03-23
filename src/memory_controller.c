@@ -6211,35 +6211,38 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
       }
     }
     int inc_var = (SUPER_ENABLE && is_super_level(level)) ? S_INC/2 : S_INC;
-    for (int j = LZ_VAR[level]; j < LZ_VAR[level] + inc_var; j++)
+    if(true)//(op_type == 'e')
     {
-      extendctr++;
-      int mem_addr = calc_mem_addr(index, j, 'W');
-      if (mem_addr != -1)
+      for (int j = LZ_VAR[level]; j < LZ_VAR[level] + inc_var; j++)
       {
-        s_overctr++;
-        GlobTree[index].slot[j].valid = true;
-        allocated++;
-        if (level >= TOP_CACHE_VAR)
+        extendctr++;
+        int mem_addr = calc_mem_addr(index, j, 'W');
+        if (mem_addr != -1)
         {
-          wslot++;
+          s_overctr++;
+          GlobTree[index].slot[j].valid = true;
+          allocated++;
+          if (level >= TOP_CACHE_VAR)
+          {
+            wslot++;
+          }
+          if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+          {
+            // bool nvm_access = is_nvm_addr(mem_addr);
+            bool nvm_access = in_nvm(level);
+            bool beginning = false;
+            // bool ending = (j == LZ_VAR[i]-1);
+            // bool last_read = (j == LZ_VAR[i]-1);
+            bool ending = false;
+            bool last_read = false;
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
+          }
+          // GlobTree[index].s++;
         }
-        if (level >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+        else
         {
-          // bool nvm_access = is_nvm_addr(mem_addr);
-          bool nvm_access = in_nvm(level);
-          bool beginning = false;
-          // bool ending = (j == LZ_VAR[i]-1);
-          // bool last_read = (j == LZ_VAR[i]-1);
-          bool ending = false;
-          bool last_read = false;
-          insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
+          break;
         }
-        // GlobTree[index].s++;
-      }
-      else
-      {
-        break;
       }
     }
   }
