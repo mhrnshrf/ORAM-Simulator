@@ -5595,7 +5595,7 @@ void ring_read_path(int label, int addr){
       }
     }
     
-    if(!contain_intended)
+    if(!contain_intended && !CB_ENABLE)
     {
       int dv = count_bucket_dumvalid(index, i);
       if (dv == 0)
@@ -6280,12 +6280,12 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
       }
     }
   }
-  else
-  {
-    printf("ERROR: write bucket @ L%d cur S %d out of range!\n", level, curS);
-    export_csv(pargv);
-    exit(1);
-  }
+  // else
+  // {
+  //   printf("ERROR: write bucket @ L%d cur S %d out of range!\n", level, curS);
+  //   export_csv(pargv);
+  //   exit(1);
+  // }
   
   if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   {
@@ -6641,11 +6641,11 @@ void ring_early_reshuffle(int label){
         }
         
       }
-      else
-      {
-        printf("ERROR: early reshuffle cur S %d our of range!\n", curS);
-        exit(1);
-      }
+      // else
+      // {
+      //   printf("ERROR: early reshuffle cur S %d our of range!\n", curS);
+      //   exit(1);
+      // }
 
       read_bucket(index, i, 'r', 0, true);
       
