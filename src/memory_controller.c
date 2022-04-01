@@ -6769,7 +6769,7 @@ void ring_early_reshuffle(int label){
 
 
 void ring_invalidate(int index, int offset){
-   if (!GlobTree[index].slot[offset].valid)
+   if (!GlobTree[index].slot[offset].valid && !CB_ENABLE)
   {
     printf("invalidate an invalid block @ %d\n", tracectr);
     exit(1);
