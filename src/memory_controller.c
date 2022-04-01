@@ -7141,9 +7141,9 @@ void export_csv(char * argv[]){
   fprintf(fp, "invokectr,%d\n", invokectr);
   // fprintf(fp, "oramctr,%d\n", oramctr);
   fprintf(fp, "ringctr,%d\n", ringctr);
+  fprintf(fp, "ringdum,%d\n", ringdumctr);
   fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
-  // fprintf(fp, "dummyctr,%d\n", dummyctr);
   fprintf(fp, "pos1_access,%d\n", pos1_access);
   fprintf(fp, "pos2_access,%d\n", pos2_access);
   // fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
@@ -7199,7 +7199,6 @@ void export_csv(char * argv[]){
   // fprintf(fp, "missl1wb,%lld\n", missl1wb);
   // fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
   // fprintf(fp, "wbshuff,%d\n", wbshuff);
-  // fprintf(fp, "ringdumctr,%d\n", ringdumctr);
   // fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
   // fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
   // fprintf(fp, "stalectr,%d\n", stalectr);
