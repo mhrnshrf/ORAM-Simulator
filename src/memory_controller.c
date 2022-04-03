@@ -5594,24 +5594,35 @@ void ring_read_path(int label, int addr){
         break;
       }
     }
+
+    bool green_turn = false;
     
-    if(!contain_intended && !CB_ENABLE)
+    if(!contain_intended)
     {
       int dv = count_bucket_dumvalid(index, i);
-      if (dv == 0)
+      if (dv != 0)
       {
-        printf("ERROR: ring read @%d L%d index %d no valid dummy available! \n", tracectr, i, index);
-        exit(1);
+        while (GlobTree[index].slot[offset].isReal || !GlobTree[index].slot[offset].valid)
+        {
+          // if (tracectr >= 3101531)
+          // {
+          //   printf("@%d L%d while searching dum val  index %d\n", tracectr, i, index);
+          // }
+          
+          offset = rand() % slotCount;
+        }
       }
-      while (GlobTree[index].slot[offset].isReal || !GlobTree[index].slot[offset].valid)
+      else if (!CB_ENABLE)
       {
-        // if (tracectr >= 3101531)
-        // {
-        //   printf("@%d L%d while searching dum val  index %d\n", tracectr, i, index);
-        // }
-        
-        offset = rand() % slotCount;
+        {
+          printf("ERROR: ring read @%d L%d index %d no valid dummy available! \n", tracectr, i, index);
+          exit(1);
+        }
       }
+      else{
+        green_turn = true;
+      }
+      
     }
     
 
@@ -5623,7 +5634,7 @@ void ring_read_path(int label, int addr){
       
 
     // if cb enabled and runout of dummies and this bucket is not returning the block of interest, go pick a real block as a green block
-    if (CB_ENABLE && GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
+    if (CB_ENABLE && green_turn)//GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
     {
       while (!GlobTree[index].slot[offset].valid)
       {
