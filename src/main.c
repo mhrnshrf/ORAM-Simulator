@@ -1574,7 +1574,11 @@ int main(int argc, char * argv[])
 	      /* Done consuming one line of the trace file.  Read in the next. */
 		// Mehrnoosh:
 
-		
+		ring_dummy = (stashctr >= DUMMY_TH) ? true : false;
+		if (DUMMY_ENABLE && ring_dummy)
+		{
+			ring_access(-1);
+		}
 
 		if (oramQ->size == 0  && (!DUMMY_ENABLE || !ring_dummy) && (last_read_served || !WAIT_ENABLE))  /*&& last_read_served*/
 		{
@@ -1642,13 +1646,14 @@ int main(int argc, char * argv[])
 					// {
 					// 	printf("while %d\n", tracectr);
 					// }
-
-					ring_dummy = (stashctr >= DUMMY_TH) ? true : false;
-
-					if (DUMMY_ENABLE && ring_dummy)
+					if(!SIM_ENABLE_VAR)
 					{
-						ring_access(-1);
-						continue;
+						ring_dummy = (stashctr >= DUMMY_TH) ? true : false;
+						if (DUMMY_ENABLE && ring_dummy)
+						{
+							ring_access(-1);
+							continue;
+						}
 					}
 					
 					if (tracectr == WARMUP_TREE - REMOTE_START_OFF)
