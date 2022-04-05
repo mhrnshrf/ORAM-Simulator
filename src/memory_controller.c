@@ -6232,7 +6232,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
       }
     }
     int inc_var = (SUPER_ENABLE && is_super_level(level)) ? S_INC_ARR[level]/2 : S_INC_ARR[level];
-    if(op_type == 'r') // (true)
+    if(true) // (op_type == 'r')
     {
       for (int j = LZ_VAR[level]; j < LZ_VAR[level] + inc_var; j++)
       {
