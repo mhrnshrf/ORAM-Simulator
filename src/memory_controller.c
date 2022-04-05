@@ -510,6 +510,7 @@ PosType pos_var;
 bool SIM_ENABLE_VAR;
 bool CACHE_ENABLE_VAR;
 bool DEAD_ENABLE_VAR;
+int S_INC_ARR[LEVEL];
 
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
@@ -1327,6 +1328,15 @@ void oram_alloc(){
   GATHER_START = TOP_CACHE + DEAD_GATHER_OFFSET;
   GREEN_BLOCK = CB_ENABLE ? CB_GREEN_MAX : 0;
 
+  for(int i = 0; i < LEVEL; i++){
+    if(i < GATHER_START){
+      S_INC_ARR[i] = 0;
+    }
+    else{
+      S_INC_ARR[i] = RING_S - LS[i]; 
+    }
+  }
+
   if (!NVM_ENABLE)
   {
     NVM_START = LEVEL;
@@ -1872,7 +1882,7 @@ void read_path(int label){
           int cand_ind = 0;
         // }
 
-        int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
+        int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC_ARR[i]) : LZ_VAR[i];  
 
         if (slotCount < 0 || slotCount > Z)
         {
@@ -5474,7 +5484,7 @@ int calc_mem_addr(int index, int offset, char type)
 
 
 int decide_which_super(int index, int i, int addr){
-  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i]; 
+  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC_ARR[i]) : LZ_VAR[i]; 
   int valid = 0;
   for (int j = 0; j < slotCount; j++)
   {
@@ -5556,7 +5566,7 @@ void ring_read_path(int label, int addr){
     }
     
 
-    int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
+    int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC_ARR[i]) : LZ_VAR[i];  
 
     if (slotCount < 0 || slotCount > Z)
     {
@@ -6221,7 +6231,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
         break;
       }
     }
-    int inc_var = (SUPER_ENABLE && is_super_level(level)) ? S_INC/2 : S_INC;
+    int inc_var = (SUPER_ENABLE && is_super_level(level)) ? S_INC_ARR[level]/2 : S_INC_ARR[level];
     if(true)//(op_type == 'e')
     {
       for (int j = LZ_VAR[level]; j < LZ_VAR[level] + inc_var; j++)
@@ -6337,7 +6347,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
 }
 
 int count_bucket_dumvalid(int index, int i){
-  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
+  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC_ARR[i]) : LZ_VAR[i];  
   int dumvalid =0;
   for (int j = 0; j < slotCount; j++)
   {
@@ -6352,7 +6362,7 @@ int count_bucket_dumvalid(int index, int i){
 
 
 int count_bucket_real(int index, int i){
-  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
+  int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC_ARR[i]) : LZ_VAR[i];  
   int real =0;
   for (int j = 0; j < slotCount; j++)
   {
@@ -6395,7 +6405,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
       GlobTree[index].reshuffled++;
     }
 
-    int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC) : LZ_VAR[i];  
+    int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC_ARR[i]) : LZ_VAR[i];  
 
     if (slotCount < 0 || slotCount > Z)
     {
