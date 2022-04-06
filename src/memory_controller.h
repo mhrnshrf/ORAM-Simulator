@@ -143,9 +143,9 @@ enum{
   // main tree
   Z = (RING_ENABLE) ? RING_Z+RING_S : USUAL_Z,
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
-  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1    Z-5
-  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L3   Z-10
+  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z-4: Z,   // # slots per bucket upto L1    Z-5
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-4: Z,   // # slots per bucket upto L2
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-4: Z,   // # slots per bucket upto L3   Z-10
   Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-5: Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree

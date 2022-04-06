@@ -1333,7 +1333,7 @@ void oram_alloc(){
       S_INC_ARR[i] = 0;
     }
     else{
-      S_INC_ARR[i] = RING_S - LS[i]; 
+      S_INC_ARR[i] = RING_S - LS[i] - GREEN_BLOCK; 
     }
   }
 
@@ -5648,7 +5648,7 @@ void ring_read_path(int label, int addr){
     {
       while (!GlobTree[index].slot[offset].valid)
       {
-        offset = rand() % LZ_VAR[i];
+        offset = rand() % slotCount;
         // printf("trace: %d   dummy: %d\n", tracectr, ring_dummy);
       }
     }
