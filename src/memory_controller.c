@@ -5639,8 +5639,8 @@ void ring_read_path(int label, int addr){
 
     
     
-    if (!ring_dummy)
-    {
+    // if (!ring_dummy)
+    // {
       
 
     // if cb enabled and runout of dummies and this bucket is not returning the block of interest, go pick a real block as a green block
@@ -5688,7 +5688,7 @@ void ring_read_path(int label, int addr){
           supdum[sind]++;
         }
       }
-    }
+    // }
     
 
 
@@ -6290,7 +6290,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
 
   int curS = GlobTree[index].s;
   
-  if (curS > 0 && curS <= RING_S )
+  if (curS >= 0 && curS <= RING_S )
   {
     if (level >= GATHER_START)
     {
@@ -6654,7 +6654,7 @@ void ring_early_reshuffle(int label){
     if (must_reshuffle)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       int stash_b4 = stashctr;
-      if (curS > 0 && curS <= RING_S )
+      if (curS >= 0 && curS <= RING_S )
       {
         if (i >= GATHER_START)
         {
@@ -7069,9 +7069,9 @@ void export_csv(char * argv[]){
   //   perror("chdir() to log failed"); 
   // }
 
-  if (chdir("../oram/log") != 0)  
+  if (chdir("../log") != 0)  
   {
-    perror("chdir() to ../oram/log failed"); 
+    perror("chdir() to ../log failed"); 
   }
 
 
