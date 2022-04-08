@@ -5654,7 +5654,7 @@ void ring_read_path(int label, int addr){
     }
 
 
-      if (GlobTree[index].slot[offset].isReal && !(green_turn && i < TOP_CACHE))
+      if (GlobTree[index].slot[offset].isReal) //&& !(green_turn && i < TOP_CACHE))
       {
         realcount[i]++;
         if (i >= LEVEL-2)
@@ -5710,13 +5710,13 @@ void ring_read_path(int label, int addr){
 
     int mem_addr = calc_mem_addr(index, offset, 'R');
 
-    if(!(green_turn && i < TOP_CACHE))
-    {
-      ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
-      GlobTree[index].dumdead++;
-      deadctr_arr[i]++;
-      // ddctr_arr[i]++;
-    }
+    // if(!(green_turn && i < TOP_CACHE))
+    // {
+    ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
+    GlobTree[index].dumdead++;
+    deadctr_arr[i]++;
+    // ddctr_arr[i]++;
+    // }
     
 
     
