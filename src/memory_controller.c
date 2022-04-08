@@ -5654,7 +5654,7 @@ void ring_read_path(int label, int addr){
     }
 
 
-      if (GlobTree[index].slot[offset].isReal)
+      if (GlobTree[index].slot[offset].isReal && !(green_turn && i < TOP_CACHE))
       {
         realcount[i]++;
         if (i >= LEVEL-2)
@@ -5710,10 +5710,13 @@ void ring_read_path(int label, int addr){
 
     int mem_addr = calc_mem_addr(index, offset, 'R');
 
-    ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
-    GlobTree[index].dumdead++;
-    deadctr_arr[i]++;
-    // ddctr_arr[i]++;
+    if(!(green_turn && i < TOP_CACHE))
+    {
+      ring_invalidate(index, offset);     // invalidate the block (no matter the block is physically here or somewhere else)
+      GlobTree[index].dumdead++;
+      deadctr_arr[i]++;
+      // ddctr_arr[i]++;
+    }
     
 
     
@@ -7163,6 +7166,7 @@ void export_csv(char * argv[]){
   // fprintf(fp, "oramctr,%d\n", oramctr);
   fprintf(fp, "ringctr,%d\n", ringctr);
   fprintf(fp, "ringdum,%d\n", ringdumctr);
+  fprintf(fp, "dummy_ratio,%f%%\n", 100*(double)ringdumctr/(ringdumctr+ringctr));
   fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
   fprintf(fp, "pos1_access,%d\n", pos1_access);
