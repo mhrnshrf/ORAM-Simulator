@@ -1270,8 +1270,8 @@ void set_to_serves(){
     // dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
     nvm_to_serve_e_r = (LEVEL - NVM_START)*((LZ[0] - LS[0]));
     // nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
-    dram_to_serve_r_r = 1*((LZ[0] - LS[0]));
-    dram_to_serve_r_w = 1*(Z);
+    dram_to_serve_r_r = 1*((LZ[0] - LS[0] - GREEN_BLOCK));
+    dram_to_serve_r_w = 1*(LZ[0]);
     nvm_to_serve_r_r = 1*((LZ[0] - LS[0]));
     nvm_to_serve_r_w = 1*(Z);
     dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
@@ -1310,7 +1310,7 @@ void set_to_serves(){
   {
     for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
     {
-      dram_to_serve_e_r += LZ[i]; 
+      dram_to_serve_e_r += (LZ[i] - LS[i] - GREEN_BLOCK); 
       dram_to_serve_e_w += LZ[i];
     }
 
@@ -2030,7 +2030,7 @@ void read_path(int label){
         if (RING_ENABLE && i >= TOP_CACHE_VAR)
         {
           int reqcont = reqmade;
-          for (int k = 0; k < (LZ[i] - LS[i])-reqmade-GREEN_BLOCK; k++)
+          for (int k = 0; k < (LZ[i] - LS[i])-reqmade-GlobTree[index].greenctr; k++)
           {
             int ri = -1;
             int sd = -1;
@@ -2042,7 +2042,7 @@ void read_path(int label){
 
             reqcont++;
 
-            if (i == TOP_CACHE_VAR && reqcont == (LZ[i] - LS[i]))
+            if (i == TOP_CACHE_VAR && reqcont == (LZ[i] - LS[i] - GlobTree[index].greenctr))
             // if (i == LEVEL_VAR-1 && reqcont == (LZ[i] - LS[i]))
             {
               // printf("reqcont is true\n");
@@ -4571,6 +4571,10 @@ int shuf_calc(){
 
 void ring_access(int addr){
   // int before = stashctr;
+  if (ring_dummy)
+  {
+    switch_enqueue_to(HEAD);
+  }
 
   int shuf_cur = shuf_calc();
   shuf_dif = shuf_cur - shuf_prev;
@@ -4640,6 +4644,8 @@ void ring_access(int addr){
     int dead_b4 = deadctr;
     int dead_b4_dram = dead_dram;
     int b4 = stalectr;
+    
+    
     ring_evict_path(label);
     stale_reduction += b4 - stalectr;
 
@@ -4678,7 +4684,10 @@ void ring_access(int addr){
   // {
   //   printf("deadQ[%d]: %d\n", i, deadQ_arr[i]->size);
   // }
-  
+  if (ring_dummy)
+  {
+    switch_enqueue_to(TAIL);
+  }
 
 }
 
@@ -5646,6 +5655,7 @@ void ring_read_path(int label, int addr){
     // if cb enabled and runout of dummies and this bucket is not returning the block of interest, go pick a real block as a green block
     if (CB_ENABLE && green_turn)//GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
     {
+      GlobTree[index].greenctr++;
       while (!GlobTree[index].slot[offset].valid)
       {
         offset = rand() % slotCount;
@@ -6277,6 +6287,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
   GlobTree[index].last_refresh = ringctr;
 
   GlobTree[index].count = 0;
+  GlobTree[index].greenctr = 0;
   deadctr -= GlobTree[index].dumdead;
   deadctr_arr[level] -= GlobTree[index].dumdead;
 
@@ -6438,7 +6449,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             bool nvm_access = in_nvm(i);
             bool beginning = (op_type == 'r') ? (reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
             bool ending = false;
-            bool last_read = (op_type == 'r') ? (reqmade == (LZ[i] - LS[i])) :  (i == TOP_CACHE_VAR && reqmade == (LZ[i] - LS[i]));
+            bool last_read = (op_type == 'r') ? (reqmade == (LZ[i] - LS[i] - GlobTree[index].greenctr)) :  (i == TOP_CACHE_VAR && reqmade == (LZ[i] - LS[i] - GlobTree[index].greenctr));
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
           }
         }
@@ -6559,7 +6570,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             bool nvm_access = in_nvm(i);
             bool beginning = (op_type == 'r') ? (reqcont == 1) : (i ==  LEVEL_VAR-1 && reqcont == 1);
             bool ending = false;
-            bool last_read = (op_type == 'r') ? (reqcont == (LZ[i] - LS[i])) :  (i == TOP_CACHE_VAR && reqcont == (LZ[i] - LS[i]));
+            bool last_read = (op_type == 'r') ? (reqcont == (LZ[i] - LS[i] - GlobTree[index].greenctr)) :  (i == TOP_CACHE_VAR && reqcont == (LZ[i] - LS[i] - GlobTree[index].greenctr));
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
         }
@@ -7072,9 +7083,9 @@ void export_csv(char * argv[]){
   //   perror("chdir() to log failed"); 
   // }
 
-  if (chdir("../log") != 0)  
+  if (chdir("log") != 0)  
   {
-    perror("chdir() to ../log failed"); 
+    perror("chdir() to log failed"); 
   }
 
 
