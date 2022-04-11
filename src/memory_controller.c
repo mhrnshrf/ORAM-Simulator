@@ -1866,11 +1866,15 @@ void read_path(int label){
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
+
       if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
       {
         int index = calc_index(label, i);
         if (RING_ENABLE)
         {
+          if(CB_ENABLE){
+            dram_to_serve_e_r += (LZ[i] - LS[i] - GlobTree[index].greenctr);
+          }
           read_bucket(index, i, 'e', 0, true);
           continue;
         }
@@ -2258,7 +2262,9 @@ void write_path(int label){
     flush_stale(label);
   }
   
-  
+  if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
+    dram_to_serve_e_w = 0;
+  }
 
   for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
@@ -2287,7 +2293,10 @@ void write_path(int label){
         int curcount = GlobTree[index].count + shuf * RING_S;
         update_count_stat(curcount, i);
 
-        write_bucket(index, label, i, 'e', true);
+        int bs = write_bucket(index, label, i, 'e', true);
+        if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
+          dram_to_serve_e_w += bs;
+        }
         continue;
       }
       int addr = 0;
@@ -5948,6 +5957,10 @@ void ring_evict_path(int label){
   int b4 = stashctr;
   // unsigned long long int b4_wbuck = wbuck;
   // unsigned long long int b4_wslot = wslot;
+  if(CB_ENABLE){
+    dram_to_serve_e_r = 0;
+    dram_to_serve_e_w = 0;
+  }
   read_path(label);
   // int af = stashctr;
   write_path(label);
@@ -6078,7 +6091,7 @@ bool is_super_level(int level){
   return false;
 }
 
-void write_bucket(int index, int label, int level, char op_type, bool first_super){
+int write_bucket(int index, int label, int level, char op_type, bool first_super){
   wbuck++;
   int allocated = 0;
 
@@ -6104,13 +6117,13 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
   //   printf("@%d L%d  cands %d   avail %d \n", ringctr, level, cands, available);
   // }
 
-  int min = 1;
+  // int min = 1;
 
-  if (available < (LZ[level] - LS[level]) + min)
-  {
-    // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, (LZ[i] - LS[i]) + min);
-    // exit(1);
-  }
+  // if (available < (LZ[level] - LS[level]) + min)
+  // {
+  //   // printf("ERROR: write bucket @ trace %d  level %d  only %d available less than %d!\n", tracectr, level, available, (LZ[i] - LS[i]) + min);
+  //   // exit(1);
+  // }
 
   // GlobTree[index].s = available - (LZ[i] - LS[i]);
   // printf("available %d    s %d\n", available, GlobTree[index].s);
@@ -6327,10 +6340,10 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
     exit(1);
   }
   
-  if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
-  {
-    // printf("%d      shuf: %lld  dead encounter: %d\n", deadQ_arr[level]->size, shuff[LEVEL-1], dead_encountered[LEVEL-1]);
-  }
+  // if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
+  // {
+  //   // printf("%d      shuf: %lld  dead encounter: %d\n", deadQ_arr[level]->size, shuff[LEVEL-1], dead_encountered[LEVEL-1]);
+  // }
 
   if (level >= GATHER_START && DEAD_ENABLE_VAR) // && op_type == 'e')
   {
@@ -6362,7 +6375,7 @@ void write_bucket(int index, int label, int level, char op_type, bool first_supe
   {
     write_bucket(calc_super_in_tree(index), calc_super_path(label, level, index), level, op_type, false);
   }
-  
+  return allocated;
 }
 
 int count_bucket_dumvalid(int index, int i){
@@ -6407,6 +6420,9 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
       // printf("index %d\n", index);
       // printf("heloooooo\n");
       // printf("flush ctr %d\n", stale_flush_ctr);
+    if(CB_ENABLE && op_type == 'r'){
+      dram_to_serve_r_r = (LZ[i] - LS[i] - GlobTree[index].greenctr);
+    }
       
       
     
@@ -6695,7 +6711,11 @@ void ring_early_reshuffle(int label){
       
       int afterR = stashctr;
       // write phase: 
-      write_bucket(index, label, i, 'r', true);
+      int bs = write_bucket(index, label, i, 'r', true);
+
+      if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
+        dram_to_serve_r_w = bs;
+      }
 
       if(stashctr > stash_b4){
         // printf("\n@%d L%d      b4 %d     af %d   %d\n", ringctr, i, stash_b4, stashctr, stash_b4-stashctr);
@@ -9053,9 +9073,9 @@ clean_queues (int channel)
   {
     if (rd_ptr->request_served == 1)  // && rd_ptr->completion_time <= CYCLE_VAL)
     {
-      // if (tracectr >= 4200)
+      // if (tracectr >= 900000)
 			// {
-      // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
+      //   printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
 			// }
       // if (rd_ptr->countdown > 0 )
       // {
@@ -9087,9 +9107,9 @@ clean_queues (int channel)
   {
     if (wrt_ptr->request_served == 1) // && wrt_ptr->completion_time <= CYCLE_VAL)
     {
-      // if (tracectr >= 4200)
+      // if (tracectr >= 900000)
       // {
-      // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
+      //   printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
       // }
 
       // if (wrt_ptr->countdown > 0 )
@@ -9278,8 +9298,9 @@ issue_request_command (request_t * request, char rwt)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
-
-				// printf("%c %d issueR req%d	 @ %lld     comp %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, request->completion_time);
+        // if(tracectr >= 900000){
+				//   printf("%c %d issueR req%d	 @ %lld     comp %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, request->completion_time);
+        // }
         // if (request->beginning)
 				// {
 					
@@ -9436,7 +9457,9 @@ issue_request_command (request_t * request, char rwt)
       }
 
       // set the completion time of this write request
-      // printf("%c %d issueW req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
+      // if(tracectr >= 900000){
+      //   printf("%c %d issueW req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
+      // }
 
       request->completion_time = CYCLE_VAL + T_DATA_TRANS + T_WR;
      
