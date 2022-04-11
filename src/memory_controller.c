@@ -5655,13 +5655,15 @@ void ring_read_path(int label, int addr){
     // if cb enabled and runout of dummies and this bucket is not returning the block of interest, go pick a real block as a green block
     if (CB_ENABLE && green_turn)//GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
     {
-      GlobTree[index].greenctr++;
+      // GlobTree[index].greenctr++;
       while (!GlobTree[index].slot[offset].valid)
       {
         offset = rand() % slotCount;
         // printf("trace: %d   dummy: %d\n", tracectr, ring_dummy);
       }
     }
+
+    
 
 
       if (GlobTree[index].slot[offset].isReal) //&& !(green_turn && i < TOP_CACHE))
@@ -5780,7 +5782,10 @@ void ring_read_path(int label, int addr){
       }
     }
 
-
+    if(CB_ENABLE && GlobTree[index].count > GlobTree[index].s)
+    {
+      GlobTree[index].greenctr++;
+    }
      
   }
 }
@@ -6488,10 +6493,10 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     }
 
 
-    int remainCount = (LZ[i] - LS[i]) - reqmade; 
-    if(CB_ENABLE && GlobTree[index].count > LS[i]){
-      remainCount -= (GlobTree[index].count - LS[i]);
-    }
+    int remainCount = (LZ[i] - LS[i]) - reqmade - GlobTree[index].greenctr; 
+    // if(CB_ENABLE && GlobTree[index].count > LS[i]){
+    //   remainCount -= (GlobTree[index].count - LS[i]);
+    // }
 
     if (SUPER_ENABLE && is_super_level(i))
     {
