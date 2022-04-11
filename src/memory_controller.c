@@ -6488,7 +6488,10 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     }
 
 
-    int remainCount = (LZ[i] - LS[i]) - reqmade - GlobTree[index].greenctr; 
+    int remainCount = (LZ[i] - LS[i]) - reqmade; 
+    if(CB_ENABLE && GlobTree[index].count > LS[i]){
+      remainCount -= (GlobTree[index].count - LS[i]);
+    }
 
     if (SUPER_ENABLE && is_super_level(i))
     {
@@ -6538,6 +6541,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
       if (remainCount > cand_ind)
       {
         printf("ERROR: read bucket @%d L%d remainCount %d residue %d  cand %d   first %d  reqmade %d\n", tracectr, i, remainCount, residue,  cand_ind, first_super, reqmade);
+        printf("slotCount %d    greenctr %d  count %d    s %d\n", slotCount, GlobTree[index].greenctr, GlobTree[index].count, GlobTree[index].s);
         exit(1);
       }
       // int remaining = (SUPER_ENABLE && is_super_level(i) && (residue != 0)) ? residue : (LZ[i] - LS[i])-reqmade-GREEN_BLOCK;
