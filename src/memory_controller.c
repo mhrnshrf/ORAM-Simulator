@@ -6488,7 +6488,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     }
 
 
-    int remainCount = (LZ[i] - LS[i])-reqmade-GREEN_BLOCK; 
+    int remainCount = (LZ[i] - LS[i]) - reqmade - GlobTree[index].greenctr; 
 
     if (SUPER_ENABLE && is_super_level(i))
     {
