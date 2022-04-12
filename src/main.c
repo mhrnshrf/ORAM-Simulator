@@ -1075,12 +1075,12 @@ int main(int argc, char * argv[])
 
 					// if (tracectr >= 900000)
 					// {
-					// 	printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
-					// 	ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
-					// 	ROB[numc].reqid[ROB[numc].head],
-					// 	CYCLE_VAL, 
-					// 	ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
-					// 	ROB[numc].head);
+						// printf("%c %d served %c req%d @ %lld	comp time %lld	%s	rob%d \n", 
+						// ROB[numc].op_type[ROB[numc].head], ROB[numc].oramid[ROB[numc].head], ROB[numc].optype[ROB[numc].head],
+						// ROB[numc].reqid[ROB[numc].head],
+						// CYCLE_VAL, 
+						// ROB[numc].comptime[ROB[numc].head], ROB[numc].waited_on[ROB[numc].head]?" last ":" ", 
+						// ROB[numc].head);
 					// }
 					
 
@@ -1388,7 +1388,7 @@ int main(int argc, char * argv[])
 
 				// if (tracectr >= 900000)
 				// {
-				// 	printf("%c %d insertR req%d	@ %lld	beginning? %d	ending? %d 	last read? %d \n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL, beginning[numc], ending[numc], last_read[numc]);
+					// printf("%c %d insertR req%d	@ %lld	beginning? %d	ending? %d 	last read? %d \n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL, beginning[numc], ending[numc], last_read[numc]);
 				// }
 
 		  // Check to see if the read is for buffered data in write queue - 
@@ -1504,7 +1504,7 @@ int main(int argc, char * argv[])
 				// start = clock();
 				// if (tracectr >= 900000)
 				// {
-				// 	printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
+					// printf("%c %d insertW req%d	@ %lld\n", op_type[numc], oramid[numc], reqid[numc], CYCLE_VAL);
 				// }
 				
 				if (last_read[numc])
@@ -2158,7 +2158,8 @@ int main(int argc, char * argv[])
 			opertype[numc] = pN->type;
 			oramid[numc] = pN->oramid;
 			tree[numc] = pN->tree;
-			last_read[numc] = pN->last_read;
+			// last_read[numc] = pN->last_read;
+			last_read[numc] = false;
 			nvm_access[numc] = pN->nvm_access;
 
 			beginning[numc] = pN->beginning;
@@ -2173,10 +2174,10 @@ int main(int argc, char * argv[])
 			// }
 			
 
-			// if (!last_read_served)
-			// {
-			// 	printf("last read not served yet!!!\n");
-			// }
+			if (!last_read_served)
+			{
+				printf("last read not served yet!!!\n");
+			}
 			
 
 			if (pN->beginning)

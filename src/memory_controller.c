@@ -6420,9 +6420,9 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
       // printf("index %d\n", index);
       // printf("heloooooo\n");
       // printf("flush ctr %d\n", stale_flush_ctr);
-    if(CB_ENABLE && op_type == 'r'){
-      dram_to_serve_r_r = (LZ[i] - LS[i] - GlobTree[index].greenctr);
-    }
+    // if(CB_ENABLE && op_type == 'r'){
+    //   dram_to_serve_r_r = (LZ[i] - LS[i] - GlobTree[index].greenctr);
+    // }
       
       
     
@@ -6713,9 +6713,9 @@ void ring_early_reshuffle(int label){
       // write phase: 
       int bs = write_bucket(index, label, i, 'r', true);
 
-      if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
-        dram_to_serve_r_w = bs;
-      }
+      // if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
+      //   dram_to_serve_r_w = bs;
+      // }
 
       if(stashctr > stash_b4){
         // printf("\n@%d L%d      b4 %d     af %d   %d\n", ringctr, i, stash_b4, stashctr, stash_b4-stashctr);
@@ -9075,7 +9075,7 @@ clean_queues (int channel)
     {
       // if (tracectr >= 900000)
 			// {
-      //   printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
+        // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
 			// }
       // if (rd_ptr->countdown > 0 )
       // {
@@ -9109,7 +9109,7 @@ clean_queues (int channel)
     {
       // if (tracectr >= 900000)
       // {
-      //   printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
+        // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
       // }
 
       // if (wrt_ptr->countdown > 0 )
