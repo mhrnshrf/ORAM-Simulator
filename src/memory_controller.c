@@ -1300,13 +1300,25 @@ void set_to_serves(){
       dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
       dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
       dram_to_serve_o = LEVEL - TOP_CACHE;
-      dram_to_serve_r_r = 1*((LZ[0] - LS[0] - GREEN_BLOCK));
-      dram_to_serve_r_w = 1*(LZ[0]);
+
       for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
       {
         dram_to_serve_e_r += (LZ[i] - LS[i] - GREEN_BLOCK); 
         dram_to_serve_e_w += LZ[i];
       }
+      int minZ = 20;
+      int minBS = 20;
+      for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+      {
+        if(LZ[i] - LS[i] < minZ){
+          minZ = LZ[i] - LS[i];
+        }
+        if(LZ[i] < minBS){
+          minBS = LZ[i];
+        }
+      }
+      dram_to_serve_r_r = 1*((minZ - GREEN_BLOCK));
+      dram_to_serve_r_w = 1*(minBS);
     }
 
     
@@ -6196,9 +6208,9 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       bool beginning = false;
       bool ending = (j == LZ_VAR[level]-1);
       bool last_read = (j == LZ_VAR[level]-1);
-      if (op_type != 'r'){
+      // if (op_type != 'r'){
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
-      }
+      // }
     }
 
     
@@ -6254,9 +6266,9 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
           // bool last_read = (j == LZ_VAR[i]-1);
           bool ending = false;
           bool last_read = false;
-          if (op_type != 'r'){
+          // if (op_type != 'r'){
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
-          }
+          // }
         }
 
         if (candidate[real] != -1 && real < (LZ[level] - LS[level])) // GlobTree[index].dumnum > GlobTree[index].s)
@@ -6312,9 +6324,9 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
             // bool last_read = (j == LZ_VAR[i]-1);
             bool ending = false;
             bool last_read = false;
-            if (op_type != 'r'){
+            // if (op_type != 'r'){
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
-            }
+            // }
           }
           // GlobTree[index].s++;
         }
@@ -6498,10 +6510,10 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             bool beginning = (op_type == 'r') ? (reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
             bool ending = false;
             bool last_read = (op_type == 'r') ? (reqmade == (LZ[i] - LS[i] - GlobTree[index].greenctr)) :  (i == TOP_CACHE_VAR && reqmade == (LZ[i] - LS[i] - GlobTree[index].greenctr));
-            if (op_type != 'r')
-            {
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
-            }
+            // if (op_type != 'r')
+            // {
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+            // }
             
           }
         }
@@ -6627,9 +6639,9 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             bool beginning = (op_type == 'r') ? (reqcont == 1) : (i ==  LEVEL_VAR-1 && reqcont == 1);
             bool ending = false;
             bool last_read = (op_type == 'r') ? (reqcont == (LZ[i] - LS[i] - GlobTree[index].greenctr)) :  (i == TOP_CACHE_VAR && reqcont == (LZ[i] - LS[i] - GlobTree[index].greenctr));
-            if (op_type != 'r'){
-              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
-            }
+            // if (op_type != 'r'){
+            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+            // }
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
         }
         dum_cand[ri] = -1;
@@ -6744,7 +6756,7 @@ void ring_early_reshuffle(int label){
       
       int afterR = stashctr;
       // write phase: 
-      int bs = write_bucket(index, label, i, 'r', true);
+      write_bucket(index, label, i, 'r', true);
 
       // if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
       //   dram_to_serve_r_w = bs;
