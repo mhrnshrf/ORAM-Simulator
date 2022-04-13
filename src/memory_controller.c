@@ -1264,36 +1264,57 @@ void set_to_serves(){
 
   if (RING_ENABLE)
   {
-    dram_to_serve_o = NVM_START - TOP_CACHE;
-    nvm_to_serve_o = LEVEL - NVM_START;
-    dram_to_serve_e_r = (NVM_START - TOP_CACHE)*((LZ[0] - LS[0])); 
-    // dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
-    nvm_to_serve_e_r = (LEVEL - NVM_START)*((LZ[0] - LS[0]));
-    // nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
-    dram_to_serve_r_r = 1*((LZ[0] - LS[0] - GREEN_BLOCK));
-    dram_to_serve_r_w = 1*(LZ[0]);
-    nvm_to_serve_r_r = 1*((LZ[0] - LS[0]));
-    nvm_to_serve_r_w = 1*(Z);
-    dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
-    dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
-
-    for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+    if(NVM_ENABLE)
     {
-      if (in_nvm(i))
+      dram_to_serve_o = NVM_START - TOP_CACHE;
+      nvm_to_serve_o = LEVEL - NVM_START;
+      dram_to_serve_e_r = (NVM_START - TOP_CACHE)*((LZ[0] - LS[0])); 
+      // dram_to_serve_e_w = (NVM_START - TOP_CACHE)*(Z); 
+      nvm_to_serve_e_r = (LEVEL - NVM_START)*((LZ[0] - LS[0]));
+      // nvm_to_serve_e_w = (LEVEL - NVM_START)*(Z);
+      dram_to_serve_r_r = 1*((LZ[0] - LS[0] - GREEN_BLOCK));
+      dram_to_serve_r_w = 1*(LZ[0]);
+      nvm_to_serve_r_r = 1*((LZ[0] - LS[0]));
+      nvm_to_serve_r_w = 1*(Z);
+      dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
+      dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
+      for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
       {
-        nvm_to_serve_e_w += LZ[i];
+        if (in_nvm(i))
+        {
+          nvm_to_serve_e_w += LZ[i];
+        }
+        else
+        {
+          dram_to_serve_e_w += LZ[i];
+        }
       }
-      else
+    }
+    else
+    {
+      nvm_to_serve_o = 0;
+      nvm_to_serve_r_r = 0;
+      nvm_to_serve_r_w = 0;
+      nvm_to_serve_e_w = 0;
+      nvm_to_serve_e_r = 0;
+      dram_to_serve_m_r = (LEVEL - TOP_CACHE)*(1); 
+      dram_to_serve_m_w = (LEVEL - TOP_CACHE)*(1); 
+      dram_to_serve_o = LEVEL - TOP_CACHE;
+      dram_to_serve_r_r = 1*((LZ[0] - LS[0] - GREEN_BLOCK));
+      dram_to_serve_r_w = 1*(LZ[0]);
+      for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
       {
+        dram_to_serve_e_r += (LZ[i] - LS[i] - GREEN_BLOCK); 
         dram_to_serve_e_w += LZ[i];
       }
     }
+
     
-    if (DYNAMIC_S && DEAD_ENABLE)
-    {
-      dram_to_serve_e_w = (LEVEL - TOP_CACHE)*((LZ[0] - LS[0])+1);
-      dram_to_serve_r_w = 1*((LZ[0] - LS[0])+1);
-    }
+    // if (DYNAMIC_S && DEAD_ENABLE)
+    // {
+    //   dram_to_serve_e_w = (LEVEL - TOP_CACHE)*((LZ[0] - LS[0])+1);
+    //   dram_to_serve_r_w = 1*((LZ[0] - LS[0])+1);
+    // }
     
     // nvm_to_serve_m_r = (LEVEL - NVM_START)*(1);
     // nvm_to_serve_m_w = (LEVEL - NVM_START)*(1);
@@ -1872,7 +1893,7 @@ void read_path(int label){
         int index = calc_index(label, i);
         if (RING_ENABLE)
         {
-          if(CB_ENABLE){
+          if((CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)) && i >= TOP_CACHE){
             dram_to_serve_e_r += (LZ[i] - LS[i] - GlobTree[index].greenctr);
           }
           read_bucket(index, i, 'e', 0, true);
@@ -2294,7 +2315,7 @@ void write_path(int label){
         update_count_stat(curcount, i);
 
         int bs = write_bucket(index, label, i, 'e', true);
-        if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
+        if((CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)) && i >= TOP_CACHE){
           dram_to_serve_e_w += bs;
         }
         continue;
@@ -5957,7 +5978,7 @@ void ring_evict_path(int label){
   int b4 = stashctr;
   // unsigned long long int b4_wbuck = wbuck;
   // unsigned long long int b4_wslot = wslot;
-  if(CB_ENABLE){
+  if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
     dram_to_serve_e_r = 0;
     dram_to_serve_e_w = 0;
   }
@@ -6175,7 +6196,9 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       bool beginning = false;
       bool ending = (j == LZ_VAR[level]-1);
       bool last_read = (j == LZ_VAR[level]-1);
+      if (op_type != 'r'){
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
+      }
     }
 
     
@@ -6231,7 +6254,9 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
           // bool last_read = (j == LZ_VAR[i]-1);
           bool ending = false;
           bool last_read = false;
+          if (op_type != 'r'){
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
+          }
         }
 
         if (candidate[real] != -1 && real < (LZ[level] - LS[level])) // GlobTree[index].dumnum > GlobTree[index].s)
@@ -6287,7 +6312,9 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
             // bool last_read = (j == LZ_VAR[i]-1);
             bool ending = false;
             bool last_read = false;
+            if (op_type != 'r'){
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
+            }
           }
           // GlobTree[index].s++;
         }
@@ -6471,7 +6498,11 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             bool beginning = (op_type == 'r') ? (reqmade == 1) : (i ==  LEVEL_VAR-1 && reqmade == 1);
             bool ending = false;
             bool last_read = (op_type == 'r') ? (reqmade == (LZ[i] - LS[i] - GlobTree[index].greenctr)) :  (i == TOP_CACHE_VAR && reqmade == (LZ[i] - LS[i] - GlobTree[index].greenctr));
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+            if (op_type != 'r')
+            {
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+            }
+            
           }
         }
       }
@@ -6596,7 +6627,9 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             bool beginning = (op_type == 'r') ? (reqcont == 1) : (i ==  LEVEL_VAR-1 && reqcont == 1);
             bool ending = false;
             bool last_read = (op_type == 'r') ? (reqcont == (LZ[i] - LS[i] - GlobTree[index].greenctr)) :  (i == TOP_CACHE_VAR && reqcont == (LZ[i] - LS[i] - GlobTree[index].greenctr));
-            insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+            if (op_type != 'r'){
+              insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+            }
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
         }
         dum_cand[ri] = -1;
@@ -9073,10 +9106,11 @@ clean_queues (int channel)
   {
     if (rd_ptr->request_served == 1)  // && rd_ptr->completion_time <= CYCLE_VAL)
     {
-      // if (tracectr >= 900000)
-			// {
-        // printf("%c %d deleteR req%d	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, CYCLE_VAL);
-			// }
+      int cur_print = -1;
+      int to_print = -1;
+
+
+      
       // if (rd_ptr->countdown > 0 )
       // {
       //   rd_ptr->countdown--;
@@ -9084,6 +9118,28 @@ clean_queues (int channel)
       // }
       
       update_served_count(rd_ptr);
+      if(rd_ptr->op_type == 'o'){
+        cur_print = cur_dram_served_o;
+        to_print = dram_to_serve_o;
+      }
+      else if(rd_ptr->op_type == 'r')
+      {
+        cur_print = cur_dram_served_r_r;
+        to_print = dram_to_serve_r_r;
+      }
+      else if(rd_ptr->op_type == 'e'){
+        cur_print = cur_dram_served_e_r;
+        to_print = dram_to_serve_e_r;
+      }
+      else if(rd_ptr->op_type == 'm'){
+        cur_print = cur_dram_served_m_r;
+        to_print = dram_to_serve_m_r;
+      }
+      if (LOG_ENABLE && tracectr >= LOG_TH)
+			{
+        printf("%c %d deleteR req%d   comp %lld	@ %lld\n", rd_ptr->op_type, rd_ptr->oramid, rd_ptr->reqid, rd_ptr->completion_time, CYCLE_VAL);
+        printf("%c  dram_to_serve %d      cur_dram_served %d\n", rd_ptr->op_type, to_print, cur_print);
+			}
       determine_served_all(rd_ptr);
 
       // if (rd_ptr->last_read)
@@ -9107,10 +9163,10 @@ clean_queues (int channel)
   {
     if (wrt_ptr->request_served == 1) // && wrt_ptr->completion_time <= CYCLE_VAL)
     {
-      // if (tracectr >= 900000)
-      // {
-        // printf("%c %d deleteW req%d	@ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, CYCLE_VAL);
-      // }
+      if (LOG_ENABLE && tracectr >= LOG_TH)
+      {
+        printf("%c %d deleteW req%d	comp %lld   @ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, wrt_ptr->completion_time, CYCLE_VAL);
+      }
 
       // if (wrt_ptr->countdown > 0 )
       // {
@@ -9298,7 +9354,7 @@ issue_request_command (request_t * request, char rwt)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
-        // if(tracectr >= 900000){
+        // if(tracectr >= LOG_TH){
 				//   printf("%c %d issueR req%d	 @ %lld     comp %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, request->completion_time);
         // }
         // if (request->beginning)
@@ -9457,7 +9513,7 @@ issue_request_command (request_t * request, char rwt)
       }
 
       // set the completion time of this write request
-      // if(tracectr >= 900000){
+      // if(tracectr >= LOG_TH){
       //   printf("%c %d issueW req%d	@ %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL);
       // }
 

@@ -136,8 +136,10 @@
 
 #define MAX_SHUF 20
 
-#define RING_ZSTL 0
+#define RING_ZSTL 0   // to apply IR-Alloc on Ring ORAM
 
+#define LOG_ENABLE 0 // to print log of all accesses requests and types
+#define LOG_TH 2500000 // loging threshold
 
 enum{
   // main tree
