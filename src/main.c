@@ -2160,7 +2160,7 @@ int main(int argc, char * argv[])
 				if (DUMMY_ENABLE && ring_dummy)
 				{
 					ring_access(-1);
-					continue;
+					// continue;
 				}
 			}
 			
