@@ -385,15 +385,35 @@ int main(int argc, char * argv[])
 	// printf("exp name %s\n", exp_name); 
 	// test delete from q 
 	
-	// Queue *q = ConstructQueue(4);
-	// for (int i = 1; i <= q->limit; i++)
+	// // test enqueue head:
+	// Queue *q = ConstructQueue(8);
+	// for (int i = 1; i <= 4; i++)
 	// {
 	// 	Element *e = (Element*) malloc(sizeof (Element)); 
 	// 	e->index = i;
-	// 	e->offset = i*10;
+	// 	e->oramid = i*10;
 	// 	Enqueue(q, e);
-	// 	printf("%d , %d added\n", e->index, e->offset);
+	// 	printf("%d , %d added\n", e->index, e->oramid);
 	// }
+
+	// for (int i = 5; i <= 8; i++)
+	// {
+	// 	Element *e = (Element*) malloc(sizeof (Element)); 
+	// 	e->index = i;
+	// 	e->oramid = i*-10;
+	// 	EnqueueHead(q, e);
+	// 	printf("%d , %d added\n", e->index, e->oramid);
+	// }
+
+	// while (q->size > 0)
+	// {	
+	// 	Element *e = Dequeue(q);
+	// 	printf("%d , %d\n", e->index, e->oramid);
+	// }
+
+	// exit(0);
+	// // test enqueue head.
+
 	// printf("queue size: %d\n", q->size);
 	// printf("tail %d , %d \n", q->tail->index, q->tail->offset);
 	// printf("head %d , %d \n", q->head->index, q->head->offset);
@@ -414,16 +434,8 @@ int main(int argc, char * argv[])
 	// printf("head %d , %d \n", q->head->index, q->head->offset);
 
 
-	// int qs = q->size;
 	
 	 
-	// for (int i = 0; i < qs; i++)
-	// {	Element *e = Dequeue(q);
-
-	// 	printf("%d , %d\n", e->index, e->offset);
-	// }
-
-	// exit(0);
 	
 
 
@@ -1419,8 +1431,31 @@ int main(int argc, char * argv[])
 			ROB[numc].comptime[ROB[numc].tail] = CYCLE_VAL+lat+PIPELINEDEPTH;
 
 			request_t * req_ptr = form_request(opertype[numc], oramid[numc], op_type[numc], reqid[numc], nvm_access[numc], ROB[numc].comptime[ROB[numc].tail]);
-						
+			int cur_print = -1;
+      		int to_print = -1;			
 			update_served_count(req_ptr);
+			if(req_ptr->op_type == 'o'){
+				cur_print = cur_dram_served_o;
+				to_print = dram_to_serve_o;
+			}
+			else if(req_ptr->op_type == 'r')
+			{
+				cur_print = cur_dram_served_r_r;
+				to_print = dram_to_serve_r_r;
+			}
+			else if(req_ptr->op_type == 'e'){
+				cur_print = cur_dram_served_e_r;
+				to_print = dram_to_serve_e_r;
+			}
+			else if(req_ptr->op_type == 'm'){
+				cur_print = cur_dram_served_m_r;
+				to_print = dram_to_serve_m_r;
+			}
+			if (LOG_ENABLE && tracectr >= LOG_TH)
+			{
+				printf("%c %d deleteR req%d   comp %lld	@ %lld lat\n", req_ptr->op_type, req_ptr->oramid, req_ptr->reqid, req_ptr->completion_time, CYCLE_VAL);
+				printf("%c  dram_to_serve %d      cur_dram_served %d\n", req_ptr->op_type, to_print, cur_print);
+			}
 			determine_served_all(req_ptr);
 			free(req_ptr);
 
@@ -1647,7 +1682,7 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) ) //  && tracectr <= endpoint
 				{
-					if (tracectr % 1000000 == 0)
+					if (tracectr % 10000 == 0)
 					{
 						printf("@%d \n", tracectr);
 					}

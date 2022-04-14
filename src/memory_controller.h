@@ -139,7 +139,7 @@
 #define RING_ZSTL 0   // to apply IR-Alloc on Ring ORAM
 
 #define LOG_ENABLE 0 // to print log of all accesses requests and types
-#define LOG_TH 2610000 // loging threshold
+#define LOG_TH 2060000 // loging threshold
 
 enum{
   // main tree
@@ -374,8 +374,41 @@ extern long long int dram_tmax;
 extern bool nvmt0_set;
 extern int lrs_ctr;
 
+// extern int dram_to_serve_e_w;
+// extern int nvm_to_serve_e_w;
+
+
+extern int cur_dram_served_o;
+extern int cur_nvm_served_o; 
+extern int cur_dram_served_e_r;
+extern int cur_dram_served_e_w;
+extern int cur_nvm_served_e_r;
+extern int cur_nvm_served_e_w;
+extern int cur_dram_served_m_r;
+extern int cur_dram_served_m_w;
+extern int cur_nvm_served_m_r;
+extern int cur_nvm_served_m_w;
+extern int cur_dram_served_r_r;
+extern int cur_dram_served_r_w;
+extern int cur_nvm_served_r_r;
+extern int cur_nvm_served_r_w;
+
+extern int dram_to_serve_o;
+extern int nvm_to_serve_o;
+extern int dram_to_serve_e_r;
 extern int dram_to_serve_e_w;
+extern int nvm_to_serve_e_r;
 extern int nvm_to_serve_e_w;
+extern int dram_to_serve_m_r;
+extern int dram_to_serve_m_w;
+extern int nvm_to_serve_m_r;
+extern int nvm_to_serve_m_w;
+extern int dram_to_serve_r_r;
+extern int dram_to_serve_r_w;
+extern int nvm_to_serve_r_r;
+extern int nvm_to_serve_r_w;
+
+
 
 
 
@@ -415,6 +448,7 @@ void rho_insert(int physical_address);
 Queue *ConstructQueue(int limit);
 void DestructQueue(Queue *queue);
 bool Enqueue(Queue *pQueue, Element *item);
+bool EnqueueHead(Queue *pQueue, Element *item);
 Element *Dequeue(Queue *pQueue);
 bool isEmpty(Queue* pQueue);
 void test_queue();

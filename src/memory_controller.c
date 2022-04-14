@@ -1018,8 +1018,20 @@ bool EnqueueHead(Queue *pQueue, Element *item) {
 
     } else {
         /*adding item to the head of the queue*/
-        item->prev = pQueue->head;
-        pQueue->head = item;
+        Element *it = pQueue->head;
+        Element *itFront = NULL;
+        while(it->oramid < 0){
+          itFront = it;
+          it = it->prev;
+        }
+        item->prev = it;
+        if(itFront == NULL){
+          pQueue->head = item;
+        }
+        else{
+          itFront->prev = item;
+        }
+
     }
     pQueue->size++;
     return true;
@@ -1088,16 +1100,19 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->instr = instr; 
   pN->pc = pc; 
   pN->type = type;
-  pN->oramid = (RING_ENABLE)? ringctr :(TREE_VAR == RHO) ? rhoctr : oramctr;
+  pN->oramid = (RING_ENABLE)? (ringctr + ringdumctr) :(TREE_VAR == RHO) ? rhoctr : oramctr;
   // pN->oramid = (RING_ENABLE && op_type == 'r')? shuff_total : pN->oramid;
-  pN->oramid = (ENQUEUE_VAR == HEAD) ? -1 : pN->oramid;   // in case of dummy access set oram id to -1
+  pN->oramid = (ENQUEUE_VAR == HEAD) ? -1*(pN->oramid) : pN->oramid;   // in case of dummy access set oram id to -1
   pN->tree = TREE_VAR;
   pN->orig_addr = orig_addr;
-  pN->last_read = (!RING_ENABLE) ? false : (ENQUEUE_VAR == HEAD)? beginning : last_read;
+  // pN->last_read = (!RING_ENABLE) ? false : (ENQUEUE_VAR == HEAD)? beginning : last_read;
+  pN->last_read = (!RING_ENABLE) ? false : last_read;
   pN->nvm_access = nvm_access;
   pN->op_type = op_type;
-  pN->beginning = (ENQUEUE_VAR == HEAD) ? last_read : beginning;
-  pN->ending = (ENQUEUE_VAR == HEAD) ? false : ending;
+  // pN->beginning = (ENQUEUE_VAR == HEAD) ? last_read : beginning;
+  pN->beginning = beginning;
+  // pN->ending = (ENQUEUE_VAR == HEAD) ? false : ending;
+  pN->ending = ending;
   pN->reqid = reqcount;
   pN->level = level;
   
