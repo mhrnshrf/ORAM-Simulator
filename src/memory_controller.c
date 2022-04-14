@@ -5710,7 +5710,7 @@ void ring_read_path(int label, int addr){
     }
     
 
-
+    green_turn = green_turn || (!contain_intended && (GlobTree[index].count >= GlobTree[index].s));
     
     
     // if (!ring_dummy)
