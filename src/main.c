@@ -2230,6 +2230,10 @@ int main(int argc, char * argv[])
             reqid[numc] = pN->reqid;
             level[numc] = pN->level;
 
+			if((CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)) && pN->op_type == 'e' && pN->last_read){
+				dram_to_serve_e_r = pN->dtser;
+			}
+
 			// if (opertype[numc] == 'W')
 			// {
 			// 	last_read[numc] = false;

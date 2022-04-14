@@ -139,7 +139,7 @@
 #define RING_ZSTL 0   // to apply IR-Alloc on Ring ORAM
 
 #define LOG_ENABLE 0 // to print log of all accesses requests and types
-#define LOG_TH 2060000 // loging threshold
+#define LOG_TH 2110000 // loging threshold
 
 enum{
   // main tree
@@ -220,6 +220,7 @@ typedef struct Element_t{
   char op_type;
   int reqid;
   int level;
+  int dtser;
 }Element;
 
 

@@ -137,6 +137,7 @@ int dram_to_serve_r_r;
 int dram_to_serve_r_w;
 int nvm_to_serve_r_r;
 int nvm_to_serve_r_w;
+int dram_to_serve_e_r_var = 0;
 
 int online_r = 0;
 int evict_r = 0;
@@ -1115,6 +1116,10 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   pN->ending = ending;
   pN->reqid = reqcount;
   pN->level = level;
+
+  if((CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)) && op_type == 'e' && last_read){
+    pN->dtser = dram_to_serve_e_r_var;
+  }
   
   bool added = false;
   if (ENQUEUE_VAR == TAIL)
@@ -1921,7 +1926,10 @@ void read_path(int label){
         if (RING_ENABLE)
         {
           if((CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)) && i >= TOP_CACHE){
-            dram_to_serve_e_r += (LZ[i] - LS[i] - GlobTree[index].greenctr);
+            dram_to_serve_e_r_var += (LZ[i] - LS[i] - GlobTree[index].greenctr);
+            if(LOG_ENABLE && tracectr >= LOG_TH){
+              printf("er %d dram_to_serve_e_r %d\n", ringctr + ringdumctr, dram_to_serve_e_r);
+            }
           }
           read_bucket(index, i, 'e', 0, true);
           continue;
@@ -6006,7 +6014,7 @@ void ring_evict_path(int label){
   // unsigned long long int b4_wbuck = wbuck;
   // unsigned long long int b4_wslot = wslot;
   if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
-    dram_to_serve_e_r = 0;
+    dram_to_serve_e_r_var = 0;
     dram_to_serve_e_w = 0;
   }
   read_path(label);
