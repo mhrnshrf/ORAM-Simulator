@@ -2190,7 +2190,7 @@ int main(int argc, char * argv[])
 
 			// newreq_consumed = false;
 
-			if(oramQ->head->beginning){
+			if(oramQ->head->beginning && oramQ->head->oramid >= 0){
 				ring_dummy = (stashctr >= DUMMY_TH) ? true : false;
 				if (DUMMY_ENABLE && ring_dummy)
 				{
