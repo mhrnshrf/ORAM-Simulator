@@ -5722,6 +5722,7 @@ void ring_read_path(int label, int addr){
     if (CB_ENABLE && green_turn)//GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
     {
       // GlobTree[index].greenctr++;
+      // offset = rand() % slotCount;   // for true randomness of a green block being real or dummy this should be uncommented
       while (!GlobTree[index].slot[offset].valid)
       {
         offset = rand() % slotCount;
