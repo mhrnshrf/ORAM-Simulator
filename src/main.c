@@ -2240,10 +2240,10 @@ int main(int argc, char * argv[])
 			// }
 			
 
-			if (!last_read_served)
-			{
-				printf("last read not served yet!!!\n");
-			}
+			// if (!last_read_served)
+			// {
+			// 	printf("last read not served yet!!!\n");
+			// }
 			
 
 			if (pN->beginning)

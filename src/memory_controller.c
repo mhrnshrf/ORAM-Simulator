@@ -1386,7 +1386,8 @@ void oram_alloc(){
       S_INC_ARR[i] = 0;
     }
     else{
-      S_INC_ARR[i] = RING_S - LS[i] - GREEN_BLOCK; 
+      // S_INC_ARR[i] = RING_S - LS[i] - GREEN_BLOCK; 
+      S_INC_ARR[i] = S_INC; 
     }
   }
 
