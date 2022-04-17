@@ -7292,6 +7292,8 @@ void export_csv(char * argv[]){
   // fprintf(fp, "oramctr,%d\n", oramctr);
   fprintf(fp, "ringctr,%d\n", ringctr);
   fprintf(fp, "ringdum,%d\n", ringdumctr);
+  fprintf(fp, "ringtotal,%d\n", ringdumctr+ringctr);
+  fprintf(fp, "acc_ratio,%f%%\n", 100*(double)ringctr/(ringdumctr+ringctr));
   fprintf(fp, "dummy_ratio,%f%%\n", 100*(double)ringdumctr/(ringdumctr+ringctr));
   fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
