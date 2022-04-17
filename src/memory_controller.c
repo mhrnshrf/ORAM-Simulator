@@ -168,6 +168,8 @@ int lrs_ctr = 0;
 
 int greenturn_ctr = 0;
 int greenturn_sum = 0;
+int greentc_ctr = 0;
+int greentc_sum = 0;
 
 unsigned long long int s_underctr = 0;
 unsigned long long int s_overctr = 0;
@@ -4689,8 +4691,10 @@ void ring_access(int addr){
 
   // printf("\nb4 read stash %d  trace %d\n", stashctr, tracectr);
   greenturn_ctr = 0;
+  greentc_ctr = 0;
   ring_read_path(label, addr);
   greenturn_sum += greenturn_ctr;
+  greentc_sum += greentc_ctr;
   // printf("af read stash %d  trace %d\n", stashctr, tracectr);
   // printf("@> ring read path  trace %d\n\n", tracectr);
   // print_stash();
@@ -5727,6 +5731,11 @@ void ring_read_path(int label, int addr){
     if (CB_ENABLE && green_turn)//GlobTree[index].count >= LS[i] && !GlobTree[index].slot[offset].isReal)
     {
       greenturn_ctr++;
+      if (i >= TOP_CACHE)
+      {
+        greentc_ctr++;
+      }
+      
       // GlobTree[index].greenctr++;
       // offset = rand() % slotCount;   // for true randomness of a green block being real or dummy this should be uncommented
       while (!GlobTree[index].slot[offset].valid)
@@ -7563,6 +7572,7 @@ void export_csv(char * argv[]){
   }
   fprintf(fp, "deadctr,%lld\n", deadctr);
   fprintf(fp, "greenturn_avg,%f\n", (double)greenturn_sum/(ringctr+ringdumctr));
+  fprintf(fp, "greentc_avg,%f\n", (double)greentc_sum/(ringctr+ringdumctr));
 
   // for (int i = GATHER_START; i < LEVEL; i++)
   // {
