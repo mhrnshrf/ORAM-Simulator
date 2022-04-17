@@ -4690,7 +4690,7 @@ void ring_access(int addr){
   // printf("\nb4 read stash %d  trace %d\n", stashctr, tracectr);
   greenturn_ctr = 0;
   ring_read_path(label, addr);
-  int greenturn_sum += greenturn_ctr;
+  greenturn_sum += greenturn_ctr;
   // printf("af read stash %d  trace %d\n", stashctr, tracectr);
   // printf("@> ring read path  trace %d\n\n", tracectr);
   // print_stash();
