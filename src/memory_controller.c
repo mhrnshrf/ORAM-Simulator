@@ -1387,7 +1387,7 @@ void oram_alloc(){
   GREEN_BLOCK = CB_ENABLE ? CB_GREEN_MAX : 0;
 
   for(int i = 0; i < LEVEL; i++){
-    if(i < GATHER_START){
+    if(i < GATHER_START || !DYNAMIC_S){
       S_INC_ARR[i] = 0;
     }
     else{
