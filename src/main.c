@@ -247,71 +247,71 @@ void print_oram_params(){
 	printf("LLC Size       %d MB / %d-way\n", (int)(CACHE_SIZE/pow(1024,2)), NUM_WAY);
 	printf("Write Bypass   %d\n", WRITE_BYPASS);
 
-	printf("\n....................................................\n");
-	printf("                 Subtree Config\n");
-	printf("....................................................\n");
-	printf("Subtree Enable 	   %s\n", SUBTREE_ENABLE?"On":"Off");
-	printf("Subtree Channels   %d\n", NUM_CHANNELS_SUBTREE);
-	printf("Subtree Size       %d\n", SUBTREE_SIZE);
-	printf("Subtree Slot	   %d\n", SUBTREE_SLOT);
-	printf("Subtree Bucket     %d\n", SUBTREE_BUCKET);
-	printf("Subtree Level      %d\n", SUBTREE_LEVEL);
+	// printf("\n....................................................\n");
+	// printf("                 Subtree Config\n");
+	// printf("....................................................\n");
+	// printf("Subtree Enable 	   %s\n", SUBTREE_ENABLE?"On":"Off");
+	// printf("Subtree Channels   %d\n", NUM_CHANNELS_SUBTREE);
+	// printf("Subtree Size       %d\n", SUBTREE_SIZE);
+	// printf("Subtree Slot	   %d\n", SUBTREE_SLOT);
+	// printf("Subtree Bucket     %d\n", SUBTREE_BUCKET);
+	// printf("Subtree Level      %d\n", SUBTREE_LEVEL);
 
-	printf("\n....................................................\n");
-	printf("                   RHO Config\n");
-	printf("....................................................\n");
-	printf("Rho Enable          %s\n", RHO_ENABLE?"On":"Off");
-	printf("Rho Level           %d\n", RHO_LEVEL);
-	printf("Rho Path            %d\n", RHO_PATH);
-	printf("Rho Node            %d\n", RHO_NODE);
-	printf("Rho Slot            %d\n", RHO_SLOT);
-	printf("Rho Block           %d\n", RHO_BLOCK);
-	printf("Rho Set             %d\n", RHO_SET);
-	printf("Rho Way             %d\n", RHO_WAY);
-	printf("Rho Z               %d\n", RHO_Z);
- 	printf("Rho OV Threshold    %d\n", RHO_OV_THRESHOLD);
-	printf("Rho Stash Size      %d\n", RHO_STASH_SIZE);
-	printf("Rho BK Eviction     %d\n", RHO_BK_EVICTION);
-	printf("Rho Empty Top       %d\n", RHO_EMPTY_TOP);
-	printf("Rho Top Cache       %d\n\n", RHO_TOP_CACHE);
-	printf("Rho   L1  %d     Z1  %d\n", RHO_L1, RHO_Z1);
-	printf("Rho   L2  %d    Z2  %d\n", RHO_L2, RHO_Z2);
-	printf("Rho   L3  %d    Z3  %d\n\n", RHO_L3, RHO_Z3);
-	printf("Rho LZ ");
-	// calculating rho path length
-	for (int i = 0; i < RHO_LEVEL; i++)
-	{
-		printf("%d ", RHO_LZ[i]);
-		rho_path_length += RHO_LZ[i];
-	}
-	// calculating effective rho path length
-	for (int i = RHO_TOP_CACHE; i < RHO_LEVEL; i++)
-	{
-		rho_effective_pl += RHO_LZ[i];
-	}
-	printf("\n= %d ~> rho path length\n", rho_path_length);
-	printf("  %d ~> rho effective path length\n\n", rho_effective_pl);
+	// printf("\n....................................................\n");
+	// printf("                   RHO Config\n");
+	// printf("....................................................\n");
+	// printf("Rho Enable          %s\n", RHO_ENABLE?"On":"Off");
+	// printf("Rho Level           %d\n", RHO_LEVEL);
+	// printf("Rho Path            %d\n", RHO_PATH);
+	// printf("Rho Node            %d\n", RHO_NODE);
+	// printf("Rho Slot            %d\n", RHO_SLOT);
+	// printf("Rho Block           %d\n", RHO_BLOCK);
+	// printf("Rho Set             %d\n", RHO_SET);
+	// printf("Rho Way             %d\n", RHO_WAY);
+	// printf("Rho Z               %d\n", RHO_Z);
+ 	// printf("Rho OV Threshold    %d\n", RHO_OV_THRESHOLD);
+	// printf("Rho Stash Size      %d\n", RHO_STASH_SIZE);
+	// printf("Rho BK Eviction     %d\n", RHO_BK_EVICTION);
+	// printf("Rho Empty Top       %d\n", RHO_EMPTY_TOP);
+	// printf("Rho Top Cache       %d\n\n", RHO_TOP_CACHE);
+	// printf("Rho   L1  %d     Z1  %d\n", RHO_L1, RHO_Z1);
+	// printf("Rho   L2  %d    Z2  %d\n", RHO_L2, RHO_Z2);
+	// printf("Rho   L3  %d    Z3  %d\n\n", RHO_L3, RHO_Z3);
+	// printf("Rho LZ ");
+	// // calculating rho path length
+	// for (int i = 0; i < RHO_LEVEL; i++)
+	// {
+	// 	printf("%d ", RHO_LZ[i]);
+	// 	rho_path_length += RHO_LZ[i];
+	// }
+	// // calculating effective rho path length
+	// for (int i = RHO_TOP_CACHE; i < RHO_LEVEL; i++)
+	// {
+	// 	rho_effective_pl += RHO_LZ[i];
+	// }
+	// printf("\n= %d ~> rho path length\n", rho_path_length);
+	// printf("  %d ~> rho effective path length\n\n", rho_effective_pl);
 
-	printf("\n....................................................\n");
-	printf("                 Timing Config\n");
-	printf("....................................................\n");
-	printf("Timing Enable       %s\n", TIMING_ENABLE?"On":"Off");
-	// printf("Timing Interval     %d cycles\n\n", TIMING_INTERVAL);
-	printf("T1 Interval         %d cycles\n", T1_INTERVAL);
-	printf("T2 Interval         %d cycles\n\n", T2_INTERVAL);
+	// printf("\n....................................................\n");
+	// printf("                 Timing Config\n");
+	// printf("....................................................\n");
+	// printf("Timing Enable       %s\n", TIMING_ENABLE?"On":"Off");
+	// // printf("Timing Interval     %d cycles\n\n", TIMING_INTERVAL);
+	// printf("T1 Interval         %d cycles\n", T1_INTERVAL);
+	// printf("T2 Interval         %d cycles\n\n", T2_INTERVAL);
 
-	printf("\n....................................................\n");
-	printf("                 Prefetch Config\n");
-	printf("....................................................\n");
-	printf("Prefetch Enable     %s\n", PREFETCH_ENABLE?"On":"Off");
-	printf("Buffer Entry #      %d\n\n", PREFETCH_BUF_SIZE);
+	// printf("\n....................................................\n");
+	// printf("                 Prefetch Config\n");
+	// printf("....................................................\n");
+	// printf("Prefetch Enable     %s\n", PREFETCH_ENABLE?"On":"Off");
+	// printf("Buffer Entry #      %d\n\n", PREFETCH_BUF_SIZE);
 
 
-	printf("\n....................................................\n");
-	printf("                 STT Config\n");
-	printf("....................................................\n");
-	printf("STT Enable     %s\n", STT_ENABLE?"On":"Off");
-	printf("STT Size       %d entry / %d-way\n\n", STT_SET*STT_WAY, STT_WAY);
+	// printf("\n....................................................\n");
+	// printf("                 STT Config\n");
+	// printf("....................................................\n");
+	// printf("STT Enable     %s\n", STT_ENABLE?"On":"Off");
+	// printf("STT Size       %d entry / %d-way\n\n", STT_SET*STT_WAY, STT_WAY);
 
 
 	printf("\n....................................................\n");
