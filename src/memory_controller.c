@@ -4642,7 +4642,7 @@ int shuf_calc(){
 
 void ring_access(int addr){
   // int before = stashctr;
-  if (ring_dummy)
+  if (ring_dummy && DUMMY_ENABLE)
   {
     switch_enqueue_to(HEAD);
   }
@@ -4699,7 +4699,7 @@ void ring_access(int addr){
   // printf("@> ring read path  trace %d\n\n", tracectr);
   // print_stash();
 
-  if (!ring_dummy)
+  if (!(ring_dummy && DUMMY_ENABLE))
   {
     remap_block(addr);
   }
