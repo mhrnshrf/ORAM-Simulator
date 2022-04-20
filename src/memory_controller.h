@@ -65,7 +65,7 @@
 // #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17  ds15 ~> 14
-#define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22  ds15 ~> 22
+#define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22  ds15 ~> 22
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree invariant
@@ -136,7 +136,7 @@
 
 #define MAX_SHUF 20
 
-#define RING_ZSTL 1   // to apply IR-Alloc on Ring ORAM
+#define RING_ZSTL 0   // to apply IR-Alloc on Ring ORAM
 
 #define LOG_ENABLE 0 // to print log of all accesses requests and types
 #define LOG_TH 39000000 // loging threshold
@@ -146,9 +146,9 @@ enum{
   Z = (RING_ENABLE) ? RING_Z+RING_S : USUAL_Z,
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
   Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1    Z-5
-  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-3: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-2: Z,   // # slots per bucket upto L3   Z-10
-  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-4: Z,
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-4: Z,   // # slots per bucket upto L2
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-4: Z,   // # slots per bucket upto L3   Z-10
+  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-7: Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + ((RING_ENABLE)?Z4:Z)*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
