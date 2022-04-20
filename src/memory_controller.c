@@ -6773,7 +6773,7 @@ void ring_early_reshuffle(int label){
     }  
 
     int curS = calc_ring_s(index, i); 
-    int reach_point = (i < TOP_CACHE) ? curS : curS + GREEN_BLOCK;
+    int reach_point = (i < TOP_CACHE || (RING_ZSTL && i <= L3)) ? curS : curS + GREEN_BLOCK;
     bool must_reshuffle = (SUPER_ENABLE && is_super_level(i)) ? super_node_need_reshuffle(index) : (GlobTree[index].count >= reach_point);
 
     if (must_reshuffle)    // || i < TOP_CACHE  || i >= LEVEL-2 
