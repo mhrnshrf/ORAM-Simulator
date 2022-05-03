@@ -3410,7 +3410,7 @@ void freecursive_access(int addr, char type){
   {
     Slot sl = {.addr = addr , .label = PosMap[addr], .isReal = true, .isData = true};
 
-    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT && stalectr <= STALE_TH) // /*!pause_skip && !posneeded && wl_occ < WL_CAP*/
+    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT) //&& stalectr <= STALE_TH) // /*!pause_skip && !posneeded && wl_occ < WL_CAP*/
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
