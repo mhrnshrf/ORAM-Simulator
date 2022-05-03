@@ -7355,7 +7355,6 @@ void export_csv(char * argv[]){
   // fprintf(fp, "pinctr,%d\n", pinctr);
   // fprintf(fp, "unpinctr,%d\n", unpinctr);
   // fprintf(fp, "precase,%d\n", precase);
-  // fprintf(fp, "sttctr,%d\n", sttctr);
   // fprintf(fp, "stash_leftover,%d\n", stash_leftover);
   // fprintf(fp, "stash_removed,%d\n", stash_removed);
   // fprintf(fp, "fillhit,%d\n", fillhit);
@@ -7364,6 +7363,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "midctr,%f%%\n", 100*(double)midctr/(topctr+midctr+botctr));
   fprintf(fp, "botctr,%f%%\n", 100*(double)botctr/(topctr+midctr+botctr));
   fprintf(fp, "stashctr,%d\n", stashctr);
+  fprintf(fp, "sttctr,%d\n", sttctr);
   // fprintf(fp, "stash_cont,%d\n", stash_cont);
   // fprintf(fp, "linger_discard,%d\n", linger_discard);
   // fprintf(fp, "shuffctr_dram,%d\n", shuffctr_dram);
