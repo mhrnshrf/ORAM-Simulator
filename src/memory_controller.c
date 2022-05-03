@@ -2160,6 +2160,23 @@ void read_path(int label){
 void pick_candidate(int index, int label, int i){
   int c = 0;
   int mask = label>>(LEVEL_VAR-1-i);
+
+
+  if (STT_ENABLE && RING_ENABLE)
+  {
+    for (int i = 0; i < Z_VAR; i++)
+    {
+      int stt_cand = stt_candidate(label, i);
+      if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
+      {
+        Slot s = {.addr = stt_cand , .label = PosMap[stt_cand], .isReal = true, .isData = true};
+        add_to_stash(s);
+        stt_invalidate(stt_cand);
+        sttctr++;
+      }
+    }
+  }
+
   for(int k= 0; k < STASH_SIZE_VAR; k++)
   {
     bool spot_real = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].isReal : Stash[k].isReal;
@@ -2178,6 +2195,9 @@ void pick_candidate(int index, int label, int i){
       }
     }
   }
+
+
+  
 }
 
 void print_candidate(){
@@ -6168,10 +6188,10 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
   wbuck++;
   int allocated = 0;
 
-  if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
-  {
+  // if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
+  // {
     // printf("@%d W> %d, ", ringctr, deadQ_arr[level]->size);
-  }
+  // }
 
   reset_candidate();
   pick_candidate(index, label, level);
@@ -6200,6 +6220,8 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
   // GlobTree[index].s = available - (LZ[i] - LS[i]);
   // printf("available %d    s %d\n", available, GlobTree[index].s);
+
+
   int real = 0;
 
   for (int k = 0; k < available; k++)
