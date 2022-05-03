@@ -7388,6 +7388,7 @@ void export_csv(char * argv[]){
   }
   fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
   fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
+  fprintf(fp, "STALE_TH,%d\n", STALE_TH);
   fprintf(fp, "stash_hit,%d\n", stash_hit);
   // for (int i = 0; i < 31; i++)
   // {
