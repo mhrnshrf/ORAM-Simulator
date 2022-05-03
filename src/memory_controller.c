@@ -2161,6 +2161,21 @@ void pick_candidate(int index, int label, int i){
   int c = 0;
   int mask = label>>(LEVEL_VAR-1-i);
 
+  if (STT_ENABLE && RING_ENABLE)
+  {
+    for (int i = c; i < Z_VAR; i++)
+    {
+      int stt_cand = stt_candidate(label, i);
+      if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
+      {
+        Slot s = {.addr = stt_cand , .label = PosMap[stt_cand], .isReal = true, .isData = true};
+        add_to_stash(s);
+        stt_invalidate(stt_cand);
+        sttctr++;
+      }
+    }
+  }
+
 
   for(int k= 0; k < STASH_SIZE_VAR; k++)
   {
@@ -2181,20 +2196,6 @@ void pick_candidate(int index, int label, int i){
     }
   }
 
-  if (STT_ENABLE && RING_ENABLE)
-  {
-    for (int i = c; i < Z_VAR; i++)
-    {
-      int stt_cand = stt_candidate(label, i);
-      if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
-      {
-        Slot s = {.addr = stt_cand , .label = PosMap[stt_cand], .isReal = true, .isData = true};
-        add_to_stash(s);
-        stt_invalidate(stt_cand);
-        sttctr++;
-      }
-    }
-  }
 
 
   
@@ -3409,7 +3410,7 @@ void freecursive_access(int addr, char type){
   {
     Slot sl = {.addr = addr , .label = PosMap[addr], .isReal = true, .isData = true};
 
-    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT && stalectr <= STALE_TH  /*!pause_skip && !posneeded && wl_occ < WL_CAP*/)
+    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT && stalectr <= STALE_TH) // /*!pause_skip && !posneeded && wl_occ < WL_CAP*/
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
@@ -7375,18 +7376,18 @@ void export_csv(char * argv[]){
   // fprintf(fp, "missl1wb,%lld\n", missl1wb);
   // fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
   // fprintf(fp, "wbshuff,%d\n", wbshuff);
-  // fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
-  // fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
-  // fprintf(fp, "stalectr,%d\n", stalectr);
-  // fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
-  // fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
-  // fprintf(fp, "stale_reduction,%d\n", stale_reduction);
-  // for (int i = 0; i < GL_COUNT; i++)
-  // {
-  //   fprintf(fp, "glctr[%d],%f%%\n", i, 100*(double)glctr[i]/(pow(2,GL[i])*GL_CAP[i]));
-  // }
-  // fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
-  // fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
+  fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
+  fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
+  fprintf(fp, "stalectr,%d\n", stalectr);
+  fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
+  fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
+  fprintf(fp, "stale_reduction,%d\n", stale_reduction);
+  for (int i = 0; i < GL_COUNT; i++)
+  {
+    fprintf(fp, "glctr[%d],%f%%\n", i, 100*(double)glctr[i]/(pow(2,GL[i])*GL_CAP[i]));
+  }
+  fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
+  fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
   fprintf(fp, "stash_hit,%d\n", stash_hit);
   // for (int i = 0; i < 31; i++)
   // {
