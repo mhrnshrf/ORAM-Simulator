@@ -410,8 +410,8 @@ extern int dram_to_serve_r_w;
 extern int nvm_to_serve_r_r;
 extern int nvm_to_serve_r_w;
 
-extern unsigned long int rctr;
-extern unsigned long int wctr;
+extern unsigned long long int rctr;
+extern unsigned long long int wctr;
 
 
 

@@ -202,8 +202,8 @@ unsigned long long int wbuck = 0;
 unsigned long long int wslot = 0;
 
 
-unsigned long int rctr = 0;
-unsigned long int wctr = 0;
+unsigned long long int rctr = 0;
+unsigned long long int wctr = 0;
 
 
 
@@ -7345,8 +7345,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "missctr,%d\n", missctr);
   fprintf(fp, "rmiss,%d\n", rmiss);
   fprintf(fp, "wmiss,%d\n", wmiss);
-  fprintf(fp, "rctr,%llu\n", rctr);
-  fprintf(fp, "wctr,%llu\n", wctr);
+  fprintf(fp, "rctr,%lld\n", rctr);
+  fprintf(fp, "wctr,%lld\n", wctr);
   fprintf(fp, "wskip,%d\n", wskip);
   fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
   fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);
