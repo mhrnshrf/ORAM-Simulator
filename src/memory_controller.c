@@ -202,6 +202,9 @@ unsigned long long int wbuck = 0;
 unsigned long long int wslot = 0;
 
 
+unsigned long int rctr = 0;
+unsigned long int wctr = 0;
+
 
 
 
@@ -1915,6 +1918,7 @@ void read_path(int label){
     {
       retrieve_stale(label);
       discard_stale(label);
+      // printf("@%d   stale %d \n", tracectr, stalectr);
     }
     
     // int start = RING_ENABLE ? EMPTY_TOP_VAR : LEVEL_VAR - 1;
@@ -3410,7 +3414,7 @@ void freecursive_access(int addr, char type){
   {
     Slot sl = {.addr = addr , .label = PosMap[addr], .isReal = true, .isData = true};
 
-    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT) //&& stalectr <= STALE_TH) // /*!pause_skip && !posneeded && wl_occ < WL_CAP*/
+    if (WSKIP_ENABLE && type == 'W'  && stashctr < SKIP_LIMIT && stalectr <= STALE_TH) // /*!pause_skip && !posneeded && wl_occ < WL_CAP*/
     {
       int cur = PosMap[addr];
       while (PosMap[addr] == cur)
@@ -7341,6 +7345,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "missctr,%d\n", missctr);
   fprintf(fp, "rmiss,%d\n", rmiss);
   fprintf(fp, "wmiss,%d\n", wmiss);
+  fprintf(fp, "rctr,%d\n", rctr);
+  fprintf(fp, "wctr,%d\n", wctr);
   fprintf(fp, "wskip,%d\n", wskip);
   fprintf(fp, "nonmemops_sum,%lld\n", nonmemops_sum);
   fprintf(fp, "nonmemops_executed,%lld\n", nonmemops_executed);

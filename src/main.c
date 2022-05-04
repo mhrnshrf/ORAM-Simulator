@@ -103,8 +103,8 @@ int consec_dumctr = 0;
 
 int endpoint;
 
-long long int rctr = 0;
-long long int wctr = 0;
+
+
 long long int instctr= 0;
 
 double rmpki;

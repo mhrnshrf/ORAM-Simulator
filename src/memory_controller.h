@@ -123,8 +123,8 @@
 // #define DEP_TH 5             // threshold on # reshuffle for dynamic ep 
 // #define WL_CAP 100000        // cap on wl feature
 #define STALE_CAP 56          // cap on stale for each 5 levels each of which is 64 bit
-#define STALE_BUF_SIZE 300   //size of stale buffer
-#define GL_COUNT 3          // # gathering levelss
+#define STALE_BUF_SIZE 600   //size of stale buffer
+#define GL_COUNT 3          // # gathering levels
 #define GLMAX 15          // last level gl
 
 // #define DD_SATURATE 30000000
@@ -409,6 +409,9 @@ extern int dram_to_serve_r_r;
 extern int dram_to_serve_r_w;
 extern int nvm_to_serve_r_r;
 extern int nvm_to_serve_r_w;
+
+extern unsigned long int rctr = 0;
+extern unsigned long int wctr = 0;
 
 
 
