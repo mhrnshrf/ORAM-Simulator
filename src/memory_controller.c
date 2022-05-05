@@ -1914,12 +1914,12 @@ void read_path(int label){
     bool last_read = false;
     
 
-    // if (META_ENABLE)
-    // {
-    //   retrieve_stale(label);
-    //   discard_stale(label);
-    //   // printf("@%d   stale %d \n", tracectr, stalectr);
-    // }
+    if (META_ENABLE)
+    {
+      retrieve_stale(label);
+      discard_stale(label);
+      // printf("@%d   stale %d \n", tracectr, stalectr);
+    }
     
     // int start = RING_ENABLE ? EMPTY_TOP_VAR : LEVEL_VAR - 1;
     // int end = RING_ENABLE ?
@@ -2344,10 +2344,10 @@ void write_path(int label){
   
   int gi = -1;
 
-  // if (META_ENABLE)
-  // {
-  //   flush_stale(label);
-  // }
+  if (META_ENABLE)
+  {
+    flush_stale(label);
+  }
   
   if(CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)){
     dram_to_serve_e_w = 0;
@@ -5902,15 +5902,19 @@ void ring_read_path(int label, int addr){
 
   if (META_ENABLE)
   {
+    // int staleb4 = stalectr;
     retrieve_stale(label);
     discard_stale(label);
-    // printf("@%d   stale %d \n", tracectr, stalectr);
+    // if(staleb4 == stalectr){
+    // printf("discar>: @%d   stale %d \n", tracectr, stalectr);
+    // }
   }
 
 
   if (META_ENABLE)
   {
     flush_stale(label);
+    // printf("flush> @%d   stale %d \n", tracectr, stalectr);
   }
 
 
