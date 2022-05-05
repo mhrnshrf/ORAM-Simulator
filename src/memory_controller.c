@@ -5650,18 +5650,7 @@ void ring_read_path(int label, int addr){
   }
 
 
-  if (META_ENABLE)
-  {
-    retrieve_stale(label);
-    discard_stale(label);
-    // printf("@%d   stale %d \n", tracectr, stalectr);
-  }
-
-
-  if (META_ENABLE)
-  {
-    flush_stale(label);
-  }
+ 
   
 
 
@@ -5909,6 +5898,22 @@ void ring_read_path(int label, int addr){
     }
      
   }
+
+
+  if (META_ENABLE)
+  {
+    retrieve_stale(label);
+    discard_stale(label);
+    // printf("@%d   stale %d \n", tracectr, stalectr);
+  }
+
+
+  if (META_ENABLE)
+  {
+    flush_stale(label);
+  }
+
+
 }
 
 
