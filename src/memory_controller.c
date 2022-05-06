@@ -2165,20 +2165,20 @@ void pick_candidate(int index, int label, int i){
   int c = 0;
   int mask = label>>(LEVEL_VAR-1-i);
 
-  if (STT_ENABLE && RING_ENABLE)
-  {
-    for (int i = c; i < Z_VAR; i++)
-    {
-      int stt_cand = stt_candidate(label, i);
-      if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
-      {
-        Slot s = {.addr = stt_cand , .label = PosMap[stt_cand], .isReal = true, .isData = true};
-        add_to_stash(s);
-        stt_invalidate(stt_cand);
-        sttctr++;
-      }
-    }
-  }
+  // if (STT_ENABLE && RING_ENABLE)
+  // {
+  //   for (int i = c; i < Z_VAR; i++)
+  //   {
+  //     int stt_cand = stt_candidate(label, i);
+  //     if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
+  //     {
+  //       Slot s = {.addr = stt_cand , .label = PosMap[stt_cand], .isReal = true, .isData = true};
+  //       add_to_stash(s);
+  //       stt_invalidate(stt_cand);
+  //       sttctr++;
+  //     }
+  //   }
+  // }
 
 
   for(int k= 0; k < STASH_SIZE_VAR; k++)
@@ -6303,23 +6303,46 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       // }
     }
 
+    bool stt_turn = false;
+    int stt_cand = -1;
+    if (STT_ENABLE && RING_ENABLE)
+    {
+      stt_cand = stt_candidate(label, level);
+      if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
+      {
+        stt_turn = true;
+        sttctr++;
+      }
+    }
     
-    if (candidate[real] != -1 && real < (LZ[level] - LS[level])) // GlobTree[index].dumnum > GlobTree[index].s)
+    if ((candidate[real] != -1 || stt_turn) && real < (LZ[level] - LS[level])) // GlobTree[index].dumnum > GlobTree[index].s)
     {
       // if (tracectr >= 39796059)
       // {
       //   print_candidate();
       //   printf("%c %lld k=%d: cand[%d]: %d\n", op_type, wbuck, k, candidate[k], Stash[candidate[k]].addr);
       // }
-      GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
-      GlobTree[index].slot[j].label = Stash[candidate[real]].label;
+      if(!stt_turn){
+        GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
+        GlobTree[index].slot[j].label = Stash[candidate[real]].label;
+      }
+      else{
+        GlobTree[index].slot[j].addr = stt_cand;
+        GlobTree[index].slot[j].label = PosMap[stt_cand];
+      }
+      
       GlobTree[index].slot[j].isReal = true;
       GlobTree[index].slot[j].isData = true;
       GlobTree[index].dumnum--;
       GlobTree[index].dumval--;
       real++;
 
-      remove_from_stash(candidate[real-1]);
+      if(!stt_turn){
+        remove_from_stash(candidate[real-1]);
+      }
+      else{
+        stt_invalidate(stt_cand);
+      }
     }
     else
     {
@@ -6361,22 +6384,46 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
           // }
         }
 
-        if (candidate[real] != -1 && real < (LZ[level] - LS[level])) // GlobTree[index].dumnum > GlobTree[index].s)
+        bool stt_turn = false;
+        int stt_cand = -1;
+        if (STT_ENABLE && RING_ENABLE)
+        {
+          stt_cand = stt_candidate(label, level);
+          if (stt_cand != -1 && (stt_cand != intended_addr || !pinFlag))  
+          {
+            stt_turn = true;
+            sttctr++;
+          }
+        }
+
+        if ((candidate[real] != -1 || stt_turn) && real < (LZ[level] - LS[level])) // GlobTree[index].dumnum > GlobTree[index].s)
         {
           // if (tracectr >= 39796059)
           // {
           //   print_candidate();
           //   printf("%c %lld real=%d: cand[%d]: %d\n", op_type, wbuck, real, candidate[real], Stash[candidate[real]].addr);
           // }
-          GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
-          GlobTree[index].slot[j].label = Stash[candidate[real]].label;
+          if(!stt_turn){
+            GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
+            GlobTree[index].slot[j].label = Stash[candidate[real]].label;
+          }
+          else{
+            GlobTree[index].slot[j].addr = stt_cand;
+            GlobTree[index].slot[j].label = PosMap[stt_cand];
+          }
           GlobTree[index].slot[j].isReal = true;
           GlobTree[index].slot[j].isData = true;
           GlobTree[index].dumnum--;
           GlobTree[index].dumval--;
           real++;
 
-          remove_from_stash(candidate[real-1]);
+          if(!stt_turn){
+            remove_from_stash(candidate[real-1]);
+          }
+          else{
+            stt_invalidate(stt_cand);
+          }
+
         }
         else
         {
