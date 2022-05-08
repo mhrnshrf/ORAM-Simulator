@@ -3449,7 +3449,10 @@ void freecursive_access(int addr, char type){
     }
     else
     {
-      ring_access(addr);
+      if (!LLC_DIRTY || !dirty_evict)
+      {
+        ring_access(addr);
+      }
     }
     
     
