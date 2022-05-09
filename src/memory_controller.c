@@ -2048,7 +2048,7 @@ void read_path(int label){
           {
             if(GlobTree[index].slot[j].isReal)
             {
-              if (GlobTree[index].slot[j].addr == oram_acc_addr)
+              if ((GlobTree[index].slot[j].addr == oram_acc_addr)  && !RING_ENABLE)
               {
                 if (i <= TOP_BOUNDARY)
                 {
@@ -2753,12 +2753,16 @@ void remap_block(int addr){
     {
       if (!LLC_DIRTY || pinFlag)
       {
-        // printf("@%d remap %d\n", tracectr, addr);
+        if(tracectr >= 1000000){
+          printf("@%d remap %d\n", tracectr, addr);
+        }
         Stash[index].label = label;
       }
       else
       {
-        // printf("@%d remove %d\n", tracectr, addr);
+        if(tracectr >= 1000000){
+          printf("@%d remove %d\n", tracectr, addr);
+        }
         remove_from_stash(index);
       }
     }
@@ -3335,7 +3339,9 @@ void freecursive_access(int addr, char type){
           pinOn();
           if (RING_ENABLE)
           {
-            // printf("@%d posmap  %d  cycle %lld\n", tracectr, tag, CYCLE_VAL);
+            if(tracectr >= 1000000){
+              printf("@%d posmap  %d  cycle %lld\n", tracectr, tag, CYCLE_VAL);
+            }
             ring_access(tag);
           }
           else
@@ -3459,7 +3465,10 @@ void freecursive_access(int addr, char type){
     {
       if (!LLC_DIRTY || !dirty_evict)
       {
-        // printf("@%d data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
+        if(tracectr >= 1000000)
+        {
+          printf("@%d data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
+        }
         ring_access(addr);
       }
     }
@@ -5756,6 +5765,11 @@ void ring_read_path(int label, int addr){
       else{
         green_turn = true;
       }
+
+      if (GolbTree[index].count == LS[i] && i < TOP_CACHE)
+      {
+        continue;
+      }
       
     }
     
@@ -6886,7 +6900,7 @@ void ring_early_reshuffle(int label){
     int reach_point = (i < TOP_CACHE || (RING_ZSTL && i <= L3)) ? curS : curS + green_var;
     bool must_reshuffle = (SUPER_ENABLE && is_super_level(i)) ? super_node_need_reshuffle(index) : (GlobTree[index].count >= reach_point);
 
-    if (must_reshuffle)    // || i < TOP_CACHE  || i >= LEVEL-2 
+    if (must_reshuffle && i >= TOP_CACHE)    // || i < TOP_CACHE  || i >= LEVEL-2 
     {
       int stash_b4 = stashctr;
       if (curS >= 0 && curS <= RING_S )
