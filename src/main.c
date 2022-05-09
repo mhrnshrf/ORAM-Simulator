@@ -1892,6 +1892,7 @@ int main(int argc, char * argv[])
 									// first serve the evicted block then next time serve this trace
 									int victim;
 									victim = cache_fill(addr[numc], opertype[numc]);
+									// printf("@%d cached %lld\n", tracectr, addr[numc]>>6);
 									// printf("shad: %d\n", shad_nonmemops[numc]);
 
 									// if (shad_nonmemops[numc] == 10 && opertype[numc] == 'W' /*&& victim != -1*/)

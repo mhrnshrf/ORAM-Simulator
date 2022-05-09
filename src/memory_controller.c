@@ -2726,6 +2726,11 @@ void remap_block(int addr){
         printf("remap:  previous Posmap[%d]: %d\n", addr, prevlabel);
         printf("remap:  Posmap[%d]: %d\n", addr, PosMap[addr]);
         printf("remap:  stashctr: %d    bkctr: %d\n", stashctr, bkctr);
+        unsigned long long int caddr = addr << ((unsigned long long int) log2(BLOCK_SIZE));
+        bool incache = cache_access(caddr, 'R');
+        printf("it %s exist in cache\n", incache ? "does" : "does not");
+          
+
         // printf("remap:  PLB[%d]: %d\n", addr%PLB_SIZE, PLB[addr%PLB_SIZE]);
       }
       print_oram_stats();
@@ -2748,10 +2753,12 @@ void remap_block(int addr){
     {
       if (!LLC_DIRTY || pinFlag)
       {
+        // printf("@%d remap %d\n", tracectr, addr);
         Stash[index].label = label;
       }
       else
       {
+        // printf("@%d remove %d\n", tracectr, addr);
         remove_from_stash(index);
       }
     }
@@ -3328,6 +3335,7 @@ void freecursive_access(int addr, char type){
           pinOn();
           if (RING_ENABLE)
           {
+            // printf("@%d posmap  %d  cycle %lld\n", tracectr, tag, CYCLE_VAL);
             ring_access(tag);
           }
           else
@@ -3451,6 +3459,7 @@ void freecursive_access(int addr, char type){
     {
       if (!LLC_DIRTY || !dirty_evict)
       {
+        // printf("@%d data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
         ring_access(addr);
       }
     }
