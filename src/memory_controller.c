@@ -6856,7 +6856,7 @@ void ring_early_reshuffle(int label){
   // int shufcount = 0;
   // int stashb4 = stashctr;
   // for (int i = 0; i < LEVEL; i++)
-  for (int i = LEVEL-1; i > 0; i--)
+  for (int i = LEVEL-1; i >= 0; i--)
   {
     int index = calc_index(label, i);
     // int reqmade = 0;
