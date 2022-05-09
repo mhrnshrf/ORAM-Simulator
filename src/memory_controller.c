@@ -5742,11 +5742,11 @@ void ring_read_path(int label, int addr){
 
     if(!contain_intended)
     {
-      if (GlobTree[index].count >= LS[i] && i < TOP_CACHE)
-      {
-        // printf("here!!!! @%d\n", tracectr);
-        continue;
-      }
+      // to exclude top cache from reshuffle
+      // if (GlobTree[index].count >= LS[i] && i < TOP_CACHE)
+      // {
+      //   continue;
+      // }
       int dv = count_bucket_dumvalid(index, i);
       if (dv != 0)
       {
@@ -6901,7 +6901,9 @@ void ring_early_reshuffle(int label){
     int reach_point = (i < TOP_CACHE || (RING_ZSTL && i <= L3)) ? curS : curS + green_var;
     bool must_reshuffle = (SUPER_ENABLE && is_super_level(i)) ? super_node_need_reshuffle(index) : (GlobTree[index].count >= reach_point);
 
-    if (must_reshuffle && i >= TOP_CACHE)    // || i < TOP_CACHE  || i >= LEVEL-2 
+    // to exclude top cache from reshuffle
+    // if (must_reshuffle && i >= TOP_CACHE)   
+    if (must_reshuffle)   
     {
       int stash_b4 = stashctr;
       if (curS >= 0 && curS <= RING_S )
