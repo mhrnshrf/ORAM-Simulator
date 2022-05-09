@@ -5742,8 +5742,9 @@ void ring_read_path(int label, int addr){
 
     if(!contain_intended)
     {
-      if (GlobTree[index].count == LS[i] && i < TOP_CACHE)
+      if (GlobTree[index].count >= LS[i] && i < TOP_CACHE)
       {
+        // printf("here!!!! @%d\n", tracectr);
         continue;
       }
       int dv = count_bucket_dumvalid(index, i);
@@ -5763,6 +5764,7 @@ void ring_read_path(int label, int addr){
       {
         {
           printf("ERROR: ring read @%d L%d index %d no valid dummy available! \n", tracectr, i, index);
+          printf("count: %d\n", GlobTree[index].count);
           exit(1);
         }
       }
