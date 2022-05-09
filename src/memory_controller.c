@@ -5742,6 +5742,10 @@ void ring_read_path(int label, int addr){
 
     if(!contain_intended)
     {
+      if (GlobTree[index].count == LS[i] && i < TOP_CACHE)
+      {
+        continue;
+      }
       int dv = count_bucket_dumvalid(index, i);
       if (dv != 0)
       {
@@ -5766,11 +5770,6 @@ void ring_read_path(int label, int addr){
         green_turn = true;
       }
 
-      if (GlobTree[index].count == LS[i] && i < TOP_CACHE)
-      {
-        continue;
-      }
-      
     }
     
 
