@@ -5766,7 +5766,7 @@ void ring_read_path(int label, int addr){
         green_turn = true;
       }
 
-      if (GolbTree[index].count == LS[i] && i < TOP_CACHE)
+      if (GlobTree[index].count == LS[i] && i < TOP_CACHE)
       {
         continue;
       }
