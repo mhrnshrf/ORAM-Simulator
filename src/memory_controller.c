@@ -2753,14 +2753,14 @@ void remap_block(int addr){
     {
       if (!LLC_DIRTY || pinFlag)
       {
-        if(tracectr >= 1000000){
+        if (LOG_ENABLE && tracectr >= LOG_TH){
           printf("@%d remap %d\n", tracectr, addr);
         }
         Stash[index].label = label;
       }
       else
       {
-        if(tracectr >= 1000000){
+        if (LOG_ENABLE && tracectr >= LOG_TH){
           printf("@%d remove %d\n", tracectr, addr);
         }
         remove_from_stash(index);
@@ -3339,7 +3339,7 @@ void freecursive_access(int addr, char type){
           pinOn();
           if (RING_ENABLE)
           {
-            if(tracectr >= 1000000){
+            if (LOG_ENABLE && tracectr >= LOG_TH){
               printf("@%d posmap  %d  cycle %lld\n", tracectr, tag, CYCLE_VAL);
             }
             ring_access(tag);
@@ -3465,7 +3465,7 @@ void freecursive_access(int addr, char type){
     {
       if (!LLC_DIRTY || !dirty_evict)
       {
-        if(tracectr >= 1000000)
+        if (LOG_ENABLE && tracectr >= LOG_TH)
         {
           printf("@%d data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
         }
