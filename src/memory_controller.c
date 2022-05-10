@@ -1782,8 +1782,9 @@ int assign_a_path(int addr){
             GlobTree[index].slot[j].label = label;
             GlobTree[index].slot[j].isReal = true;
             GlobTree[index].slot[j].isData = true;
-
             GlobTree[index].dumnum--;
+            
+            count_level[i]++;
 
             cap_count[calc_index(label, CAP_LEVEL)-CAP_NODE+1]++;
             return label;
