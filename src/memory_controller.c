@@ -2340,7 +2340,7 @@ void flush_stale(int label){
 
 bool in_range_wpath(int i){
   // printf("i: %d\n", i);
-  if(ring_evictctr % 2 == 0){
+  if(ring_evictctr % 5 != 0){
     // printf("return %d\n", (i >= EMPTY_TOP_VAR));
     return (i >= EMPTY_TOP_VAR);
   }
@@ -2364,8 +2364,8 @@ void write_path(int label){
   }
 
   // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-  int start = (ring_evictctr % 2 == 0) ? LEVEL_VAR-1 : EMPTY_TOP_VAR;
-  int inc = (ring_evictctr % 2 == 0) ? -1 : 1;
+  int start = (ring_evictctr % 5 != 0) ? LEVEL_VAR-1 : EMPTY_TOP_VAR;
+  int inc = (ring_evictctr % 5 != 0) ? -1 : 1;
   for(int i = start; in_range_wpath(i); i=i+inc)
   {
     // printf("@%d   %d\n", tracectr, i);
