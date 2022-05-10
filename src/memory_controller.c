@@ -4700,6 +4700,9 @@ int shuf_calc(){
 
 void ring_access(int addr){
   // int before = stashctr;
+  record_util_level();
+  record_util_snap();
+
   if (ring_dummy && DUMMY_ENABLE)
   {
     switch_enqueue_to(HEAD);
@@ -7718,6 +7721,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "deadctr,%lld\n", deadctr);
   fprintf(fp, "greenturn_avg,%f\n", (double)greenturn_sum/(ringctr+ringdumctr));
   fprintf(fp, "greentc_avg,%f\n", (double)greentc_sum/(ringctr+ringdumctr));
+
+  print_array_double(util_overall, LEVEL, fp);
 
   // for (int i = GATHER_START; i < LEVEL; i++)
   // {
