@@ -1513,7 +1513,12 @@ void oram_alloc(){
 
   for (int i = 0; i < LEVEL; i++)
   {
-    cap_level[i] = (LZ[i]*pow(2,i));
+    if(RING_ENABLE){
+      cap_level[i] = ((LZ[i]-LS[i])*pow(2,i));
+    }
+    else{
+      cap_level[i] = (LZ[i]*pow(2,i));
+    }
   }
   
 
@@ -5834,6 +5839,7 @@ void ring_read_path(int label, int addr){
           GlobTree[index].slot[offset].addr = -1;
           GlobTree[index].slot[offset].label = -1;
           GlobTree[index].dumnum++;
+          count_level[i]--;
         }
         else
         {
@@ -6380,6 +6386,7 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       real++;
 
       if(!stt_turn){
+        count_level[level]++;
         remove_from_stash(candidate[real-1]);
       }
       else{
@@ -6460,6 +6467,7 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
           real++;
 
           if(!stt_turn){
+            count_level[level]++;
             remove_from_stash(candidate[real-1]);
           }
           else{
@@ -6711,6 +6719,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
           GlobTree[index].slot[j].addr = -1;
           GlobTree[index].slot[j].label = -1;
           GlobTree[index].dumnum++;
+          count_level[i]--;
           // GlobTree[index].dumval++;
         }
         else
