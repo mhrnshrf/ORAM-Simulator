@@ -1930,8 +1930,8 @@ void read_path(int label){
     // int start = RING_ENABLE ? EMPTY_TOP_VAR : LEVEL_VAR - 1;
     // int end = RING_ENABLE ?
 
-    for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-    // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+    // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
@@ -7731,6 +7731,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "deadctr,%lld\n", deadctr);
   fprintf(fp, "greenturn_avg,%f\n", (double)greenturn_sum/(ringctr+ringdumctr));
   fprintf(fp, "greentc_avg,%f\n", (double)greentc_sum/(ringctr+ringdumctr));
+  fprintf(fp, "TOP_BOUNDARY,%d\n", TOP_BOUNDARY);
+  fprintf(fp, "MID_BOUNDARY,%d\n", MID_BOUNDARY);
 
   print_array_double(util_overall, LEVEL, fp);
 
