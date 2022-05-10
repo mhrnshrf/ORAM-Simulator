@@ -2365,8 +2365,6 @@ void write_path(int label){
   int inc = (ring_evictctr % 2 == 0) ? -1 : 1;
   for(int i = start; i < in_range_wpath(i); i=i+inc)
   {
-    
-    
     if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
     {
       int index = calc_index(label, i);
