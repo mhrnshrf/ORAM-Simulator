@@ -2363,10 +2363,10 @@ void write_path(int label){
     dram_to_serve_e_w = 0;
   }
 
-  // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   int start = (ring_evictctr % 25 != 0) ? LEVEL_VAR-1 : EMPTY_TOP_VAR;
   int inc = (ring_evictctr % 25 != 0) ? -1 : 1;
-  for(int i = start; in_range_wpath(i); i=i+inc)
+  for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+  // for(int i = start; in_range_wpath(i); i=i+inc)
   {
     // printf("@%d   %d\n", tracectr, i);
     if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
