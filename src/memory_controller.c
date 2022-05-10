@@ -2353,7 +2353,8 @@ void write_path(int label){
     dram_to_serve_e_w = 0;
   }
 
-  for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+  // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+  for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
   {
     
     
