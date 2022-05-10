@@ -1929,10 +1929,10 @@ void read_path(int label){
     
     // int start = RING_ENABLE ? EMPTY_TOP_VAR : LEVEL_VAR - 1;
     // int end = RING_ENABLE ?
-      int start = (RING_ENABLE && ring_evictctr % 5 == 0) ? TOP_CACHE : EMPTY_TOP_VAR;
+      // int start = (RING_ENABLE && ring_evictctr % 5 == 0) ? TOP_CACHE : EMPTY_TOP_VAR;
     // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-    // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
-    for(int i = start; i < LEVEL_VAR; i++)
+    // for(int i = start; i < LEVEL_VAR; i++)
+    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
@@ -2370,11 +2370,12 @@ void write_path(int label){
     dram_to_serve_e_w = 0;
   }
 
-  int end = (RING_ENABLE && ring_evictctr % 5 == 0) ? TOP_CACHE : EMPTY_TOP_VAR;
+  // int end = (RING_ENABLE && ring_evictctr % 5 == 0) ? TOP_CACHE : EMPTY_TOP_VAR;
   // int start = (ring_evictctr % 25 != 0) ? LEVEL_VAR-1 : EMPTY_TOP_VAR;
   // int inc = (ring_evictctr % 25 != 0) ? -1 : 1;
   // for(int i = start; in_range_wpath(i); i=i+inc)
-  for(int i = LEVEL_VAR-1; i >= end; i--)
+  // for(int i = LEVEL_VAR-1; i >= end; i--)
+  for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
   {
     // printf("@%d   %d\n", tracectr, i);
     if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
