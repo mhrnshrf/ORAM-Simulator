@@ -1935,7 +1935,7 @@ void read_path(int label){
     // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
     // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     int start = RING_ENABLE ? TOP_CACHE : EMPTY_TOP_VAR;
-    if(stashctr >= 0.3 * STASH_SIZE){
+    if(stashctr >= 0.5 * STASH_SIZE){
       start = EMPTY_TOP_VAR;
       tc_must_flush = true;
     }
