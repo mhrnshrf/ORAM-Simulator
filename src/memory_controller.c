@@ -1933,14 +1933,15 @@ void read_path(int label){
     // int end = RING_ENABLE ?
       // int start = (RING_ENABLE && ring_evictctr % 5 == 0) ? TOP_CACHE : EMPTY_TOP_VAR;
     // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-    int start = RING_ENABLE ? TOP_CACHE : EMPTY_TOP_VAR;
-    if(stashctr >= 0.5 * STASH_SIZE){
-      start = EMPTY_TOP_VAR;
-      tc_must_flush = true;
-    }
-    else{
-      tc_must_flush = false;
-    }
+    
+    // int start = RING_ENABLE ? TOP_CACHE : EMPTY_TOP_VAR;
+    // if(stashctr >= 0.5 * STASH_SIZE){
+    //   start = EMPTY_TOP_VAR;
+    //   tc_must_flush = true;
+    // }
+    // else{
+    //   tc_must_flush = false;
+    // }
 
     // for(int i = start; i < LEVEL_VAR; i++)
     for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
