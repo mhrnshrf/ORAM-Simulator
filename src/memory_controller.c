@@ -2392,7 +2392,7 @@ void write_path(int label){
   int end = (tc_must_flush || !RING_ENABLE) ? EMPTY_TOP_VAR : TOP_CACHE_VAR;
   for(int i = LEVEL_VAR - 1; i >= end; i--)
   {
-    printf("@%d   L%d\n", tracectr, i);
+    // printf("@%d   L%d\n", tracectr, i);
     if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
     {
       int index = calc_index(label, i);
