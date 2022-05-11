@@ -234,6 +234,8 @@ long long int orig_pc;
 int oram_acc_addr;
 int wbshuff = 0;
 
+bool tc_must_flush = false;
+
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
   bool isReal;       // real 1 , dummy 0
@@ -1931,8 +1933,17 @@ void read_path(int label){
     // int end = RING_ENABLE ?
       // int start = (RING_ENABLE && ring_evictctr % 5 == 0) ? TOP_CACHE : EMPTY_TOP_VAR;
     // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-    // for(int i = start; i < LEVEL_VAR; i++)
-    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+    // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+    int start = RING_ENABLE ? TOP_CACHE : EMPTY_TOP_VAR;
+    if(stashctr >= 0.3 * STASH_SIZE){
+      start = EMPTY_TOP_VAR;
+      tc_must_flush = true;
+    }
+    else{
+      tc_must_flush = false;
+    }
+
+    for(int i = start; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
@@ -2374,10 +2385,14 @@ void write_path(int label){
   // int start = (ring_evictctr % 25 != 0) ? LEVEL_VAR-1 : EMPTY_TOP_VAR;
   // int inc = (ring_evictctr % 25 != 0) ? -1 : 1;
   // for(int i = start; in_range_wpath(i); i=i+inc)
+  // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
   // for(int i = LEVEL_VAR-1; i >= end; i--)
-  for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+  // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+  // bool leaf_written = false;
+  int end = (tc_must_flush || !RING_ENABLE) ? EMPTY_TOP_VAR : TOP_CACHE_VAR;
+  for(int i = LEVEL_VAR - 1; i >= end; i--)
   {
-    // printf("@%d   %d\n", tracectr, i);
+    printf("@%d   L%d\n", tracectr, i);
     if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
     {
       int index = calc_index(label, i);
@@ -2405,6 +2420,11 @@ void write_path(int label){
         if((CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)) && i >= TOP_CACHE){
           dram_to_serve_e_w += bs;
         }
+        // if(RING_ENABLE && !leaf_written && i == EMPTY_TOP_VAR){
+        //   i = LEVEL_VAR;
+        //   leaf_written = true;
+        //   end = TOP_CACHE_VAR;
+        // }
         continue;
       }
       int addr = 0;
@@ -2552,6 +2572,8 @@ void write_path(int label){
 
 
     // }
+
+    
 
   }
   
