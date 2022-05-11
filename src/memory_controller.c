@@ -1933,7 +1933,6 @@ void read_path(int label){
     // int end = RING_ENABLE ?
       // int start = (RING_ENABLE && ring_evictctr % 5 == 0) ? TOP_CACHE : EMPTY_TOP_VAR;
     // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
-    // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     int start = RING_ENABLE ? TOP_CACHE : EMPTY_TOP_VAR;
     if(stashctr >= 0.5 * STASH_SIZE){
       start = EMPTY_TOP_VAR;
@@ -1943,7 +1942,8 @@ void read_path(int label){
       tc_must_flush = false;
     }
 
-    for(int i = start; i < LEVEL_VAR; i++)
+    // for(int i = start; i < LEVEL_VAR; i++)
+    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
@@ -2387,10 +2387,10 @@ void write_path(int label){
   // for(int i = start; in_range_wpath(i); i=i+inc)
   // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
   // for(int i = LEVEL_VAR-1; i >= end; i--)
-  // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   // bool leaf_written = false;
-  int end = (tc_must_flush || !RING_ENABLE) ? EMPTY_TOP_VAR : TOP_CACHE_VAR;
-  for(int i = LEVEL_VAR - 1; i >= end; i--)
+  // int end = (tc_must_flush || !RING_ENABLE) ? EMPTY_TOP_VAR : TOP_CACHE_VAR;
+  // for(int i = LEVEL_VAR - 1; i >= end; i--)
+  for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
     // printf("@%d   L%d\n", tracectr, i);
     if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
