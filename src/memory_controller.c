@@ -522,6 +522,7 @@ bool SIM_ENABLE_VAR;
 bool CACHE_ENABLE_VAR;
 bool DEAD_ENABLE_VAR;
 int S_INC_ARR[LEVEL];
+bool SKIP_ENABLE_VAR;
 
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
@@ -835,6 +836,7 @@ void var_init(){
   NVM_ADDR_BYTE = NVM_ADDR_VAR << (int)log2(BLOCK_SIZE);
   DEAD_ENABLE_VAR = DEAD_ENABLE;
   S_INC_VAR = DYNAMIC_S ? S_INC : 0;
+  SKIP_ENABLE_VAR = SKIP_ENABLE;
 }
 
 unsigned long long int byte_addr(long long int physical_addr){
@@ -1933,23 +1935,23 @@ void read_path(int label){
     // int end = RING_ENABLE ?
       // int start = (RING_ENABLE && ring_evictctr % 5 == 0) ? TOP_CACHE : EMPTY_TOP_VAR;
     // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+    
+    // int start = RING_ENABLE ? TOP_CACHE : EMPTY_TOP_VAR;
+    // if(stashctr >= 0.5 * STASH_SIZE){
+    //   start = EMPTY_TOP_VAR;
+    //   tc_must_flush = true;
+    // }
+    // else{
+    //   tc_must_flush = false;
+    // }
 
-    int start = RING_ENABLE ? TOP_CACHE : EMPTY_TOP_VAR;
-    if(stashctr >= 0.7 * STASH_SIZE){
-      start = EMPTY_TOP_VAR;
-      tc_must_flush = true;
-    }
-    else{
-      tc_must_flush = false;
-    }
-
-    for(int i = start; i < LEVEL_VAR; i++)
-    // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+    // for(int i = start; i < LEVEL_VAR; i++)
+    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
 
-      if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
+      if (!SKIP_ENABLE_VAR || i < SKIP_L1 || i > SKIP_L2)
       {
         int index = calc_index(label, i);
         if (RING_ENABLE)
@@ -2389,12 +2391,12 @@ void write_path(int label){
   // for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
   // for(int i = LEVEL_VAR-1; i >= end; i--)
   // bool leaf_written = false;
-  int end = (tc_must_flush || !RING_ENABLE) ? EMPTY_TOP_VAR : TOP_CACHE_VAR;
-  for(int i = LEVEL_VAR - 1; i >= end; i--)
-  // for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+  // int end = (tc_must_flush || !RING_ENABLE) ? EMPTY_TOP_VAR : TOP_CACHE_VAR;
+  // for(int i = LEVEL_VAR - 1; i >= end; i--)
+  for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
     // printf("@%d   L%d\n", tracectr, i);
-    if (!SKIP_ENABLE || i <= SKIP_L1 || i >= SKIP_L2)
+    if (!SKIP_ENABLE_VAR || i < SKIP_L1 || i > SKIP_L2)
     {
       int index = calc_index(label, i);
       if (RING_ENABLE)
@@ -4813,7 +4815,9 @@ void ring_access(int addr){
     int dead_b4_dram = dead_dram;
     int b4 = stalectr;
     
-    
+    if(SKIP_ENABLE){
+      SKIP_ENABLE_VAR = (ring_evictctr % 2 == 0) ? true : false;
+    }
     ring_evict_path(label);
     stale_reduction += b4 - stalectr;
 
