@@ -204,6 +204,7 @@ unsigned long long int wslot = 0;
 
 unsigned long long int rctr = 0;
 unsigned long long int wctr = 0;
+unsigned long long int indepctr = 0;
 
 
 
@@ -523,6 +524,7 @@ bool CACHE_ENABLE_VAR;
 bool DEAD_ENABLE_VAR;
 int S_INC_ARR[LEVEL];
 bool SKIP_ENABLE_VAR;
+bool INDEP_ENABLE_VAR;
 
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
@@ -837,6 +839,7 @@ void var_init(){
   DEAD_ENABLE_VAR = DEAD_ENABLE;
   S_INC_VAR = DYNAMIC_S ? S_INC : 0;
   SKIP_ENABLE_VAR = SKIP_ENABLE;
+  INDEP_ENABLE_VAR = false;
 }
 
 unsigned long long int byte_addr(long long int physical_addr){
@@ -1946,7 +1949,14 @@ void read_path(int label){
     // }
 
     // for(int i = start; i < LEVEL_VAR; i++)
-    for(int i = EMPTY_TOP_VAR; i < LEVEL_VAR; i++)
+    int start = EMPTY_TOP_VAR;
+    int end = LEVEL_VAR;
+    if (RING_ENABLE && INDEP_ENABLE_VAR)
+    {
+      end = TOP_CACHE;
+    }
+    
+    for(int i = start; i < end; i++)
     {
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
@@ -2393,7 +2403,14 @@ void write_path(int label){
   // bool leaf_written = false;
   // int end = (tc_must_flush || !RING_ENABLE) ? EMPTY_TOP_VAR : TOP_CACHE_VAR;
   // for(int i = LEVEL_VAR - 1; i >= end; i--)
-  for(int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
+  int start = LEVEL_VAR-1;
+  int end = EMPTY_TOP_VAR;
+  if (RING_ENABLE && INDEP_ENABLE_VAR)
+  {
+    start = TOP_CACHE - 1;
+  }
+
+  for(int i = start; i >= end; i--)
   {
     // printf("@%d   L%d\n", tracectr, i);
     if (!SKIP_ENABLE_VAR || i < SKIP_L1 || i > SKIP_L2)
@@ -4859,6 +4876,25 @@ void ring_access(int addr){
   if (ring_dummy)
   {
     switch_enqueue_to(TAIL);
+  }
+
+  if(RING_ENABLE && INDEP_ENABLE)
+  {
+    while(stashctr > 0.5 * STASH_SIZE)
+    {
+      INDEP_ENABLE_VAR = true;
+      for (int i = 0; i < STASH_SIZE; i++)
+      {
+        read_path(Stash[i].label);
+        write_path(Stash[i].label);
+        indepctr++;
+        if(stashctr < 0.5 * STASH_SIZE)
+        {
+          break;
+        }
+      }
+    }
+    INDEP_ENABLE_VAR = false;
   }
 
 }
@@ -7841,6 +7877,7 @@ void export_csv(char * argv[]){
   
   // print_lifetime_stat(fp);
 
+  fprintf(fp, "indepctr,%lld\n", indepctr);
   
 
 
