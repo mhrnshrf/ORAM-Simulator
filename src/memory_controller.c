@@ -5852,6 +5852,7 @@ void ring_read_path(int label, int addr){
         {
           printf("ERROR: ring read @%d L%d index %d no valid dummy available! \n", tracectr, i, index);
           printf("count: %d\n", GlobTree[index].count);
+          printf("dummy: %d\n", GlobTree[index].dumnum);
           exit(1);
         }
       }
