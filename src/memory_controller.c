@@ -1953,7 +1953,7 @@ void read_path(int label){
     int end = LEVEL_VAR;
     if (RING_ENABLE && INDEP_ENABLE_VAR)
     {
-      end = TOP_CACHE;
+      end = TOP_CACHE_VAR;
     }
     
     for(int i = start; i < end; i++)
@@ -5853,6 +5853,7 @@ void ring_read_path(int label, int addr){
           printf("ERROR: ring read @%d L%d index %d no valid dummy available! \n", tracectr, i, index);
           printf("count: %d\n", GlobTree[index].count);
           printf("dummy: %d\n", GlobTree[index].dumnum);
+          printf("indep: %lld\n", indepctr);
           exit(1);
         }
       }
