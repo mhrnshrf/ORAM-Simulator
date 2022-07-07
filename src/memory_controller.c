@@ -6503,7 +6503,7 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
   if (INDEP_ENABLE_VAR)
   {
-    printf("util[%d]:   %f\n", level, (double)real/RING_Z);  
+    // printf("util[%d]:   %f\n", level, (double)real/RING_Z);  
     // printf("avg[%d]:   %f\n", level, (double)count_level[level]/cap_level[level]);  
   }
   
