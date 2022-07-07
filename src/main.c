@@ -20,7 +20,10 @@ bool last_lock_released_prev;
 bool tail_written;
 bool newreq_consumed;
 
-int expt_done=0;  
+int expt_done=0; 
+
+char measuring_op = 'r';
+long long int op_timer_start = 0;
 
 long long int CYCLE_VAL=0;
 
@@ -1374,6 +1377,41 @@ int main(int argc, char * argv[])
 	          ROB[numc].reqid[ROB[numc].tail] = reqid[numc];
 			  tail_written = true;
 
+			  	if (beginning[numc])
+				{
+					if (op_timer_start != 0)
+					{
+						if (measuring_op == 'o')
+						{
+							online_time += (CYCLE_VAL - op_timer_start); 
+						}
+						else if (measuring_op == 'e')
+						{
+							evict_time += (CYCLE_VAL - op_timer_start); 
+						}
+						else if (measuring_op == 'r')
+						{
+							reshuff_time += (CYCLE_VAL - op_timer_start); 
+						}
+						else if (measuring_op == 'm')
+						{
+							if (op_type[numc] == 'o')
+							{
+								online_time += (CYCLE_VAL - op_timer_start); 
+							}
+							else if (op_type[numc] == 'e')
+							{
+								evict_time += (CYCLE_VAL - op_timer_start); 
+							}
+						}
+					}
+					
+					
+					
+					measuring_op = op_type[numc];
+					op_timer_start = CYCLE_VAL;
+				}
+
 
 			if (beginning[numc])
 				{
@@ -1462,6 +1500,8 @@ int main(int argc, char * argv[])
 		  }
 		  else {
 			// Mehrnoosh:
+		
+
 				// if (beginning[numc])
 				// {
 				// 	// if (tracectr > 2200)
@@ -1491,7 +1531,6 @@ int main(int argc, char * argv[])
 				// 		cur_meta = oramid[numc];
 				// 	}
 				// }
-
 				
 				
 
@@ -1701,6 +1740,13 @@ int main(int argc, char * argv[])
 					if(!SIM_ENABLE_VAR)
 					{
 						ring_dummy = (stashctr >= DUMMY_TH) ? true : false;
+						
+						// bool deadQ_runout = (deadQ_arr[LEVEL-1]->size < LZ[LEVEL-1]*2 )|| (deadQ_arr[LEVEL-2]->size < LZ[LEVEL-2]*2) || (deadQ_arr[LEVEL-3]->size < LZ[LEVEL-3]*2); 
+						// if (deadQ_runout && DEAD_ENABLE && DYNAMIC_S && RSTL_ENABLE)
+						// {
+						// 	ring_dummy = true;
+						// }
+						
 						if (DUMMY_ENABLE && ring_dummy)
 						{
 							ring_access(-1);
@@ -2193,6 +2239,13 @@ int main(int argc, char * argv[])
 
 			if(oramQ->head->beginning && oramQ->head->oramid >= 0){
 				ring_dummy = (stashctr >= DUMMY_TH) ? true : false;
+
+				// bool deadQ_runout = (deadQ_arr[LEVEL-1]->size < LZ[LEVEL-1]*2 )|| (deadQ_arr[LEVEL-2]->size < LZ[LEVEL-2]*2) || (deadQ_arr[LEVEL-3]->size < LZ[LEVEL-3]*2); 
+				// if (deadQ_runout && DEAD_ENABLE && DYNAMIC_S && RSTL_ENABLE)
+				// {
+				// 	ring_dummy = true;
+				// }
+
 				if (DUMMY_ENABLE && ring_dummy)
 				{
 					ring_access(-1);

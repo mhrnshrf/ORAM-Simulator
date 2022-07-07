@@ -32,6 +32,10 @@ extern long long int trace_clk;
 char bench[20];
 char exp_name[20] = "";
 
+long long int online_time = 0;
+long long int evict_time = 0;
+long long int reshuff_time = 0;
+
 long long int deadctr = 0;
 long long int ddctr = 0;
 long long int dead_dram = 0;
@@ -1403,6 +1407,11 @@ void oram_alloc(){
     else{
       // S_INC_ARR[i] = RING_S - LS[i] - GREEN_BLOCK; 
       S_INC_ARR[i] = S_INC; 
+      // if (i > L3)
+      // {
+      //   S_INC_ARR[i] = S_INC - 1;
+      // }
+      
     }
   }
 
@@ -2407,7 +2416,7 @@ void write_path(int label){
   int end = EMPTY_TOP_VAR;
   if (RING_ENABLE && INDEP_ENABLE_VAR)
   {
-    start = TOP_CACHE - 1;
+    start = TOP_CACHE_VAR - 1;
   }
 
   for(int i = start; i >= end; i--)
@@ -4835,6 +4844,7 @@ void ring_access(int addr){
     if(SKIP_ENABLE){
       SKIP_ENABLE_VAR = (ring_evictctr % 2 == 0) ? true : false;
     }
+
     ring_evict_path(label);
     stale_reduction += b4 - stalectr;
 
@@ -4851,7 +4861,7 @@ void ring_access(int addr){
     shuf_prev = shuf_cur;
   }
   
-  
+
   ring_early_reshuffle(label);
 
 
@@ -4880,19 +4890,32 @@ void ring_access(int addr){
 
   if(RING_ENABLE && INDEP_ENABLE)
   {
-    while(stashctr > 0.5 * STASH_SIZE)
+    
+    while(stashctr > 0.2 * STASH_SIZE)
     {
-      INDEP_ENABLE_VAR = true;
+      printf("\n@%d\n", ringctr);
       for (int i = 0; i < STASH_SIZE; i++)
       {
-        read_path(Stash[i].label);
-        write_path(Stash[i].label);
-        indepctr++;
-        if(stashctr < 0.5 * STASH_SIZE)
+        INDEP_ENABLE_VAR = true;
+        // int randpath = rand() % PATH;
+        // int pathid = reverse_lex(indepctr);
+        if (Stash[i].addr == -1)
         {
+          continue;
+        }
+        
+        int pathid = Stash[i].label;
+        // printf("path %d\n", pathid);
+        printf("\nbf %d\n", stashctr);
+        read_path(pathid);
+        write_path(pathid);
+        printf("af %d\n", stashctr);
+        indepctr++;
+        if(stashctr < 0.2 * STASH_SIZE){
           break;
         }
       }
+    
     }
     INDEP_ENABLE_VAR = false;
   }
@@ -6343,6 +6366,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
   int available = detect_inplace_available(index, level);
 
+  // if(INDEP_ENABLE_VAR)
+  // {
+  //   printf("L%d available %d\n", level, available);
+  // }
+  
+
   // int cands = 0;
   // if(ringctr == 550025 && level == 23 && op_type == 'r'){
   //   for (int i = 0; i < Z; i++)
@@ -6471,6 +6500,13 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       
     }
   }
+
+  if (INDEP_ENABLE_VAR)
+  {
+    printf("util[%d]:   %f\n", level, (double)real/RING_Z);  
+    // printf("avg[%d]:   %f\n", level, (double)count_level[level]/cap_level[level]);  
+  }
+  
 
   if (level >= GATHER_START && RING_ENABLE && DYNAMIC_S && DEAD_ENABLE_VAR )//&& op_type == 'e')
   {
@@ -6992,6 +7028,9 @@ void ring_early_reshuffle(int label){
     int curS = calc_ring_s(index, i); 
     int green_var = (LS[i] + S_INC_ARR[i] + GREEN_BLOCK < RING_S) ? GREEN_BLOCK - (RING_S - LS[i] - S_INC_ARR[i] - GREEN_BLOCK) : GREEN_BLOCK;
     int reach_point = (i < TOP_CACHE || (RING_ZSTL && i <= L3)) ? curS : curS + green_var;
+    if(RING_ZSTL &&  i <= L2 && i > L1){
+      reach_point = curS + GREEN_BLOCK-1; 
+    }
     bool must_reshuffle = (SUPER_ENABLE && is_super_level(i)) ? super_node_need_reshuffle(index) : (GlobTree[index].count >= reach_point);
 
     // to exclude top cache from reshuffle
@@ -7283,7 +7322,7 @@ void export_intermed(char exp_name[], unsigned long long int ind, long double *a
   // filename = strcat(filename, ".csv");
   // // printf("filename csv: %s\n", filename);
 
-  sprintf(filename, "%s%lld-%lld.csv", exp_name, suffix, ind);
+  sprintf(filename, "%s-%lld-%lld.csv", exp_name, suffix, ind);
   // printf("filename: %s\n", filename);
 
 
@@ -7880,7 +7919,83 @@ void export_csv(char * argv[]){
   // print_lifetime_stat(fp);
 
   fprintf(fp, "indepctr,%lld\n", indepctr);
+
+
+  // for (int channel = 0; i < NUM_CHANNELS; i++)
+  // {
+  //   /* code */
+  // }
+
+  long long int activates_for_reads = 0;
+  long long int activates_for_spec = 0;
+  long long int activates_for_writes = 0;
+  long long int read_cmds = 0;
+  long long int write_cmds = 0;
+  unsigned long long int TotalReads = 0;
+  unsigned long long int TotalWrites       = 0;
+  unsigned long long int AvgReadLatency = 0;
+  unsigned long long int AvgReadQLate = 0;
+  unsigned long long int AvgWrite = 0;
+  unsigned long long int AvgWriteQLate = 0;
+  unsigned long long int ReadHit = 0;
+  unsigned long long int WriteHit = 0;
+
+  for (int c = 0; c < NUM_CHANNELS; c++)
+  {
+    activates_for_writes = 0;
+    activates_for_reads = 0;
+    activates_for_spec = 0;
+    read_cmds = 0;
+    write_cmds = 0;
+    for (int r = 0; r < NUM_RANKS; r++)
+
+    {
+      for (int b = 0; b < NUM_BANKS; b++)
+
+      {
+        activates_for_writes += stats_num_activate_write[c][r][b];
+        activates_for_reads += stats_num_activate_read[c][r][b];
+        activates_for_spec += stats_num_activate_spec[c][r][b];
+        read_cmds += stats_num_read[c][r][b];
+        write_cmds += stats_num_write[c][r][b];
+      } 
+    }  
+    fprintf (fp, "TotalReads[%d] ,  %-7lld\n", c,        stats_reads_completed[c]);
+    fprintf (fp, "TotalWrites[%d] ,  %-7lld\n", c,        stats_writes_completed[c]);
+    fprintf (fp, "AvgReadLatency[%d] ,  %7.5f\n",  c,       (double) stats_average_read_latency[c]);
+    fprintf (fp, "AvgReadQLate[%d] ,  %7.5f\n",  c,       (double) stats_average_read_queue_latency[c]);
+    fprintf (fp, "AvgWrite[%d] ,  %7.5f\n",  c,      (double) stats_average_write_latency[c]);
+    fprintf (fp, "AvgWriteQLate[%d] ,  %7.5f\n",  c,(double) stats_average_write_queue_latency[c]);
+    fprintf (fp, "ReadHit[%d] ,  %7.5f\n",  c,((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds));
+    fprintf (fp, "WriteHit[%d] ,  %7.5f\n",  c,((double) (write_cmds - activates_for_writes) / write_cmds));
+    TotalReads += stats_reads_completed[c];
+    TotalWrites       +=  stats_writes_completed[c];
+    AvgReadLatency +=  (double) stats_average_read_latency[c];
+    AvgReadQLate +=  (double) stats_average_read_queue_latency[c];
+    AvgWrite +=  (double) stats_average_write_latency[c];
+    AvgWriteQLate += (double) stats_average_write_queue_latency[c];  
+    ReadHit += ((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds);
+    WriteHit += ((double) (write_cmds - activates_for_writes) / write_cmds);
+  } 
   
+  fprintf (fp, "TotalReads, %-7lld\n", TotalReads);
+  fprintf (fp, "TotalWrites,  %-7lld\n", TotalWrites);
+  fprintf (fp, "AvgReadLatency_avg,  %7.5f\n",  (double)AvgReadLatency/NUM_CHANNELS);
+  fprintf (fp, "AvgReadQLate_avg,  %7.5f\n", (double) AvgReadQLate/NUM_CHANNELS);
+  fprintf (fp, "AvgWrite_avg,  %7.5f\n",  (double)AvgWrite/NUM_CHANNELS);
+  fprintf (fp, "AvgWriteQLate_avg,  %7.5f\n",   (double)AvgWriteQLate/NUM_CHANNELS);
+  fprintf (fp, "ReadHit_avg,  %f\n",  (double)ReadHit/NUM_CHANNELS);
+  fprintf (fp, "WriteHit_avg,  %f\n",  (double)WriteHit/NUM_CHANNELS);
+  fprintf (fp, "TotalMem, %-7lld\n", TotalReads + TotalWrites);
+  
+  fprintf (fp, "online_time, %lld\n", online_time);
+  fprintf (fp, "reshuff_time, %lld\n", reshuff_time);
+  fprintf (fp, "evict_time, %lld\n", evict_time);
+  long long int allOp_time = evict_time + reshuff_time + online_time;
+  fprintf (fp, "allOp_time, %lld\n", allOp_time);
+  fprintf (fp, "online_share, %f\n", (double) online_time/allOp_time);
+  fprintf (fp, "reshuff_share, %f\n", (double) reshuff_time/allOp_time);
+  fprintf (fp, "evict_share, %f\n", (double) evict_time/allOp_time);
 
 
   // char real[5] = "real";
@@ -8355,6 +8470,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->op_type = op_type;
     new_node->reqid = reqid;
     new_node->countdown = (!is_nvm_addr_byte(physical_address)) ? 0 : (type == READ) ? 60*NVM_LATENCY : 64*NVM_LATENCY*2 ;
+
     // new_node->countdown = 0;
     // if (nvm_access)
     // {
