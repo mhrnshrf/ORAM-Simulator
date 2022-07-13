@@ -241,6 +241,7 @@ int REMOTE_CAP ;  // the cap on the number of blocks that each bucket can give a
 int SHADQ_SIZE ;  // capacity limit of shadow queue
 int SUPER_LEVEL ;  // level at which super node merge starts (inclusive)
 int SUPER_S ;  // s value for th super node
+int SKIP_TURN ; // number of evict paths to let go as regular
 
 
 

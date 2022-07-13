@@ -130,6 +130,8 @@ typedef enum {
 	SUPER_LEVEL_token ,
 	SUPER_S_token ,
 	INDEP_ENABLE_token ,
+	SKIP_TURN_token ,
+
 
 	comment_token,
 	unknown_token
@@ -365,6 +367,8 @@ token_t tokenize(char * input){
 	return SUPER_S_token;
   } else if (strncmp(input, "INDEP_ENABLE",length) == 0) {
 	return INDEP_ENABLE_token;
+  } else if (strncmp(input, "INDEP_ENABLE",length) == 0) {
+	return SKIP_TURN_token;
 
   }else {
 	printf("PANIC :Unknown token %s\n",input);
@@ -887,6 +891,10 @@ void read_config_file(FILE * fin)
 				SUPER_S = input_int;
 				break;
 			case INDEP_ENABLE_token:
+				fscanf(fin,"%d",&input_int);
+				INDEP_ENABLE = input_int;
+				break;
+			case SKIP_TURN_token:
 				fscanf(fin,"%d",&input_int);
 				INDEP_ENABLE = input_int;
 				break;
