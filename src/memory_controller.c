@@ -4891,32 +4891,32 @@ void ring_access(int addr){
   if(RING_ENABLE && INDEP_ENABLE)
   {
     
-    while(stashctr > 0.2 * STASH_SIZE)
-    {
-      printf("\n@%d\n", ringctr);
-      for (int i = 0; i < STASH_SIZE; i++)
-      {
+    // while(stashctr > 0.2 * STASH_SIZE)
+    // {
+    //   printf("\n@%d\n", ringctr);
+    //   for (int i = 0; i < STASH_SIZE; i++)
+    //   {
         INDEP_ENABLE_VAR = true;
         // int randpath = rand() % PATH;
         // int pathid = reverse_lex(indepctr);
-        if (Stash[i].addr == -1)
-        {
-          continue;
-        }
+        // if (Stash[i].addr == -1)
+        // {
+        //   continue;
+        // }
         
-        int pathid = Stash[i].label;
+        // int pathid = Stash[i].label;
         // printf("path %d\n", pathid);
-        printf("\nbf %d\n", stashctr);
-        read_path(pathid);
-        write_path(pathid);
-        printf("af %d\n", stashctr);
+        // printf("\nbf %d\n", stashctr);
+        read_path(label);
+        write_path(label);
+        // printf("af %d\n", stashctr);
         indepctr++;
-        if(stashctr < 0.2 * STASH_SIZE){
-          break;
-        }
-      }
+        // if(stashctr < 0.2 * STASH_SIZE){
+        //   break;
+        // }
+      // }
     
-    }
+    // }
     INDEP_ENABLE_VAR = false;
   }
 
