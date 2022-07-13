@@ -367,7 +367,7 @@ token_t tokenize(char * input){
 	return SUPER_S_token;
   } else if (strncmp(input, "INDEP_ENABLE",length) == 0) {
 	return INDEP_ENABLE_token;
-  } else if (strncmp(input, "INDEP_ENABLE",length) == 0) {
+  } else if (strncmp(input, "SKIP_TURN",length) == 0) {
 	return SKIP_TURN_token;
 
   }else {
@@ -896,7 +896,7 @@ void read_config_file(FILE * fin)
 				break;
 			case SKIP_TURN_token:
 				fscanf(fin,"%d",&input_int);
-				INDEP_ENABLE = input_int;
+				SKIP_TURN = input_int;
 				break;
 
 			case unknown_token:
