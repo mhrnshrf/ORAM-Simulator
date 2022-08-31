@@ -7506,6 +7506,7 @@ void export_csv(char * argv[]){
 
   fprintf(fp, "RSTL_ENABLE,%d\n",  RSTL_ENABLE);
   fprintf(fp, "RING_ZSTL,%d\n",  RING_ZSTL); 
+  fprintf(fp, "SKIP_ENABLE,%d\n",  SKIP_ENABLE); 
 
   fprintf(fp, "TRACE_SIZE,%lld\n",  TRACE_SIZE);
   fprintf(fp, "WARMUP_TREE,%d\n",  WARMUP_TREE);
@@ -7524,6 +7525,9 @@ void export_csv(char * argv[]){
 	fprintf(fp, "SLOT ,%d\n", SLOT);
 	fprintf(fp, "BLOCK,%d\n", BLOCK);
 	fprintf(fp, "Z    ,%d\n", Z);
+	fprintf(fp, "SKIP_L1    ,%d\n", SKIP_L1);
+	fprintf(fp, "SKIP_L2    ,%d\n", SKIP_L2);
+	fprintf(fp, "SKIP_TURN    ,%d\n", SKIP_TURN);
   // fprintf("L1,%d", L1);
 	// fprintf("L2,%d",L2);
 	// fprintf("L3,%d",L3);

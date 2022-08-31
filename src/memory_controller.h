@@ -44,7 +44,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -140,6 +140,10 @@
 
 #define LOG_ENABLE 0 // to print log of all accesses requests and types
 #define LOG_TH 39000000 // loging threshold
+
+
+#define SIT_ARITY 8 // SGX Integrity Tree arity
+#define SIT_LEAF 8 // SGX Integrity Tree leaf nodes
 
 enum{
   // main tree
