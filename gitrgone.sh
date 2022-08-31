@@ -1,7 +1,7 @@
 #!/bin/bash
 
 git config --global user.email mhrnshrf@gmail.com
-git config --local user.email mhrnshrf@gmail.com
+git config --global user.name "Mehrnoosh Raoufi"
 
 
 COMMENT=$1
