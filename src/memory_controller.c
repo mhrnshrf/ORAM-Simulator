@@ -306,6 +306,11 @@ Queue *deadQ;
 Queue *deadQ_arr[LEVEL];
 Queue *deadQ_shadow[LEVEL];
 
+
+typedef struct IntegNode{
+  int ctr;
+}IntegNode;
+
 int revarr[RING_REV];
 
 bool last_read_served;
@@ -344,6 +349,8 @@ Slot StaleBuffer[STALE_BUF_SIZE];
 BucketShell SuperNode[4194304];
 BucketShell SuperHoriz1[2097152];
 BucketShell SuperHoriz2[4194304];
+
+IntegNode SGXTree[SIT_NODE];
 
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on

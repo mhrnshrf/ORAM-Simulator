@@ -345,6 +345,7 @@ void print_oram_params(){
 	
 	printf("\n....................................................\n\n\n\n\n");
 
+
 }
 
 
@@ -353,10 +354,15 @@ void print_oram_params(){
 int main(int argc, char * argv[])
 {
 
+	printf("SIT_ARITY	%d\n", SIT_ARITY);
+	printf("SIT_LEVEL	%d\n", SIT_LEVEL);
+	printf("SIT_LEAF	%d\n", SIT_LEAF);
+	printf("SIT_NODE	%d\n", SIT_NODE);
 	// random_trace();
 
 	// long long int pa = 7742115263;
 	// printf("byte addr %lld   : 	%lld\n", pa, byte_addr(pa));
+	
 
 	last_read_served = true;
 	last_read_deleted = true;

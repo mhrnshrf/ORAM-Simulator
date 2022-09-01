@@ -143,7 +143,6 @@
 
 
 #define SIT_ARITY 8 // SGX Integrity Tree arity
-#define SIT_LEAF 8 // SGX Integrity Tree leaf nodes
 
 enum{
   // main tree
@@ -184,6 +183,9 @@ enum{
   DATA_ADDR_SPACE = SLOT,
   META_ADDR_SPACE = NODE,
   DEADQ_TH = Z*500,
+  SIT_LEVEL = (int) LEVEL/(int) (log(SIT_ARITY)/log(2)),
+  SIT_LEAF = (long long int) pow(2,LEVEL),
+  SIT_NODE = (long long int)pow(2,SIT_LEVEL)-1,
   // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
 
 };
