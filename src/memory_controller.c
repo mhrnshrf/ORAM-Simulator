@@ -350,7 +350,7 @@ BucketShell SuperNode[4194304];
 BucketShell SuperHoriz1[2097152];
 BucketShell SuperHoriz2[4194304];
 
-// IntegNode SGXTree[SIT_NODE];
+IntegNode SGXTree[SIT_NODE];
 
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on
