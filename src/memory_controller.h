@@ -143,7 +143,7 @@
 
 
 #define SIT_ARITY 8 // SGX Integrity Tree arity
-#define SIT_LEVEL 9 // SGX Integrity Tree levels
+#define SIT_LEVEL 10 // SGX Integrity Tree levels
 
 enum{
   // main tree
@@ -158,7 +158,8 @@ enum{
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + ((RING_ENABLE)?Z4:Z)*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
   // BLOCK = (RING_ENABLE) ? (long long int)((RING_Z*SLOT*U)/Z):((long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1))))),  // # valid blocks in oram tree
   // BLOCK = (RING_ENABLE) ? 33260542*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
-  BLOCK = (RING_ENABLE) ? 41943037*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
+  // BLOCK = (RING_ENABLE) ? 41943037*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
+  BLOCK = (unsigned long long int)pow(SIT_ARITY, SIT_LEVEL-1),
   // BLOCK = 33260542*((long long int)pow(2,LEVEL-24)),
   // BLOCK = 16777215, 
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
@@ -551,6 +552,10 @@ int decide_which_super(int index, int i, int addr);
 int count_bucket_dumvalid(int index, int i);
 int calc_super_path(int label, int level, int index);
 int calc_space(const int * lz);
+int sit_level(int index);
+int sit_index(int label,  int l);
+void sit_access(unsigned long long int addr);
+void sit_count();
 // Mehrnoosh.
 
 

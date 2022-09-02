@@ -210,6 +210,10 @@ unsigned long long int rctr = 0;
 unsigned long long int wctr = 0;
 unsigned long long int indepctr = 0;
 
+int sit_max[SIT_LEVEL] = {0};
+int sit_avg[SIT_LEVEL] = {0};
+int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 2147483647};
+
 
 
 
@@ -238,6 +242,7 @@ int orig_instr;
 long long int orig_pc;
 int oram_acc_addr;
 int wbshuff = 0;
+int sitacc = 0;
 
 bool tc_must_flush = false;
 
@@ -308,7 +313,9 @@ Queue *deadQ_shadow[LEVEL];
 
 
 typedef struct IntegNode{
-  int ctr;
+  int lastAcc;
+  int gapSum;
+  int gapN;
 }IntegNode;
 
 int revarr[RING_REV];
@@ -1236,6 +1243,69 @@ int  calc_index(int label,  int l){
   index = sum + floor(label/pow(2,(LEVEL_VAR-l-1)));
 
   return index;
+}
+
+
+int sit_level(int index){  
+  return floor(log_base2(index+1)/log_base2(SIT_ARITY));
+}
+
+
+int sit_index(int label,  int l){
+  int sum = 0;
+  int index = -1;
+  for(int i = 0; i < l; i++)
+    sum += pow(SIT_ARITY,i);
+
+  // int a = pow(2,LEVEL-1)/pow(2,l);
+  index = sum + floor(label/pow(SIT_ARITY,(SIT_LEVEL-l-1)));
+
+  return index;
+}
+
+void sit_access(unsigned long long int addr){
+  sitacc++;
+  for (int i = SIT_LEVEL-1; i >= 0; i--)
+  {
+    unsigned long long int index = sit_index(addr, i);
+
+    SGXTree[index].gapSum = CYCLE_VAL - SGXTree[index].lastAcc;
+    SGXTree[index].gapN++;
+    SGXTree[index].lastAcc = CYCLE_VAL;
+  }
+}
+
+void sit_count(){
+  for (int i = 0; i < SIT_LEVEL; i++)
+  {
+    int sum = 0;
+    for (int j = 0; j < pow(SIT_ARITY, i); j++)
+    {
+      unsigned long long int index = sit_index(j, i); // ?????????????????
+      int cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
+      sum += cur;
+      if(cur < sit_min[i])
+      {
+        sit_min[i] = cur;
+      }
+        sit_avg[i] = 0;
+      if(cur > sit_max[i])
+      {
+        sit_max[i] = 0;
+      }
+    }
+    sit_avg[i] += sum/pow(SIT_ARITY, i);
+  }
+
+}
+
+void sit_init(){
+  for (int i = 0; i < SIT_NODE; i++)
+  {
+    SGXTree[i].lastAcc = 0;
+    SGXTree[i].gapSum = 0;
+    SGXTree[i].gapN = 0;
+  }
 }
 
 
@@ -8013,6 +8083,10 @@ void export_csv(char * argv[]){
   // char dum[5] = "dum";
   // print_super_node(supreal, exp_name, bench, real);
   // print_super_node(supdum, exp_name, bench, dum);
+  print_array(sit_min, SIT_LEVEL, fp);
+  print_array(sit_avg, SIT_LEVEL, fp);
+  print_array(sit_max, SIT_LEVEL, fp);
+
   
   fclose(fp);
 }
