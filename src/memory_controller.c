@@ -861,9 +861,16 @@ void var_init(){
 }
 
 unsigned long long int byte_addr(long long int physical_addr){
+
   // unsigned long long int mask = pow(2,)
+  unsigned long long int addr;
   
-  unsigned long long int addr = (unsigned long long  int)(physical_addr & (0x7fffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
+  if(SIT_ENABLE){
+    addr = addr & SIT_LEAF;
+    return addr;
+  }
+  
+  addr = (unsigned long long  int)(physical_addr & (0x7fffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
   // unsigned long long int addr = (unsigned long long  int)(physical_addr & (0xffffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
   // unsigned long long int addr = physical_addr;  
   unsigned long long int max = ((unsigned long long int)(BLOCK-1)<<((unsigned long long int)log2(BLOCK_SIZE))) | (unsigned long long int)(BLOCK_SIZE-1);
@@ -1296,7 +1303,6 @@ void sit_count(){
     }
     sit_avg[i] += sum/pow(SIT_ARITY, i);
   }
-
 }
 
 void sit_init(){
@@ -3967,6 +3973,11 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   //   ring_access(addr);
   //   return;
   // }
+
+  if(SIT_ENABLE){
+    sit_access(addr);
+    return;
+  }
   
 
   if (RHO_ENABLE)

@@ -27,7 +27,7 @@
 
 // enable/disable options config
 // #define TIMEOUT_ENABLE  1     // 0/1 flag to disable/enable finishing the program in case it get stuck
-// #define SUBTREE_ENABLE  0     // 0/1 flag to disable/enable having subtree adddressing scheme
+// #define SUBTREE_ENABLE  0     // 0/1 flag to disable/enable having subtree addressing scheme
 // #define CACHE_ENABLE    0     // 0/1 flag to disable/enable having cache
 #define VOLCANO_ENABLE  0     // 0/1 flag to disable/enable having volcano idea both stt and stl
 #define STT_ENABLE      0     // 0/1 flag to disable/enable stash top tree  ~> it won't matter if volcano is enabled
@@ -142,8 +142,9 @@
 #define LOG_TH 39000000 // loging threshold
 
 
+#define SIT_ENABLE 1 // SGX Integrity Tree is enabled
 #define SIT_ARITY 8 // SGX Integrity Tree arity
-#define SIT_LEVEL 10 // SGX Integrity Tree levels
+#define SIT_LEVEL 9 // SGX Integrity Tree levels
 
 enum{
   // main tree
@@ -556,6 +557,7 @@ int sit_level(int index);
 int sit_index(int label,  int l);
 void sit_access(unsigned long long int addr);
 void sit_count();
+void sit_init();
 // Mehrnoosh.
 
 

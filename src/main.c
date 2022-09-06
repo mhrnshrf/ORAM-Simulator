@@ -849,6 +849,10 @@ int main(int argc, char * argv[])
 
 	var_init();
 
+
+	sit_init();
+	
+
 	// printf("NVM_ADDR_VAR %lld\n", NVM_ADDR_VAR);
 	// printf("NVM_ADDR_BYTE %lld\n", NVM_ADDR_BYTE);
 	// printf("data addr byte %lld\n", (unsigned long long int)  DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE));
@@ -2488,6 +2492,7 @@ int main(int argc, char * argv[])
   }
 
   printf("Exporting csv...\n");
+  sit_count();
   export_csv(argv);
 
 
