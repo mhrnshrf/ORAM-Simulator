@@ -778,10 +778,10 @@ void explore_lz(){
 }
 
 
-void print_array(int * arr, int size, FILE *fp){
+void print_array(int * arr, int size, FILE *fp, char *str){
   for (int i = 0; i < size; i++)
   {
-    fprintf(fp, "arr[%d],%d\n", i, arr[i]);
+    fprintf(fp, "%s[%d],%d\n", str, i, arr[i]);
   }
   // printf("\n");
 }
@@ -866,7 +866,7 @@ unsigned long long int byte_addr(long long int physical_addr){
   unsigned long long int addr;
   
   if(SIT_ENABLE){
-    addr = physical_addr & SIT_LEAF;
+    addr = physical_addr & (SIT_LEAF-1) << ((unsigned long long int)log2(BLOCK_SIZE));
     return addr;
   }
 
@@ -1270,15 +1270,30 @@ int sit_index(int label,  int l){
   return index;
 }
 
+int sit_index_mid(int label,  int l){
+  int sum = 0;
+  int index = -1;
+  for(int i = 0; i < l; i++)
+    sum += pow(SIT_ARITY,i);
+
+  index = sum + label;
+
+  return index;
+}
+
 void sit_access(unsigned long long int addr){
   sitacc++;
   for (int i = SIT_LEVEL-1; i >= 0; i--)
   {
     unsigned long long int index = sit_index(addr, i);
+    // printf("@%lld L%d  index: %lld\n", addr, i, index);
 
-    SGXTree[index].gapSum = CYCLE_VAL - SGXTree[index].lastAcc;
+    SGXTree[index].gapSum += (sitacc - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
-    SGXTree[index].lastAcc = CYCLE_VAL;
+    SGXTree[index].lastAcc = sitacc;
+    // printf("gapSum %d\n", SGXTree[index].gapSum);
+    // printf("gapN %d\n", SGXTree[index].gapN);
+    // printf("lastAcc %d\n", SGXTree[index].lastAcc);
   }
 }
 
@@ -1286,19 +1301,24 @@ void sit_count(){
   for (int i = 0; i < SIT_LEVEL; i++)
   {
     int sum = 0;
+    // printf("\nL%d \n", i);
     for (int j = 0; j < pow(SIT_ARITY, i); j++)
     {
-      unsigned long long int index = sit_index(j, i); // ?????????????????
-      int cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
+      unsigned long long int index = sit_index_mid(j, i);
+      int cur = 0; 
+      // printf("< %lld \n", index);
+      if(SGXTree[index].gapN != 0){
+        cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
+      }
+      // printf("> %lld \n", index);
       sum += cur;
       if(cur < sit_min[i])
       {
         sit_min[i] = cur;
       }
-        sit_avg[i] = 0;
       if(cur > sit_max[i])
       {
-        sit_max[i] = 0;
+        sit_max[i] = cur;
       }
     }
     sit_avg[i] += sum/pow(SIT_ARITY, i);
@@ -8094,9 +8114,9 @@ void export_csv(char * argv[]){
   // char dum[5] = "dum";
   // print_super_node(supreal, exp_name, bench, real);
   // print_super_node(supdum, exp_name, bench, dum);
-  print_array(sit_min, SIT_LEVEL, fp);
-  print_array(sit_avg, SIT_LEVEL, fp);
-  print_array(sit_max, SIT_LEVEL, fp);
+  print_array(sit_min, SIT_LEVEL, fp, "SIT_min");
+  print_array(sit_avg, SIT_LEVEL, fp, "SIT_avg");
+  print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
 
   
   fclose(fp);

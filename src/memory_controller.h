@@ -144,7 +144,7 @@
 
 #define SIT_ENABLE 1 // SGX Integrity Tree is enabled
 #define SIT_ARITY 8 // SGX Integrity Tree arity
-#define SIT_LEVEL 9 // SGX Integrity Tree levels
+#define SIT_LEVEL 3 // SGX Integrity Tree levels
 
 enum{
   // main tree
@@ -518,7 +518,7 @@ int calc_mem_addr(int index, int offset, char type);
 int remote_allocate(int index, int offset);
 bool remove_dead(Queue *pQueue, int key1, int key2);
 void reset_shuff_interval();
-void print_array(int * arr, int size, FILE *fp);
+void print_array(int * arr, int size, FILE *fp, char* str);
 void export_intermed(char * exp_name, unsigned long long int ind, long double *arr, unsigned long long int suffix);
 void record_util_level();
 void reset_util_level();
@@ -558,6 +558,7 @@ int sit_index(int label,  int l);
 void sit_access(unsigned long long int addr);
 void sit_count();
 void sit_init();
+int sit_index_mid(int label,  int l);
 // Mehrnoosh.
 
 
