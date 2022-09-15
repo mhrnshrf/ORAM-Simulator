@@ -1295,9 +1295,9 @@ void sit_access(unsigned long long int addr){
     }
     
 
-    SGXTree[index].gapSum += (sitacc - SGXTree[index].lastAcc);
+    SGXTree[index].gapSum += (sitacc + nonmemops_sum - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
-    SGXTree[index].lastAcc = sitacc;
+    SGXTree[index].lastAcc = sitac + nonmemops_sum;
     // printf("gapSum %d\n", SGXTree[index].gapSum);
     // printf("gapN %d\n", SGXTree[index].gapN);
     // printf("lastAcc %d\n", SGXTree[index].lastAcc);
@@ -7750,20 +7750,20 @@ void export_csv(char * argv[]){
   // fprintf(fp, "missl1wb,%lld\n", missl1wb);
   // fprintf(fp, "missl1wb_rate,%f%%\n", 100*(double)missl1wb/missctr);
   // fprintf(fp, "wbshuff,%d\n", wbshuff);
-  fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
-  fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
-  fprintf(fp, "stalectr,%d\n", stalectr);
-  fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
-  fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
-  fprintf(fp, "stale_reduction,%d\n", stale_reduction);
-  for (int i = 0; i < GL_COUNT; i++)
-  {
-    fprintf(fp, "glctr[%d],%f%%\n", i, 100*(double)glctr[i]/(pow(2,GL[i])*GL_CAP[i]));
-  }
-  fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
-  fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
-  fprintf(fp, "STALE_TH,%d\n", STALE_TH);
-  fprintf(fp, "stash_hit,%d\n", stash_hit);
+  // fprintf(fp, "wl_pos1,%d\n", wl_pos[1]);
+  // fprintf(fp, "wl_pos2,%d\n", wl_pos[2]);
+  // fprintf(fp, "stalectr,%d\n", stalectr);
+  // fprintf(fp, "stale_flush_ctr,%d\n", stale_flush_ctr);
+  // fprintf(fp, "stale_discard_ctr,%d\n", stale_discard_ctr);
+  // fprintf(fp, "stale_reduction,%d\n", stale_reduction);
+  // for (int i = 0; i < GL_COUNT; i++)
+  // {
+  //   fprintf(fp, "glctr[%d],%f%%\n", i, 100*(double)glctr[i]/(pow(2,GL[i])*GL_CAP[i]));
+  // }
+  // fprintf(fp, "STALE_BUF,%d\n", STALE_BUF_SIZE);
+  // fprintf(fp, "STALE_CAP,%d\n", STALE_CAP);
+  // fprintf(fp, "STALE_TH,%d\n", STALE_TH);
+  // fprintf(fp, "stash_hit,%d\n", stash_hit);
   // for (int i = 0; i < 31; i++)
   // {
   //   fprintf(fp, "%dm,%lld\n", i*10, deadarr[i]);
@@ -7789,19 +7789,21 @@ void export_csv(char * argv[]){
   //     fprintf(fp, "dumval[%d][%d],%d\n", i, j, dumval_range_dist[i][j]);
   //   }
   // }
-  fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
-  // fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
-  fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
 
-  // fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
-  fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
-  fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
-  // fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
-  // fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
-  fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
-  fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
-  unsigned long long int dram_total_acc = DEAD_ENABLE ? (dram_inplace_r + dram_remote_r + dram_inplace_w + dram_remote_w) : (dram_norm_w + dram_norm_r);
-  fprintf(fp, "dram_total_acc,%lld\n", dram_total_acc);
+
+  // // fprintf(fp, "dram_norm_r,%lld\n", dram_norm_r);
+  // // fprintf(fp, "nvm_norm_r,%lld\n", nvm_norm_r);
+  // fprintf(fp, "dram_norm_w,%lld\n", dram_norm_w);
+
+  // // fprintf(fp, "nvm_norm_w,%lld\n", nvm_norm_w);
+  // fprintf(fp, "dram_inplace_r,%lld\n", dram_inplace_r);
+  // fprintf(fp, "dram_remote_r,%lld\n", dram_remote_r);
+  // // fprintf(fp, "nvm_inplace_r,%lld\n", nvm_inplace_r);
+  // // fprintf(fp, "nvm_remote_r,%lld\n", nvm_remote_r);
+  // fprintf(fp, "dram_inplace_w,%lld\n", dram_inplace_w);
+  // fprintf(fp, "dram_remote_w,%lld\n", dram_remote_w);
+  // unsigned long long int dram_total_acc = DEAD_ENABLE ? (dram_inplace_r + dram_remote_r + dram_inplace_w + dram_remote_w) : (dram_norm_w + dram_norm_r);
+  // fprintf(fp, "dram_total_acc,%lld\n", dram_total_acc);
   // fprintf(fp, "nvm_inplace_w,%lld\n", nvm_inplace_w);
   // fprintf(fp, "nvm_remote_w,%lld\n", nvm_remote_w);
   // fprintf(fp, "dram_inplace_w_remembered,%lld\n", dram_inplace_w_remembered);
@@ -7912,11 +7914,11 @@ void export_csv(char * argv[]){
   // printf("point 7\n");
 
 
-   for (int i = 0; i < LEVEL; i++)
-  {
-    fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
-  }
-  fprintf(fp, "shuffctr,%d\n", shuffctr);
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
+  // }
+  // fprintf(fp, "shuffctr,%d\n", shuffctr);
 
   // for (int i = 0; i < LEVEL; i++)
   // {
@@ -7953,14 +7955,14 @@ void export_csv(char * argv[]){
 
   // printf("point 8\n");
 
-  for (int i = 0; i < RING_S+1; i++)
-  {
-    fprintf(fp, "s_dist[%d],%d\n", i, s_dist[i]);
-  }
-  for (int i = 0; i < RING_S+1; i++)
-  {
-    fprintf(fp, "allocS_dist[%d],%d\n", i, allocS_dist[i]);
-  }
+  // for (int i = 0; i < RING_S+1; i++)
+  // {
+  //   fprintf(fp, "s_dist[%d],%d\n", i, s_dist[i]);
+  // }
+  // for (int i = 0; i < RING_S+1; i++)
+  // {
+  //   fprintf(fp, "allocS_dist[%d],%d\n", i, allocS_dist[i]);
+  // }
 
   // fprintf(fp, "s_underctr,%lld\n", s_underctr);
   // fprintf(fp, "s_overctr,%lld\n", s_overctr);
@@ -7972,15 +7974,15 @@ void export_csv(char * argv[]){
   // {
   //   fprintf(fp, "s_under[%d],%d\n", i, s_under[i]);
   // }
-  fprintf(fp, "deadQs,%d\n", calc_deadQ_size());
-  fprintf(fp, "dead_dram,%lld\n", dead_dram);
-  for (int i = 0; i < LEVEL; i++)
-  {
-    fprintf(fp, "deadctr_arr[%d],%lld\n", i, deadctr_arr[i]);
-  }
-  fprintf(fp, "deadctr,%lld\n", deadctr);
-  fprintf(fp, "greenturn_avg,%f\n", (double)greenturn_sum/(ringctr+ringdumctr));
-  fprintf(fp, "greentc_avg,%f\n", (double)greentc_sum/(ringctr+ringdumctr));
+  // fprintf(fp, "deadQs,%d\n", calc_deadQ_size());
+  // fprintf(fp, "dead_dram,%lld\n", dead_dram);
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   fprintf(fp, "deadctr_arr[%d],%lld\n", i, deadctr_arr[i]);
+  // }
+  // fprintf(fp, "deadctr,%lld\n", deadctr);
+  // fprintf(fp, "greenturn_avg,%f\n", (double)greenturn_sum/(ringctr+ringdumctr));
+  // fprintf(fp, "greentc_avg,%f\n", (double)greentc_sum/(ringctr+ringdumctr));
   fprintf(fp, "TOP_BOUNDARY,%d\n", TOP_BOUNDARY);
   fprintf(fp, "MID_BOUNDARY,%d\n", MID_BOUNDARY);
 
@@ -8061,7 +8063,7 @@ void export_csv(char * argv[]){
   
   // print_lifetime_stat(fp);
 
-  fprintf(fp, "indepctr,%lld\n", indepctr);
+  // fprintf(fp, "indepctr,%lld\n", indepctr);
 
 
   // for (int channel = 0; i < NUM_CHANNELS; i++)
@@ -8069,76 +8071,76 @@ void export_csv(char * argv[]){
   //   /* code */
   // }
 
-  long long int activates_for_reads = 0;
-  long long int activates_for_spec = 0;
-  long long int activates_for_writes = 0;
-  long long int read_cmds = 0;
-  long long int write_cmds = 0;
-  unsigned long long int TotalReads = 0;
-  unsigned long long int TotalWrites       = 0;
-  unsigned long long int AvgReadLatency = 0;
-  unsigned long long int AvgReadQLate = 0;
-  unsigned long long int AvgWrite = 0;
-  unsigned long long int AvgWriteQLate = 0;
-  unsigned long long int ReadHit = 0;
-  unsigned long long int WriteHit = 0;
+  // long long int activates_for_reads = 0;
+  // long long int activates_for_spec = 0;
+  // long long int activates_for_writes = 0;
+  // long long int read_cmds = 0;
+  // long long int write_cmds = 0;
+  // unsigned long long int TotalReads = 0;
+  // unsigned long long int TotalWrites       = 0;
+  // unsigned long long int AvgReadLatency = 0;
+  // unsigned long long int AvgReadQLate = 0;
+  // unsigned long long int AvgWrite = 0;
+  // unsigned long long int AvgWriteQLate = 0;
+  // unsigned long long int ReadHit = 0;
+  // unsigned long long int WriteHit = 0;
 
-  for (int c = 0; c < NUM_CHANNELS; c++)
-  {
-    activates_for_writes = 0;
-    activates_for_reads = 0;
-    activates_for_spec = 0;
-    read_cmds = 0;
-    write_cmds = 0;
-    for (int r = 0; r < NUM_RANKS; r++)
+  // for (int c = 0; c < NUM_CHANNELS; c++)
+  // {
+  //   activates_for_writes = 0;
+  //   activates_for_reads = 0;
+  //   activates_for_spec = 0;
+  //   read_cmds = 0;
+  //   write_cmds = 0;
+  //   for (int r = 0; r < NUM_RANKS; r++)
 
-    {
-      for (int b = 0; b < NUM_BANKS; b++)
+  //   {
+  //     for (int b = 0; b < NUM_BANKS; b++)
 
-      {
-        activates_for_writes += stats_num_activate_write[c][r][b];
-        activates_for_reads += stats_num_activate_read[c][r][b];
-        activates_for_spec += stats_num_activate_spec[c][r][b];
-        read_cmds += stats_num_read[c][r][b];
-        write_cmds += stats_num_write[c][r][b];
-      } 
-    }  
-    fprintf (fp, "TotalReads[%d] ,  %-7lld\n", c,        stats_reads_completed[c]);
-    fprintf (fp, "TotalWrites[%d] ,  %-7lld\n", c,        stats_writes_completed[c]);
-    fprintf (fp, "AvgReadLatency[%d] ,  %7.5f\n",  c,       (double) stats_average_read_latency[c]);
-    fprintf (fp, "AvgReadQLate[%d] ,  %7.5f\n",  c,       (double) stats_average_read_queue_latency[c]);
-    fprintf (fp, "AvgWrite[%d] ,  %7.5f\n",  c,      (double) stats_average_write_latency[c]);
-    fprintf (fp, "AvgWriteQLate[%d] ,  %7.5f\n",  c,(double) stats_average_write_queue_latency[c]);
-    fprintf (fp, "ReadHit[%d] ,  %7.5f\n",  c,((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds));
-    fprintf (fp, "WriteHit[%d] ,  %7.5f\n",  c,((double) (write_cmds - activates_for_writes) / write_cmds));
-    TotalReads += stats_reads_completed[c];
-    TotalWrites       +=  stats_writes_completed[c];
-    AvgReadLatency +=  (double) stats_average_read_latency[c];
-    AvgReadQLate +=  (double) stats_average_read_queue_latency[c];
-    AvgWrite +=  (double) stats_average_write_latency[c];
-    AvgWriteQLate += (double) stats_average_write_queue_latency[c];  
-    ReadHit += ((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds);
-    WriteHit += ((double) (write_cmds - activates_for_writes) / write_cmds);
-  } 
+  //     {
+  //       activates_for_writes += stats_num_activate_write[c][r][b];
+  //       activates_for_reads += stats_num_activate_read[c][r][b];
+  //       activates_for_spec += stats_num_activate_spec[c][r][b];
+  //       read_cmds += stats_num_read[c][r][b];
+  //       write_cmds += stats_num_write[c][r][b];
+  //     } 
+  //   }  
+  //   fprintf (fp, "TotalReads[%d] ,  %-7lld\n", c,        stats_reads_completed[c]);
+  //   fprintf (fp, "TotalWrites[%d] ,  %-7lld\n", c,        stats_writes_completed[c]);
+  //   fprintf (fp, "AvgReadLatency[%d] ,  %7.5f\n",  c,       (double) stats_average_read_latency[c]);
+  //   fprintf (fp, "AvgReadQLate[%d] ,  %7.5f\n",  c,       (double) stats_average_read_queue_latency[c]);
+  //   fprintf (fp, "AvgWrite[%d] ,  %7.5f\n",  c,      (double) stats_average_write_latency[c]);
+  //   fprintf (fp, "AvgWriteQLate[%d] ,  %7.5f\n",  c,(double) stats_average_write_queue_latency[c]);
+  //   fprintf (fp, "ReadHit[%d] ,  %7.5f\n",  c,((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds));
+  //   fprintf (fp, "WriteHit[%d] ,  %7.5f\n",  c,((double) (write_cmds - activates_for_writes) / write_cmds));
+  //   TotalReads += stats_reads_completed[c];
+  //   TotalWrites       +=  stats_writes_completed[c];
+  //   AvgReadLatency +=  (double) stats_average_read_latency[c];
+  //   AvgReadQLate +=  (double) stats_average_read_queue_latency[c];
+  //   AvgWrite +=  (double) stats_average_write_latency[c];
+  //   AvgWriteQLate += (double) stats_average_write_queue_latency[c];  
+  //   ReadHit += ((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds);
+  //   WriteHit += ((double) (write_cmds - activates_for_writes) / write_cmds);
+  // } 
   
-  fprintf (fp, "TotalReads, %-7lld\n", TotalReads);
-  fprintf (fp, "TotalWrites,  %-7lld\n", TotalWrites);
-  fprintf (fp, "AvgReadLatency_avg,  %7.5f\n",  (double)AvgReadLatency/NUM_CHANNELS);
-  fprintf (fp, "AvgReadQLate_avg,  %7.5f\n", (double) AvgReadQLate/NUM_CHANNELS);
-  fprintf (fp, "AvgWrite_avg,  %7.5f\n",  (double)AvgWrite/NUM_CHANNELS);
-  fprintf (fp, "AvgWriteQLate_avg,  %7.5f\n",   (double)AvgWriteQLate/NUM_CHANNELS);
-  fprintf (fp, "ReadHit_avg,  %f\n",  (double)ReadHit/NUM_CHANNELS);
-  fprintf (fp, "WriteHit_avg,  %f\n",  (double)WriteHit/NUM_CHANNELS);
-  fprintf (fp, "TotalMem, %-7lld\n", TotalReads + TotalWrites);
+  // fprintf (fp, "TotalReads, %-7lld\n", TotalReads);
+  // fprintf (fp, "TotalWrites,  %-7lld\n", TotalWrites);
+  // fprintf (fp, "AvgReadLatency_avg,  %7.5f\n",  (double)AvgReadLatency/NUM_CHANNELS);
+  // fprintf (fp, "AvgReadQLate_avg,  %7.5f\n", (double) AvgReadQLate/NUM_CHANNELS);
+  // fprintf (fp, "AvgWrite_avg,  %7.5f\n",  (double)AvgWrite/NUM_CHANNELS);
+  // fprintf (fp, "AvgWriteQLate_avg,  %7.5f\n",   (double)AvgWriteQLate/NUM_CHANNELS);
+  // fprintf (fp, "ReadHit_avg,  %f\n",  (double)ReadHit/NUM_CHANNELS);
+  // fprintf (fp, "WriteHit_avg,  %f\n",  (double)WriteHit/NUM_CHANNELS);
+  // fprintf (fp, "TotalMem, %-7lld\n", TotalReads + TotalWrites);
   
-  fprintf (fp, "online_time, %lld\n", online_time);
-  fprintf (fp, "reshuff_time, %lld\n", reshuff_time);
-  fprintf (fp, "evict_time, %lld\n", evict_time);
-  long long int allOp_time = evict_time + reshuff_time + online_time;
-  fprintf (fp, "allOp_time, %lld\n", allOp_time);
-  fprintf (fp, "online_share, %f\n", (double) online_time/allOp_time);
-  fprintf (fp, "reshuff_share, %f\n", (double) reshuff_time/allOp_time);
-  fprintf (fp, "evict_share, %f\n", (double) evict_time/allOp_time);
+  // fprintf (fp, "online_time, %lld\n", online_time);
+  // fprintf (fp, "reshuff_time, %lld\n", reshuff_time);
+  // fprintf (fp, "evict_time, %lld\n", evict_time);
+  // long long int allOp_time = evict_time + reshuff_time + online_time;
+  // fprintf (fp, "allOp_time, %lld\n", allOp_time);
+  // fprintf (fp, "online_share, %f\n", (double) online_time/allOp_time);
+  // fprintf (fp, "reshuff_share, %f\n", (double) reshuff_time/allOp_time);
+  // fprintf (fp, "evict_share, %f\n", (double) evict_time/allOp_time);
 
 
   // char real[5] = "real";
@@ -8148,6 +8150,8 @@ void export_csv(char * argv[]){
 
   // printf("point 9\n");
 
+  fprintf (fp, "sitacc, %d\n", sitacc);
+  fprintf (fp, "total_instr, %d\n", sitacc+nonmemops_sum);
   print_array(sit_min, SIT_LEVEL, fp, "SIT_min");
   print_array(sit_avg, SIT_LEVEL, fp, "SIT_avg");
   print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
