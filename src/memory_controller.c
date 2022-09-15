@@ -1297,7 +1297,7 @@ void sit_access(unsigned long long int addr){
 
     SGXTree[index].gapSum += (sitacc + nonmemops_sum - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
-    SGXTree[index].lastAcc = sitac + nonmemops_sum;
+    SGXTree[index].lastAcc = sitacc + nonmemops_sum;
     // printf("gapSum %d\n", SGXTree[index].gapSum);
     // printf("gapN %d\n", SGXTree[index].gapN);
     // printf("lastAcc %d\n", SGXTree[index].lastAcc);
