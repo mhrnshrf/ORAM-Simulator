@@ -210,9 +210,9 @@ unsigned long long int rctr = 0;
 unsigned long long int wctr = 0;
 unsigned long long int indepctr = 0;
 
-int sit_max[SIT_LEVEL] = {0};
-int sit_avg[SIT_LEVEL] = {0};
-int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 2147483647};
+unsigned long long int sit_max[SIT_LEVEL] = {0};
+unsigned long long int sit_avg[SIT_LEVEL] = {0};
+unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 2147483647};
 
 
 
@@ -314,7 +314,7 @@ Queue *deadQ_shadow[LEVEL];
 
 typedef struct IntegNode{
   int lastAcc;
-  int gapSum;
+  unsigned long long int gapSum;
   int gapN;
 }IntegNode;
 
@@ -778,10 +778,12 @@ void explore_lz(){
 }
 
 
-void print_array(int * arr, int size, FILE *fp, char *str){
+void print_array(unsigned long long int * arr, int size, FILE *fp, char *str){
   for (int i = 0; i < size; i++)
   {
-    fprintf(fp, "%s[%d],%d\n", str, i, arr[i]);
+    // printf("print array %d\n", i);
+    // printf("%s[%d],%lld\n", str, i, arr[i]);
+    fprintf(fp, "%s[%d],%lld\n", str, i, arr[i]);
   }
   // printf("\n");
 }
@@ -800,10 +802,10 @@ void print_super_node(int * arr, char * exp, char * bench, char * realdum){
   fclose(fp);
 }
 
-void print_array_double(long double * arr, int size, FILE *fp){
+void print_array_double(long double * arr, int size, FILE *fp, char *str){
   for (int i = 0; i < size; i++)
   {
-    fprintf(fp, "arr[%d],%Lf\n", i, arr[i]);
+    fprintf(fp, "%s[%d],%Lf\n", str, i, arr[i]);
   }
 }
 
@@ -1286,7 +1288,12 @@ void sit_access(unsigned long long int addr){
   for (int i = SIT_LEVEL-1; i >= 0; i--)
   {
     unsigned long long int index = sit_index(addr, i);
-    // printf("@%lld L%d  index: %lld\n", addr, i, index);
+
+    if(index < 0 || index >= SIT_NODE){
+        printf("ERROR: sit access: index %lld  out of range!\n", index);
+        exit(1);
+    }
+    
 
     SGXTree[index].gapSum += (sitacc - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
@@ -1298,30 +1305,43 @@ void sit_access(unsigned long long int addr){
 }
 
 void sit_count(){
+  unsigned long long int test_index = 0;
   for (int i = 0; i < SIT_LEVEL; i++)
   {
-    int sum = 0;
+    unsigned long long int sum = 0;
     // printf("\nL%d \n", i);
     for (int j = 0; j < pow(SIT_ARITY, i); j++)
     {
       unsigned long long int index = sit_index_mid(j, i);
+      // if(index != test_index){
+      //   printf("index %lld  test_index %lld\n", index, test_index);
+      //   exit(1); 
+      // }
+      test_index++;
+      // if(index < 0 || index >= SIT_NODE){
+      //   printf("index %lld  out of range!\n", index);
+      //   exit(1);
+      // }
       int cur = 0; 
-      // printf("< %lld \n", index);
       if(SGXTree[index].gapN != 0){
         cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
       }
       // printf("> %lld \n", index);
       sum += cur;
-      if(cur < sit_min[i])
+      if(cur < sit_min[i] && cur != 0)
       {
         sit_min[i] = cur;
       }
-      if(cur > sit_max[i])
+      if(cur > sit_max[i] && cur != 0)
       {
         sit_max[i] = cur;
       }
     }
-    sit_avg[i] += sum/pow(SIT_ARITY, i);
+    sit_avg[i] += ((unsigned long long int)sum/(int)pow(SIT_ARITY, i));
+    // if(sit_avg[i] >= 9999997){
+    //   printf("@%d L%d sitacc %d sum %lld avg %lld\n", tracectr, i, sitacc, sum, sit_avg[i]);
+    //   exit(1);
+    // }
   }
 }
 
@@ -7438,7 +7458,7 @@ void export_intermed(char exp_name[], unsigned long long int ind, long double *a
   
   fprintf(fp,"series,%lld\n", ind);
   // print_array(arr, LEVEL, fp);
-  print_array_double(arr, LEVEL, fp);
+  print_array_double(arr, LEVEL, fp, "arr");
 
   // free(filename);
   
@@ -7570,21 +7590,24 @@ void export_csv(char * argv[]){
     perror("chdir() to log failed"); 
   }
 
-
+  // printf("point 1\n");
   filename = "";
   filename = strcat(argv[3], "-");
   filename = strcat(filename, bench);
   filename = strcat(filename, ".csv");
   
+  // printf("point 2\n");
   // printf("file: %s\n", filename);
   // sprintf(filename,"%s-%s.csv",argv[3], bench);
 
   fp = fopen(filename,"w+");
+  // printf("point 3\n");
 
   int shuffctr = 0; 
   int shuffctr_tc = 0; 
   int shuffctr_dram = 0; 
   int shuffctr_nvm = 0; 
+  // printf("point 4\n");
   for (int i = 0; i < LEVEL; i++)
   {
     shuffctr += shuff[i];
@@ -7603,6 +7626,7 @@ void export_csv(char * argv[]){
     }
   }
 
+  // printf("point 5\n");
   fprintf(fp,"Benchmark,%s\n", bench);
   fprintf(fp,"Experiment,%s\n", exp_name);
   fprintf(fp,"Time,%f\n", exe_time);
@@ -7616,6 +7640,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "RING_ZSTL,%d\n",  RING_ZSTL); 
   fprintf(fp, "SKIP_ENABLE,%d\n",  SKIP_ENABLE); 
 
+  // printf("point 6\n");
   fprintf(fp, "TRACE_SIZE,%lld\n",  TRACE_SIZE);
   fprintf(fp, "WARMUP_TREE,%d\n",  WARMUP_TREE);
   fprintf(fp, "WARMUP_CACHE,%lld\n",  WARMUP_CACHE);
@@ -7884,6 +7909,9 @@ void export_csv(char * argv[]){
   // fprintf(fp, "w_ended_nvm,%d\n", w_ended_nvm);
   // fprintf(fp, "meta_ended,%d\n", meta_ended);
 
+  // printf("point 7\n");
+
+
    for (int i = 0; i < LEVEL; i++)
   {
     fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
@@ -7922,6 +7950,9 @@ void export_csv(char * argv[]){
   // {
   //   fprintf(fp, "ephoriz2_dist[%d],%d\n", i, ephoriz2_dist[i]);
   // }
+
+  // printf("point 8\n");
+
   for (int i = 0; i < RING_S+1; i++)
   {
     fprintf(fp, "s_dist[%d],%d\n", i, s_dist[i]);
@@ -7953,7 +7984,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "TOP_BOUNDARY,%d\n", TOP_BOUNDARY);
   fprintf(fp, "MID_BOUNDARY,%d\n", MID_BOUNDARY);
 
-  print_array_double(util_overall, LEVEL, fp);
+  print_array_double(util_overall, LEVEL, fp, "util");
 
   // for (int i = GATHER_START; i < LEVEL; i++)
   // {
@@ -8114,10 +8145,14 @@ void export_csv(char * argv[]){
   // char dum[5] = "dum";
   // print_super_node(supreal, exp_name, bench, real);
   // print_super_node(supdum, exp_name, bench, dum);
+
+  // printf("point 9\n");
+
   print_array(sit_min, SIT_LEVEL, fp, "SIT_min");
   print_array(sit_avg, SIT_LEVEL, fp, "SIT_avg");
   print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
 
+  // printf("point 10\n");
   
   fclose(fp);
 }

@@ -144,7 +144,7 @@
 
 #define SIT_ENABLE 1 // SGX Integrity Tree is enabled
 #define SIT_ARITY 8 // SGX Integrity Tree arity
-#define SIT_LEVEL 3 // SGX Integrity Tree levels
+#define SIT_LEVEL 9 // SGX Integrity Tree levels
 
 enum{
   // main tree
@@ -518,11 +518,11 @@ int calc_mem_addr(int index, int offset, char type);
 int remote_allocate(int index, int offset);
 bool remove_dead(Queue *pQueue, int key1, int key2);
 void reset_shuff_interval();
-void print_array(int * arr, int size, FILE *fp, char* str);
+void print_array(unsigned long long int * arr, int size, FILE *fp, char* str);
 void export_intermed(char * exp_name, unsigned long long int ind, long double *arr, unsigned long long int suffix);
 void record_util_level();
 void reset_util_level();
-void print_array_double(long double * arr, int size, FILE *fp);
+void print_array_double(long double * arr, int size, FILE *fp, char *str);
 bool in_nvm(int level);
 bool is_nvm_addr(int addr);
 void switch_cache_enable_to(bool tf);
