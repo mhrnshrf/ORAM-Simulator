@@ -8153,7 +8153,7 @@ void export_csv(char * argv[]){
 
   if(SIT_ENABLE){
     fprintf (fp, "sitacc, %d\n", sitacc);
-    fprintf (fp, "total_instr, %lld\n", sitacc+nonmemops_sum);
+    fprintf (fp, "total_instr, %lld\n", sitacc+nonmemops_trace);
     print_array(sit_min, SIT_LEVEL, fp, "SIT_min");
     print_array(sit_avg, SIT_LEVEL, fp, "SIT_avg");
     print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
