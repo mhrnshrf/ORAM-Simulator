@@ -378,7 +378,7 @@ int RhoSubMap[NODE];              // rho subtree address map
 
 
 // profiling stats
-int tracectr = 0; // # lines read from the trace file 
+unsigned long long int tracectr = 0; // # lines read from the trace file 
 int tracectr_test = 0;  // # lines read from the trace file for testing without simulator
 int prefetchctr = 0; // # prefetch access
 int pos1ctr = 0; // # prefetch pos1

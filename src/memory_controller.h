@@ -251,7 +251,7 @@ extern Queue *deadQ_arr[LEVEL];
 extern Queue *oramQ;
 extern Queue *deadQ;
 extern Queue *plbQ; 
-extern int tracectr; 
+extern unsigned long long int tracectr; 
 extern int tracectr_test; 
 extern int invokectr; 
 extern int prefetchctr; 
