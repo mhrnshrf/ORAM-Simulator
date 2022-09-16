@@ -142,7 +142,7 @@
 #define LOG_TH 39000000 // loging threshold
 
 
-#define SIT_ENABLE 0 // SGX Integrity Tree is enabled
+#define SIT_ENABLE 1 // SGX Integrity Tree is enabled
 #define SIT_ARITY 8 // SGX Integrity Tree arity
 #define SIT_LEVEL 9 // SGX Integrity Tree levels
 
@@ -348,7 +348,7 @@ extern bool last_read_deleted;
 extern bool last_req_served;
 extern long long int nonmemops_sum;
 extern long long int nonmemops_executed;
-extern long long int nonmemops_trace;
+extern unsigned long long int nonmemops_trace;
  
 extern long long int missl1wb;
 extern char bench[20];

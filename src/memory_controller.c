@@ -567,7 +567,7 @@ int oram_effective_pl = 0;
 
 long long int nonmemops_sum = 0;
 long long int nonmemops_executed = 0;
-long long int nonmemops_trace = 0;
+unsigned long long int nonmemops_trace = 0;
 
 long long int lastpath = 0;
 
