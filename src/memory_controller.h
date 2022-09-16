@@ -348,6 +348,7 @@ extern bool last_read_deleted;
 extern bool last_req_served;
 extern long long int nonmemops_sum;
 extern long long int nonmemops_executed;
+extern long long int nonmemops_trace;
  
 extern long long int missl1wb;
 extern char bench[20];

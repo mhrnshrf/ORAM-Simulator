@@ -1846,6 +1846,7 @@ int main(int argc, char * argv[])
 								
 								tracectr++;
 								tracectr_test++;
+								nonmemops_trace += nonmemops[numc]; 
 							if (opertype[numc] == 'R') {
 								rctr++;
 								instctr += nonmemops[numc] + 1;
@@ -2492,7 +2493,9 @@ int main(int argc, char * argv[])
   }
 
   printf("Exporting csv...\n");
-  sit_count();
+  if(SIT_ENABLE){
+  	sit_count();
+  }
   export_csv(argv);
 
 

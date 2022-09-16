@@ -567,6 +567,7 @@ int oram_effective_pl = 0;
 
 long long int nonmemops_sum = 0;
 long long int nonmemops_executed = 0;
+long long int nonmemops_trace = 0;
 
 long long int lastpath = 0;
 
@@ -1295,9 +1296,9 @@ void sit_access(unsigned long long int addr){
     }
     
 
-    SGXTree[index].gapSum += (sitacc + nonmemops_sum - SGXTree[index].lastAcc);
+    SGXTree[index].gapSum += (sitacc + nonmemops_trace - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
-    SGXTree[index].lastAcc = sitacc + nonmemops_sum;
+    SGXTree[index].lastAcc = sitacc + nonmemops_trace;
     // printf("gapSum %d\n", SGXTree[index].gapSum);
     // printf("gapN %d\n", SGXTree[index].gapN);
     // printf("lastAcc %d\n", SGXTree[index].lastAcc);
@@ -8150,11 +8151,13 @@ void export_csv(char * argv[]){
 
   // printf("point 9\n");
 
-  fprintf (fp, "sitacc, %d\n", sitacc);
-  fprintf (fp, "total_instr, %lld\n", sitacc+nonmemops_sum);
-  print_array(sit_min, SIT_LEVEL, fp, "SIT_min");
-  print_array(sit_avg, SIT_LEVEL, fp, "SIT_avg");
-  print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
+  if(SIT_ENABLE){
+    fprintf (fp, "sitacc, %d\n", sitacc);
+    fprintf (fp, "total_instr, %lld\n", sitacc+nonmemops_sum);
+    print_array(sit_min, SIT_LEVEL, fp, "SIT_min");
+    print_array(sit_avg, SIT_LEVEL, fp, "SIT_avg");
+    print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
+  }
 
   // printf("point 10\n");
   
