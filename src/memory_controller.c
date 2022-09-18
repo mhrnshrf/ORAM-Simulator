@@ -214,6 +214,7 @@ unsigned long long int sit_max[SIT_LEVEL] = {0};
 unsigned long long int sit_avg[SIT_LEVEL] = {0};
 unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 0xffffffffffffffff};
 long double sit_undermean[SIT_LEVEL] = {0};
+long double sit_overmean[SIT_LEVEL] = {0};
 
 
 
@@ -1391,6 +1392,9 @@ void sit_count(){
         touched++;
         if(cur <= sit_avg[i]){
           sit_undermean[i]++;
+        }
+        else{
+          sit_overmean[i]++;
         }
       }
     }
@@ -4070,6 +4074,9 @@ void invoke_oram(long long int physical_address, long long int arrival_time, int
   // }
 
   if(SIT_ENABLE){
+    if(RAND_ENABLE){
+      addr = (rand() % SIT_LEAF);
+    }
     sit_access(addr);
     return;
   }
@@ -8218,6 +8225,7 @@ void export_csv(char * argv[]){
     fprintf (fp, "sit_untouched, %lld\n", sit_untouched);
     fprintf (fp, "sit_untouched%%, %f\n", (double)sit_untouched/SIT_NODE);
     print_array_double(sit_undermean, SIT_LEVEL, fp, "SIT_undermean");
+    print_array_double(sit_overmean, SIT_LEVEL, fp, "SIT_overmean");
   }
 
   // printf("point 10\n");
