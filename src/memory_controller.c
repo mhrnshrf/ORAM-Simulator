@@ -1298,12 +1298,12 @@ void sit_access(unsigned long long int addr){
         exit(1);
     }
     
-    unsigned long long int gap = sitacc + nonmemops_trace - SGXTree[index].lastAcc;
+    unsigned long long int gap = sitacc  - SGXTree[index].lastAcc;
     SGXTree[index].gapAvg = (SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1);
 
     // SGXTree[index].gapSum += (sitacc + nonmemops_trace - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
-    SGXTree[index].lastAcc = sitacc + nonmemops_trace;
+    SGXTree[index].lastAcc = sitacc;
     // printf("gapSum %d\n", SGXTree[index].gapSum);
     // printf("gapN %d\n", SGXTree[index].gapN);
     // printf("lastAcc %d\n", SGXTree[index].lastAcc);
