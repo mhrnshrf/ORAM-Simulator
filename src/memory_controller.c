@@ -1311,8 +1311,10 @@ void sit_count(){
   unsigned long long int test_index = 0;
   for (int i = 0; i < SIT_LEVEL; i++)
   {
-    unsigned long long int sum = 0;
     // printf("\nL%d \n", i);
+    unsigned long long int sum = 0;
+    unsigned long long int touched = 0;
+    
     for (int j = 0; j < pow(SIT_ARITY, i); j++)
     {
       unsigned long long int index = sit_index_mid(j, i);
@@ -1328,6 +1330,7 @@ void sit_count(){
       unsigned long long int cur = 0; 
       if(SGXTree[index].gapN != 0){
         cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
+        touched++;
       }
       else{
         sit_untouched++;
@@ -1343,7 +1346,8 @@ void sit_count(){
         sit_max[i] = cur;
       }
     }
-    sit_avg[i] += ((unsigned long long int)sum/(int)pow(SIT_ARITY, i));
+    // sit_avg[i] += ((unsigned long long int)sum/(int)pow(SIT_ARITY, i));
+    sit_avg[i] += ((unsigned long long int)sum/touched);
     // if(sit_avg[i] >= 9999997){
     //   printf("@%d L%d sitacc %d sum %lld avg %lld\n", tracectr, i, sitacc, sum, sit_avg[i]);
     //   exit(1);
