@@ -316,7 +316,8 @@ Queue *deadQ_shadow[LEVEL];
 
 typedef struct IntegNode{
   unsigned long long int lastAcc;
-  unsigned long long int gapSum;
+  // unsigned long long int gapSum;
+  unsigned long long int gapAvg;
   unsigned long long int gapN;
 }IntegNode;
 
@@ -1297,8 +1298,10 @@ void sit_access(unsigned long long int addr){
         exit(1);
     }
     
+    unsigned long long int gap = sitacc + nonmemops_trace - SGXTree[index].lastAcc;
+    SGXTree[index].gapAvg = (SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/2;
 
-    SGXTree[index].gapSum += (sitacc + nonmemops_trace - SGXTree[index].lastAcc);
+    // SGXTree[index].gapSum += (sitacc + nonmemops_trace - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
     SGXTree[index].lastAcc = sitacc + nonmemops_trace;
     // printf("gapSum %d\n", SGXTree[index].gapSum);
@@ -1329,7 +1332,8 @@ void sit_count(){
       // }
       unsigned long long int cur = 0; 
       if(SGXTree[index].gapN != 0){
-        cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
+        // cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
+        cur = SGXTree[index].gapAvg; 
         touched++;
       }
       else{
@@ -1359,7 +1363,8 @@ void sit_init(){
   for (int i = 0; i < SIT_NODE; i++)
   {
     SGXTree[i].lastAcc = 0;
-    SGXTree[i].gapSum = 0;
+    // SGXTree[i].gapSum = 0;
+    SGXTree[i].gapAvg = 0;
     SGXTree[i].gapN = 0;
   }
 }
