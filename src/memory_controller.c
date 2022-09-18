@@ -1298,15 +1298,27 @@ void sit_access(unsigned long long int addr){
         exit(1);
     }
     
-    unsigned long long int gap = sitacc + nonmemops_trace  - SGXTree[index].lastAcc;
-    SGXTree[index].gapAvg = (SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1);
+    unsigned long long int gap = (sitacc + nonmemops_trace)  - SGXTree[index].lastAcc;
+    SGXTree[index].gapAvg = ((SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1));
+    // SGXTree[index].gapAvg = ((SGXTree[index].gapAvg/(SGXTree[index].gapN + 1)) * SGXTree[index].gapN) + (gap/(SGXTree[index].gapN + 1));
 
     // SGXTree[index].gapSum += (sitacc + nonmemops_trace - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
-    SGXTree[index].lastAcc = sitacc + nonmemops_trace;
-    // printf("gapSum %d\n", SGXTree[index].gapSum);
-    // printf("gapN %d\n", SGXTree[index].gapN);
-    // printf("lastAcc %d\n", SGXTree[index].lastAcc);
+    SGXTree[index].lastAcc = (sitacc + nonmemops_trace);
+    if(SGXTree[index].gapAvg >= 46016787763){
+      printf("@%llu sit access:\n", tracectr);
+      printf("nonmemops_trace %llu\n", nonmemops_trace);
+      printf("gapAvg %llu\n", SGXTree[index].gapAvg);
+      printf("gapN %llu\n", SGXTree[index].gapN);
+      printf("lastAcc %llu\n", SGXTree[index].lastAcc);
+      printf("gap %llu\n", gap);
+      printf("i %d\n", i);
+      exit(1);
+    }
+      
+
+
+
   }
 }
 
@@ -1337,7 +1349,7 @@ void sit_count(){
         touched++;
       }
       else{
-        cur = sitacc + nonmemops_trace;
+        // cur = sitacc + nonmemops_trace;
         sit_untouched++;
       }
       // printf("> %lld \n", index);
@@ -1351,8 +1363,16 @@ void sit_count(){
         sit_max[i] = cur;
       }
     }
-    sit_avg[i] = ((unsigned long long int)sum/(int)pow(SIT_ARITY, i));
-    // sit_avg[i] = ((unsigned long long int)sum/touched);
+    // sit_avg[i] = ((unsigned long long int)sum/(int)pow(SIT_ARITY, i));
+    sit_avg[i] = ((unsigned long long int)sum/touched);
+    if(sit_avg[i] >= 46016787763){
+      printf("@%llu sit count:\n", tracectr);
+      printf("nonmemops_trace %llu\n", nonmemops_trace);
+      printf("sit_avg[i] %llu\n", sit_avg[i]);
+      printf("touched %llu\n", touched);
+      printf("sum %llu\n", sum);
+      exit(1);
+    }
     // if(sit_avg[i] >= 9999997){
     //   printf("@%d L%d sitacc %d sum %lld avg %lld\n", tracectr, i, sitacc, sum, sit_avg[i]);
     //   exit(1);
