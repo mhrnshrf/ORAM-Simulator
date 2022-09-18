@@ -313,9 +313,9 @@ Queue *deadQ_shadow[LEVEL];
 
 
 typedef struct IntegNode{
-  int lastAcc;
+  unsigned long long int lastAcc;
   unsigned long long int gapSum;
-  int gapN;
+  unsigned long long int gapN;
 }IntegNode;
 
 int revarr[RING_REV];
@@ -1323,7 +1323,7 @@ void sit_count(){
       //   printf("index %lld  out of range!\n", index);
       //   exit(1);
       // }
-      int cur = 0; 
+      unsigned long long int cur = 0; 
       if(SGXTree[index].gapN != 0){
         cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
       }
