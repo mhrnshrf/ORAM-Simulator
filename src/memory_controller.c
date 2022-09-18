@@ -244,6 +244,8 @@ int oram_acc_addr;
 int wbshuff = 0;
 int sitacc = 0;
 
+unsigned long long int sit_untouched = 0;
+
 bool tc_must_flush = false;
 
 typedef struct Slot{
@@ -1176,7 +1178,7 @@ void insert_oramQ(long long int addr, long long int cycle, int thread, int instr
   
   if (!added)
   {
-    printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    trace: %d  stash: %d bkctr: %d\n", addr, oramQ->size, tracectr, stashctr, bkctr);
+    printf("ERROR: insert oramQ: failed to enqueue block: %lld    oramq size: %d    trace: %lld  stash: %d bkctr: %d\n", addr, oramQ->size, tracectr, stashctr, bkctr);
     print_oram_stats();
     exit(1);
   }
@@ -1326,6 +1328,9 @@ void sit_count(){
       unsigned long long int cur = 0; 
       if(SGXTree[index].gapN != 0){
         cur = SGXTree[index].gapSum / SGXTree[index].gapN; 
+      }
+      else{
+        sit_untouched++;
       }
       // printf("> %lld \n", index);
       sum += cur;
@@ -2012,7 +2017,7 @@ void retrieve_stale(int label){
         }
         else
         {
-          printf("ERROR: discard stale: trace %d buffer overflow!  @ %d\n", tracectr, stalectr);
+          printf("ERROR: discard stale: trace %lld buffer overflow!  @ %d\n", tracectr, stalectr);
           print_oram_stats();
           exit(1);
         }
@@ -2241,7 +2246,7 @@ void read_path(int label){
               }
               else
               {
-                printf("ERROR: read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+                printf("ERROR: read: trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
                 printf("stash leftover %d\n", stash_leftover);
                 printf("stash removed  %d\n", stash_removed);
                 printf("fill hit  %d\n", fillhit);
@@ -2914,11 +2919,11 @@ void remap_block(int addr){
     {
       if (RHO_ENABLE && (TREE_VAR == RHO))
       {
-        printf("ERROR: remap: @ trace %d  block %d not found in rho stash!\n", tracectr, addr);
+        printf("ERROR: remap: @ trace %lld  block %d not found in rho stash!\n", tracectr, addr);
       }
       else
       {
-        printf("ERROR: remap: @ trace %d  block %d not found in stash!\n", tracectr, addr);
+        printf("ERROR: remap: @ trace %lld  block %d not found in stash!\n", tracectr, addr);
         printf("remap:  previous Posmap[%d]: %d\n", addr, prevlabel);
         printf("remap:  Posmap[%d]: %d\n", addr, PosMap[addr]);
         printf("remap:  stashctr: %d    bkctr: %d\n", stashctr, bkctr);
@@ -2950,14 +2955,14 @@ void remap_block(int addr){
       if (!LLC_DIRTY || pinFlag)
       {
         if (LOG_ENABLE && tracectr >= LOG_TH){
-          printf("@%d remap %d\n", tracectr, addr);
+          printf("@%lld remap %d\n", tracectr, addr);
         }
         Stash[index].label = label;
       }
       else
       {
         if (LOG_ENABLE && tracectr >= LOG_TH){
-          printf("@%d remove %d\n", tracectr, addr);
+          printf("@%lld remove %d\n", tracectr, addr);
         }
         remove_from_stash(index);
       }
@@ -3033,7 +3038,7 @@ int add_to_stash(Slot s){
 
         if (!s.isReal)
         {
-          printf("ERROR: add to stash: dummy added @ trace %d\n", tracectr);
+          printf("ERROR: add to stash: dummy added @ trace %lld\n", tracectr);
           print_stash();
           exit(1);
         }
@@ -3070,7 +3075,7 @@ int add_stale_buf(Slot s){
 
       if (!s.isReal)
       {
-        printf("ERROR: add to stash: dummy added @ trace %d\n", tracectr);
+        printf("ERROR: add to stash: dummy added @ trace %lld\n", tracectr);
         print_stash();
         exit(1);
       }
@@ -3536,7 +3541,7 @@ void freecursive_access(int addr, char type){
           if (RING_ENABLE)
           {
             if (LOG_ENABLE && tracectr >= LOG_TH){
-              printf("@%d posmap  %d  cycle %lld\n", tracectr, tag, CYCLE_VAL);
+              printf("@%lld posmap  %d  cycle %lld\n", tracectr, tag, CYCLE_VAL);
             }
             ring_access(tag);
           }
@@ -3663,7 +3668,7 @@ void freecursive_access(int addr, char type){
       {
         if (LOG_ENABLE && tracectr >= LOG_TH)
         {
-          printf("@%d data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
+          printf("@%lld data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
         }
         ring_access(addr);
       }
@@ -4424,7 +4429,7 @@ int buffer_index(int addr){
   }
   if (index == -1)
   {
-    printf("ERROR: buffer index: @ trace %d  block %d does not exist!\n", tracectr, addr);
+    printf("ERROR: buffer index: @ trace %lld  block %d does not exist!\n", tracectr, addr);
     print_oram_stats();
     exit(1);
   }
@@ -5891,7 +5896,7 @@ int decide_which_super(int index, int i, int addr){
   }
   else
   {
-    printf("ERROR: decide which super @%d  index %d adj%d i %d  addr %d\n", tracectr, index, adj, i, addr);
+    printf("ERROR: decide which super @%lld  index %d adj%d i %d  addr %d\n", tracectr, index, adj, i, addr);
     exit(1);
   }
 
@@ -6002,7 +6007,7 @@ void ring_read_path(int label, int addr){
       else if (!CB_ENABLE)
       {
         {
-          printf("ERROR: ring read @%d L%d index %d no valid dummy available! \n", tracectr, i, index);
+          printf("ERROR: ring read @%lld L%d index %d no valid dummy available! \n", tracectr, i, index);
           printf("count: %d\n", GlobTree[index].count);
           printf("dummy: %d\n", GlobTree[index].dumnum);
           printf("indep: %lld\n", indepctr);
@@ -6064,7 +6069,7 @@ void ring_read_path(int label, int addr){
         }
         else
         {
-          printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+          printf("ERROR: ring read: trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
           export_csv(pargv);
           print_oram_stats();
           exit(1);
@@ -6456,7 +6461,7 @@ bool super_node_need_reshuffle(int index){
   }
   if (extend < 0)
   {
-    printf("ERROR: super need reshuffle @%d L%d extend below zero!\n", tracectr, level);
+    printf("ERROR: super need reshuffle @%lld L%d extend below zero!\n", tracectr, level);
     exit(1);
   }
   // else if (extend > 0)
@@ -6958,7 +6963,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
         }
         else
         {
-          printf("ERROR: ring read: trace %d stash overflow!  @ %d\n", tracectr, stashctr);
+          printf("ERROR: ring read: trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
           export_csv(pargv);
           print_oram_stats();
           exit(1);
@@ -7026,7 +7031,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
     {
       if (remainCount > cand_ind)
       {
-        printf("ERROR: read bucket @%d L%d remainCount %d residue %d  cand %d   first %d  reqmade %d\n", tracectr, i, remainCount, residue,  cand_ind, first_super, reqmade);
+        printf("ERROR: read bucket @%lld L%d remainCount %d residue %d  cand %d   first %d  reqmade %d\n", tracectr, i, remainCount, residue,  cand_ind, first_super, reqmade);
         printf("slotCount %d    greenctr %d  count %d    s %d\n", slotCount, GlobTree[index].greenctr, GlobTree[index].count, GlobTree[index].s);
         exit(1);
       }
@@ -7309,7 +7314,7 @@ void ring_early_reshuffle(int label){
 void ring_invalidate(int index, int offset){
    if (!GlobTree[index].slot[offset].valid && !CB_ENABLE)
   {
-    printf("invalidate an invalid block @ %d\n", tracectr);
+    printf("invalidate an invalid block @ %lld\n", tracectr);
     exit(1);
   }
   GlobTree[index].slot[offset].valid = false;
@@ -7683,7 +7688,7 @@ void export_csv(char * argv[]){
   
 
 
-  fprintf(fp,"tracectr,%d\n", tracectr);
+  fprintf(fp,"tracectr,%lld\n", tracectr);
   // fprintf(fp, "mem_clk,%lld\n", mem_clk);
   fprintf(fp, "invokectr,%d\n", invokectr);
   // fprintf(fp, "oramctr,%d\n", oramctr);
@@ -8157,6 +8162,8 @@ void export_csv(char * argv[]){
     print_array(sit_min, SIT_LEVEL, fp, "SIT_min");
     print_array(sit_avg, SIT_LEVEL, fp, "SIT_avg");
     print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
+    fprintf (fp, "sit_untouched, %lld\n", sit_untouched);
+    fprintf (fp, "sit_untouched%%, %f\n", (double)sit_untouched/SIT_NODE);
   }
 
   // printf("point 10\n");
@@ -8188,7 +8195,7 @@ void print_oram_stats(){
   // printf("\n\n\n\n............... ORAM Stats ...............\n\n");
   // printf("Execution Time (s)       %f\n", exe_time);
   // printf("Total Cycles             %lld \n", CYCLE_VAL);
-  // printf("Trace Size               %d\n", tracectr);
+  // printf("Trace Size               %lld\n", tracectr);
   // printf("Mem Cycles               %lld\n", mem_clk);
   // printf("Invoke Mem               %d\n", invokectr);
   // printf("ORAM Access              %d\n", oramctr);

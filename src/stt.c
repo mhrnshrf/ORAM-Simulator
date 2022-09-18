@@ -230,7 +230,7 @@ void stt_invalidate(unsigned int addr){
         }        
     }
     // miss
-    printf("ERROR: stt invalidate: @trace %d tracectr  block %d not found!\n", tracectr, addr);
+    printf("ERROR: stt invalidate: @trace %lld tracectr  block %d not found!\n", tracectr, addr);
     exit(1);
 }
 

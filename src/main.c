@@ -1733,7 +1733,7 @@ int main(int argc, char * argv[])
 				{
 					if (tracectr % 1000000 == 0)
 					{
-						printf("@%d \n", tracectr);
+						printf("@%lld \n", tracectr);
 					}
 					// if (tracectr % 50000 == 0)
 					// {
@@ -2387,7 +2387,7 @@ int main(int argc, char * argv[])
 
 			if (!RING_ENABLE && pN->oramid != curr_access)
 			{
-				printf("\nERROR: deququed req %d does not match curr access %d @ trace %d\n", pN->oramid, curr_access, tracectr);
+				printf("\nERROR: deququed req %d does not match curr access %d @ trace %lld\n", pN->oramid, curr_access, tracectr);
 				exit(1);
 			}
 
