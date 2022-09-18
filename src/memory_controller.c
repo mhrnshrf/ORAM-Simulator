@@ -213,6 +213,7 @@ unsigned long long int indepctr = 0;
 unsigned long long int sit_max[SIT_LEVEL] = {0};
 unsigned long long int sit_avg[SIT_LEVEL] = {0};
 unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 0xffffffffffffffff};
+long double sit_undermean[SIT_LEVEL] = {0};
 
 
 
@@ -1378,6 +1379,24 @@ void sit_count(){
     //   exit(1);
     // }
   }
+  for (int i = 0; i < SIT_LEVEL; i++)
+  {
+    unsigned long long int touched = 0;
+    
+    for (int j = 0; j < pow(SIT_ARITY, i); j++)
+    {
+      unsigned long long int index = sit_index_mid(j, i);
+      if(SGXTree[index].gapN != 0){
+        unsigned long long int cur = SGXTree[index].gapAvg; 
+        touched++;
+        if(cur <= sit_avg[i]){
+          sit_undermean[i]++;
+        }
+      }
+    }
+    sit_undermean[i] = (double) sit_undermean[i]/touched;
+  }
+
 }
 
 void sit_init(){
@@ -8187,6 +8206,10 @@ void export_csv(char * argv[]){
   // printf("point 9\n");
 
   if(SIT_ENABLE){
+    fprintf (fp, "SIT_ARITY, %d\n", SIT_ARITY);
+    fprintf (fp, "SIT_LEVEL, %d\n", SIT_LEVEL);
+    fprintf (fp, "SIT_LEAF, %d\n", SIT_LEAF);
+    fprintf (fp, "SIT_NODE, %d\n", SIT_NODE);
     fprintf (fp, "sitacc, %d\n", sitacc);
     fprintf (fp, "total_instr, %lld\n", sitacc+nonmemops_trace);
     print_array(sit_min, SIT_LEVEL, fp, "SIT_min");
@@ -8194,6 +8217,7 @@ void export_csv(char * argv[]){
     print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
     fprintf (fp, "sit_untouched, %lld\n", sit_untouched);
     fprintf (fp, "sit_untouched%%, %f\n", (double)sit_untouched/SIT_NODE);
+    print_array_double(sit_undermean, SIT_LEVEL, fp, "SIT_undermean");
   }
 
   // printf("point 10\n");
