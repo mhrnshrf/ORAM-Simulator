@@ -213,8 +213,8 @@ unsigned long long int indepctr = 0;
 unsigned long long int sit_max[SIT_LEVEL] = {0};
 unsigned long long int sit_avg[SIT_LEVEL] = {0};
 unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 0xffffffffffffffff};
-// long double sit_undermean[SIT_LEVEL] = {0};
-// long double sit_overmean[SIT_LEVEL] = {0};
+long double sit_undermean[SIT_LEVEL] = {0};
+long double sit_overmean[SIT_LEVEL] = {0};
 
 
 
@@ -1301,7 +1301,7 @@ void sit_access(unsigned long long int addr){
     }
     
     unsigned long long int gap = (sitacc + nonmemops_trace)  - SGXTree[index].lastAcc;
-    SGXTree[index].gapAvg = ((SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1))/1000000;
+    SGXTree[index].gapAvg = ((SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1));
     // SGXTree[index].gapAvg = ((SGXTree[index].gapAvg/(SGXTree[index].gapN + 1)) * SGXTree[index].gapN) + (gap/(SGXTree[index].gapN + 1));
 
     // SGXTree[index].gapSum += (sitacc + nonmemops_trace - SGXTree[index].lastAcc);
@@ -1380,26 +1380,26 @@ void sit_count(){
     //   exit(1);
     // }
   }
-  // for (int i = 0; i < SIT_LEVEL; i++)
-  // {
-  //   unsigned long long int touched = 0;
+  for (int i = 0; i < SIT_LEVEL; i++)
+  {
+    unsigned long long int touched = 0;
     
-  //   for (int j = 0; j < pow(SIT_ARITY, i); j++)
-  //   {
-  //     unsigned long long int index = sit_index_mid(j, i);
-  //     if(SGXTree[index].gapN != 0){
-  //       unsigned long long int cur = SGXTree[index].gapAvg; 
-  //       touched++;
-  //       if(cur <= sit_avg[i]){
-  //         sit_undermean[i]++;
-  //       }
-  //       else{
-  //         sit_overmean[i]++;
-  //       }
-  //     }
-  //   }
-  //   sit_undermean[i] = (double) sit_undermean[i]/touched;
-  // }
+    for (int j = 0; j < pow(SIT_ARITY, i); j++)
+    {
+      unsigned long long int index = sit_index_mid(j, i);
+      if(SGXTree[index].gapN != 0){
+        unsigned long long int cur = SGXTree[index].gapAvg; 
+        touched++;
+        if(cur <= sit_avg[i]){
+          sit_undermean[i]++;
+        }
+        else{
+          sit_overmean[i]++;
+        }
+      }
+    }
+    sit_undermean[i] = (double) sit_undermean[i]/touched;
+  }
 
 }
 
@@ -8224,8 +8224,8 @@ void export_csv(char * argv[]){
     print_array(sit_max, SIT_LEVEL, fp, "SIT_max");
     fprintf (fp, "sit_untouched, %lld\n", sit_untouched);
     fprintf (fp, "sit_untouched%%, %f\n", (double)sit_untouched/SIT_NODE);
-    // print_array_double(sit_undermean, SIT_LEVEL, fp, "SIT_undermean");
-    // print_array_double(sit_overmean, SIT_LEVEL, fp, "SIT_overmean");
+    print_array_double(sit_undermean, SIT_LEVEL, fp, "SIT_undermean");
+    print_array_double(sit_overmean, SIT_LEVEL, fp, "SIT_overmean");
   }
 
   // printf("point 10\n");
