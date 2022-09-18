@@ -212,7 +212,7 @@ unsigned long long int indepctr = 0;
 
 unsigned long long int sit_max[SIT_LEVEL] = {0};
 unsigned long long int sit_avg[SIT_LEVEL] = {0};
-unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 2147483647};
+unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 0xffffffffffffffff};
 
 
 
