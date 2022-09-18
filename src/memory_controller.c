@@ -1351,7 +1351,7 @@ void sit_count(){
       }
     }
     // sit_avg[i] += ((unsigned long long int)sum/(int)pow(SIT_ARITY, i));
-    sit_avg[i] += ((unsigned long long int)sum/touched);
+    sit_avg[i] = ((unsigned long long int)sum/touched);
     // if(sit_avg[i] >= 9999997){
     //   printf("@%d L%d sitacc %d sum %lld avg %lld\n", tracectr, i, sitacc, sum, sit_avg[i]);
     //   exit(1);
