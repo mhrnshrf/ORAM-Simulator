@@ -1846,7 +1846,7 @@ int main(int argc, char * argv[])
 								
 								tracectr++;
 								tracectr_test++;
-								// nonmemops_trace += nonmemops[numc]; 
+								nonmemops_trace += nonmemops[numc]; 
 							if (opertype[numc] == 'R') {
 								rctr++;
 								instctr += nonmemops[numc] + 1;

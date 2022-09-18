@@ -1299,7 +1299,7 @@ void sit_access(unsigned long long int addr){
     }
     
     unsigned long long int gap = (sitacc + nonmemops_trace)  - SGXTree[index].lastAcc;
-    SGXTree[index].gapAvg = ((SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1));
+    SGXTree[index].gapAvg = ((SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1))/1000000;
     // SGXTree[index].gapAvg = ((SGXTree[index].gapAvg/(SGXTree[index].gapN + 1)) * SGXTree[index].gapN) + (gap/(SGXTree[index].gapN + 1));
 
     // SGXTree[index].gapSum += (sitacc + nonmemops_trace - SGXTree[index].lastAcc);
