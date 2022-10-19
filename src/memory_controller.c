@@ -8138,8 +8138,8 @@ void export_csv(char * argv[]){
   // long long int activates_for_writes = 0;
   // long long int read_cmds = 0;
   // long long int write_cmds = 0;
-  // unsigned long long int TotalReads = 0;
-  // unsigned long long int TotalWrites       = 0;
+  unsigned long long int TotalReads = 0;
+  unsigned long long int TotalWrites       = 0;
   // unsigned long long int AvgReadLatency = 0;
   // unsigned long long int AvgReadQLate = 0;
   // unsigned long long int AvgWrite = 0;
@@ -8147,43 +8147,42 @@ void export_csv(char * argv[]){
   // unsigned long long int ReadHit = 0;
   // unsigned long long int WriteHit = 0;
 
-  // for (int c = 0; c < NUM_CHANNELS; c++)
-  // {
-  //   activates_for_writes = 0;
-  //   activates_for_reads = 0;
-  //   activates_for_spec = 0;
-  //   read_cmds = 0;
-  //   write_cmds = 0;
-  //   for (int r = 0; r < NUM_RANKS; r++)
+  for (int c = 0; c < NUM_CHANNELS; c++)
+  {
+    // activates_for_writes = 0;
+    // activates_for_reads = 0;
+    // activates_for_spec = 0;
+    // read_cmds = 0;
+    // write_cmds = 0;
+    // for (int r = 0; r < NUM_RANKS; r++)
+    // {
+    //   for (int b = 0; b < NUM_BANKS; b++)
 
-  //   {
-  //     for (int b = 0; b < NUM_BANKS; b++)
-
-  //     {
-  //       activates_for_writes += stats_num_activate_write[c][r][b];
-  //       activates_for_reads += stats_num_activate_read[c][r][b];
-  //       activates_for_spec += stats_num_activate_spec[c][r][b];
-  //       read_cmds += stats_num_read[c][r][b];
-  //       write_cmds += stats_num_write[c][r][b];
-  //     } 
-  //   }  
-  //   fprintf (fp, "TotalReads[%d] ,  %-7lld\n", c,        stats_reads_completed[c]);
-  //   fprintf (fp, "TotalWrites[%d] ,  %-7lld\n", c,        stats_writes_completed[c]);
-  //   fprintf (fp, "AvgReadLatency[%d] ,  %7.5f\n",  c,       (double) stats_average_read_latency[c]);
-  //   fprintf (fp, "AvgReadQLate[%d] ,  %7.5f\n",  c,       (double) stats_average_read_queue_latency[c]);
-  //   fprintf (fp, "AvgWrite[%d] ,  %7.5f\n",  c,      (double) stats_average_write_latency[c]);
-  //   fprintf (fp, "AvgWriteQLate[%d] ,  %7.5f\n",  c,(double) stats_average_write_queue_latency[c]);
-  //   fprintf (fp, "ReadHit[%d] ,  %7.5f\n",  c,((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds));
-  //   fprintf (fp, "WriteHit[%d] ,  %7.5f\n",  c,((double) (write_cmds - activates_for_writes) / write_cmds));
-  //   TotalReads += stats_reads_completed[c];
-  //   TotalWrites       +=  stats_writes_completed[c];
-  //   AvgReadLatency +=  (double) stats_average_read_latency[c];
-  //   AvgReadQLate +=  (double) stats_average_read_queue_latency[c];
-  //   AvgWrite +=  (double) stats_average_write_latency[c];
-  //   AvgWriteQLate += (double) stats_average_write_queue_latency[c];  
-  //   ReadHit += ((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds);
-  //   WriteHit += ((double) (write_cmds - activates_for_writes) / write_cmds);
-  // } 
+    //   {
+    //     activates_for_writes += stats_num_activate_write[c][r][b];
+    //     activates_for_reads += stats_num_activate_read[c][r][b];
+    //     activates_for_spec += stats_num_activate_spec[c][r][b];
+    //     read_cmds += stats_num_read[c][r][b];
+    //     write_cmds += stats_num_write[c][r][b];
+    //   } 
+    // }  
+    // fprintf (fp, "TotalReads[%d] ,  %-7lld\n", c,        stats_reads_completed[c]);
+    // fprintf (fp, "TotalWrites[%d] ,  %-7lld\n", c,        stats_writes_completed[c]);
+    // fprintf (fp, "AvgReadLatency[%d] ,  %7.5f\n",  c,       (double) stats_average_read_latency[c]);
+    // fprintf (fp, "AvgReadQLate[%d] ,  %7.5f\n",  c,       (double) stats_average_read_queue_latency[c]);
+    // fprintf (fp, "AvgWrite[%d] ,  %7.5f\n",  c,      (double) stats_average_write_latency[c]);
+    // fprintf (fp, "AvgWriteQLate[%d] ,  %7.5f\n",  c,(double) stats_average_write_queue_latency[c]);
+    // fprintf (fp, "ReadHit[%d] ,  %7.5f\n",  c,((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds));
+    // fprintf (fp, "WriteHit[%d] ,  %7.5f\n",  c,((double) (write_cmds - activates_for_writes) / write_cmds));
+    TotalReads += stats_reads_completed[c];
+    TotalWrites       +=  stats_writes_completed[c];
+    // AvgReadLatency +=  (double) stats_average_read_latency[c];
+    // AvgReadQLate +=  (double) stats_average_read_queue_latency[c];
+    // AvgWrite +=  (double) stats_average_write_latency[c];
+    // AvgWriteQLate += (double) stats_average_write_queue_latency[c];  
+    // ReadHit += ((double)(read_cmds - activates_for_reads - activates_for_spec) / read_cmds);
+    // WriteHit += ((double) (write_cmds - activates_for_writes) / write_cmds);
+  } 
   
   fprintf (fp, "TotalReads, %-7lld\n", TotalReads);
   fprintf (fp, "TotalWrites,  %-7lld\n", TotalWrites);
