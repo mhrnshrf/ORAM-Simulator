@@ -24,10 +24,8 @@
 // FILE * trace;
 
 // #define CACHE_SIZE 262144   // in bytes ~~~> 256 KB
-#define CACHE_SIZE_L1 65536   // in bytes ~~~> 64 KB
-#define NUM_WAY_L1 4           // bytes ~~~> # way per set
-#define CACHE_SIZE_L2 262144   // in bytes ~~~> 256 KB
-#define NUM_WAY_L2 8           // bytes ~~~> # way per set
+#define CACHE_SIZE 65536   // in bytes ~~~> 64 KB
+#define NUM_WAY 2           // bytes ~~~> # way per set
 #define BLOCK_SIZE 64       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
 #define L1_LATENCY 3        // L1 latency in terms of # cycles 
@@ -45,13 +43,10 @@ long long int viclru = 0;
 
 
 enum{
-  NUM_SET_L1 = (unsigned int)(CACHE_SIZE_L1/BLOCK_SIZE)/NUM_WAY_L1,  
-  INDEX_WIDTH_L1 = (unsigned int)log2(NUM_SET_L1), 
-  NUM_SET_L2 = (unsigned int)(CACHE_SIZE_L2/BLOCK_SIZE)/NUM_WAY_L2,  
-  INDEX_WIDTH_L2 = (unsigned int)log2(NUM_SET_L2), 
+  NUM_SET = (unsigned int)(CACHE_SIZE/BLOCK_SIZE)/NUM_WAY,  // # sets
+  INDEX_WIDTH = (unsigned int)log2(NUM_SET), 
   OFFSET_WIDTH = (unsigned int)log2(BLOCK_SIZE),
-  TAG_WIDTH_L1 = (unsigned int)ADDR_WIDTH - INDEX_WIDTH_L1 - OFFSET_WIDTH,
-  TAG_WIDTH_L2 = (unsigned int)ADDR_WIDTH - INDEX_WIDTH_L2 - OFFSET_WIDTH,
+  TAG_WIDTH = (unsigned int)ADDR_WIDTH - INDEX_WIDTH - OFFSET_WIDTH,
 };
 
 
@@ -60,43 +55,30 @@ typedef struct Cacheline{
   bool dirty;
   unsigned int tag;
   unsigned int addr;
-  long long int LRU;
 } Cacheline;
 
-typedef struct Param{
-   unsigned int NUM_SET; 
-   unsigned int INDEX_WIDTH; 
-   unsigned int NUM_WAY; 
-} Param;
 
-Param paramL1 = {.NUM_SET = NUM_SET_L1, .INDEX_WIDTH = INDEX_WIDTH_L1, .NUM_WAY = NUM_WAY_L1}; 
-Param paramL2 = {.NUM_SET = NUM_SET_L2, .INDEX_WIDTH = INDEX_WIDTH_L2, .NUM_WAY = NUM_WAY_L2}; 
 
-Cacheline **L1 = new Cacheline*[NUM_SET_L1];     // the cache
-Cacheline **L2 = new Cacheline*[NUM_SET_L2];     // the cache
-// for(int i = 0; i < NUM_SET_L1; ++i)
-//     L1[i] = new int[NUM_WAY_L1];
-
-// Cacheline L2[NUM_SET_L2][NUM_WAY_L2];     // the cache
-// long long int LRU[NUM_SET][NUM_WAY];                 // a array to keep track of lru for eviction
+Cacheline L1[NUM_SET][NUM_WAY];     // the cache
+long long int LRU[NUM_SET][NUM_WAY];                 // a array to keep track of lru for eviction
 
 // invalidate all cahce blocks upon init
-void cache_init(Cacheline **CC, Param paramCC){
-    for (unsigned int i = 0; i < paramCC.NUM_SET; i++)
+void cache_init(){
+    for (unsigned int i = 0; i < NUM_SET; i++)
     {
-        for (unsigned int j = 0; j < paramCC.NUM_WAY; j++)
+        for (unsigned int j = 0; j < NUM_WAY; j++)
         {
-            CC[i][j].valid = false;
-            CC[i][j].dirty = false;
-            CC[i][j].tag = -1;
+            L1[i][j].valid = false;
+            L1[i][j].dirty = false;
+            L1[i][j].tag = -1;
             
-            CC[i][j].LRU = 0;
+            LRU[i][j] = 0;
         }
     }
 }
 
-void update_LRU(unsigned int index, unsigned int way, Cacheline **CC){
-    CC[index][way].LRU = cache_clk;
+void update_LRU(unsigned int index, unsigned int way){
+    LRU[index][way] = cache_clk;
     // if (LRU[index][way] >= NUM_WAY - 1)
     // {
     //     LRU[index][way] = 0;
@@ -107,16 +89,16 @@ void update_LRU(unsigned int index, unsigned int way, Cacheline **CC){
     // } 
 }
 
-void reset_LRU(unsigned int index, unsigned int way, Cacheline **CC){
-    CC[index][way].LRU = cache_clk;
+void reset_LRU(unsigned int index, unsigned int way){
+    LRU[index][way] = cache_clk;
     // LRU[index][way] = 1;
 }
 
 
-int find_spot(unsigned int index, Cacheline **CC, Param paramCC){
-    for (unsigned int j = 0; j < paramCC.NUM_WAY; j++)
+int find_spot(unsigned int index){
+    for (int j = 0; j < NUM_WAY; j++)
     {
-        if (!CC[index][j].valid)
+        if (!L1[index][j].valid)
         {
             return j;
         }
@@ -126,16 +108,16 @@ int find_spot(unsigned int index, Cacheline **CC, Param paramCC){
 
 
 // find the cacheline with the least recently used
-int find_victim(unsigned int index, Cacheline **CC, Param paramCC) {
+int find_victim(unsigned int index) {
     int victim = -1;
     // char min = NUM_WAY;
     long long int min = cache_clk;
-    for (unsigned int j = 0; j < paramCC.NUM_WAY; j++)
+    for (int j = 0; j < NUM_WAY; j++)
     {
-        if (CC[index][j].LRU < min)
+        if (LRU[index][j] < min)
         {
             victim = j;
-            min = CC[index][j].LRU;
+            min = LRU[index][j];
 
         }
     }
@@ -145,47 +127,47 @@ int find_victim(unsigned int index, Cacheline **CC, Param paramCC) {
 
 
 
-unsigned int get_index(unsigned int addr, Param paramCC){
+unsigned int get_index(unsigned int addr){
     unsigned int index = addr >> OFFSET_WIDTH;
     // index = index << (TAG_WIDTH);
     // index = index >> (TAG_WIDTH);
-    index = index & ((unsigned int)pow(2, paramCC.INDEX_WIDTH)-1);
+    index = index & ((unsigned int)pow(2, INDEX_WIDTH)-1);
     return index;
 
 }
 
-unsigned int get_tag(unsigned int addr, Param paramCC){
-    unsigned int tag = addr >> (paramCC.INDEX_WIDTH + OFFSET_WIDTH);
+unsigned int get_tag(unsigned int addr){
+    unsigned int tag = addr >> (INDEX_WIDTH+OFFSET_WIDTH);
     return tag;
 }
 
 
 // return true on hit and false on miss
-bool cache_access(unsigned int addr, char type, FILE * trace, Cacheline **CC, Param paramCC){
+bool cache_access(unsigned int addr, char type, FILE * trace){
     // fprintf(trace,"CA < get index\n");
-    unsigned int index = get_index(addr, paramCC);
+    unsigned int index = get_index(addr);
     // if(index < 0 || index >= NUM_SET){
     //     fprintf(trace,"ERROR\n");
     //     fprintf(trace,"index %d\n", index);
     //     exit(1);
     // }
-    unsigned int tag = get_tag(addr, paramCC);
+    unsigned int tag = get_tag(addr);
     // fprintf(trace,"CA > get tag\n");
 
     // fprintf(trace,"CA < L1 index %d \n", index);
-    for (unsigned int j = 0; j < paramCC.NUM_WAY; j++)
+    for (unsigned int j = 0; j < NUM_WAY; j++)
     {
         // hit
         // fprintf(trace,"CA < L1 index %d   j %d\n", index, j);
-        if (CC[index][j].tag == tag && CC[index][j].valid)
+        if (L1[index][j].tag == tag && L1[index][j].valid)
         {   
             // fprintf(trace,"CA > L1 index %d   j %d\n", index, j);
             if (type == CWRITE)
             {
-                CC[index][j].dirty = true;
+                L1[index][j].dirty = true;
             }
             // fprintf(trace,"CA > dirty L1 index %d   j %d\n", index, j);
-            update_LRU(index, j, CC);  
+            update_LRU(index, j);  
             // fprintf(trace,"CA > update L1 index %d   j %d\n", index, j);
             return true;    
         }        
@@ -197,19 +179,19 @@ bool cache_access(unsigned int addr, char type, FILE * trace, Cacheline **CC, Pa
 
 
 // try to fill the cache with new data, it may lead to eviction ~~~> is called when miss happens
-int cache_fill(unsigned int addr,  char type, FILE * trace, Cacheline **CC, Param paramCC){
-    unsigned int index = get_index(addr, paramCC);
-    unsigned int tag = get_tag(addr, paramCC);
+int cache_fill(unsigned int addr,  char type, FILE * trace){
+    unsigned int index = get_index(addr);
+    unsigned int tag = get_tag(addr);
 
     int victim = -1;
    
     // miss only
-    int way = find_spot(index, CC, paramCC);
+    int way = find_spot(index);
 
     // miss & evict
     if (way == -1)
     {
-        way = find_victim(index, CC, paramCC);
+        way = find_victim(index);
         // if (way == -1)
         // {
         //     fprintf(trace,"ERROR\n");
@@ -217,26 +199,26 @@ int cache_fill(unsigned int addr,  char type, FILE * trace, Cacheline **CC, Para
         //     exit(1);
         // }
         
-        viclru = CC[index][way].LRU;
-        if (CC[index][way].dirty)
+        viclru = LRU[index][way];
+        if (L1[index][way].dirty)
         {
-            victim = CC[index][way].addr;
+            victim = L1[index][way].addr;
         }
     }
 
 
     // cacheline fill
-    CC[index][way].valid = true;
-    CC[index][way].tag = tag;
-    CC[index][way].addr = addr;
-    CC[index][way].dirty = false;
+    L1[index][way].valid = true;
+    L1[index][way].tag = tag;
+    L1[index][way].addr = addr;
+    L1[index][way].dirty = false;
     
     if (type == CWRITE)
     {
-        CC[index][way].dirty = true;
+        L1[index][way].dirty = true;
     }
     
-    reset_LRU(index, way, CC);  
+    reset_LRU(index, way);  
 
     return victim;  
 }
@@ -273,11 +255,8 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
     unsigned int addrval;
     sscanf(str,"%x", &addrval);
     int victim = -1;
-    int victim2 = -1;
-    int victim3 = -1;
     unsigned int v = 0;
-    unsigned int v2 = 0;
-    unsigned int v3 = 0;
+    bool skip = false;
 
     // char buf[100];
     // sprintf(buf, "%p\n", ip);
@@ -286,34 +265,24 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 
     // fprintf(trace,"R < cache access\n");
 
-	if (!cache_access(addrval, 'R', trace, L1, paramL1)) // miss
+	if (!cache_access(addrval, 'R', trace)) // miss
 	{
         // fprintf(trace,"R > cache access\n");
         rctr++;
-		victim = cache_fill(addrval, 'R', trace, L1, paramL1);
+		victim = cache_fill(addrval, 'R', trace);
 
         // fprintf(trace,"R > cache fill\n");
 
 		// if needed to evict a block
         // if (ipval != 0x7fbe48b439c0)
-        if (victim != -1)
         {
-            v = (unsigned int)victim;
-            if (!cache_access(v, 'W', trace, L2, paramL2)){
-
-                victim2 = cache_fill(v, 'W', trace, L2, paramL2);
-
-                if (victim2 != -1)
-                {
-                    v2 = (unsigned int)victim2;
-                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v2,  ip);
-                    nonmemops = L2_LATENCY;
-                }
-
+            if (victim != -1)
+            {
+                v = (unsigned int)victim;
+                // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
                 fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
-            }
-            // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
-            nonmemops = L2_LATENCY;
+                }
+                nonmemops = L2_LATENCY;
         }
         // fprintf(trace,"R > victim print\n");
         // else
@@ -321,17 +290,9 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
         //     skip = true;
         // }
         
-        if (!cache_access(addrval, 'R', trace, L2, paramL2)){
-            // fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
-            victim3 = cache_fill(addrval, 'R', trace, L1, paramL1);
-            if (victim3 != -1)
-            {
-                v3 = (unsigned int)victim3;
-                fprintf(trace,"%d W 0x%x %p\n", nonmemops, v3,  ip);
-                nonmemops = L2_LATENCY;
-            }
-
-	        fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
+        if (!skip){
+	    // fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
+	    fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
         }
 	    nonmemops = 0;	
 
@@ -361,11 +322,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
         sscanf(str,"%x", &addrval);
 
         int victim = -1;
-        int victim2 = -1;
-        int victim3 = -1;
         unsigned int v = 0;
-        unsigned int v2 = 0;
-        unsigned int v3 = 0;
+        bool skip = false;
 
         // char buf[100];
         // sprintf(buf, "%p\n", ip);
@@ -373,53 +331,36 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
         // sscanf(buf,"%x", &ipval);
 
         // fprintf(trace,"W < cache access\n");
-        if (!cache_access(addrval, 'W', trace, L1, paramL1)) // miss
+        if (!cache_access(addrval, 'W', trace)) // miss
         {
             // fprintf(trace,"W > cache access\n");
 
             wctr++;
-            victim = cache_fill(addrval, 'W', trace, L1, paramL1);
+            victim = cache_fill(addrval, 'W', trace);
 
             // fprintf(trace,"W > cache fill\n");
             // if needed to evict a block
             // if (ipval != 0x7fbe48b439c0)
-			if (victim != -1)
-            {
-                v = (unsigned int)victim;
-                if (!cache_access(v, 'W', trace, L2, paramL2)){
-
-                    victim2 = cache_fill(v, 'W', trace, L2, paramL2);
-
-                    if (victim2 != -1)
-                    {
-                        v2 = (unsigned int)victim2;
-                        fprintf(trace,"%d W 0x%x %p\n", nonmemops, v2,  ip);
-                        nonmemops = L2_LATENCY;
-                    }
-
-                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
+			{
+                if (victim != -1)
+                {
+                    v = (unsigned int)victim;
+                    // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v, ip);
+                
+                    
+                    nonmemops = L2_LATENCY;
                 }
-                // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
-                nonmemops = L2_LATENCY;
             }
-            
             // fprintf(trace,"W > victim print\n");
             // else
             // {
             //     skip = true;
             // }
 
-            if (!cache_access(addrval, 'W', trace, L2, paramL2)){
-                // fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
-                victim3 = cache_fill(addrval, 'W', trace, L1, paramL1);
-                if (victim3 != -1)
-                {
-                    v3 = (unsigned int)victim3;
-                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v3,  ip);
-                    nonmemops = L2_LATENCY;
-                }
-
-                fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
+            if (!skip){
+            // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+            fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
             }
             // fprintf(trace,"W > miss print\n");
 
@@ -518,14 +459,7 @@ int main(int argc, char *argv[])
     if (PIN_Init(argc, argv)) return Usage();
 
     trace = fopen("pinatrace.out", "w");
-    for(int i = 0; i < NUM_SET_L1; ++i){
-        L1[i] = new Cacheline[NUM_WAY_L1];
-    }
-    for(int i = 0; i < NUM_SET_L2; ++i){
-        L2[i] = new Cacheline[NUM_WAY_L2];
-    }
-    cache_init(L1, paramL1);
-    cache_init(L2, paramL2);
+    cache_init();
 
     INS_AddInstrumentFunction(Instruction, 0);
     PIN_AddFiniFunction(Fini, 0);

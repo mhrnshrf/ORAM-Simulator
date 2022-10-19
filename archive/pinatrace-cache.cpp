@@ -73,11 +73,10 @@ Param paramL1 = {.NUM_SET = NUM_SET_L1, .INDEX_WIDTH = INDEX_WIDTH_L1, .NUM_WAY 
 Param paramL2 = {.NUM_SET = NUM_SET_L2, .INDEX_WIDTH = INDEX_WIDTH_L2, .NUM_WAY = NUM_WAY_L2}; 
 
 Cacheline **L1 = new Cacheline*[NUM_SET_L1];     // the cache
-Cacheline **L2 = new Cacheline*[NUM_SET_L2];     // the cache
 // for(int i = 0; i < NUM_SET_L1; ++i)
 //     L1[i] = new int[NUM_WAY_L1];
 
-// Cacheline L2[NUM_SET_L2][NUM_WAY_L2];     // the cache
+Cacheline L2[NUM_SET_L2][NUM_WAY_L2];     // the cache
 // long long int LRU[NUM_SET][NUM_WAY];                 // a array to keep track of lru for eviction
 
 // invalidate all cahce blocks upon init
@@ -273,11 +272,8 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
     unsigned int addrval;
     sscanf(str,"%x", &addrval);
     int victim = -1;
-    int victim2 = -1;
-    int victim3 = -1;
     unsigned int v = 0;
-    unsigned int v2 = 0;
-    unsigned int v3 = 0;
+    bool skip = false;
 
     // char buf[100];
     // sprintf(buf, "%p\n", ip);
@@ -296,24 +292,14 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
 
 		// if needed to evict a block
         // if (ipval != 0x7fbe48b439c0)
-        if (victim != -1)
         {
-            v = (unsigned int)victim;
-            if (!cache_access(v, 'W', trace, L2, paramL2)){
-
-                victim2 = cache_fill(v, 'W', trace, L2, paramL2);
-
-                if (victim2 != -1)
-                {
-                    v2 = (unsigned int)victim2;
-                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v2,  ip);
-                    nonmemops = L2_LATENCY;
-                }
-
+            if (victim != -1)
+            {
+                v = (unsigned int)victim;
+                // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
                 fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
-            }
-            // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
-            nonmemops = L2_LATENCY;
+                }
+                nonmemops = L2_LATENCY;
         }
         // fprintf(trace,"R > victim print\n");
         // else
@@ -321,17 +307,9 @@ VOID RecordMemRead(VOID * ip, VOID * addr)
         //     skip = true;
         // }
         
-        if (!cache_access(addrval, 'R', trace, L2, paramL2)){
-            // fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
-            victim3 = cache_fill(addrval, 'R', trace, L1, paramL1);
-            if (victim3 != -1)
-            {
-                v3 = (unsigned int)victim3;
-                fprintf(trace,"%d W 0x%x %p\n", nonmemops, v3,  ip);
-                nonmemops = L2_LATENCY;
-            }
-
-	        fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
+        if (!skip){
+	    // fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
+	    fprintf(trace,"%d R 0x%x %p\n", nonmemops, addrval, ip);
         }
 	    nonmemops = 0;	
 
@@ -361,11 +339,8 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
         sscanf(str,"%x", &addrval);
 
         int victim = -1;
-        int victim2 = -1;
-        int victim3 = -1;
         unsigned int v = 0;
-        unsigned int v2 = 0;
-        unsigned int v3 = 0;
+        bool skip = false;
 
         // char buf[100];
         // sprintf(buf, "%p\n", ip);
@@ -383,43 +358,26 @@ VOID RecordMemWrite(VOID * ip, VOID * addr)
             // fprintf(trace,"W > cache fill\n");
             // if needed to evict a block
             // if (ipval != 0x7fbe48b439c0)
-			if (victim != -1)
-            {
-                v = (unsigned int)victim;
-                if (!cache_access(v, 'W', trace, L2, paramL2)){
-
-                    victim2 = cache_fill(v, 'W', trace, L2, paramL2);
-
-                    if (victim2 != -1)
-                    {
-                        v2 = (unsigned int)victim2;
-                        fprintf(trace,"%d W 0x%x %p\n", nonmemops, v2,  ip);
-                        nonmemops = L2_LATENCY;
-                    }
-
-                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v,  ip);
+			{
+                if (victim != -1)
+                {
+                    v = (unsigned int)victim;
+                    // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v, ip);
+                
+                    
+                    nonmemops = L2_LATENCY;
                 }
-                // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, v,  ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
-                nonmemops = L2_LATENCY;
             }
-            
             // fprintf(trace,"W > victim print\n");
             // else
             // {
             //     skip = true;
             // }
 
-            if (!cache_access(addrval, 'W', trace, L2, paramL2)){
-                // fprintf(trace,"%d R 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*rctr/(double)instctr), instctr);
-                victim3 = cache_fill(addrval, 'W', trace, L1, paramL1);
-                if (victim3 != -1)
-                {
-                    v3 = (unsigned int)victim3;
-                    fprintf(trace,"%d W 0x%x %p\n", nonmemops, v3,  ip);
-                    nonmemops = L2_LATENCY;
-                }
-
-                fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
+            if (!skip){
+            // fprintf(trace,"%d W 0x%x %p     %f      %f  %lld\n", nonmemops, addrval, ip, (double)hit/access, (double)(1000*wctr/(double)instctr), instctr);
+            fprintf(trace,"%d W 0x%x %p\n", nonmemops, addrval, ip);
             }
             // fprintf(trace,"W > miss print\n");
 
@@ -521,11 +479,7 @@ int main(int argc, char *argv[])
     for(int i = 0; i < NUM_SET_L1; ++i){
         L1[i] = new Cacheline[NUM_WAY_L1];
     }
-    for(int i = 0; i < NUM_SET_L2; ++i){
-        L2[i] = new Cacheline[NUM_WAY_L2];
-    }
     cache_init(L1, paramL1);
-    cache_init(L2, paramL2);
 
     INS_AddInstrumentFunction(Instruction, 0);
     PIN_AddFiniFunction(Fini, 0);

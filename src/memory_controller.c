@@ -7880,10 +7880,10 @@ void export_csv(char * argv[]){
   // fprintf(fp, "deadrem,%lld\n", deadrem);
 
 
-  // for (int i = 0; i < LEVEL; i++)
-  // {
-  //   fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
-  // }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf(fp, "shuff[%d],%lld\n", i, shuff[i]);
+  }
 
   // print_lifetime_stat(fp);
   
@@ -7953,8 +7953,8 @@ void export_csv(char * argv[]){
   // fprintf(fp, "rdram,%d\n", rdram);
   // fprintf(fp, "mdram,%d\n", mdram);
   // fprintf(fp, "lrs_ctr,%d\n", lrs_ctr);
-  // fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_sum/1000));
-  // fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_sum/1000));
+  fprintf(fp, "rmpki,%f\n", (double)rmiss/(nonmemops_sum/1000));
+  fprintf(fp, "wmpki,%f\n", (double)wmiss/(nonmemops_sum/1000));
   // fprintf(fp, "supshuf_total,%d\n", supshuf_total);
   // fprintf(fp, "supshuf_horiz1,%d\n", supshuf_horiz1);
   // fprintf(fp, "supshuf_horiz2,%d\n", supshuf_horiz2);
@@ -8185,15 +8185,15 @@ void export_csv(char * argv[]){
   //   WriteHit += ((double) (write_cmds - activates_for_writes) / write_cmds);
   // } 
   
-  // fprintf (fp, "TotalReads, %-7lld\n", TotalReads);
-  // fprintf (fp, "TotalWrites,  %-7lld\n", TotalWrites);
+  fprintf (fp, "TotalReads, %-7lld\n", TotalReads);
+  fprintf (fp, "TotalWrites,  %-7lld\n", TotalWrites);
   // fprintf (fp, "AvgReadLatency_avg,  %7.5f\n",  (double)AvgReadLatency/NUM_CHANNELS);
   // fprintf (fp, "AvgReadQLate_avg,  %7.5f\n", (double) AvgReadQLate/NUM_CHANNELS);
   // fprintf (fp, "AvgWrite_avg,  %7.5f\n",  (double)AvgWrite/NUM_CHANNELS);
   // fprintf (fp, "AvgWriteQLate_avg,  %7.5f\n",   (double)AvgWriteQLate/NUM_CHANNELS);
   // fprintf (fp, "ReadHit_avg,  %f\n",  (double)ReadHit/NUM_CHANNELS);
   // fprintf (fp, "WriteHit_avg,  %f\n",  (double)WriteHit/NUM_CHANNELS);
-  // fprintf (fp, "TotalMem, %-7lld\n", TotalReads + TotalWrites);
+  fprintf (fp, "TotalMem, %-7lld\n", TotalReads + TotalWrites);
   
   // fprintf (fp, "online_time, %lld\n", online_time);
   // fprintf (fp, "reshuff_time, %lld\n", reshuff_time);
