@@ -6867,12 +6867,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       }
     }
   }
-  else
-  {
-    printf("ERROR: write bucket @ L%d cur S %d out of range!\n", level, curS);
-    export_csv(pargv);
-    exit(1);
-  }
+  // else
+  // {
+  //   printf("ERROR: write bucket @ L%d cur S %d out of range!\n", level, curS);
+  //   export_csv(pargv);
+  //   exit(1);
+  // }
   
   // if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   // {
