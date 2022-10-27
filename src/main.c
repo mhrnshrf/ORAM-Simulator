@@ -11,6 +11,7 @@
 #include "params.h"
 #include "stt.h"
 
+
 #define MAXTRACELINESIZE 164
 long long int BIGNUM = 1000000;
 
@@ -56,6 +57,7 @@ float core_power=0;
 #include "prefetcher.h"
 #include "plb.h"
 #include<signal.h> 
+#include "metacache.h"
 
 struct timeval sday, eday;
 long int period = 0;
@@ -885,6 +887,8 @@ int main(int argc, char * argv[])
 	plb_init();
 
 	stt_init();
+
+	metacache_init();
 
 	table_init();
 	

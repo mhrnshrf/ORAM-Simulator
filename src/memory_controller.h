@@ -142,7 +142,7 @@
 #define LOG_TH 39000000 // loging threshold
 
 
-#define SIT_ENABLE 0 // SGX Integrity Tree is enabled
+#define SIT_ENABLE 1 // SGX Integrity Tree enable
 #define SIT_ARITY 8 // SGX Integrity Tree arity
 #define SIT_LEVEL 9 // SGX Integrity Tree levels
 

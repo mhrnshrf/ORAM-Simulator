@@ -25,6 +25,7 @@ extern long long int trace_clk;
 #include "prefetcher.h"
 #include "plb.h"
 #include "stt.h"
+#include "metacache.h"
 #include <string.h>
 #include <unistd.h> 
 #include <time.h>
@@ -1294,6 +1295,15 @@ void sit_access(unsigned long long int addr){
   for (int i = SIT_LEVEL-1; i >= 0; i--)
   {
     unsigned long long int index = sit_index(addr, i);
+
+
+    // metacache
+    if(metacache_access(index, 'W')){
+      break;
+    }
+
+    index = metacache_fill(index, 'W');
+    // metacache
 
     if(index < 0 || index >= SIT_NODE){
         printf("ERROR: sit access: index %lld  out of range!\n", index);
