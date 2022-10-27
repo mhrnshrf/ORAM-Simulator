@@ -1303,6 +1303,9 @@ void sit_access(unsigned long long int addr){
     }
 
     index = metacache_fill(index, 'W');
+    if(index == -1)
+      break;
+    }
     // metacache
 
     if(index < 0 || index >= SIT_NODE){
