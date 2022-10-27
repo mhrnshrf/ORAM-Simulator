@@ -1303,7 +1303,7 @@ void sit_access(unsigned long long int addr){
     }
 
     index = metacache_fill(index, 'W');
-    if(index == -1)
+    if(index == -1){
       break;
     }
     // metacache
