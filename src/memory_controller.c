@@ -6856,7 +6856,7 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
   int curS = GlobTree[index].s;
   
-  if (curS >= 0 && curS <= RING_S )
+  if (curS >= 0 && curS <= RING_S + BIGBUCK )
   {
     if (level >= GATHER_START)
     {
@@ -6867,12 +6867,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       }
     }
   }
-  // else
-  // {
-  //   printf("ERROR: write bucket @ L%d cur S %d out of range!\n", level, curS);
-  //   export_csv(pargv);
-  //   exit(1);
-  // }
+  else
+  {
+    printf("ERROR: write bucket @ L%d cur S %d out of range!\n", level, curS);
+    export_csv(pargv);
+    exit(1);
+  }
   
   // if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   // {
@@ -7241,7 +7241,7 @@ void ring_early_reshuffle(int label){
     if (must_reshuffle)   
     {
       int stash_b4 = stashctr;
-      if (curS >= 0 && curS <= RING_S )
+      if (curS >= 0 && curS <= RING_S + BIGBUCK )
       {
         if (i >= GATHER_START)
         {
