@@ -44,7 +44,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -142,25 +142,27 @@
 #define LOG_TH 39000000 // loging threshold
 
 
-#define SIT_ENABLE 1 // SGX Integrity Tree enable
+#define SIT_ENABLE 0 // SGX Integrity Tree enable
 #define SIT_ARITY 8 // SGX Integrity Tree arity
 #define SIT_LEVEL 9 // SGX Integrity Tree levels
 
+#define BIGBUCK 2
+
 enum{
   // main tree
-  Z = (RING_ENABLE) ? RING_Z+RING_S : USUAL_Z,
+  Z = (RING_ENABLE) ? RING_Z + RING_S + BIGBUCK : USUAL_Z,
   EMPTY_TOP = (VOLCANO_ENABLE || STT_ENABLE) ? 10 : 0,
-  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,   // # slots per bucket upto L1    Z-5
-  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-3: Z,   // # slots per bucket upto L2
-  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-5: Z,   // # slots per bucket upto L3   Z-10
-  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z-5: Z,
+  Z1 = (VOLCANO_ENABLE || STT_ENABLE) ? 0 : (RING_ENABLE && RSTL_ENABLE)? Z-BIGBUCK: Z,   // # slots per bucket upto L1    Z-5
+  Z2 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-BIGBUCK: Z,   // # slots per bucket upto L2
+  Z3 = (VOLCANO_ENABLE || STL_ENABLE) ? 2 : (RING_ENABLE && RSTL_ENABLE)? Z-BIGBUCK: Z,   // # slots per bucket upto L3   Z-10
+  Z4 = (RING_ENABLE && !RSTL_ENABLE) ? Z3 : (RING_ENABLE && RSTL_ENABLE)? Z: Z,
   PATH = (long long int)pow(2,LEVEL-1),  // # paths in oram tree
   NODE = (long long int)pow(2,LEVEL)-1,  // # nodes in oram tree
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + ((RING_ENABLE)?Z4:Z)*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
   // BLOCK = (RING_ENABLE) ? (long long int)((RING_Z*SLOT*U)/Z):((long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1))))),  // # valid blocks in oram tree
   // BLOCK = (RING_ENABLE) ? 33260542*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
-  // BLOCK = (RING_ENABLE) ? 41943037*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
-  BLOCK = (unsigned long long int)pow(SIT_ARITY, SIT_LEVEL-1),
+  BLOCK = (RING_ENABLE) ? 41943037*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
+  // BLOCK = (unsigned long long int)pow(SIT_ARITY, SIT_LEVEL-1),
   // BLOCK = 33260542*((long long int)pow(2,LEVEL-24)),
   // BLOCK = 16777215, 
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
