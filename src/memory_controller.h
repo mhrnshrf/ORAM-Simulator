@@ -44,7 +44,7 @@
 #define RING_ENABLE     1     // 0/1 flag to disable/enable ring oram (instead of path oram)
 // #define RAND_ENABLE     0     // 0/1 flag to disable/enable rand address instead of trace addr
 // #define WSKIP_ENABLE    0     // 0/1 flag to disable/enable write linger feature for ring oram
-#define RSTL_ENABLE     1     // 0/1 flag to disable/enable stl feature for ring oram
+#define RSTL_ENABLE     0     // 0/1 flag to disable/enable stl feature for ring oram
 // #define SKIP_ENABLE     0     // 0/1 flag to disable/enable skip middle level feature for ring oram
 // #define LINGER_BASE     0     // 0/1 flag to disable/enable write linger baseline for ring oram
 // #define DUMMY_ENABLE    0     // 0/1 flag to disable/enable dummy enable baseline for ring oram
@@ -146,7 +146,7 @@
 #define SIT_ARITY 8 // SGX Integrity Tree arity
 #define SIT_LEVEL 9 // SGX Integrity Tree levels
 
-#define BIGBUCK 2
+#define BIGBUCK 0
 
 enum{
   // main tree
@@ -562,6 +562,8 @@ void sit_access(unsigned long long int addr);
 void sit_count();
 void sit_init();
 int sit_index_mid(int label,  int l);
+int accgap_index_mid(int label,  int l);
+void accgap_count();
 // Mehrnoosh.
 
 

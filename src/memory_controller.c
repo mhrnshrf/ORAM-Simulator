@@ -217,6 +217,12 @@ unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 0xfffffffffff
 long double sit_undermean[SIT_LEVEL] = {0};
 long double sit_overmean[SIT_LEVEL] = {0};
 
+unsigned long long int accgap_max[LEVEL] = {0};
+unsigned long long int accgap_avg[LEVEL] = {0};
+unsigned long long int accgap_min[LEVEL] = {[0 ... LEVEL-1] = 0xffffffffffffffff};
+long double accgap_undermean[LEVEL] = {0};
+long double accgap_overmean[LEVEL] = {0};
+
 
 
 
@@ -248,6 +254,7 @@ int wbshuff = 0;
 int sitacc = 0;
 
 unsigned long long int sit_untouched = 0;
+unsigned long long int accgap_untouched = 0;
 
 bool tc_must_flush = false;
 
@@ -280,6 +287,9 @@ typedef struct Bucket{
   char s;
   int reshuffled;
   int last_refresh;
+  unsigned long long int lastAcc;
+  unsigned long long int gapAvg;
+  unsigned long long int gapN;
 }Bucket;
 
 typedef struct BucketShell{
@@ -1290,6 +1300,90 @@ int sit_index_mid(int label,  int l){
   return index;
 }
 
+int accgap_index_mid(int label,  int l){
+  int sum = 0;
+  int index = -1;
+  for(int i = 0; i < l; i++)
+    sum += pow(2,i);
+
+  index = sum + label;
+
+  return index;
+}
+
+void accgap_count(){
+  unsigned long long int test_index = 0;
+  for (int i = 0; i < LEVEL; i++)
+  {
+    // printf("\nL%d \n", i);
+    unsigned long long int sum = 0;
+    unsigned long long int touched = 0;
+    
+    for (int j = 0; j < pow(2, i); j++)
+    {
+      unsigned long long int index = accgap_index_mid(j, i);
+      // if(index != test_index){
+      //   printf("index %lld  test_index %lld\n", index, test_index);
+      //   exit(1); 
+      // }
+      test_index++;
+      // if(index < 0 || index >= accgap_NODE){
+      //   printf("index %lld  out of range!\n", index);
+      //   exit(1);
+      // }
+      unsigned long long int cur = 0; 
+      if(GlobTree[index].gapN != 0){
+        // cur = GlobTree[index].gapSum / GlobTree[index].gapN; 
+        cur = GlobTree[index].gapAvg; 
+        touched++;
+      }
+      else{
+        // cur = sitacc + nonmemops_trace;
+        accgap_untouched++;
+      }
+      // printf("> %lld \n", index);
+      sum += cur;
+      if(cur < accgap_min[i] && cur != 0)
+      {
+        accgap_min[i] = cur;
+      }
+      if(cur > accgap_max[i] && cur != 0)
+      {
+        accgap_max[i] = cur;
+      }
+    }
+    // accgap_avg[i] = ((unsigned long long int)sum/(int)pow(accgap_ARITY, i));
+    accgap_avg[i] = ((unsigned long long int)sum/touched);
+  
+    // if(accgap_avg[i] >= 9999997){
+    //   printf("@%d L%d sitacc %d sum %lld avg %lld\n", tracectr, i, sitacc, sum, accgap_avg[i]);
+    //   exit(1);
+    // }
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    unsigned long long int touched = 0;
+    
+    for (int j = 0; j < pow(2, i); j++)
+    {
+      unsigned long long int index = accgap_index_mid(j, i);
+      if(GlobTree[index].gapN != 0){
+        unsigned long long int cur = GlobTree[index].gapAvg; 
+        touched++;
+        if(cur <= accgap_avg[i]){
+          accgap_undermean[i]++;
+        }
+        else{
+          accgap_overmean[i]++;
+        }
+      }
+    }
+    accgap_undermean[i] = (double) accgap_undermean[i]/touched;
+  }
+
+}
+
+
 void sit_access(unsigned long long int addr){
   sitacc++;
   for (int i = SIT_LEVEL-1; i >= 0; i--)
@@ -1315,9 +1409,6 @@ void sit_access(unsigned long long int addr){
     
     unsigned long long int gap = (sitacc + nonmemops_trace)  - SGXTree[index].lastAcc;
     SGXTree[index].gapAvg = ((SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1));
-    // SGXTree[index].gapAvg = ((SGXTree[index].gapAvg/(SGXTree[index].gapN + 1)) * SGXTree[index].gapN) + (gap/(SGXTree[index].gapN + 1));
-
-    // SGXTree[index].gapSum += (sitacc + nonmemops_trace - SGXTree[index].lastAcc);
     SGXTree[index].gapN++;
     SGXTree[index].lastAcc = (sitacc + nonmemops_trace);
     if(SGXTree[index].gapAvg >= 46016787763){
@@ -1650,6 +1741,10 @@ void oram_alloc(){
      GlobTree[i].s = LS[l];
      GlobTree[i].reshuffled = 0;
      GlobTree[i].last_refresh = 0;
+     GlobTree[i].lastAcc = 0;
+     GlobTree[i].gapAvg = 0;
+     GlobTree[i].gapN = 0;
+
     for (int k = 0; k < Z; ++k)
     {
       GlobTree[i].slot[k].addr = -1;
@@ -5123,6 +5218,8 @@ void ring_access(int addr){
     INDEP_ENABLE_VAR = false;
   }
 
+  nonmemops_trace = 0;
+
 }
 
 void bin(unsigned int n)
@@ -6558,6 +6655,11 @@ bool is_super_level(int level){
 int write_bucket(int index, int label, int level, char op_type, bool first_super){
   wbuck++;
   int allocated = 0;
+
+  unsigned long long int gap = (ringctr + nonmemops_trace)  - GlobTree[index].lastAcc;
+  GlobTree[index].gapAvg = ((GlobTree[index].gapAvg * GlobTree[index].gapN + gap)/(GlobTree[index].gapN + 1));
+  GlobTree[index].gapN++;
+  GlobTree[index].lastAcc = (ringctr + nonmemops_trace);
 
   // if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   // {
@@ -8240,6 +8342,14 @@ void export_csv(char * argv[]){
     print_array_double(sit_overmean, SIT_LEVEL, fp, "SIT_overmean");
   }
 
+  fprintf (fp, "ring+nonmemops, %lld\n", ringctr+nonmemops_trace);
+  print_array(accgap_min, LEVEL, fp, "accgap_min");
+  print_array(accgap_avg, LEVEL, fp, "accgap_avg");
+  print_array(accgap_max, LEVEL, fp, "accgap_max");
+  fprintf (fp, "accgap_untouched, %lld\n", accgap_untouched);
+  fprintf (fp, "accgap_untouched%%, %f\n", (double)accgap_untouched/NODE);
+  print_array_double(accgap_undermean, LEVEL, fp, "accgap_undermean");
+  print_array_double(accgap_overmean, LEVEL, fp, "accgap_overmean");
   // printf("point 10\n");
   
   fclose(fp);

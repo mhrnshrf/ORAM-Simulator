@@ -2500,6 +2500,7 @@ int main(int argc, char * argv[])
   if(SIT_ENABLE){
   	sit_count();
   }
+  accgap_count();
   export_csv(argv);
 
 
