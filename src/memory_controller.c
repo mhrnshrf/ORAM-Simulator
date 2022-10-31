@@ -1343,6 +1343,10 @@ void accgap_count(){
       }
       // printf("> %lld \n", index);
       sum += cur;
+      if(accgap_avg[i] >= 20886289089){
+        printf("cur> @%d L%d ringctr %d sum %lld avg %lld\n", tracectr, i, ringctr, sum, accgap_avg[i]);
+        exit(1);
+      }
       if(cur < accgap_min[i] && cur != 0)
       {
         accgap_min[i] = cur;
@@ -1355,10 +1359,10 @@ void accgap_count(){
     // accgap_avg[i] = ((unsigned long long int)sum/(int)pow(accgap_ARITY, i));
     accgap_avg[i] = ((unsigned long long int)sum/touched);
   
-    // if(accgap_avg[i] >= 9999997){
-    //   printf("@%d L%d sitacc %d sum %lld avg %lld\n", tracectr, i, sitacc, sum, accgap_avg[i]);
-    //   exit(1);
-    // }
+    if(accgap_avg[i] >= 20886289089){
+      printf("avg> @%d L%d ringctr %d sum %lld avg %lld\n", tracectr, i, ringctr, sum, accgap_avg[i]);
+      exit(1);
+    }
   }
   for (int i = 0; i < LEVEL; i++)
   {
@@ -6386,12 +6390,6 @@ int calc_overlap(int pathA, int pathB){
 
 void ring_evict_path(int label){
   // printf("\nevict path trace %d\n", tracectr);
-
-
-
-
-
-  
 
   lingered--;
 
