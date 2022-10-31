@@ -1322,15 +1322,15 @@ void accgap_count(){
     for (int j = 0; j < pow(2, i); j++)
     {
       unsigned long long int index = accgap_index_mid(j, i);
-      // if(index != test_index){
-      //   printf("index %lld  test_index %lld\n", index, test_index);
-      //   exit(1); 
-      // }
+      if(index != test_index){
+        printf("accgap index %lld  test_index %lld\n", index, test_index);
+        exit(1); 
+      }
       test_index++;
-      // if(index < 0 || index >= accgap_NODE){
-      //   printf("index %lld  out of range!\n", index);
-      //   exit(1);
-      // }
+      if(index < 0 || index >= NODE){
+        printf("accgap index %lld  out of range!\n", index);
+        exit(1);
+      }
       unsigned long long int cur = 0; 
       if(GlobTree[index].gapN != 0){
         // cur = GlobTree[index].gapSum / GlobTree[index].gapN; 
