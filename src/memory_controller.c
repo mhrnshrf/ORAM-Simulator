@@ -1343,7 +1343,7 @@ void accgap_count(){
       }
       // printf("> %lld \n", index);
       sum += cur;
-      if(accgap_avg[i] >= 20886289089){
+      if(cur >= 20886289089){
         printf("cur> @%d L%d ringctr %d sum %lld avg %lld\n", tracectr, i, ringctr, sum, accgap_avg[i]);
         exit(1);
       }
