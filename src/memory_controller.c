@@ -1344,7 +1344,7 @@ void accgap_count(){
       // printf("> %lld \n", index);
       sum += cur;
       if(cur >= 20886289089){
-        printf("cur> @%d L%d ringctr %d sum %lld avg %lld\n", tracectr, i, ringctr, sum, accgap_avg[i]);
+        printf("cur> @%d L%d ringctr %lld sum %lld cur %lld\n", tracectr, i, ringctr, sum, cur);
         exit(1);
       }
       if(cur < accgap_min[i] && cur != 0)
@@ -1360,7 +1360,7 @@ void accgap_count(){
     accgap_avg[i] = ((unsigned long long int)sum/touched);
   
     if(accgap_avg[i] >= 20886289089){
-      printf("avg> @%d L%d ringctr %d sum %lld avg %lld\n", tracectr, i, ringctr, sum, accgap_avg[i]);
+      printf("avg> @%d L%d ringctr %lld sum %lld avg %lld\n", tracectr, i, ringctr, sum, accgap_avg[i]);
       exit(1);
     }
   }
