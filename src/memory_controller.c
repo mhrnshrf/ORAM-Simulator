@@ -5222,7 +5222,7 @@ void ring_access(int addr){
     INDEP_ENABLE_VAR = false;
   }
 
-  nonmemops_trace = 0;
+  // nonmemops_trace = 0;
 
 }
 
@@ -8344,7 +8344,7 @@ void export_csv(char * argv[]){
     print_array_double(sit_overmean, SIT_LEVEL, fp, "SIT_overmean");
   }
 
-  fprintf (fp, "ring+nonmemops, %lld\n", ringctr+nonmemops_trace);
+  // fprintf (fp, "ring+nonmemops, %lld\n", ringctr+nonmemops_trace);
   print_array(accgap_min, LEVEL, fp, "accgap_min");
   print_array(accgap_avg, LEVEL, fp, "accgap_avg");
   print_array(accgap_max, LEVEL, fp, "accgap_max");
