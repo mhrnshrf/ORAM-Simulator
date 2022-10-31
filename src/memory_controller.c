@@ -6654,6 +6654,8 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
   wbuck++;
   int allocated = 0;
 
+  nonmemops_trace = 0;
+
   unsigned long long int gap = (ringctr + nonmemops_trace)  - GlobTree[index].lastAcc;
   GlobTree[index].gapAvg = ((GlobTree[index].gapAvg * GlobTree[index].gapN + gap)/(GlobTree[index].gapN + 1));
   GlobTree[index].gapN++;
