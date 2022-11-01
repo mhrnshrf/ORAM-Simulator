@@ -1343,10 +1343,10 @@ void accgap_count(){
       }
       // printf("> %lld \n", index);
       sum += cur;
-      if(cur >= 20886289089){
-        printf("cur:: @%lld L%d ringctr %d sum %lld cur %lld\n", tracectr, i, ringctr, sum, cur);
-        exit(1);
-      }
+      // if(cur >= 20886289089){
+      //   printf("cur:: @%lld L%d ringctr %d sum %lld cur %lld\n", tracectr, i, ringctr, sum, cur);
+      //   exit(1);
+      // }
       if(cur < accgap_min[i] && cur != 0)
       {
         accgap_min[i] = cur;
@@ -1359,10 +1359,10 @@ void accgap_count(){
     // accgap_avg[i] = ((unsigned long long int)sum/(int)pow(accgap_ARITY, i));
     accgap_avg[i] = ((unsigned long long int)sum/touched);
   
-    if(accgap_avg[i] >= 20886289089){
-      printf("avg:: @%lld L%d ringctr %d sum %lld avg %lld\n", tracectr, i, ringctr, sum, accgap_avg[i]);
-      exit(1);
-    }
+    // if(accgap_avg[i] >= 20886289089){
+    //   printf("avg:: @%lld L%d ringctr %d sum %lld avg %lld\n", tracectr, i, ringctr, sum, accgap_avg[i]);
+    //   exit(1);
+    // }
   }
   for (int i = 0; i < LEVEL; i++)
   {
@@ -6656,14 +6656,14 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
   nonmemops_trace = 0;
 
-  unsigned long long int gap = (ringctr + nonmemops_trace)  - GlobTree[index].lastAcc;
+  unsigned long long int gap = (invokectr + nonmemops_trace)  - GlobTree[index].lastAcc;
   GlobTree[index].gapAvg = ((GlobTree[index].gapAvg * GlobTree[index].gapN + gap)/(GlobTree[index].gapN + 1));
   GlobTree[index].gapN++;
-  GlobTree[index].lastAcc = (ringctr + nonmemops_trace);
-  if(gap >= 20886289089){
-    printf("write bucket:: @%lld L%d ringctr %d gapN %lld gap %lld lastAcc %lld\n", tracectr, level, ringctr, GlobTree[index].gapN, gap, GlobTree[index].lastAcc);
-    exit(1);
-  }
+  GlobTree[index].lastAcc = (invokectr + nonmemops_trace);
+  // if(gap >= 20886289089){
+  //   printf("write bucket:: @%lld L%d ringctr %d gapN %lld gap %lld lastAcc %lld\n", tracectr, level, ringctr, GlobTree[index].gapN, gap, GlobTree[index].lastAcc);
+  //   exit(1);
+  // }
 
   // if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   // {
