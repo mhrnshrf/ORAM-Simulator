@@ -6656,10 +6656,10 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
   nonmemops_trace = 0;
 
-  unsigned long long int gap = (invokectr + nonmemops_trace)  - GlobTree[index].lastAcc;
+  unsigned long long int gap = (ringctr + nonmemops_trace)  - GlobTree[index].lastAcc;
   GlobTree[index].gapAvg = ((GlobTree[index].gapAvg * GlobTree[index].gapN + gap)/(GlobTree[index].gapN + 1));
   GlobTree[index].gapN++;
-  GlobTree[index].lastAcc = (invokectr + nonmemops_trace);
+  GlobTree[index].lastAcc = (ringctr + nonmemops_trace);
   if(gap == 0 || gap == 1){
     printf("write bucket:: @%lld L%d ringctr %d gapN %lld gap %lld lastAcc %lld, invokectr %d op %c\n", tracectr, level, ringctr, GlobTree[index].gapN, gap, GlobTree[index].lastAcc, invokectr, op_type);
     exit(1);
