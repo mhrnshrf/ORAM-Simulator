@@ -599,7 +599,7 @@ long double util_overall[LEVEL] = {0};
 bool ring_dummy = false;
 
 
-unsigned long long intwbuck_top = 0;
+unsigned long long int wbuck_top = 0;
 unsigned long long int gap_top_over1 = 0;
 
 // void reset_util(){
