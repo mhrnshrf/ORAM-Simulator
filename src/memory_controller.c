@@ -601,6 +601,8 @@ bool ring_dummy = false;
 
 unsigned long long int wbuck_top = 0;
 unsigned long long int gap_top_over1 = 0;
+unsigned long long int gap_top_equal2 = 0;
+unsigned long long int gap_top_equal3 = 0;
 unsigned long long int gapAvg_top_over1 = 0;
 
 // void reset_util(){
@@ -6675,6 +6677,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
     // printf("write bucket:: @%lld L%d ringctr %d gapN %lld gap %lld lastAcc %lld, invokectr %d op %c  gapAvg %lld\n", tracectr, level, ringctr, GlobTree[index].gapN, gap, GlobTree[index].lastAcc, invokectr, op_type, GlobTree[index].gapAvg);
     // exit(1);
   }
+  if(gap == 2 && level > 0 && level < 9){
+    gap_top_equal2++;
+  }
+  if(gap == 3 && level > 0 && level < 9){
+    gap_top_equal3++;
+  }
   if(GlobTree[index].gapAvg > 1 && level > 0 && level < 9){
     gapAvg_top_over1++;
   }
@@ -8369,10 +8377,13 @@ void export_csv(char * argv[]){
   print_array_double(accgap_undermean, LEVEL, fp, "accgap_undermean");
   print_array_double(accgap_overmean, LEVEL, fp, "accgap_overmean");
   fprintf (fp, "gap_top_over1, %lld\n", gap_top_over1);
+  fprintf (fp, "gap_top_equal2, %lld\n", gap_top_equal2);
   fprintf (fp, "gapAvg_top_over1, %lld\n", gapAvg_top_over1);
   fprintf (fp, "wbuck_top, %lld\n", wbuck_top);
-  fprintf (fp, "gap_top%%, %f\n", (double)gap_top_over1/wbuck_top);
-  fprintf (fp, "gapAvg_top%%, %f\n", (double)gapAvg_top_over1/wbuck_top);
+  fprintf (fp, "gap_over1%%, %f\n", (double)gap_top_over1/wbuck_top);
+  fprintf (fp, "gapAvg_over1%%, %f\n", (double)gapAvg_top_over1/wbuck_top);
+  fprintf (fp, "gap_equal2%%, %f\n", (double)gap_top_equal2/wbuck_top);
+  fprintf (fp, "gap_equal3%%, %f\n", (double)gap_top_equal3/wbuck_top);
   // printf("point 10\n");
   
   fclose(fp);
