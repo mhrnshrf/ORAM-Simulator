@@ -604,6 +604,7 @@ unsigned long long int gap_top_over1 = 0;
 unsigned long long int gap_top_equal2 = 0;
 unsigned long long int gap_top_equal3 = 0;
 unsigned long long int gapAvg_top_over1 = 0;
+unsigned long long int gap_top_under0 = 0;
 
 // void reset_util(){
 //   for (int i = 0; i < LEVEL; i++)
@@ -6683,6 +6684,9 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
   if(gap == 3 && level > 0 && level < 9){
     gap_top_equal3++;
   }
+  if(gap < 0 && level > 0 && level < 9){
+    gap_top_under0++;
+  }
   if(GlobTree[index].gapAvg > 1 && level > 0 && level < 9){
     gapAvg_top_over1++;
   }
@@ -8379,11 +8383,13 @@ void export_csv(char * argv[]){
   fprintf (fp, "gap_top_over1, %lld\n", gap_top_over1);
   fprintf (fp, "gap_top_equal2, %lld\n", gap_top_equal2);
   fprintf (fp, "gapAvg_top_over1, %lld\n", gapAvg_top_over1);
+  fprintf (fp, "gap_top_under0, %lld\n", gap_top_under0);
   fprintf (fp, "wbuck_top, %lld\n", wbuck_top);
   fprintf (fp, "gap_over1%%, %f\n", (double)gap_top_over1/wbuck_top);
   fprintf (fp, "gapAvg_over1%%, %f\n", (double)gapAvg_top_over1/wbuck_top);
   fprintf (fp, "gap_equal2%%, %f\n", (double)gap_top_equal2/wbuck_top);
   fprintf (fp, "gap_equal3%%, %f\n", (double)gap_top_equal3/wbuck_top);
+  fprintf (fp, "gap_under0%%, %f\n", (double)gap_top_under0/wbuck_top);
   // printf("point 10\n");
   
   fclose(fp);
