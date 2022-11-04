@@ -606,6 +606,8 @@ unsigned long long int gap_top_equal3 = 0;
 unsigned long long int gapAvg_top_over1 = 0;
 unsigned long long int gap_top_under0 = 0;
 
+bool is_evict_path = false;
+
 // void reset_util(){
 //   for (int i = 0; i < LEVEL; i++)
 //   {
@@ -5256,23 +5258,28 @@ void bin(unsigned int n)
 
 void metadata_access(int label, char type){
   int last_read = false;
-  for (int i = LEVEL-1; i >= 0; i--)
+  int start = LEVEL-1;
+  for (int i = start; i >= 0; i--)
   {
-     if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
+    if (!(SKIP_ENABLE_VAR && is_evict_path) || i < SKIP_L1 || i > SKIP_L2)
     {
-      if (i == TOP_CACHE_VAR ) // && type == 'R')
+      if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
       {
-        last_read = true;
+        if (i == TOP_CACHE_VAR ) // && type == 'R')
+        {
+          last_read = true;
+        }
+        int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
+        // bool nvm_access = is_nvm_addr(mem_addr);
+        bool nvm_access = in_nvm(i);
+        nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
+        bool beginning = (type == 'R') && (i == LEVEL-1);
+        bool ending = (type == 'W') && (i == TOP_CACHE_VAR);
+        char op_type = 'm';
+        insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access, op_type, beginning, ending, i);
       }
-      int mem_addr = DATA_ADDR_SPACE + calc_index(label, i);
-      // bool nvm_access = is_nvm_addr(mem_addr);
-      bool nvm_access = in_nvm(i);
-      nvm_access = false;   // assume all metadta is in dram, comment this line if intend otherwise
-      bool beginning = (type == 'R') && (i == LEVEL-1);
-      bool ending = (type == 'W') && (i == TOP_CACHE_VAR);
-      char op_type = 'm';
-      insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access, op_type, beginning, ending, i);
-    }
+
+  }
   }
 
 }
@@ -6514,8 +6521,10 @@ void ring_evict_path(int label){
   
   if (SIM_ENABLE_VAR)
   {
+    is_evict_path = true;
     metadata_access(label, 'R');
     metadata_access(label, 'W');
+    is_evict_path = false;
   }
   
   
