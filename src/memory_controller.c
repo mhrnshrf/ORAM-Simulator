@@ -5154,7 +5154,8 @@ void ring_access(int addr){
     int b4 = stalectr;
     
     if(SKIP_ENABLE){
-      SKIP_ENABLE_VAR = (ring_evictctr % SKIP_TURN == 0) ? true : false;
+      // SKIP_ENABLE_VAR = (ring_evictctr % SKIP_TURN == 0) ? true : false;
+      SKIP_ENABLE_VAR = (ring_evictctr % SKIP_TURN != 0) ? true : false;
     }
 
     ring_evict_path(label);
