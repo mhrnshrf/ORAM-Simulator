@@ -210,12 +210,16 @@ unsigned long long int wslot = 0;
 unsigned long long int rctr = 0;
 unsigned long long int wctr = 0;
 unsigned long long int indepctr = 0;
+unsigned long long int gap_total = 0;
+unsigned long long int gap_under_total = 0;
 
 unsigned long long int sit_max[SIT_LEVEL] = {0};
 unsigned long long int sit_avg[SIT_LEVEL] = {0};
 unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 0xffffffffffffffff};
 long double sit_undermean[SIT_LEVEL] = {0};
 long double sit_overmean[SIT_LEVEL] = {0};
+unsigned long long int gap_under_th[SIT_LEVEL] = {0};
+unsigned long long int gap_under_4xth[SIT_LEVEL] = {0};
 
 unsigned long long int accgap_max[LEVEL] = {0};
 unsigned long long int accgap_avg[LEVEL] = {0};
@@ -1425,16 +1429,24 @@ void sit_access(unsigned long long int addr){
     SGXTree[index].gapAvg = ((SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1));
     SGXTree[index].gapN++;
     SGXTree[index].lastAcc = (sitacc + nonmemops_trace);
-    if(SGXTree[index].gapAvg >= 46016787763){
-      printf("@%llu sit access:\n", tracectr);
-      printf("nonmemops_trace %llu\n", nonmemops_trace);
-      printf("gapAvg %llu\n", SGXTree[index].gapAvg);
-      printf("gapN %llu\n", SGXTree[index].gapN);
-      printf("lastAcc %llu\n", SGXTree[index].lastAcc);
-      printf("gap %llu\n", gap);
-      printf("i %d\n", i);
-      exit(1);
+
+    gap_total++;
+
+    if(gap <= PCM_TH){
+      gap_under_th[i]++;
+      gap_under_total++;
     }
+
+    // if(SGXTree[index].gapAvg >= 46016787763){
+    //   printf("@%llu sit access:\n", tracectr);
+    //   printf("nonmemops_trace %llu\n", nonmemops_trace);
+    //   printf("gapAvg %llu\n", SGXTree[index].gapAvg);
+    //   printf("gapN %llu\n", SGXTree[index].gapN);
+    //   printf("lastAcc %llu\n", SGXTree[index].lastAcc);
+    //   printf("gap %llu\n", gap);
+    //   printf("i %d\n", i);
+    //   exit(1);
+    // }
       
 
 
@@ -8380,27 +8392,29 @@ void export_csv(char * argv[]){
     fprintf (fp, "sit_untouched%%, %f\n", (double)sit_untouched/SIT_NODE);
     print_array_double(sit_undermean, SIT_LEVEL, fp, "SIT_undermean");
     print_array_double(sit_overmean, SIT_LEVEL, fp, "SIT_overmean");
+    fprintf (fp, "PCM_TH, %d\n", PCM_TH);
+    print_array(gap_under_th, SIT_LEVEL, fp, "gap_under_th");
+    fprintf (fp, "gap_under_total, %lld\n", gap_under_total);
+    fprintf (fp, "gap_total, %lld\n", gap_total);
   }
 
-  // fprintf (fp, "ring+nonmemops, %lld\n", ringctr+nonmemops_trace);
-  print_array(accgap_min, LEVEL, fp, "accgap_min");
-  print_array(accgap_avg, LEVEL, fp, "accgap_avg");
-  print_array(accgap_max, LEVEL, fp, "accgap_max");
-  fprintf (fp, "accgap_untouched, %lld\n", accgap_untouched);
-  fprintf (fp, "accgap_untouched%%, %f\n", (double)accgap_untouched/NODE);
-  print_array_double(accgap_undermean, LEVEL, fp, "accgap_undermean");
-  print_array_double(accgap_overmean, LEVEL, fp, "accgap_overmean");
-  fprintf (fp, "gap_top_over1, %lld\n", gap_top_over1);
-  fprintf (fp, "gap_top_equal2, %lld\n", gap_top_equal2);
-  fprintf (fp, "gapAvg_top_over1, %lld\n", gapAvg_top_over1);
-  fprintf (fp, "gap_top_under0, %lld\n", gap_top_under0);
-  fprintf (fp, "wbuck_top, %lld\n", wbuck_top);
-  fprintf (fp, "gap_over1%%, %f\n", (double)gap_top_over1/wbuck_top);
-  fprintf (fp, "gapAvg_over1%%, %f\n", (double)gapAvg_top_over1/wbuck_top);
-  fprintf (fp, "gap_equal2%%, %f\n", (double)gap_top_equal2/wbuck_top);
-  fprintf (fp, "gap_equal3%%, %f\n", (double)gap_top_equal3/wbuck_top);
-  fprintf (fp, "gap_under0%%, %f\n", (double)gap_top_under0/wbuck_top);
-  // printf("point 10\n");
+  // print_array(accgap_min, LEVEL, fp, "accgap_min");
+  // print_array(accgap_avg, LEVEL, fp, "accgap_avg");
+  // print_array(accgap_max, LEVEL, fp, "accgap_max");
+  // fprintf (fp, "accgap_untouched, %lld\n", accgap_untouched);
+  // fprintf (fp, "accgap_untouched%%, %f\n", (double)accgap_untouched/NODE);
+  // print_array_double(accgap_undermean, LEVEL, fp, "accgap_undermean");
+  // print_array_double(accgap_overmean, LEVEL, fp, "accgap_overmean");
+  // fprintf (fp, "gap_top_over1, %lld\n", gap_top_over1);
+  // fprintf (fp, "gap_top_equal2, %lld\n", gap_top_equal2);
+  // fprintf (fp, "gapAvg_top_over1, %lld\n", gapAvg_top_over1);
+  // fprintf (fp, "gap_top_under0, %lld\n", gap_top_under0);
+  // fprintf (fp, "wbuck_top, %lld\n", wbuck_top);
+  // fprintf (fp, "gap_over1%%, %f\n", (double)gap_top_over1/wbuck_top);
+  // fprintf (fp, "gapAvg_over1%%, %f\n", (double)gapAvg_top_over1/wbuck_top);
+  // fprintf (fp, "gap_equal2%%, %f\n", (double)gap_top_equal2/wbuck_top);
+  // fprintf (fp, "gap_equal3%%, %f\n", (double)gap_top_equal3/wbuck_top);
+  // fprintf (fp, "gap_under0%%, %f\n", (double)gap_top_under0/wbuck_top);
   
   fclose(fp);
 }
