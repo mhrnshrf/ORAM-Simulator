@@ -148,7 +148,7 @@
 
 #define BIGBUCK 0
 
-#define PCM_TH 600
+#define PCM_TH 5
 
 enum{
   // main tree
