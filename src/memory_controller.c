@@ -6689,12 +6689,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
   nonmemops_trace = 0;
 
   if(SIM_ENABLE_VAR){
-    // unsigned long long int gap = (ringctr + nonmemops_trace)  - GlobTree[index].lastAcc;
-    unsigned long long int gap = CYCLE_VAL  - GlobTree[index].lastAcc;
+    unsigned long long int gap = (ringctr + nonmemops_trace)  - GlobTree[index].lastAcc;
+    // unsigned long long int gap = CYCLE_VAL  - GlobTree[index].lastAcc;
     GlobTree[index].gapAvg = ((GlobTree[index].gapAvg * GlobTree[index].gapN + gap)/(GlobTree[index].gapN + 1));
     GlobTree[index].gapN++;
-    // GlobTree[index].lastAcc = (ringctr + nonmemops_trace);
-    GlobTree[index].lastAcc = CYCLE_VAL;
+    GlobTree[index].lastAcc = (ringctr + nonmemops_trace);
+    // GlobTree[index].lastAcc = CYCLE_VAL;
     accgap_total++;
 
     if(gap <= PCM_TH){
