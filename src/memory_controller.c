@@ -212,6 +212,8 @@ unsigned long long int wctr = 0;
 unsigned long long int indepctr = 0;
 unsigned long long int gap_total = 0;
 unsigned long long int gap_under_total = 0;
+unsigned long long int accgap_total = 0;
+unsigned long long int accgap_under_total = 0;
 
 unsigned long long int sit_max[SIT_LEVEL] = {0};
 unsigned long long int sit_avg[SIT_LEVEL] = {0};
@@ -219,13 +221,13 @@ unsigned long long int sit_min[SIT_LEVEL] = {[0 ... SIT_LEVEL-1] = 0xfffffffffff
 long double sit_undermean[SIT_LEVEL] = {0};
 long double sit_overmean[SIT_LEVEL] = {0};
 unsigned long long int gap_under_th[SIT_LEVEL] = {0};
-unsigned long long int gap_under_4xth[SIT_LEVEL] = {0};
 
 unsigned long long int accgap_max[LEVEL] = {0};
 unsigned long long int accgap_avg[LEVEL] = {0};
 unsigned long long int accgap_min[LEVEL] = {[0 ... LEVEL-1] = 0xffffffffffffffff};
 long double accgap_undermean[LEVEL] = {0};
 long double accgap_overmean[LEVEL] = {0};
+unsigned long long int accgap_under_th[LEVEL] = {0};
 
 
 
@@ -6686,32 +6688,42 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
   nonmemops_trace = 0;
 
-  unsigned long long int gap = (ringctr + nonmemops_trace)  - GlobTree[index].lastAcc;
-  GlobTree[index].gapAvg = ((GlobTree[index].gapAvg * GlobTree[index].gapN + gap)/(GlobTree[index].gapN + 1));
-  GlobTree[index].gapN++;
-  GlobTree[index].lastAcc = (ringctr + nonmemops_trace);
+  if(SIM_ENABLE_VAR){
+    // unsigned long long int gap = (ringctr + nonmemops_trace)  - GlobTree[index].lastAcc;
+    unsigned long long int gap = CYCLE_VAL  - GlobTree[index].lastAcc;
+    GlobTree[index].gapAvg = ((GlobTree[index].gapAvg * GlobTree[index].gapN + gap)/(GlobTree[index].gapN + 1));
+    GlobTree[index].gapN++;
+    // GlobTree[index].lastAcc = (ringctr + nonmemops_trace);
+    GlobTree[index].lastAcc = CYCLE_VAL;
+    accgap_total++;
 
-   if( level > 0 && level < 9){
-    wbuck_top++;
-   }
+    if(gap <= PCM_TH){
+      accgap_under_th[level]++;
+      accgap_under_total++;
+    }
+  }
 
-  if(gap > 1 && level > 0 && level < 9){
-    gap_top_over1++;
-    // printf("write bucket:: @%lld L%d ringctr %d gapN %lld gap %lld lastAcc %lld, invokectr %d op %c  gapAvg %lld\n", tracectr, level, ringctr, GlobTree[index].gapN, gap, GlobTree[index].lastAcc, invokectr, op_type, GlobTree[index].gapAvg);
-    // exit(1);
-  }
-  if(gap == 2 && level > 0 && level < 9){
-    gap_top_equal2++;
-  }
-  if(gap == 3 && level > 0 && level < 9){
-    gap_top_equal3++;
-  }
-  if(gap < 0 && level > 0 && level < 9){
-    gap_top_under0++;
-  }
-  if(GlobTree[index].gapAvg > 1 && level > 0 && level < 9){
-    gapAvg_top_over1++;
-  }
+  //  if( level > 0 && level < 9){
+  //   wbuck_top++;
+  //  }
+
+  // if(gap > 1 && level > 0 && level < 9){
+  //   gap_top_over1++;
+  //   // printf("write bucket:: @%lld L%d ringctr %d gapN %lld gap %lld lastAcc %lld, invokectr %d op %c  gapAvg %lld\n", tracectr, level, ringctr, GlobTree[index].gapN, gap, GlobTree[index].lastAcc, invokectr, op_type, GlobTree[index].gapAvg);
+  //   // exit(1);
+  // }
+  // if(gap == 2 && level > 0 && level < 9){
+  //   gap_top_equal2++;
+  // }
+  // if(gap == 3 && level > 0 && level < 9){
+  //   gap_top_equal3++;
+  // }
+  // if(gap < 0 && level > 0 && level < 9){
+  //   gap_top_under0++;
+  // }
+  // if(GlobTree[index].gapAvg > 1 && level > 0 && level < 9){
+  //   gapAvg_top_over1++;
+  // }
 
   // if (level == LEVEL - 1 && DEAD_ENABLE_VAR && tracectr > 62000000)
   // {
@@ -8398,6 +8410,10 @@ void export_csv(char * argv[]){
     fprintf (fp, "gap_total, %lld\n", gap_total);
   }
 
+  fprintf (fp, "PCM_TH, %d\n", PCM_TH);
+  print_array(accgap_under_th, LEVEL, fp, "accgap_under_th");
+  fprintf (fp, "accgap_under_total, %lld\n", accgap_under_total);
+  fprintf (fp, "accgap_total, %lld\n", accgap_total);
   // print_array(accgap_min, LEVEL, fp, "accgap_min");
   // print_array(accgap_avg, LEVEL, fp, "accgap_avg");
   // print_array(accgap_max, LEVEL, fp, "accgap_max");
