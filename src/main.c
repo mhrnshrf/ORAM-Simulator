@@ -911,8 +911,8 @@ int main(int argc, char * argv[])
 		
 	if (!NONSEC_ENABLE)
 	{
-		oram_init();
-		/* code */
+		// oram_init();
+		oram_init_path();
 	}
 	
 	printf("oram init is done.\n");

@@ -1908,7 +1908,7 @@ void oram_init(){
 
 
 void oram_init_path(){
-  switch_sim_enable_to(false);
+  // switch_sim_enable_to(false);
 
   for(int i = 0; i < BLOCK; i++)
   {
