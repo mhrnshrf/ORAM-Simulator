@@ -1427,10 +1427,17 @@ void sit_access(unsigned long long int addr){
         exit(1);
     }
     
-    unsigned long long int gap = (sitacc + nonmemops_trace)  - SGXTree[index].lastAcc;
+    if(SIM_ENABLE){
+      insert_oramQ(index, 0, 0, 0, 0, 'R', false, false, 'm', false, false, i);
+      insert_oramQ(index, 0, 0, 0, 0, 'W', false, false, 'm', false, false, i);
+    }
+
+    // unsigned long long int gap = (sitacc + nonmemops_trace)  - SGXTree[index].lastAcc;
+    unsigned long long int gap = CYCLE_VAL  - SGXTree[index].lastAcc;
     SGXTree[index].gapAvg = ((SGXTree[index].gapAvg * SGXTree[index].gapN + gap)/(SGXTree[index].gapN + 1));
     SGXTree[index].gapN++;
-    SGXTree[index].lastAcc = (sitacc + nonmemops_trace);
+    SGXTree[index].lastAcc = CYCLE_VAL;
+    // SGXTree[index].lastAcc = (sitacc + nonmemops_trace);
 
     gap_total++;
 
