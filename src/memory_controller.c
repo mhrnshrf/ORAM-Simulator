@@ -1909,6 +1909,7 @@ void oram_init(){
 
 void oram_init_path(){
   switch_sim_enable_to(false);
+  SKIP_ENABLE_VAR = false;
 
   for(int i = 0; i < BLOCK; i++)
   {
@@ -1949,8 +1950,10 @@ void oram_init_path(){
   // }
   // switch_tree_to(ORAM);
 
-  switch_sim_enable_to(SIM_ENABLE);
   // switch_sim_enable_to(true);
+  switch_sim_enable_to(SIM_ENABLE);
+  SKIP_ENABLE_VAR = SKIP_ENABLE;
+
   printf("oram init path done.\n");
   fflush(stdout);
 }
