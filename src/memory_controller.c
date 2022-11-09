@@ -1929,8 +1929,7 @@ void oram_init_path(){
       write_path(randpath);
       // printf("after bk evict @ stash %d\n", stashctr);
     } 
-    
-  switch_sim_enable_to(SIM_ENABLE);
+
 
   }
 
@@ -1950,7 +1949,8 @@ void oram_init_path(){
   // }
   // switch_tree_to(ORAM);
 
-  switch_sim_enable_to(true);
+  switch_sim_enable_to(SIM_ENABLE);
+  // switch_sim_enable_to(true);
   printf("oram init path done.\n");
   fflush(stdout);
 }
