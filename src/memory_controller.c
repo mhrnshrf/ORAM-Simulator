@@ -1412,14 +1412,14 @@ void sit_access(unsigned long long int addr){
 
 
     // metacache
-    // if(metacache_access(index, 'W')){
-    //   break;
-    // }
+    if(metacache_access(index, 'W')){
+      break;
+    }
 
-    // index = metacache_fill(index, 'W');
-    // if(index == -1){
-    //   break;
-    // }
+    index = metacache_fill(index, 'W');
+    if(index == -1){
+      break;
+    }
     // metacache
 
     if(index < 0 || index >= SIT_NODE){
