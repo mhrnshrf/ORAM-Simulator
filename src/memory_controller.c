@@ -8274,13 +8274,13 @@ void export_csv(char * argv[]){
   //   fprintf(fp, "dead_gathered[%d],%d\n", i, dead_gathered[i]);
   // }
 
-  // for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
-  // {
-  //   for (int j = 0; j < RING_S; j++)
-  //   {
-  //     fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
-  //   }
-  // }
+  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  {
+    for (int j = 0; j < RING_S; j++)
+    {
+      fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
+    }
+  }
   // for (int i = 0; i < MAX_SHUF + 2; i++)
   // {
   //   fprintf(fp, "ep_shuf[%d],%d\n", i, ep_shuf[i]);
