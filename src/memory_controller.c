@@ -268,6 +268,7 @@ unsigned long long int nvm_read = 0;
 unsigned long long int nvm_write = 0;
 unsigned long long int dram_read = 0;
 unsigned long long int dram_write = 0;
+unsigned long long int nvmw_total = 0;
 
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
@@ -6839,6 +6840,11 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
   for (int k = 0; k < available; k++)
   {
+    if (in_nvm(level))
+    {
+      nvmw_total++;
+    }
+    
     int j = dead_slot[k];
     if (j == -1)
     {
@@ -8520,6 +8526,7 @@ void export_csv(char * argv[]){
   fprintf (fp, "nvm_read, %lld\n", nvm_read);
   fprintf (fp, "nvm_write, %lld\n", nvm_write);
   fprintf (fp, "nvm_total, %lld\n", nvm_read + nvm_write);
+  fprintf (fp, "nvmw_total, %lld\n", nvmw_total);
   // print_array(accgap_min, LEVEL, fp, "accgap_min");
   // print_array(accgap_avg, LEVEL, fp, "accgap_avg");
   // print_array(accgap_max, LEVEL, fp, "accgap_max");
