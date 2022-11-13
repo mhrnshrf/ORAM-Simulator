@@ -5211,7 +5211,7 @@ void ring_access(int addr){
       if(VARIEDL_ENABLE){
         SKIP_L1_VAR = calc_path_length();
         SKIP_ENABLE_VAR = (SKIP_L1_VAR != SKIP_L2) ? true : false;
-        printf("@%d  PL:  %d\n", ring_evictctr, SKIP_L1_VAR);
+        // printf("@%d  PL:  %d\n", ring_evictctr, SKIP_L1_VAR);
       }
     }
 
