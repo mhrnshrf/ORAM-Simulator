@@ -264,6 +264,11 @@ unsigned long long int accgap_untouched = 0;
 
 bool tc_must_flush = false;
 
+unsigned long long int nvm_read = 0;
+unsigned long long int nvm_write = 0;
+unsigned long long int dram_read = 0;
+unsigned long long int dram_write = 0;
+
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
   bool isReal;       // real 1 , dummy 0
@@ -5335,6 +5340,22 @@ void metadata_access(int label, char type){
         bool ending = (type == 'W') && (i == TOP_CACHE_VAR);
         char op_type = 'm';
         insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, type, last_read, nvm_access, op_type, beginning, ending, i);
+        if(nvm_access){
+          if(type == 'W'){
+            nvm_write++;
+          }
+          else{
+            nvm_read++;
+          }
+        }
+        else{
+          if(type == 'W'){
+            dram_write++;
+          }
+          else{
+            dram_read++;
+          }
+        }
       }
 
   }
@@ -6380,6 +6401,12 @@ void ring_read_path(int label, int addr){
       bool ending = (i == TOP_CACHE_VAR);
       char op_type = 'o';
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
+      if(nvm_access){
+        nvm_read++;
+      }
+      else{
+        dram_read++;
+      }
     }
 
     GlobTree[index].count++;
@@ -6859,6 +6886,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       // if (op_type != 'r'){
       insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
       // }
+      if(nvm_access){
+        nvm_write++;
+      }
+      else{
+        dram_write++;
+      }
     }
 
     bool stt_turn = false;
@@ -6948,6 +6981,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
           // if (op_type != 'r'){
           insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
           // }
+          if(nvm_access){
+            nvm_write++;
+          }
+          else{
+            dram_write++;
+          }
         }
 
         bool stt_turn = false;
@@ -7031,6 +7070,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
             // if (op_type != 'r'){
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'W', last_read, nvm_access, op_type, beginning, ending, level);
             // }
+            if(nvm_access){
+              nvm_write++;
+            }
+            else{
+              dram_write++;
+            }
           }
           // GlobTree[index].s++;
         }
@@ -7218,6 +7263,13 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             // {
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
             // }
+
+            if(nvm_access){
+              nvm_read++;
+            }
+            else{
+              dram_read++;
+            }
             
           }
         }
@@ -7348,6 +7400,12 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
             insert_oramQ(mem_addr, orig_cycle, orig_thread, orig_instr, orig_pc, 'R', last_read, nvm_access, op_type, beginning, ending, i);
             // }
             // printf("%d: slot %d accessed ~> dummy? %s\n", k, sd, GlobTree[index].slot[sd].isReal?"no":"yes");
+            if(nvm_access){
+              nvm_read++;
+            }
+            else{
+              dram_read++;
+            }
         }
         dum_cand[ri] = -1;
       }
@@ -8457,6 +8515,11 @@ void export_csv(char * argv[]){
   print_array(accgap_under_th, LEVEL, fp, "accgap_under_th");
   fprintf (fp, "accgap_under_total, %lld\n", accgap_under_total);
   fprintf (fp, "accgap_total, %lld\n", accgap_total);
+  fprintf (fp, "dram_read, %lld\n", dram_read);
+  fprintf (fp, "dram_write, %lld\n", dram_write);
+  fprintf (fp, "nvm_read, %lld\n", nvm_read);
+  fprintf (fp, "nvm_write, %lld\n", nvm_write);
+  fprintf (fp, "nvm_total, %lld\n", nvm_read + nvm_write);
   // print_array(accgap_min, LEVEL, fp, "accgap_min");
   // print_array(accgap_avg, LEVEL, fp, "accgap_avg");
   // print_array(accgap_max, LEVEL, fp, "accgap_max");
