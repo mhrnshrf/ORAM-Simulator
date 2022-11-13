@@ -566,6 +566,11 @@ int S_INC_ARR[LEVEL];
 bool SKIP_ENABLE_VAR;
 bool INDEP_ENABLE_VAR;
 
+bool pl_rise = true;
+
+int SKIP_L1_VAR;
+int SKIP_L2_VAR;
+
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
 // int Z_VAR = Z;
@@ -893,6 +898,8 @@ void var_init(){
   S_INC_VAR = DYNAMIC_S ? S_INC : 0;
   SKIP_ENABLE_VAR = SKIP_ENABLE;
   INDEP_ENABLE_VAR = false;
+  SKIP_L1_VAR = SKIP_L1;
+  SKIP_L2_VAR = SKIP_L2;
 }
 
 unsigned long long int byte_addr(long long int physical_addr){
@@ -2300,7 +2307,7 @@ void read_path(int label){
       // printf("\nread path %d level %d\n", label, i);
       // print_path(0);
 
-      if (!SKIP_ENABLE_VAR || i < SKIP_L1 || i > SKIP_L2)
+      if (!SKIP_ENABLE_VAR || i < SKIP_L1_VAR || i > SKIP_L2_VAR)
       {
         int index = calc_index(label, i);
         if (RING_ENABLE)
@@ -2752,7 +2759,7 @@ void write_path(int label){
   for(int i = start; i >= end; i--)
   {
     // printf("@%d   L%d\n", tracectr, i);
-    if (!SKIP_ENABLE_VAR || i < SKIP_L1 || i > SKIP_L2)
+    if (!SKIP_ENABLE_VAR || i < SKIP_L1_VAR || i > SKIP_L2_VAR)
     {
       int index = calc_index(label, i);
       if (RING_ENABLE)
@@ -5096,6 +5103,25 @@ int shuf_calc(){
   return sum;
 }
 
+int calc_path_length(){
+  int pl = SKIP_L1_VAR;
+  if (SKIP_L1_VAR == SKIP_L1)
+  {
+    pl_rise = true;
+  }
+  if(SKIP_L1_VAR == SKIP_L2){
+    pl_rise = false;
+  }
+  
+  if(pl_rise){
+    pl = pl + 1;
+  }
+  else{
+    pl = pl - 1;
+  }
+  return pl;
+}
+
 void ring_access(int addr){
   // int before = stashctr;
   record_util_level();
@@ -5182,6 +5208,11 @@ void ring_access(int addr){
     if(SKIP_ENABLE){
       // SKIP_ENABLE_VAR = (ring_evictctr % SKIP_TURN == 0) ? true : false;
       SKIP_ENABLE_VAR = (ring_evictctr % SKIP_TURN != 0) ? true : false;
+      if(VARIEDL_ENABLE){
+        SKIP_L1_VAR = calc_path_length();
+        SKIP_ENABLE_VAR = (SKIP_L1_VAR != SKIP_L2) ? true : false;
+        printf("@%d  PL:  %d\n", ring_evictctr, SKIP_L1_VAR);
+      }
     }
 
     ring_evict_path(label);
@@ -5288,7 +5319,7 @@ void metadata_access(int label, char type){
   int start = LEVEL-1;
   for (int i = start; i >= 0; i--)
   {
-    if (!(SKIP_ENABLE_VAR && is_evict_path) || i < SKIP_L1 || i > SKIP_L2)
+    if (!(SKIP_ENABLE_VAR && is_evict_path) || i < SKIP_L1_VAR || i > SKIP_L2_VAR)
     {
       if (i >= TOP_CACHE_VAR && SIM_ENABLE_VAR)
       {

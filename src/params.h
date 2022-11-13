@@ -202,6 +202,7 @@ bool CB_ENABLE      ;     // 0/1 flag that indicates whether compact bucket feat
 bool DYNAMIC_S      ;     // 0/1 flag that indicates whether dynamic s setting is enabled
 bool SUPER_ENABLE   ;     // 0/1 flag that indicates whether super node option is enabled
 bool INDEP_ENABLE   ;     // 0/1 flag that indicates whether independent tree top eviction is enabled
+bool VARIEDL_ENABLE   ;    
 
 
 long long int TRACE_SIZE ;       // # addr read from trace file
