@@ -8898,7 +8898,7 @@ log_base2 (unsigned int new_value)
 dram_address_t * calc_dram_addr (long long int physical_address) 
 {
   long long int input_a, temp_b, temp_a;
-  // long long int blkaddr;
+  long long int blkaddr;
   int channelBitWidth = log_base2 (NUM_CHANNELS);
   int rankBitWidth = log_base2 (NUM_RANKS);
   int bankBitWidth = log_base2 (NUM_BANKS);
@@ -8910,7 +8910,7 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   this_a->actual_address = physical_address;
   input_a = physical_address;
   input_a = input_a >> byteOffsetWidth;	// strip out the cache_offset
-  // blkaddr = input_a;
+  blkaddr = input_a;
   if (ADDRESS_MAPPING == 1)
 
   {
