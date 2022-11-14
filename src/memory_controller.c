@@ -9011,7 +9011,8 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->ending = ending;
     new_node->op_type = op_type;
     new_node->reqid = reqid;
-    new_node->countdown = (!is_nvm_addr_byte(physical_address)) ? 0 : (type == READ) ? 60*NVM_LATENCY : 64*NVM_LATENCY*2 ;
+    // new_node->countdown = (!is_nvm_addr_byte(physical_address)) ? 0 : (type == READ) ? 60*NVM_LATENCY : 64*NVM_LATENCY*2 ;
+    new_node->countdown = (!(is_nvm_addr_byte(physical_address) && NVM_ENABLE)) ? 0 : (type == READ) ? 300 : 1000 ;
 
     // new_node->countdown = 0;
     // if (nvm_access)
@@ -9177,11 +9178,11 @@ update_read_queue_commands (int channel)
 
     // ignore the requests whose completion time has been determined
     // these requests will be removed this very cycle 
-    // if (curr->countdown > 0)
-    // {
-    //   curr->countdown--;
-    //   continue;
-    // }
+    if (curr->countdown > 0)
+    {
+      curr->countdown--;
+      continue;
+    }
     
 
     if (curr->request_served == 1)
@@ -9290,11 +9291,11 @@ update_write_queue_commands (int channel)
   request_t * curr = NULL;
   LL_FOREACH (write_queue_head[channel], curr) 
   {
-    // if (curr->countdown > 0)
-    // {
-    //   curr->countdown--;
-    //   continue;
-    // }
+    if (curr->countdown > 0)
+    {
+      curr->countdown--;
+      continue;
+    }
 
     if (curr->request_served == 1)
       continue;
@@ -10054,11 +10055,11 @@ clean_queues (int channel)
 
 
       
-      // if (rd_ptr->countdown > 0 )
-      // {
-      //   rd_ptr->countdown--;
-      //   continue;
-      // }
+      if (rd_ptr->countdown > 0 )
+      {
+        rd_ptr->countdown--;
+        continue;
+      }
       
       update_served_count(rd_ptr);
       if(rd_ptr->op_type == 'o'){
@@ -10111,15 +10112,15 @@ clean_queues (int channel)
         printf("%c %d deleteW req%d	comp %lld   @ %lld\n", wrt_ptr->op_type, wrt_ptr->oramid, wrt_ptr->reqid, wrt_ptr->completion_time, CYCLE_VAL);
       }
 
-      // if (wrt_ptr->countdown > 0 )
-      // {
-      //   wrt_ptr->countdown--;
-      //   continue;
-      // }
+      if (wrt_ptr->countdown > 0 )
+      {
+        wrt_ptr->countdown--;
+        continue;
+      }
 
       //  if (wrt_ptr->completion_time > CYCLE_VAL)
       // {
-      //   // wrt_ptr->countdown--;
+      //   wrt_ptr->countdown--;
       //   continue;
       // }
       
@@ -10297,10 +10298,10 @@ issue_request_command (request_t * request, char rwt)
       // set the completion time of this read request
       // in the ROB and the controller queue.
       int NVM_DELAY = 0;
-      
-      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE){
-        NVM_DELAY = 480;
-      }
+
+      // if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE){
+      //   NVM_DELAY = 480;
+      // }
 
       request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS + NVM_DELAY;
         // if(tracectr >= LOG_TH){
