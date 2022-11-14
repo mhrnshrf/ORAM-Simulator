@@ -10296,7 +10296,13 @@ issue_request_command (request_t * request, char rwt)
       
       // set the completion time of this read request
       // in the ROB and the controller queue.
-      request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS;
+      int NVM_DELAY = 0;
+      
+      if (is_nvm_addr_byte(request->physical_address) && NVM_ENABLE){
+        NVM_DELAY = 480;
+      }
+
+      request->completion_time = CYCLE_VAL + T_CAS + T_DATA_TRANS + NVM_DELAY;
         // if(tracectr >= LOG_TH){
 				//   printf("%c %d issueR req%d	 @ %lld     comp %lld\n", request->op_type, request->oramid, request->reqid, CYCLE_VAL, request->completion_time);
         // }
