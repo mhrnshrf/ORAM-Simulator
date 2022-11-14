@@ -9012,7 +9012,7 @@ init_new_node (long long int physical_address, long long int arrival_time,
     new_node->op_type = op_type;
     new_node->reqid = reqid;
     // new_node->countdown = (!is_nvm_addr_byte(physical_address)) ? 0 : (type == READ) ? 60*NVM_LATENCY : 64*NVM_LATENCY*2 ;
-    new_node->countdown = (!(is_nvm_addr_byte(physical_address) && NVM_ENABLE)) ? 0 : (type == READ) ? 300 : 1000 ;
+    new_node->countdown = (!(is_nvm_addr_byte(physical_address) && NVM_ENABLE)) ? 0 : (type == READ) ? 300 : 300 ;
 
     // new_node->countdown = 0;
     // if (nvm_access)
