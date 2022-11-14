@@ -8961,22 +8961,22 @@ dram_address_t * calc_dram_addr (long long int physical_address)
     this_a->row = temp_a ^ temp_b;	// strip out the row number
   }
 
-  // if (NVM_ENABLE)
-  // {
-  //   int cur_chan = this_a->channel;
-  //   int dram_chan = NUM_CHANNELS - NVM_CHANNEL;
-  //   unsigned long long int data_addr_byte = (unsigned long long int) DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE);
-  //   unsigned long long int metadata_nvm_byte = DATA_ADDR_SPACE + (pow(2, NVM_START)-1)*1;
-  //   metadata_nvm_byte =  (unsigned long long int) metadata_nvm_byte << (int)log2(BLOCK_SIZE);
-  //   if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) )// || physical_address >= metadata_nvm_byte)
-  //   {
-  //     this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
-  //   }
-  //   else
-  //   {
-  //     this_a->channel = blkaddr % dram_chan;
-  //   }
-  // }
+  if (NVM_ENABLE)
+  {
+    int cur_chan = this_a->channel;
+    int dram_chan = NUM_CHANNELS - NVM_CHANNEL;
+    unsigned long long int data_addr_byte = (unsigned long long int) DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE);
+    unsigned long long int metadata_nvm_byte = DATA_ADDR_SPACE + (pow(2, NVM_START)-1)*1;
+    metadata_nvm_byte =  (unsigned long long int) metadata_nvm_byte << (int)log2(BLOCK_SIZE);
+    if ((physical_address >= NVM_ADDR_BYTE && physical_address <=  data_addr_byte) )// || physical_address >= metadata_nvm_byte)
+    {
+      this_a->channel = NUM_CHANNELS - NVM_CHANNEL + (cur_chan % NVM_CHANNEL);
+    }
+    else
+    {
+      this_a->channel = blkaddr % dram_chan;
+    }
+  }
   
   return (this_a);
 }
