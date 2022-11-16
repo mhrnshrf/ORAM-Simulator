@@ -1778,7 +1778,7 @@ int main(int argc, char * argv[])
 					{
 						switch_sim_enable_to(SIM_ENABLE);
 						switch_cache_enable_to(CACHE_ENABLE);
-						// reset_profile_counters();
+						reset_profile_counters();
 
 						// switch_dead_enable_to(DEAD_ENABLE);
 						if (WARMUP_CACHE == 0)

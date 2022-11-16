@@ -269,6 +269,8 @@ unsigned long long int nvm_write = 0;
 unsigned long long int dram_read = 0;
 unsigned long long int dram_write = 0;
 unsigned long long int nvmw_total = 0;
+unsigned long long int nvm_write_evict = 0;
+unsigned long long int nvm_write_shuf = 0;
 
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
@@ -6894,6 +6896,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       // }
       if(nvm_access){
         nvm_write++;
+        if(op_type == 'e'){
+          nvm_write_evict++;
+        }
+        else if(op_type == 'r'){
+          nvm_write_shuf++;
+        }
       }
       else{
         dram_write++;
@@ -6989,6 +6997,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
           // }
           if(nvm_access){
             nvm_write++;
+            if(op_type == 'e'){
+              nvm_write_evict++;
+            }
+            else if(op_type == 'r'){
+              nvm_write_shuf++;
+            }
           }
           else{
             dram_write++;
@@ -7078,6 +7092,12 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
             // }
             if(nvm_access){
               nvm_write++;
+              if(op_type == 'e'){
+                nvm_write_evict++;
+              }
+              else if(op_type == 'r'){
+                nvm_write_shuf++;
+              }
             }
             else{
               dram_write++;
@@ -7816,109 +7836,112 @@ void export_intermed(char exp_name[], unsigned long long int ind, long double *a
 }
 
 void reset_profile_counters(){
-  invokectr = 0;
-  oramctr = 0;
-  dummyctr = 0;
-  pos1_access = 0;
-  pos2_access = 0;
-  plb_hit[0] = 0; 
-  plb_hit[1] = 0; 
-  plb_hit[2] = 0; 
-  plbaccess[0] = 0;
-  plbaccess[1] = 0;
-  plbaccess[2] = 0;
-  bkctr = 0;
-  // hitctr = 0;
-  // missctr = 0;
-  evictctr = 0;
-  rho_hit = 0;
-  rhoctr = 0;
-  rho_dummyctr = 0;
-  rho_bkctr = 0;
-  earlyctr = 0;
-  dirty_pointctr = 0;
-  cache_dirty = 0;
-  ptr_fail = 0;
-  search_fail = 0;
-  pinctr = 0;
-  unpinctr = 0;
-  precase = 0;
-  sttctr = 0;
-  stash_leftover = 0;
-  stash_removed = 0;
-  fillhit = 0;
-  fillmiss = 0;
-  topctr = 0;
-  midctr = 0;
-  botctr = 0;
-  ring_evictctr = 0;
-  // stashctr = 0;
-  stash_cont = 0;
-  linger_discard = 0;
-  ringctr = 0;
-  wbctr = 0;
-  writectr = 0;
-  wskip = 0;
-  mem_req_latencies = 0;
-  // nonmemops_sum = 0;
-  missl1wb = 0;
-  wbshuff = 0;
-  ringdumctr = 0;
-  wl_pos[1] = 0;
-  wl_pos[2] = 0;
-  stalectr = 0;
-  stale_flush_ctr = 0;
-  stale_discard_ctr = 0;
-  stale_reduction = 0;
-  // deadctr = 0;
-  // dead_on_path = 0;
-  // dead_on_path_dram = 0;
-  dram_norm_r = 0;
-  nvm_norm_r = 0;
-  dram_norm_w = 0;
-  nvm_norm_w = 0;
-  dram_inplace_r = 0;
-  dram_remote_r = 0;
-  nvm_inplace_r = 0;
-  nvm_remote_r = 0;
-  dram_inplace_w = 0;
-  dram_remote_w = 0;
-  nvm_inplace_w = 0;
-  nvm_remote_w = 0;
-  // remote_nvms = 0;
-  dram_elselevel = 0;
-  nvm_elselevel = 0;
-  // surplus_dead = 0;
-  surplus_in_use = 0;
-  // rmiss = 0;
-  // wmiss = 0;
-  deadrem = 0;
+  // invokectr = 0;
+  // oramctr = 0;
+  // dummyctr = 0;
+  // pos1_access = 0;
+  // pos2_access = 0;
+  // plb_hit[0] = 0; 
+  // plb_hit[1] = 0; 
+  // plb_hit[2] = 0; 
+  // plbaccess[0] = 0;
+  // plbaccess[1] = 0;
+  // plbaccess[2] = 0;
+  // bkctr = 0;
+  // // hitctr = 0;
+  // // missctr = 0;
+  // evictctr = 0;
+  // rho_hit = 0;
+  // rhoctr = 0;
+  // rho_dummyctr = 0;
+  // rho_bkctr = 0;
+  // earlyctr = 0;
+  // dirty_pointctr = 0;
+  // cache_dirty = 0;
+  // ptr_fail = 0;
+  // search_fail = 0;
+  // pinctr = 0;
+  // unpinctr = 0;
+  // precase = 0;
+  // sttctr = 0;
+  // stash_leftover = 0;
+  // stash_removed = 0;
+  // fillhit = 0;
+  // fillmiss = 0;
+  // topctr = 0;
+  // midctr = 0;
+  // botctr = 0;
+  // ring_evictctr = 0;
+  // // stashctr = 0;
+  // stash_cont = 0;
+  // linger_discard = 0;
+  // ringctr = 0;
+  // wbctr = 0;
+  // writectr = 0;
+  // wskip = 0;
+  // mem_req_latencies = 0;
+  // // nonmemops_sum = 0;
+  // missl1wb = 0;
+  // wbshuff = 0;
+  // ringdumctr = 0;
+  // wl_pos[1] = 0;
+  // wl_pos[2] = 0;
+  // stalectr = 0;
+  // stale_flush_ctr = 0;
+  // stale_discard_ctr = 0;
+  // stale_reduction = 0;
+  // // deadctr = 0;
+  // // dead_on_path = 0;
+  // // dead_on_path_dram = 0;
+  // dram_norm_r = 0;
+  // nvm_norm_r = 0;
+  // dram_norm_w = 0;
+  // nvm_norm_w = 0;
+  // dram_inplace_r = 0;
+  // dram_remote_r = 0;
+  // nvm_inplace_r = 0;
+  // nvm_remote_r = 0;
+  // dram_inplace_w = 0;
+  // dram_remote_w = 0;
+  // nvm_inplace_w = 0;
+  // nvm_remote_w = 0;
+  // // remote_nvms = 0;
+  // dram_elselevel = 0;
+  // nvm_elselevel = 0;
+  // // surplus_dead = 0;
+  // surplus_in_use = 0;
+  // // rmiss = 0;
+  // // wmiss = 0;
+  // deadrem = 0;
   // nonmemops_executed = 0;
   // dead_dram = 0;
   for (int i = 0; i < LEVEL; i++)
   {
     shuff[i] = 0;
   }
-  for (int i = 0; i < RING_S+1; i++)
-  {
-    s_dist[i] = 0;
-  }
-  for (int i = 0; i < RING_S+1; i++)
-  {
-    allocS_dist[i] = 0;
-  }
-  for (int i = 0; i < LEVEL; i++)
-  {
-    s_under[i] = 0;
-  }
 
-  s_underctr = 0;
-  s_overctr = 0;
-  s_inctr = 0;
-  takenctr = 0;
-  extendctr = 0;
-  inplacectr = 0;
-  stash_hit = 0;
+  ring_evictctr = 0;
+
+  // for (int i = 0; i < RING_S+1; i++)
+  // {
+  //   s_dist[i] = 0;
+  // }
+  // for (int i = 0; i < RING_S+1; i++)
+  // {
+  //   allocS_dist[i] = 0;
+  // }
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   s_under[i] = 0;
+  // }
+
+  // s_underctr = 0;
+  // s_overctr = 0;
+  // s_inctr = 0;
+  // takenctr = 0;
+  // extendctr = 0;
+  // inplacectr = 0;
+  // stash_hit = 0;
 
 }
 
@@ -8527,6 +8550,9 @@ void export_csv(char * argv[]){
   fprintf (fp, "nvm_write, %lld\n", nvm_write);
   fprintf (fp, "nvm_total, %lld\n", nvm_read + nvm_write);
   fprintf (fp, "nvmw_total, %lld\n", nvmw_total);
+  fprintf (fp, "nvm_write_evict, %lld\n", nvm_write_evict);
+  fprintf (fp, "nvm_write_shuf, %lld\n", nvm_write_shuf);
+  fprintf (fp, "nvm_write_sim, %lld\n", nvm_write_evict + nvm_write_shuf);
   // print_array(accgap_min, LEVEL, fp, "accgap_min");
   // print_array(accgap_avg, LEVEL, fp, "accgap_avg");
   // print_array(accgap_max, LEVEL, fp, "accgap_max");
