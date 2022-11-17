@@ -8988,7 +8988,8 @@ dram_address_t * calc_dram_addr (long long int physical_address)
   }
 
   // if (NVM_ENABLE)
-  if (true)
+  // if (true)
+  if (false)
   {
     int cur_chan = this_a->channel;
     int dram_chan = NUM_CHANNELS - NVM_CHANNEL;
