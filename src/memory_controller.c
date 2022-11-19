@@ -7920,6 +7920,15 @@ void reset_profile_counters(){
     shuff[i] = 0;
   }
 
+  for (int i = 0; i < LEVEL; i++)
+  {
+    for (int j = 0; j < RING_S; j++)
+    {
+      ep_s[i][j] = 0;
+    }
+    
+  }
+
   ring_evictctr = 0;
 
   // for (int i = 0; i < RING_S+1; i++)
@@ -8570,6 +8579,18 @@ void export_csv(char * argv[]){
   // fprintf (fp, "gap_equal2%%, %f\n", (double)gap_top_equal2/wbuck_top);
   // fprintf (fp, "gap_equal3%%, %f\n", (double)gap_top_equal3/wbuck_top);
   // fprintf (fp, "gap_under0%%, %f\n", (double)gap_top_under0/wbuck_top);
+
+  for (int i = 0; i < LEVEL; i++)
+  {
+    unsigned long long int sum = 0;
+
+    for (int j = 0; j < RING_S; j++)
+    {
+      sum += (ep_s[i][j]*j);
+    }
+    fprintf (fp, "ep_s_avg[%d], %f\n", i, (double)sum/ring_evictctr);
+  }
+  
   
   fclose(fp);
 }
