@@ -8401,7 +8401,7 @@ void export_csv(char * argv[]){
   //   fprintf(fp, "dead_gathered[%d],%d\n", i, dead_gathered[i]);
   // }
 
-  for (int i = TOP_CACHE_VAR; i < LEVEL; i++)
+  for (int i = 0; i < LEVEL; i++)
   {
     for (int j = 0; j < RING_S; j++)
     {
