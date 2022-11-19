@@ -2797,7 +2797,7 @@ void write_path(int label){
 
         int bs = write_bucket(index, label, i, 'e', true);
 
-        freed = stash_b4 - stalectr ;
+        freed = stash_b4 - stashctr ;
         if(freed < 0){
           printf("evict path write path flushed blocks %d\n", freed);
           exit(1);
