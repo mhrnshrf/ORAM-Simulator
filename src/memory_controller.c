@@ -228,6 +228,7 @@ unsigned long long int accgap_min[LEVEL] = {[0 ... LEVEL-1] = 0xffffffffffffffff
 long double accgap_undermean[LEVEL] = {0};
 long double accgap_overmean[LEVEL] = {0};
 unsigned long long int accgap_under_th[LEVEL] = {0};
+unsigned long long int flushed[LEVEL] = {0};
 
 
 
@@ -2790,7 +2791,20 @@ void write_path(int label){
         int curcount = GlobTree[index].count + shuf * RING_S;
         update_count_stat(curcount, i);
 
+        int freed = 0;
+        int stash_b4 = stashctr;
+
+
         int bs = write_bucket(index, label, i, 'e', true);
+
+        freed = stash_b4 - stalectr ;
+        if(freed < 0){
+          printf("evict path write path flushed blocks %d\n", freed);
+          exit(1);
+        }
+        if(SIM_ENABLE_VAR){
+          flushed[i] += freed;
+        }
         if((CB_ENABLE || (DEAD_ENABLE && DYNAMIC_S)) && i >= TOP_CACHE){
           dram_to_serve_e_w += bs;
         }
@@ -8589,6 +8603,10 @@ void export_csv(char * argv[]){
       sum += (ep_s[i][j]*j);
     }
     fprintf (fp, "ep_s_avg[%d], %f\n", i, (double)sum/ring_evictctr);
+  }
+  for (int i = 0; i < LEVEL; i++)
+  {
+    fprintf (fp, "flushed_avg[%d], %f\n", i, (double)flushed[i]/ring_evictctr);
   }
   
   
