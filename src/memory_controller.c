@@ -272,6 +272,7 @@ unsigned long long int dram_write = 0;
 unsigned long long int nvmw_total = 0;
 unsigned long long int nvm_write_evict = 0;
 unsigned long long int nvm_write_shuf = 0;
+unsigned long long int dup_renewal = 0;
 
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
@@ -394,6 +395,8 @@ IntegNode SGXTree[SIT_NODE];
 void pinOn() {pinFlag = true;}    // turn the pin flag on
 void pinOff() {pinFlag = false;}  // turn the pin flag off
 
+
+int Dup[BLOCK];
 
 // rho
 typedef struct RhoBucket{
@@ -1908,6 +1911,7 @@ void oram_init(){
   {
     // printf("i: %d\n", i);
     PosMap[i] =  assign_a_path(i);
+    Dup[i] = DUP_MAX;
   }
 
   // initialize subtree addressing for oram tree
@@ -5196,6 +5200,14 @@ void ring_access(int addr){
   }
   
 
+  bool dup_runout = false;
+  if(Dup[addr] > 1){
+    Dup[addr]--;
+  }
+  else{
+    dup_runout = true;
+  }
+
   // printf("\nb4 read stash %d  trace %d\n", stashctr, tracectr);
   greenturn_ctr = 0;
   greentc_ctr = 0;
@@ -5208,8 +5220,13 @@ void ring_access(int addr){
 
   if (!(ring_dummy && DUMMY_ENABLE))
   {
-    remap_block(addr);
+    if(!DUP_ENABLE || dup_runout){
+      remap_block(addr);
+      Dup[addr] = DUP_MAX;
+      dup_renewal++;
+    }
   }
+
 
   // printf("@> remap block  trace %d\n", tracectr);
 
@@ -6265,7 +6282,13 @@ void ring_read_path(int label, int addr){
 
     bool green_turn = false;
 
-    if(!contain_intended)
+    bool dup_dumread = false;
+
+    if(DUP_ENABLE && Dup[addr] > 1){
+      dup_dumread = true;
+    }
+
+    if(!contain_intended || dup_dumread)
     {
       // to exclude top cache from reshuffle
       // if (GlobTree[index].count >= LS[i] && i < TOP_CACHE)
@@ -8055,6 +8078,7 @@ void export_csv(char * argv[]){
 	fprintf(fp, "SKIP_L1    ,%d\n", SKIP_L1);
 	fprintf(fp, "SKIP_L2    ,%d\n", SKIP_L2);
 	fprintf(fp, "SKIP_TURN    ,%d\n", SKIP_TURN);
+	fprintf(fp, "DUP_ENABLE    ,%d\n", DUP_ENABLE);
   // fprintf("L1,%d", L1);
 	// fprintf("L2,%d",L2);
 	// fprintf("L3,%d",L3);
@@ -8415,13 +8439,13 @@ void export_csv(char * argv[]){
   //   fprintf(fp, "dead_gathered[%d],%d\n", i, dead_gathered[i]);
   // }
 
-  for (int i = 0; i < LEVEL; i++)
-  {
-    for (int j = 0; j < RING_S; j++)
-    {
-      fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
-    }
-  }
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   for (int j = 0; j < RING_S; j++)
+  //   {
+  //     fprintf(fp, "ep_s[%d][%d],%d\n", i, j, ep_s[i][j]);
+  //   }
+  // }
   // for (int i = 0; i < MAX_SHUF + 2; i++)
   // {
   //   fprintf(fp, "ep_shuf[%d],%d\n", i, ep_shuf[i]);
@@ -8563,19 +8587,19 @@ void export_csv(char * argv[]){
     fprintf (fp, "gap_total, %lld\n", gap_total);
   }
 
-  fprintf (fp, "PCM_TH, %d\n", PCM_TH);
-  print_array(accgap_under_th, LEVEL, fp, "accgap_under_th");
-  fprintf (fp, "accgap_under_total, %lld\n", accgap_under_total);
-  fprintf (fp, "accgap_total, %lld\n", accgap_total);
-  fprintf (fp, "dram_read, %lld\n", dram_read);
-  fprintf (fp, "dram_write, %lld\n", dram_write);
-  fprintf (fp, "nvm_read, %lld\n", nvm_read);
-  fprintf (fp, "nvm_write, %lld\n", nvm_write);
-  fprintf (fp, "nvm_total, %lld\n", nvm_read + nvm_write);
-  fprintf (fp, "nvmw_total, %lld\n", nvmw_total);
-  fprintf (fp, "nvm_write_evict, %lld\n", nvm_write_evict);
-  fprintf (fp, "nvm_write_shuf, %lld\n", nvm_write_shuf);
-  fprintf (fp, "nvm_write_sim, %lld\n", nvm_write_evict + nvm_write_shuf);
+  // fprintf (fp, "PCM_TH, %d\n", PCM_TH);
+  // print_array(accgap_under_th, LEVEL, fp, "accgap_under_th");
+  // fprintf (fp, "accgap_under_total, %lld\n", accgap_under_total);
+  // fprintf (fp, "accgap_total, %lld\n", accgap_total);
+  // fprintf (fp, "dram_read, %lld\n", dram_read);
+  // fprintf (fp, "dram_write, %lld\n", dram_write);
+  // fprintf (fp, "nvm_read, %lld\n", nvm_read);
+  // fprintf (fp, "nvm_write, %lld\n", nvm_write);
+  // fprintf (fp, "nvm_total, %lld\n", nvm_read + nvm_write);
+  // fprintf (fp, "nvmw_total, %lld\n", nvmw_total);
+  // fprintf (fp, "nvm_write_evict, %lld\n", nvm_write_evict);
+  // fprintf (fp, "nvm_write_shuf, %lld\n", nvm_write_shuf);
+  // fprintf (fp, "nvm_write_sim, %lld\n", nvm_write_evict + nvm_write_shuf);
   // print_array(accgap_min, LEVEL, fp, "accgap_min");
   // print_array(accgap_avg, LEVEL, fp, "accgap_avg");
   // print_array(accgap_max, LEVEL, fp, "accgap_max");
@@ -8594,21 +8618,22 @@ void export_csv(char * argv[]){
   // fprintf (fp, "gap_equal3%%, %f\n", (double)gap_top_equal3/wbuck_top);
   // fprintf (fp, "gap_under0%%, %f\n", (double)gap_top_under0/wbuck_top);
 
-  for (int i = 0; i < LEVEL; i++)
-  {
-    unsigned long long int sum = 0;
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   unsigned long long int sum = 0;
 
-    for (int j = 0; j < RING_S; j++)
-    {
-      sum += (ep_s[i][j]*j);
-    }
-    fprintf (fp, "ep_s_avg[%d], %f\n", i, (double)sum/ring_evictctr);
-  }
-  for (int i = 0; i < LEVEL; i++)
-  {
-    fprintf (fp, "flushed_avg[%d], %f\n", i, (double)flushed[i]/ring_evictctr);
-  }
+  //   for (int j = 0; j < RING_S; j++)
+  //   {
+  //     sum += (ep_s[i][j]*j);
+  //   }
+  //   fprintf (fp, "ep_s_avg[%d], %f\n", i, (double)sum/ring_evictctr);
+  // }
+  // for (int i = 0; i < LEVEL; i++)
+  // {
+  //   fprintf (fp, "flushed_avg[%d], %f\n", i, (double)flushed[i]/ring_evictctr);
+  // }
   
+  fprintf (fp, "dup_renewal, %lld\n", dup_renewal);
   
   fclose(fp);
 }

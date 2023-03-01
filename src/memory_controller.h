@@ -150,6 +150,9 @@
 
 #define PCM_TH 150
 
+#define DUP_ENABLE 0
+#define DUP_MAX 3
+
 enum{
   // main tree
   Z = (RING_ENABLE) ? RING_Z + RING_S + BIGBUCK : USUAL_Z,
