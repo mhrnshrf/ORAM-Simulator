@@ -3770,7 +3770,7 @@ void freecursive_access(int addr, char type){
           cache_invalidate(caddr);
           // printf("cache invalidated block %d\n", tag);
           // reset_dirty_search();
-          
+          Dup[tag] = 1;
           pinOn();
           if (RING_ENABLE)
           {

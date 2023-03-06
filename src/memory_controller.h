@@ -150,7 +150,7 @@
 
 #define PCM_TH 150
 
-#define DUP_ENABLE 0
+#define DUP_ENABLE 1
 #define DUP_MAX 3
 
 enum{
