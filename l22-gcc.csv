@@ -1,0 +1,123 @@
+Benchmark,gcc
+Experiment,l22
+Time,2346.734375
+Cycles,5537615
+DEAD_ENABLE,0
+DYNAMIC_S,0
+CB_ENABLE,0
+RSTL_ENABLE,0
+RING_ZSTL,0
+SKIP_ENABLE,0
+TRACE_SIZE,40000000
+WARMUP_TREE,38000000
+WARMUP_CACHE,1000000
+DEADQ_SIZE,1000
+GATHER_OFFSET,8
+REMOTE_RATIO,0.500000
+REMOTE_CAP,10
+CB_MAX,3
+S_INC,2
+LEVEL,22
+PATH ,2097152
+NODE ,4194303
+SLOT ,50331636
+BLOCK,10485759
+Z    ,12
+SKIP_L1    ,21
+SKIP_L2    ,23
+SKIP_TURN    ,40000000
+DUP_ENABLE    ,0
+L10,5+7
+L11,5+7
+L12,5+7
+L13,5+7
+L14,5+7
+L15,5+7
+L16,5+7
+L17,5+7
+L18,5+7
+L19,5+7
+L20,5+7
+L21,5+7
+ePL,144
+space,50331636
+space_ratio,100.000000%
+tracectr,39035288
+invokectr,38004543
+ringctr,33416575
+ringdum,0
+ringtotal,33416575
+acc_ratio,100.000000%
+dummy_ratio,0.000000%
+ring_evictctr,632
+shuff_tc+,7662
+pos1_access,2659695
+pos2_access,717896
+cache_hit,89.295153%
+cache_evict,60.710483%
+hitctr,924462
+missctr,110826
+rmiss,21845
+wmiss,88981
+rctr,20338393
+wctr,18696895
+wskip,0
+nonmemops_sum,294340705
+nonmemops_executed,8150321
+topctr,71.287080%
+midctr,23.410218%
+botctr,5.302702%
+stashctr,300
+sttctr,0
+shuff[0],632
+shuff[1],600
+shuff[2],608
+shuff[3],622
+shuff[4],627
+shuff[5],647
+shuff[6],636
+shuff[7],631
+shuff[8],649
+shuff[9],621
+shuff[10],601
+shuff[11],631
+shuff[12],639
+shuff[13],692
+shuff[14],592
+shuff[15],646
+shuff[16],651
+shuff[17],617
+shuff[18],639
+shuff[19],666
+shuff[20],647
+shuff[21],641
+rmpki,0.074217
+wmpki,0.302307
+TOP_BOUNDARY,9
+MID_BOUNDARY,20
+util[0],0.892829
+util[1],0.806815
+util[2],0.737496
+util[3],0.662304
+util[4],0.580388
+util[5],0.497550
+util[6],0.422989
+util[7],0.361587
+util[8],0.312414
+util[9],0.270252
+util[10],0.229167
+util[11],0.181871
+util[12],0.148288
+util[13],0.131210
+util[14],0.122251
+util[15],0.117246
+util[16],0.114749
+util[17],0.116459
+util[18],0.130027
+util[19],0.190029
+util[20],0.378637
+util[21],0.731923
+TotalReads, 235304 
+TotalWrites,  266128 
+TotalMem, 501432 
+dup_renewal, 33413930
