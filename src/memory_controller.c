@@ -8114,8 +8114,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "pos1_access,%d\n", pos1_access);
   fprintf(fp, "pos2_access,%d\n", pos2_access);
   // fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
-  fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
-  fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
+  // fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+  // fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
   fprintf(fp, "posmap%%,%f%%\n", 100*(double)(pos1_access + pos1_access)/ringctr);
   fprintf(fp, "data%%,%f%%\n", 100*(double)(ringctr - pos1_access - pos1_access)/ringctr);
 
