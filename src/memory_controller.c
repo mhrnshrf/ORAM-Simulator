@@ -8638,7 +8638,7 @@ void export_csv(char * argv[]){
   
   fprintf (fp, "dup_renewal, %lld\n", dup_renewal);
   fprintf (fp, "dup_renew%%, %f%%\n", 100*(double)dup_renewal/ringctr);
-  fprintf(fp, "path_per_acc,%f%%\n", 100*(double)ringctr/invokectr);
+  fprintf(fp, "path_per_acc,%f\n", (double)ringctr/invokectr);
 
   
   fclose(fp);
