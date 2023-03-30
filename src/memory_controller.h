@@ -57,7 +57,7 @@
 // oram invariant
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
-#define LEVEL 22 // # levels
+#define LEVEL 24 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
@@ -151,7 +151,10 @@
 #define PCM_TH 150
 
 #define DUP_ENABLE 0
-#define DUP_MAX 4
+#define DUP_MAX 2
+
+#define DUPACT_ENABLE 1
+
 
 enum{
   // main tree
@@ -166,11 +169,11 @@ enum{
   SLOT = Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + ((RING_ENABLE)?Z4:Z)*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1)),  // # free slots in oram tree
   // BLOCK = (RING_ENABLE) ? (long long int)((RING_Z*SLOT*U)/Z):((long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1))))),  // # valid blocks in oram tree
   // BLOCK = (RING_ENABLE) ? 33260542*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
-  // BLOCK = (RING_ENABLE) ? 41943037*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
+  BLOCK = (RING_ENABLE) ? 41943037*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
   // BLOCK = (unsigned long long int)pow(SIT_ARITY, SIT_LEVEL-1),
   // BLOCK = 33260542*((long long int)pow(2,LEVEL-24)),
   // BLOCK = 16777215, 
-  BLOCK = 10485759, 
+  // BLOCK = 10485759, 
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
   STASH_SIZE = (VOLCANO_ENABLE /*|| STT_ENABLE*/) ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,
   OV_THRESHOLD = STASH_SIZE - Z*(LEVEL+1),   // overflow threshold for background eviction; C - Z(L+1)
@@ -197,6 +200,7 @@ enum{
   // SIT_LEVEL = (int) LEVEL/(int) (log(SIT_ARITY)/log(2)),
   SIT_LEAF = (long long int) pow(SIT_ARITY,SIT_LEVEL-1),
   SIT_NODE = (long long int)(pow(SIT_ARITY,SIT_LEVEL)-1)/(long long int)(pow(SIT_ARITY,1)-1),
+  DUP_BLK = BLOCK/DUP_MAX,
   // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
 
 };

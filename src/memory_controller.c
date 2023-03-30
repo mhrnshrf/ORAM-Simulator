@@ -583,6 +583,9 @@ bool pl_rise = true;
 int SKIP_L1_VAR;
 int SKIP_L2_VAR;
 
+unsigned long long int dup_remove = 0;
+unsigned long long int dup_refill = 0;
+
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
 // int Z_VAR = Z;
@@ -1907,6 +1910,13 @@ int calc_deadQ_size(){
 
 // initialize the oram tree by assigning a random path to each addr of address space
 void oram_init(){
+  if(DUPACT_ENABLE){
+    for(int i = 0; i < BLOCK; i++){
+      PosMap[i] =  assign_a_path(i % DUP_BLK);
+      Dup[i] = DUP_MAX;
+    }
+    return;
+  }
   for(int i = 0; i < BLOCK; i++)
   {
     // printf("i: %d\n", i);
@@ -3141,7 +3151,18 @@ void remap_block(int addr){
   {
     if (!LLC_DIRTY || pinFlag)
     {
-      PosMap[addr] = label;   // $$$ remember to exclude current path later on
+      if(DUPACT_ENABLE){
+        for (int i = 0; i < DUP_MAX; i++)
+        {
+          if(PosMap[addr  + DUP_BLK * i] == -1){
+            PosMap[addr  + DUP_BLK * i] = label;
+            break;
+          }
+        }
+      }
+      else{
+        PosMap[addr] = label;   // $$$ remember to exclude current path later on
+      }
     }
   }
   
@@ -3655,6 +3676,9 @@ void oram_access(int addr){
 void freecursive_access(int addr, char type){
   
   // bool posneeded = false;
+  if(DUPACT_ENABLE){
+    addr = addr % DUP_BLK;
+  }
 
 
   if (stash_contain(addr))      // check if the block is already in the stash
@@ -5180,6 +5204,7 @@ void ring_access(int addr){
     ringctr++;
     label = PosMap[addr];
   }
+
   
   
 
@@ -5199,6 +5224,16 @@ void ring_access(int addr){
     return;
   }
   
+  if(DUPACT_ENABLE){
+    for (int i = 0; i < DUP_MAX; i++)
+    {
+      if(PosMap[addr  + DUP_BLK * i]!= -1){
+        label = PosMap[addr * (i + 1)];
+        PosMap[addr  + DUP_BLK * i]= -1;
+        break;
+      }
+    }
+  }
 
   bool dup_runout = false;
   if(Dup[addr] > 1){
@@ -5292,6 +5327,7 @@ void ring_access(int addr){
   // {
   //   printf("deadQ[%d]: %d\n", i, deadQ_arr[i]->size);
   // }
+
   if (ring_dummy)
   {
     switch_enqueue_to(TAIL);
@@ -5329,6 +5365,36 @@ void ring_access(int addr){
     INDEP_ENABLE_VAR = false;
   }
 
+  if(DUPACT_ENABLE && ep_cond){
+    for (int i = 0; i < STASH_SIZE; i++)
+    {
+      if (Stash[i].valid)
+      {
+        int dup = 0;
+        int target = -1;
+        
+        for (int j = 0; j < DUP_MAX; j++)
+        {
+          int ind = addr + DUP_BLK * j;
+          if (PosMap[ind] != -1)
+          {
+            dup++;
+          }
+          if (PosMap[ind] == Stash[i].label)
+          {
+            target = ind;
+          }
+        }
+        if (dup > 1)
+        {
+          dup_remove++;
+          PosMap[target] = -1;
+          remove_from_stash(i);
+        }
+      }
+      
+    }
+  }
   // nonmemops_trace = 0;
 
 }
@@ -6370,6 +6436,34 @@ void ring_read_path(int label, int addr){
           GlobTree[index].slot[offset].label = -1;
           GlobTree[index].dumnum++;
           count_level[i]--;
+          if(DUPACT_ENABLE){
+            int dup = 0;
+            for (int j = 0; j < DUP_MAX; j++){
+              if(PosMap[addr + DUP_BLK*j] != -1){
+                dup++;
+              }
+            }
+            if (dup < DUP_MAX)
+            {
+                for (int j = 0; j < DUP_MAX; j++)
+                {
+                  if(PosMap[addr + DUP_BLK*j] != -1)
+                  {
+                    int dup_label = rand() % PATH;
+                    Slot s = {.addr = addr , .label = dup_label, .isReal = true, .isData = true};
+                    dup_refill++;
+                    if(!add_to_stash(s)){
+                      printf("ERROR: ring read: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
+                      export_csv(pargv);
+                      print_oram_stats();
+                      exit(1);
+                    }
+                  }
+                }
+            }
+            
+            
+          }
         }
         else
         {
@@ -8639,6 +8733,10 @@ void export_csv(char * argv[]){
   fprintf (fp, "dup_renewal, %lld\n", dup_renewal);
   fprintf (fp, "dup_renew%%, %f%%\n", 100*(double)dup_renewal/ringctr);
   fprintf(fp, "path_per_acc,%f\n", (double)ringctr/invokectr);
+  fprintf (fp, "dup_remove, %lld\n", dup_remove);
+  fprintf (fp, "dup_remove_per_evict, %f\n", (double)dup_remove/ring_evictctr);
+  fprintf (fp, "dup_refill, %lld\n", dup_refill);
+  fprintf (fp, "dup_refill_per_acc, %f\n", (double)dup_refill/invokectr);
 
   
   fclose(fp);
