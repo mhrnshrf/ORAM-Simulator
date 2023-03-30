@@ -3833,7 +3833,7 @@ void freecursive_access(int addr, char type){
             Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
             
             
-            if (stash_contain(s.addr))
+            if (stash_contain(s.addr) && !DUPACT_ENABLE)
             {
               printf("ERROR: freecursive: block %d already in stash!\n", s.addr);
               print_oram_stats();
@@ -3843,9 +3843,9 @@ void freecursive_access(int addr, char type){
             {
               si = add_to_stash(s);
               if(si == -1){
-              printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
-              print_oram_stats();
-              exit(1);
+                printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
+                print_oram_stats();
+                exit(1);
               }
               
             }
