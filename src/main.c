@@ -904,15 +904,15 @@ int main(int argc, char * argv[])
 
 	if (SNAPSHOT_ENABLE)
 	{
-		// oram_init_path();
-		oram_init();
+		oram_init_path();
+		// oram_init();
 		take_snapshot(argv);
 	}
 		
 	if (!NONSEC_ENABLE)
 	{
-		// oram_init();
-		oram_init_path();
+		oram_init();
+		// oram_init_path();
 	}
 	
 	printf("oram init is done.\n");
