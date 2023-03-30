@@ -5227,9 +5227,9 @@ void ring_access(int addr){
   if(DUPACT_ENABLE){
     for (int i = 0; i < DUP_MAX; i++)
     {
-      if(PosMap[addr  + DUP_BLK * i]!= -1){
+      if(PosMap[addr  + DUP_BLK * i] != -1){
         label = PosMap[addr * (i + 1)];
-        PosMap[addr  + DUP_BLK * i]= -1;
+        PosMap[addr  + DUP_BLK * i] = -1;
         break;
       }
     }
@@ -6443,14 +6443,14 @@ void ring_read_path(int label, int addr){
                 dup++;
               }
             }
-            if (dup < DUP_MAX)
+            if (dup == 0)
             {
                 for (int j = 0; j < DUP_MAX; j++)
                 {
                   if(PosMap[addr + DUP_BLK*j] != -1)
                   {
                     int dup_label = rand() % PATH;
-                    Slot s = {.addr = addr , .label = dup_label, .isReal = true, .isData = true};
+                    Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
                     dup_refill++;
                     if(!add_to_stash(s)){
                       printf("ERROR: ring read: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
