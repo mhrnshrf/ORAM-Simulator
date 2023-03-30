@@ -1875,6 +1875,11 @@ int main(int argc, char * argv[])
 								}
 							}
 							addr[numc] = byte_addr(addr[numc]);
+							if (DUPACT_ENABLE)
+							{
+								addr[numc] = addr[numc] % (DUP_BLK<<6) ;
+							}
+							
 							// if (nonmemops[numc] == 10)
 							// {
 							// 	nonmemops[numc] = 200;
