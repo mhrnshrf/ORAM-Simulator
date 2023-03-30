@@ -5228,7 +5228,7 @@ void ring_access(int addr){
     for (int i = 0; i < DUP_MAX; i++)
     {
       if(PosMap[addr  + DUP_BLK * i] != -1){
-        label = PosMap[addr * (i + 1)];
+        label = PosMap[addr  + DUP_BLK * i];
         PosMap[addr  + DUP_BLK * i] = -1;
         break;
       }
