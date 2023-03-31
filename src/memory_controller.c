@@ -5276,7 +5276,7 @@ void ring_access(int addr){
       dup++;
     }
   }
-  printf("@> remap dup %d   stash %d \n", dup, stashctr);
+  // printf("@> remap dup %d   stash %d \n", dup, stashctr);
   
 
 
