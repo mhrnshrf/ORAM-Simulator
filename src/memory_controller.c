@@ -5239,6 +5239,11 @@ void ring_access(int addr){
         break;
       }
     }
+    if(label == -1){
+      printf("ERROR: ring access: run out of valid dup!\n");
+      export_csv(pargv);
+      exit(1);
+    }
   }
 
   bool dup_runout = false;
