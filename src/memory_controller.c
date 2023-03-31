@@ -5385,6 +5385,7 @@ void ring_access(int addr){
             target = ind;
           }
         }
+        // printf("@remove dup %d\n", dup);
         if (dup > 1)
         {
           dup_remove++;
@@ -6443,6 +6444,7 @@ void ring_read_path(int label, int addr){
                 dup++;
               }
             }
+            // printf("@refill dup %d\n", dup);
             if (dup == 0)
             {
                 for (int j = 0; j < DUP_MAX; j++)
