@@ -6471,7 +6471,7 @@ void ring_read_path(int label, int addr){
               }
             }
             // printf("@refill dup %d\n", dup);
-            if (dup == 1)
+            if (dup == 0)
             {
                 for (int j = 0; j < DUP_MAX; j++)
                 {
