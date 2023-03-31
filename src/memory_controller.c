@@ -3795,6 +3795,12 @@ void freecursive_access(int addr, char type){
           // printf("cache invalidated block %d\n", tag);
           // reset_dirty_search();
           Dup[tag] = 1;
+          if(DUPACT_ENABLE){
+            for (int i = 1; i < DUP_MAX; i++)
+            {
+              PosMap[tag + DUP_BLK * i] = -1;
+            }
+          }
           pinOn();
           if (RING_ENABLE)
           {
@@ -5246,6 +5252,7 @@ void ring_access(int addr){
   // printf("\nb4 read stash %d  trace %d\n", stashctr, tracectr);
   greenturn_ctr = 0;
   greentc_ctr = 0;
+  // printf("label %d\n", label);
   ring_read_path(label, addr);
   greenturn_sum += greenturn_ctr;
   greentc_sum += greentc_ctr;
@@ -5261,6 +5268,16 @@ void ring_access(int addr){
       dup_renewal++;
     }
   }
+
+  int dup = 0;
+  for (int i = 0; i < DUP_MAX; i++)
+  {
+    if(PosMap[addr + DUP_BLK * i] != -1){
+      dup++;
+    }
+  }
+  printf("@> remap dup %d   stash %d \n", dup, stashctr);
+  
 
 
   // printf("@> remap block  trace %d\n", tracectr);
@@ -5365,17 +5382,18 @@ void ring_access(int addr){
     INDEP_ENABLE_VAR = false;
   }
 
+  // printf("@ end acc stash %d\n", stashctr);
   if(DUPACT_ENABLE && ep_cond){
     for (int i = 0; i < STASH_SIZE; i++)
     {
-      if (Stash[i].valid)
+      if (Stash[i].isReal)
       {
         int dup = 0;
         int target = -1;
         
         for (int j = 0; j < DUP_MAX; j++)
         {
-          int ind = addr + DUP_BLK * j;
+          int ind = Stash[i].addr + DUP_BLK * j;
           if (PosMap[ind] != -1)
           {
             dup++;
@@ -5388,9 +5406,12 @@ void ring_access(int addr){
         // printf("@remove dup %d\n", dup);
         if (dup > 1)
         {
-          dup_remove++;
-          PosMap[target] = -1;
-          remove_from_stash(i);
+          if(!pinFlag || i != intended)
+          {
+            dup_remove++;
+            PosMap[target] = -1;
+            remove_from_stash(i);
+          }
         }
       }
       
