@@ -6399,7 +6399,7 @@ void ring_read_path(int label, int addr){
       else if (!CB_ENABLE)
       {
         {
-          printf("ERROR: ring read @%lld L%d index %d no valid dummy available! \n", tracectr, i, index);
+          printf("ERROR: ring read @%lld L%d index %d label %d no valid dummy available! \n", tracectr, i, index, label);
           printf("count: %d\n", GlobTree[index].count);
           printf("dummy: %d\n", GlobTree[index].dumnum);
           printf("indep: %lld\n", indepctr);
