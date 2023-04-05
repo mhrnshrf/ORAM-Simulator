@@ -5281,7 +5281,7 @@ void ring_access(int addr){
       dup++;
     }
   }
-  // printf("@> remap dup %d   stash %d \n", dup, stashctr);
+  // printf("@%lld> remap dup %d   stash %d addr %d\n", tracectr, dup, stashctr, addr);
   
 
 
@@ -6471,11 +6471,13 @@ void ring_read_path(int label, int addr){
               }
             }
             // printf("@refill dup %d\n", dup);
+            // printf("@%lld read dup %d   stash %d  addr %d\n", tracectr, dup, stashctr, addr);
+
             if (dup == 0)
             {
                 for (int j = 0; j < DUP_MAX; j++)
                 {
-                  if(PosMap[addr + DUP_BLK*j] != -1)
+                  if(PosMap[addr + DUP_BLK*j] == -1)
                   {
                     int dup_label = rand() % PATH;
                     Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};

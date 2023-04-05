@@ -855,6 +855,8 @@ int main(int argc, char * argv[])
 	sit_init();
 	
 
+	// printf("BLOCK %d\n", BLOCK);
+	// printf("DUP_BLK %d\n", DUP_BLK);
 	// printf("NVM_ADDR_VAR %lld\n", NVM_ADDR_VAR);
 	// printf("NVM_ADDR_BYTE %lld\n", NVM_ADDR_BYTE);
 	// printf("data addr byte %lld\n", (unsigned long long int)  DATA_ADDR_SPACE << (int)log2(BLOCK_SIZE));
