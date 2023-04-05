@@ -6475,7 +6475,7 @@ void ring_read_path(int label, int addr){
 
             if (dup == 0)
             {
-                for (int j = 0; j < DUP_MAX; j++)
+                for (int j = 0; j < DUP_MAX - 1; j++)
                 {
                   if(PosMap[addr + DUP_BLK*j] == -1)
                   {
