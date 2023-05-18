@@ -6517,7 +6517,7 @@ void ring_read_path(int label, int addr){
                     int dup_label = rand() % PATH;
                     Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
                     dup_refill++;
-                    if(!add_to_stash(s)){
+                    if(add_to_stash(s) == -1){
                       printf("ERROR: ring read: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
                       export_csv(pargv);
                       print_oram_stats();
