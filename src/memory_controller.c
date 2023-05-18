@@ -6516,6 +6516,7 @@ void ring_read_path(int label, int addr){
                   if(PosMap[addr + DUP_BLK*j] == -1)
                   {
                     int dup_label = rand() % PATH;
+                    PosMap[addr + DUP_BLK*j] = dup_label;
                     Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
                     dup_refill++;
                     if(add_to_stash(s) == -1){
