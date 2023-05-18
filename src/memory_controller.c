@@ -3314,6 +3314,7 @@ int add_to_stash(Slot s){
         Stash[i].isReal = true;
         Stash[i].isData = true;
         Stash[i].dlabel[0] = s.label;
+        Stash[i].dup = 0;
         
         stashctr++;
 
