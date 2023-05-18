@@ -286,6 +286,8 @@ typedef struct Slot{
   int remote_offset; // physical slot offset of a block that supposed to be here but is somewhere else
   int dead_start;
   int dead_lifetime;
+  int dup;
+  int dlabel[DUP_MAX];
 }Slot;
 
 // typedef struct Bucket{
@@ -370,6 +372,7 @@ int intended_addr = -1;         // intended block in stash
 bool pinFlag = false;     // a flag to indicate whether the intended block should be pinned to the stash or not 
 // int trace[TRACE_SIZE] = {0};    // array for pre-reading traces from a file
 int candidate[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
+int cand_dlabel[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
 int dead_slot[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
 int taken_slot[Z] = {[0 ... Z-1] = -1};    // keep index of candidates in stash for write back to a specific node
 bool write_cache_hit = false;
@@ -1813,6 +1816,7 @@ void oram_alloc(){
       GlobTree[i].slot[k].redirect = false;  
       GlobTree[i].slot[k].dead_start = 0;  
       GlobTree[i].slot[k].dead_lifetime = 0; 
+      GlobTree[i].slot[k].dup = 0; 
       if (k < LZ[l])
       {
         GlobTree[i].dumnum++;
@@ -2200,6 +2204,7 @@ void reset_candidate(){
   for (int i = 0; i < Z; i++)
   {
     candidate[i] = -1;
+    cand_dlabel[i] = -1;
   }
 }
 
@@ -2586,17 +2591,27 @@ void pick_candidate(int index, int label, int i){
     bool spot_real = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].isReal : Stash[k].isReal;
     if (spot_real)
     {
-      int stash_label = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].label : Stash[k].label;
-      int target = stash_label>>(LEVEL_VAR-1-i);
-      if(/* (Stash[k].label == label || index == calc_index(Stash[k].label, i)) */ (((target)^mask) == 0) && (!pinFlag || k != intended || (RHO_ENABLE && (TREE_VAR == RHO))))
+      for (int h = Stash[k].dup; h >= 0; h--)
       {
-        candidate[c] = k;
-        c++; 
-        if (c == Z_VAR)
+        int stash_label = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].label : Stash[k].label;
+        if (DUPACT_ENABLE)
         {
-          return;
+          stash_label = Stash[k].dlabel[h];
+        }
+        
+        int target = stash_label>>(LEVEL_VAR-1-i);
+        if(/* (Stash[k].label == label || index == calc_index(Stash[k].label, i)) */ (((target)^mask) == 0) && (!pinFlag || k != intended || (RHO_ENABLE && (TREE_VAR == RHO))))
+        {
+          candidate[c] = k;
+          cand_dlabel[c] = stash_label;
+          c++; 
+          if (c == Z_VAR)
+          {
+            return;
+          }
         }
       }
+      
     }
   }
 
@@ -3238,6 +3253,16 @@ int add_to_stash(Slot s){
   //   }
   // }
 
+  if(DUPACT_ENABLE){
+    int ind = get_stash(s.addr);
+    if (ind != -1)
+    {
+      Stash[ind].dup++;
+      Stash[ind].dlabel[Stash[ind].dup] = s.label;
+      return ind;
+    }
+  }
+
 
 
   if (!META_ENABLE)
@@ -3288,6 +3313,7 @@ int add_to_stash(Slot s){
         Stash[i].label = s.label;
         Stash[i].isReal = true;
         Stash[i].isData = true;
+        Stash[i].dlabel[0] = s.label;
         
         stashctr++;
 
@@ -3365,6 +3391,15 @@ int get_stale_buf(int addr){
 
 // remove from stash given the item index in the stash
 void remove_from_stash(int index){
+  if (DUPACT_ENABLE)
+  {
+    if (Stash[index].dup > 0)
+    {
+      Stash[index].dup--;
+      return;
+    }
+  }
+  
 
   if (RHO_ENABLE && (TREE_VAR == RHO))
   {
@@ -5388,40 +5423,40 @@ void ring_access(int addr){
   }
 
   // printf("@ end acc stash %d\n", stashctr);
-  if(DUPACT_ENABLE && ep_cond){
-    for (int i = 0; i < STASH_SIZE; i++)
-    {
-      if (Stash[i].isReal)
-      {
-        int dup = 0;
-        int target = -1;
+  // if(DUPACT_ENABLE && ep_cond)
+  // {
+  //   for (int i = 0; i < STASH_SIZE; i++)
+  //   {
+  //     if (Stash[i].isReal)
+  //     {
+  //       int dup = 0;
+  //       int target = -1;
         
-        for (int j = 0; j < DUP_MAX; j++)
-        {
-          int ind = Stash[i].addr + DUP_BLK * j;
-          if (PosMap[ind] != -1)
-          {
-            dup++;
-          }
-          if (PosMap[ind] == Stash[i].label)
-          {
-            target = ind;
-          }
-        }
-        // printf("@remove dup %d\n", dup);
-        if (dup > 1)
-        {
-          if(!pinFlag || i != intended)
-          {
-            dup_remove++;
-            PosMap[target] = -1;
-            remove_from_stash(i);
-          }
-        }
-      }
+  //       for (int j = 0; j < DUP_MAX; j++)
+  //       {
+  //         int ind = Stash[i].addr + DUP_BLK * j;
+  //         if (PosMap[ind] != -1)
+  //         {
+  //           dup++;
+  //         }
+  //         if (PosMap[ind] == Stash[i].label)
+  //         {
+  //           target = ind;
+  //         }
+  //       }
+  //       if (dup > 1)
+  //       {
+  //         if(!pinFlag || i != intended)
+  //         {
+  //           dup_remove++;
+  //           PosMap[target] = -1;
+  //           remove_from_stash(i);
+  //         }
+  //       }
+  //     }
       
-    }
-  }
+  //   }
+  // }
   // nonmemops_trace = 0;
 
 }
@@ -6455,8 +6490,8 @@ void ring_read_path(int label, int addr){
           supreal[sind]++;
         }
         
-        
-        if(add_to_stash(GlobTree[index].slot[offset]) != -1)
+        int ats = add_to_stash(GlobTree[index].slot[offset]);
+        if( ats != -1)
         {
           GlobTree[index].slot[offset].isReal = false;
           GlobTree[index].slot[offset].addr = -1;
@@ -7091,6 +7126,11 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
       if(!stt_turn){
         GlobTree[index].slot[j].addr = Stash[candidate[real]].addr;
         GlobTree[index].slot[j].label = Stash[candidate[real]].label;
+        if (DUPACT_ENABLE)
+        {
+          GlobTree[index].slot[j].label = cand_dlabel[real];
+        }
+        
       }
       else{
         GlobTree[index].slot[j].addr = stt_cand;
