@@ -2591,7 +2591,8 @@ void pick_candidate(int index, int label, int i){
     bool spot_real = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].isReal : Stash[k].isReal;
     if (spot_real)
     {
-      for (int h = Stash[k].dup; h >= 0; h--)
+      int start = (DUPACT_ENABLE) ? Stash[k].dup : 0;
+      for (int h = start; h >= 0; h--)
       {
         int stash_label = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].label : Stash[k].label;
         if (DUPACT_ENABLE)
@@ -3228,6 +3229,10 @@ void remap_block(int addr){
           printf("@%lld remap %d\n", tracectr, addr);
         }
         Stash[index].label = label;
+
+        if(DUPACT_ENABLE){
+          Stash[index].dlabel[0] = label;
+        }
       }
       else
       {
