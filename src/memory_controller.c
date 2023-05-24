@@ -6514,25 +6514,25 @@ void ring_read_path(int label, int addr){
             // printf("@refill dup %d\n", dup);
             // printf("@%lld read dup %d   stash %d  addr %d\n", tracectr, dup, stashctr, addr);
 
-            // if (dup == 0)
-            // {
-            //     for (int j = 0; j < DUP_MAX - 1; j++)
-            //     {
-            //       if(PosMap[addr + DUP_BLK*j] == -1)
-            //       {
-            //         int dup_label = rand() % PATH;
-            //         PosMap[addr + DUP_BLK*j] = dup_label;
-            //         Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
-            //         dup_refill++;
-            //         if(add_to_stash(s) == -1){
-            //           printf("ERROR: ring read: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
-            //           export_csv(pargv);
-            //           print_oram_stats();
-            //           exit(1);
-            //         }
-            //       }
-            //     }
-            // }
+            if (dup == 0)
+            {
+                for (int j = 0; j < DUP_MAX - 1; j++)
+                {
+                  if(PosMap[addr + DUP_BLK*j] == -1)
+                  {
+                    int dup_label = rand() % PATH;
+                    PosMap[addr + DUP_BLK*j] = dup_label;
+                    Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
+                    dup_refill++;
+                    if(add_to_stash(s) == -1){
+                      printf("ERROR: ring read: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
+                      export_csv(pargv);
+                      print_oram_stats();
+                      exit(1);
+                    }
+                  }
+                }
+            }
             
             
           }
