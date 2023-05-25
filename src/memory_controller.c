@@ -3311,7 +3311,6 @@ int add_to_stash(Slot s){
           break;
         }
       }
-      
       return ind;
     }
   }
@@ -7832,7 +7831,7 @@ void ring_early_reshuffle(int label){
       //   dram_to_serve_r_w = bs;
       // }
 
-      if(stashctr > stash_b4 && !STT_ENABLE){
+      if(stashctr > stash_b4 && !STT_ENABLE && !DUPACT_ENABLE){
         // printf("\n@%d L%d      b4 %d     af %d   %d\n", ringctr, i, stash_b4, stashctr, stash_b4-stashctr);
         printf("\n@%d L%d      b4 %d    mid %d  af %d   %d  read %d\n", ringctr, i, stash_b4, afterR, stashctr, stash_b4-stashctr, afterR-stash_b4 );
         exit(1);
