@@ -5459,40 +5459,42 @@ void ring_access(int addr){
   }
 
   // printf("@ end acc stash %d\n", stashctr);
-  // if(DUPACT_ENABLE && ep_cond)
-  // {
-  //   for (int i = 0; i < STASH_SIZE; i++)
-  //   {
-  //     if (Stash[i].isReal)
-  //     {
-  //       int dup = 0;
-  //       int target = -1;
+
+  if(DUPACT_ENABLE && ep_cond)
+  {
+    for (int i = 0; i < STASH_SIZE; i++)
+    {
+      if (Stash[i].isReal)
+      {
+        int dup = 0;
+        int target = -1;
         
-  //       for (int j = 0; j < DUP_MAX; j++)
-  //       {
-  //         int ind = Stash[i].addr + DUP_BLK * j;
-  //         if (PosMap[ind] != -1)
-  //         {
-  //           dup++;
-  //         }
-  //         if (PosMap[ind] == Stash[i].label)
-  //         {
-  //           target = ind;
-  //         }
-  //       }
-  //       if (dup > 1  && Stash[i].dup == 0)
-  //       {
-  //         if(!pinFlag || i != intended)
-  //         {
-  //           dup_remove++;
-  //           PosMap[target] = -1;
-  //           remove_from_stash(i);
-  //         }
-  //       }
-  //     }
+        for (int j = 0; j < DUP_MAX; j++)
+        {
+          int ind = Stash[i].addr + DUP_BLK * j;
+          if (PosMap[ind] != -1)
+          {
+            dup++;
+          }
+          if (PosMap[ind] == Stash[i].label)
+          {
+            target = ind;
+          }
+        }
+        if (dup > 1  && Stash[i].dup == 0)
+        {
+          if(!pinFlag || i != intended)
+          {
+            dup_remove++;
+            PosMap[target] = -1;
+            remove_from_stash(i);
+          }
+        }
+      }
       
-  //   }
-  // }
+    }
+  }
+
   // nonmemops_trace = 0;
 
 }
@@ -7795,7 +7797,7 @@ void ring_early_reshuffle(int label){
       //   dram_to_serve_r_w = bs;
       // }
 
-      if(stashctr > stash_b4 && !STT_ENABLE && !DUPACT_ENABLE){
+      if(stashctr > stash_b4 && !STT_ENABLE){
         // printf("\n@%d L%d      b4 %d     af %d   %d\n", ringctr, i, stash_b4, stashctr, stash_b4-stashctr);
         printf("\n@%d L%d      b4 %d    mid %d  af %d   %d  read %d\n", ringctr, i, stash_b4, afterR, stashctr, stash_b4-stashctr, afterR-stash_b4 );
         exit(1);
