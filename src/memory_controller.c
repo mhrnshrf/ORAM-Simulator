@@ -3239,7 +3239,7 @@ void remap_block(int addr){
           for (int i = 0; i < DUP_MAX; i++)
           {
             if(Stash[index].dlabel[i] == -1){
-              Stash[index].dlabel[i] = s.label;
+              Stash[index].dlabel[i] = label;
               break;
             }
           }
