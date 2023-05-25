@@ -5491,42 +5491,42 @@ void ring_access(int addr){
 
   // printf("@ end acc stash %d\n", stashctr);
 
-  // if(DUPACT_ENABLE && ep_cond)
-  // {
-  //   for (int i = 0; i < STASH_SIZE; i++)
-  //   {
-  //     if (Stash[i].isReal)
-  //     {
-  //       int dup = 0;
-  //       int target = -1;
+  if(DUPACT_ENABLE && ep_cond)
+  {
+    for (int i = 0; i < STASH_SIZE; i++)
+    {
+      if (Stash[i].isReal)
+      {
+        int dup = 0;
+        int target = -1;
         
-  //       if (Stash[i].dup == 0)
-  //       {
-  //         for (int j = 0; j < DUP_MAX; j++)
-  //         {
-  //           int ind = Stash[i].addr + DUP_BLK * j;
-  //           if (PosMap[ind] != -1)
-  //           {
-  //             dup++;
-  //           }
-  //           if (PosMap[ind] == Stash[i].label)
-  //           {
-  //             target = ind;
-  //           }
-  //         }
-  //         if(dup > 1){
-  //           if(!pinFlag || i != intended)
-  //           {
-  //             dup_remove++;
-  //             target_dup_label = PosMap[target];
-  //             PosMap[target] = -1;
-  //             remove_from_stash(i);
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+        if (Stash[i].dup == 0)
+        {
+          for (int j = 0; j < DUP_MAX; j++)
+          {
+            int ind = Stash[i].addr + DUP_BLK * j;
+            if (PosMap[ind] != -1)
+            {
+              dup++;
+            }
+            if (PosMap[ind] == Stash[i].label)
+            {
+              target = ind;
+            }
+          }
+          if(dup > 1){
+            if(!pinFlag || i != intended)
+            {
+              dup_remove++;
+              target_dup_label = PosMap[target];
+              PosMap[target] = -1;
+              remove_from_stash(i);
+            }
+          }
+        }
+      }
+    }
+  }
 
   // nonmemops_trace = 0;
 
