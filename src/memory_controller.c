@@ -3446,8 +3446,8 @@ void remove_from_stash(int index){
       Stash[index].dup--;
       for (int i = 0; i < DUP_MAX; i++)
       {
-        if(Stash[ind].dlabel[i] == target_dup_label){
-          Stash[ind].dlabel[i] = -1;
+        if(Stash[index].dlabel[i] == target_dup_label){
+          Stash[index].dlabel[i] = -1;
           break;
         }
       }
