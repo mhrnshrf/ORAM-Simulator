@@ -637,6 +637,8 @@ unsigned long long int gap_top_under0 = 0;
 
 bool is_evict_path = false;
 
+int target_dup_label = -1;
+
 // void reset_util(){
 //   for (int i = 0; i < LEVEL; i++)
 //   {
@@ -2598,8 +2600,11 @@ void pick_candidate(int index, int label, int i){
         if (DUPACT_ENABLE)
         {
           stash_label = Stash[k].dlabel[h];
+
+          if(stash_label == -1){
+            continue;
+          }
         }
-        
         int target = stash_label>>(LEVEL_VAR-1-i);
         if(/* (Stash[k].label == label || index == calc_index(Stash[k].label, i)) */ (((target)^mask) == 0) && (!pinFlag || k != intended || (RHO_ENABLE && (TREE_VAR == RHO))))
         {
@@ -3293,7 +3298,14 @@ int add_to_stash(Slot s){
     if (ind != -1)
     {
       Stash[ind].dup++;
-      Stash[ind].dlabel[Stash[ind].dup] = s.label;
+      for (int i = 0; i < DUP_MAX; i++)
+      {
+        if(Stash[ind].dlabel[i] != -1){
+          Stash[ind].dlabel[i] = s.label;
+          break;
+        }
+      }
+      
       return ind;
     }
   }
@@ -3432,6 +3444,13 @@ void remove_from_stash(int index){
     if (Stash[index].dup > 0)
     {
       Stash[index].dup--;
+      for (int i = 0; i < DUP_MAX; i++)
+      {
+        if(Stash[ind].dlabel[i] == target_dup_label){
+          Stash[ind].dlabel[i] = -1;
+          break;
+        }
+      }
       return;
     }
   }
@@ -5469,25 +5488,28 @@ void ring_access(int addr){
         int dup = 0;
         int target = -1;
         
-        for (int j = 0; j < DUP_MAX; j++)
+        if (Stash[i].dup == 0)
         {
-          int ind = Stash[i].addr + DUP_BLK * j;
-          if (PosMap[ind] != -1)
+          for (int j = 0; j < DUP_MAX; j++)
           {
-            dup++;
+            int ind = Stash[i].addr + DUP_BLK * j;
+            if (PosMap[ind] != -1)
+            {
+              dup++;
+            }
+            if (PosMap[ind] == Stash[i].label)
+            {
+              target = ind;
+            }
           }
-          if (PosMap[ind] == Stash[i].label)
-          {
-            target = ind;
-          }
-        }
-        if (dup > 1  && Stash[i].dup == 0)
-        {
-          if(!pinFlag || i != intended)
-          {
-            dup_remove++;
-            PosMap[target] = -1;
-            remove_from_stash(i);
+          if(dup > 1){
+            if(!pinFlag || i != intended)
+            {
+              dup_remove++;
+              target_dup_label = PosMap[target];
+              PosMap[target] = -1;
+              remove_from_stash(i);
+            }
           }
         }
       }
@@ -7167,6 +7189,7 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
         if (DUPACT_ENABLE)
         {
           GlobTree[index].slot[j].label = cand_dlabel[real];
+          target_dup_label = cand_dlabel[real];
         }
         
       }
