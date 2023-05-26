@@ -3238,12 +3238,18 @@ void remap_block(int addr){
 
         if(DUPACT_ENABLE){
           // Stash[index].dlabel[0] = label;
+          bool found = false;
           for (int i = 0; i < DUP_MAX; i++)
           {
             if(Stash[index].dlabel[i] == former_label){
               Stash[index].dlabel[i] = label;
+              found = true;
               break;
             }
+          }
+          if(!found){
+            printf("ERROR: remap: former label %d not found @%lld", former_label, tracectr);
+            exit(1);
           }
         }
       }
