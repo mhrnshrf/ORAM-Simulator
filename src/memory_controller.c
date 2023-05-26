@@ -3255,36 +3255,36 @@ void remap_block(int addr){
     }
   }
   
-    if(DUPACT_ENABLE){
-      int dup = 0;
-      for (int j = 0; j < DUP_MAX; j++){
-        if(PosMap[addr + DUP_BLK*j] != -1){
-          dup++;
-        }
-      }
-      // printf("@refill dup %d\n", dup);
-      // printf("@%lld read dup %d   stash %d  addr %d\n", tracectr, dup, stashctr, addr);
+    // if(DUPACT_ENABLE){
+    //   int dup = 0;
+    //   for (int j = 0; j < DUP_MAX; j++){
+    //     if(PosMap[addr + DUP_BLK*j] != -1){
+    //       dup++;
+    //     }
+    //   }
+    //   // printf("@refill dup %d\n", dup);
+    //   // printf("@%lld read dup %d   stash %d  addr %d\n", tracectr, dup, stashctr, addr);
 
-      if (dup == 1)
-      {
-        for (int j = 0; j < DUP_MAX; j++)
-        {
-          if(PosMap[addr + DUP_BLK*j] == -1)
-          {
-            int dup_label = rand() % PATH;
-            PosMap[addr + DUP_BLK*j] = dup_label;
-            Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
-            dup_refill++;
-            if(add_to_stash(s) == -1){
-              printf("ERROR: remap: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
-              export_csv(pargv);
-              print_oram_stats();
-              exit(1);
-            }
-          }
-        }
-      }
-    }
+    //   if (dup == 1)
+    //   {
+    //     for (int j = 0; j < DUP_MAX; j++)
+    //     {
+    //       if(PosMap[addr + DUP_BLK*j] == -1)
+    //       {
+    //         int dup_label = rand() % PATH;
+    //         PosMap[addr + DUP_BLK*j] = dup_label;
+    //         Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
+    //         dup_refill++;
+    //         if(add_to_stash(s) == -1){
+    //           printf("ERROR: remap: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
+    //           export_csv(pargv);
+    //           print_oram_stats();
+    //           exit(1);
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
   
 }
@@ -5491,42 +5491,42 @@ void ring_access(int addr){
 
   // printf("@ end acc stash %d\n", stashctr);
 
-  if(DUPACT_ENABLE && ep_cond)
-  {
-    for (int i = 0; i < STASH_SIZE; i++)
-    {
-      if (Stash[i].isReal)
-      {
-        int dup = 0;
-        int target = -1;
+  // if(DUPACT_ENABLE && ep_cond)
+  // {
+  //   for (int i = 0; i < STASH_SIZE; i++)
+  //   {
+  //     if (Stash[i].isReal)
+  //     {
+  //       int dup = 0;
+  //       int target = -1;
         
-        if (Stash[i].dup == 0)
-        {
-          for (int j = 0; j < DUP_MAX; j++)
-          {
-            int ind = Stash[i].addr + DUP_BLK * j;
-            if (PosMap[ind] != -1)
-            {
-              dup++;
-            }
-            if (PosMap[ind] == Stash[i].label)
-            {
-              target = ind;
-            }
-          }
-          if(dup > 1){
-            if(!pinFlag || i != intended)
-            {
-              dup_remove++;
-              target_dup_label = PosMap[target];
-              PosMap[target] = -1;
-              remove_from_stash(i);
-            }
-          }
-        }
-      }
-    }
-  }
+  //       if (Stash[i].dup == 0)
+  //       {
+  //         for (int j = 0; j < DUP_MAX; j++)
+  //         {
+  //           int ind = Stash[i].addr + DUP_BLK * j;
+  //           if (PosMap[ind] != -1)
+  //           {
+  //             dup++;
+  //           }
+  //           if (PosMap[ind] == Stash[i].label)
+  //           {
+  //             target = ind;
+  //           }
+  //         }
+  //         if(dup > 1){
+  //           if(!pinFlag || i != intended)
+  //           {
+  //             dup_remove++;
+  //             target_dup_label = PosMap[target];
+  //             PosMap[target] = -1;
+  //             remove_from_stash(i);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   // nonmemops_trace = 0;
 
@@ -7831,7 +7831,7 @@ void ring_early_reshuffle(int label){
       //   dram_to_serve_r_w = bs;
       // }
 
-      if(stashctr > stash_b4 && !STT_ENABLE && !DUPACT_ENABLE){
+      if(stashctr > stash_b4 && !STT_ENABLE){
         // printf("\n@%d L%d      b4 %d     af %d   %d\n", ringctr, i, stash_b4, stashctr, stash_b4-stashctr);
         printf("\n@%d L%d      b4 %d    mid %d  af %d   %d  read %d\n", ringctr, i, stash_b4, afterR, stashctr, stash_b4-stashctr, afterR-stash_b4 );
         exit(1);
