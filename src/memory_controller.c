@@ -3248,7 +3248,12 @@ void remap_block(int addr){
             }
           }
           if(!found){
-            printf("ERROR: remap: former label %d not found @%lld", former_label, tracectr);
+            printf("ERROR: remap: former label %d not found @%lld\n", former_label, tracectr);
+            for (int i = 0; i < DUP_MAX; i++)
+            {
+              printf("Stash[index].dlabel[%d]: %d \n", i, Stash[index].dlabel[i]);
+            }
+
             exit(1);
           }
         }
