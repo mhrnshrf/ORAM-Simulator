@@ -2593,8 +2593,8 @@ void pick_candidate(int index, int label, int i){
     bool spot_real = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].isReal : Stash[k].isReal;
     if (spot_real)
     {
-      int start = (DUPACT_ENABLE) ? Stash[k].dup : 0;
-      for (int h = start; h >= 0; h--)
+      // int start = (DUPACT_ENABLE) ? Stash[k].dup : 0;
+      for (int h = 0; h <= Stash[k].dup; h++)
       {
         int stash_label = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].label : Stash[k].label;
         if (DUPACT_ENABLE)
