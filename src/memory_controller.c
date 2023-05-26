@@ -3235,14 +3235,14 @@ void remap_block(int addr){
         Stash[index].label = label;
 
         if(DUPACT_ENABLE){
-          // Stash[index].dlabel[0] = label;
-          for (int i = 0; i < DUP_MAX; i++)
-          {
-            if(Stash[index].dlabel[i] == -1){
-              Stash[index].dlabel[i] = label;
-              break;
-            }
-          }
+          Stash[index].dlabel[0] = label;
+          // for (int i = 0; i < DUP_MAX; i++)
+          // {
+          //   if(Stash[index].dlabel[i] == -1){
+          //     Stash[index].dlabel[i] = label;
+          //     break;
+          //   }
+          // }
         }
       }
       else
@@ -3365,14 +3365,14 @@ int add_to_stash(Slot s){
         Stash[i].label = s.label;
         Stash[i].isReal = true;
         Stash[i].isData = true;
-        // Stash[i].dlabel[0] = s.label;
-        for (int j = 0; j < DUP_MAX; j++)
-        {
-          if(Stash[i].dlabel[j] == -1){
-            Stash[i].dlabel[j] = s.label;
-            break;
-          }
-        }
+        Stash[i].dlabel[0] = s.label;
+        // for (int j = 0; j < DUP_MAX; j++)
+        // {
+        //   if(Stash[i].dlabel[j] == -1){
+        //     Stash[i].dlabel[j] = s.label;
+        //     break;
+        //   }
+        // }
         Stash[i].dup = 0;
         
         stashctr++;
