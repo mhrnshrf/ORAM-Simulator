@@ -1923,6 +1923,13 @@ void oram_init(){
       PosMap[i] =  assign_a_path(i % DUP_BLK);
       Dup[i] = DUP_MAX;
     }
+    for (int i = 0; i < STASH_SIZE; i++)
+    {
+      for(int j = 0; j < DUP_MAX; j++){
+        Stash[i].dlabel[j] = -1;
+      }
+    }
+    
     return;
   }
   for(int i = 0; i < BLOCK; i++)
