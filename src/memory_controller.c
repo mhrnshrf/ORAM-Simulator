@@ -639,6 +639,8 @@ bool is_evict_path = false;
 
 int target_dup_label = -1;
 
+int former_label = -1;
+
 // void reset_util(){
 //   for (int i = 0; i < LEVEL; i++)
 //   {
@@ -3235,14 +3237,14 @@ void remap_block(int addr){
         Stash[index].label = label;
 
         if(DUPACT_ENABLE){
-          Stash[index].dlabel[0] = label;
-          // for (int i = 0; i < DUP_MAX; i++)
-          // {
-          //   if(Stash[index].dlabel[i] == -1){
-          //     Stash[index].dlabel[i] = label;
-          //     break;
-          //   }
-          // }
+          // Stash[index].dlabel[0] = label;
+          for (int i = 0; i < DUP_MAX; i++)
+          {
+            if(Stash[index].dlabel[i] == former_label){
+              Stash[index].dlabel[i] = label;
+              break;
+            }
+          }
         }
       }
       else
@@ -3365,14 +3367,14 @@ int add_to_stash(Slot s){
         Stash[i].label = s.label;
         Stash[i].isReal = true;
         Stash[i].isData = true;
-        Stash[i].dlabel[0] = s.label;
-        // for (int j = 0; j < DUP_MAX; j++)
-        // {
-        //   if(Stash[i].dlabel[j] == -1){
-        //     Stash[i].dlabel[j] = s.label;
-        //     break;
-        //   }
-        // }
+        // Stash[i].dlabel[0] = s.label;
+        for (int j = 0; j < DUP_MAX; j++)
+        {
+          if(Stash[i].dlabel[j] == -1){
+            Stash[i].dlabel[j] = s.label;
+            break;
+          }
+        }
         Stash[i].dup = 0;
         
         stashctr++;
@@ -6404,6 +6406,8 @@ void ring_read_path(int label, int addr){
   // Element *pN = (Element*) malloc(sizeof (Element));
   // pN->addr = label;
   // Enqueue(pathQ, pN);
+
+  former_label = label;
 
   if (SIM_ENABLE_VAR)
   {
