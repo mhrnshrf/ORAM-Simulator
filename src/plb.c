@@ -231,6 +231,8 @@ int plb_fill(unsigned int addr){
     unsigned int index = plb_index(addr);
     unsigned int tag = plb_tag(addr);
 
+
+
     int victim = -1;
    
     // miss only
@@ -250,12 +252,31 @@ int plb_fill(unsigned int addr){
         exit(1);
     }
 
+    // if(victim == 3227765)
+    // {
+    //     printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    //     printf("victim: %d\n", victim);
+    //     printf("PosMap[%d]: %d\n", victim, PosMap[victim]);
+    //     printf("PLB[%d][%d].tag: %d\n", index, way, PLB[index][way].tag);
+    //     printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    // } 
+
     // plbline fill
     PLB[index][way].valid = true;
     PLB[index][way].tag = tag;
 
+    // if(addr == 3227765)
+    // {
+    //     printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    //     printf("addr: %d\n", addr);
+    //     printf("PosMap[%d]: %d\n", addr, PosMap[addr]);
+    //     printf("PLB[%d][%d].tag: %d\n", index, way, PLB[index][way].tag);
+    //     printf("stash_contain: %d\n", stash_contain(addr));
+    //     printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    // }
 
-    reset_REP(index, way);  
+    reset_REP(index, way);
+
 
     return victim;  
 }

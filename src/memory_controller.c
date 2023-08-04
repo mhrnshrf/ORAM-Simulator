@@ -641,6 +641,8 @@ int target_dup_label = -1;
 
 int former_label = -1;
 
+int target_dup_label_tmp = -1;
+
 // void reset_util(){
 //   for (int i = 0; i < LEVEL; i++)
 //   {
@@ -2479,8 +2481,8 @@ void read_path(int label){
                   botctr++;
                 }
               }
-              
-              
+
+              // printf("calling add from readPath\n");
               if(add_to_stash(GlobTree[index].slot[j]) != -1)
               {
                 GlobTree[index].slot[j].isReal = false;
@@ -2602,8 +2604,8 @@ void pick_candidate(int index, int label, int i){
     bool spot_real = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].isReal : Stash[k].isReal;
     if (spot_real)
     {
-      // int start = (DUPACT_ENABLE) ? Stash[k].dup : 0;
-      for (int h = 0; h <= Stash[k].dup; h++)
+      int end = (DUPACT_ENABLE) ? DUP_MAX: 1;
+      for (int h = 0; h < end; h++)
       {
         int stash_label = (RHO_ENABLE && (TREE_VAR == RHO))? RhoStash[k].label : Stash[k].label;
         if (DUPACT_ENABLE)
@@ -3161,6 +3163,8 @@ void background_eviction(){
 // assign the block a new label and update in posmap and stash 
 void remap_block(int addr){
 
+  // printf("remapBlock(%d)     former_label %d \n", addr, former_label);
+
  
   int label = rand() % PATH_VAR;
 
@@ -3250,15 +3254,22 @@ void remap_block(int addr){
           {
             if(Stash[index].dlabel[i] == former_label){
               Stash[index].dlabel[i] = label;
+              // printf("MAP block %d Stash[%d].dlabel[%d]: %d  \n", Stash[index].addr, index, i, Stash[index].dlabel[i]);
+              target_dup_label_tmp = label;
               found = true;
               break;
             }
           }
           if(!found){
-            printf("ERROR: remap: former label %d not found @%lld\n", former_label, tracectr);
+            printf("ERROR: remap: block %d former label %d not found @%lld\n", addr, former_label, tracectr);
             for (int i = 0; i < DUP_MAX; i++)
             {
-              printf("Stash[index].dlabel[%d]: %d \n", i, Stash[index].dlabel[i]);
+              printf("Stash[%d].dlabel[%d]: %d \n", index, i, Stash[index].dlabel[i]);
+            }
+
+            for (int j = 0; j < DUP_MAX; j++)
+            {
+              printf("PosMap[%d].DUP[%d]: %d \n", addr, j, PosMap[addr + DUP_BLK*j]);
             }
 
             exit(1);
@@ -3311,6 +3322,8 @@ void remap_block(int addr){
 
 int add_to_stash(Slot s){
 
+  // printf("INFO: add to stash: block %d label %d will be added @%lld\n", s.addr, s.label, tracectr);
+
   // if (STT_ENABLE && TREE_VAR == ORAM)
   // {
   //   if (stt_fill(s.addr))
@@ -3323,13 +3336,26 @@ int add_to_stash(Slot s){
     int ind = get_stash(s.addr);
     if (ind != -1)
     {
+      printf("WARNING: add to stash: block %d  label %d already in the stash!\n", s.addr, s.label);
       Stash[ind].dup++;
+      bool added = false;
       for (int i = 0; i < DUP_MAX; i++)
       {
-        if(Stash[ind].dlabel[i] != -1){
+        printf("Stash[%d].dlabel[%d]: %d\n", ind, i, Stash[ind].dlabel[i]);
+        if(Stash[ind].dlabel[i] == -1){
           Stash[ind].dlabel[i] = s.label;
+          added = true;
           break;
         }
+      }
+      if(!added)
+      {
+        printf("ERROR: add to stash: unable to dlabel to an existing block %d!\n", s.addr);
+        for (int j = 0; j < DUP_MAX; j++)
+        {
+          printf("PosMap[%d].DUP[%d]: %d \n", s.addr, j, PosMap[s.addr + DUP_BLK*j]);
+        }
+        exit(1);
       }
       return ind;
     }
@@ -3358,8 +3384,8 @@ int add_to_stash(Slot s){
     // printf("exiting due to 0 added to stash!\n");
     // exit(1);
   }
-  
-  
+
+  bool added = false;
   for(int i = 0; i < STASH_SIZE_VAR; i++ )
   {
     if (RHO_ENABLE && (TREE_VAR == RHO))
@@ -3388,12 +3414,17 @@ int add_to_stash(Slot s){
         // Stash[i].dlabel[0] = s.label;
         for (int j = 0; j < DUP_MAX; j++)
         {
+          // printf("INFO: add to stash: block %d label %d trying to be added to "
+          // "Stash[%d].dlabel[%d]: %d  @%lld\n", s.addr, s.label, i, j, Stash[i].dlabel[j], tracectr);
           if(Stash[i].dlabel[j] == -1){
+            // printf("ADD block %d Stash[%d].dlabel[%d]: %d \n", s.addr, i, j, s.label );
             Stash[i].dlabel[j] = s.label;
+            Stash[i].dup = 1;
+            added = true;
             break;
           }
         }
-        Stash[i].dup = 0;
+
         
         stashctr++;
 
@@ -3407,6 +3438,11 @@ int add_to_stash(Slot s){
       }
     }
     
+  }
+  if(!added)
+  {
+    printf("ERROR: add to stash: unable to dlabel for block %d first time!\n", s.addr);
+    exit(1);
   }
   return -1;
 }
@@ -3473,18 +3509,53 @@ int get_stale_buf(int addr){
 void remove_from_stash(int index){
   if (DUPACT_ENABLE)
   {
-    if (Stash[index].dup > 0)
+    if(target_dup_label == -1)
     {
+      printf("ERROR: remove from stash: block %d target_dup_label %d\n", Stash[index].addr, target_dup_label);
+      exit(1);
+    }
+
+    // printf("Remove block %d target_dup_label %d dup %d\n", Stash[index].addr, target_dup_label, Stash[index].dup);
+    // if (Stash[index].dup > 0)
+    // {
       Stash[index].dup--;
+      bool found = false;
       for (int i = 0; i < DUP_MAX; i++)
       {
         if(Stash[index].dlabel[i] == target_dup_label){
+          // printf("RMV block %d Stash[%d].dlabel[%d]: %d  \n", Stash[index].addr, index, i, Stash[index].dlabel[i]);
           Stash[index].dlabel[i] = -1;
+          found = true;
           break;
         }
       }
+      if(!found)
+      {
+        printf("ERROR: remove from stash: block %d label %d not found at Stash[%d]\n", Stash[index].addr, target_dup_label, index);
+        printf("Stash[%d].[0]: %d\n", index, Stash[index].dlabel[0]);
+        printf("Stash[%d].[1]: %d\n", index, Stash[index].dlabel[1]);
+        exit(1);
+      }
+
+
+      if (Stash[index].dup == 0)
+      {
+        stashctr--;
+        Stash[index].isReal = false;
+      }
+      
+      // if(Stash[index].addr == 3227765)
+      // {
+      //   printf("##############################\n");
+      //   printf("Stash[%d].dup: %d\n", index, Stash[index].dup);
+      //   printf("Stash[%d].isReal: %d\n", index, Stash[index].isReal);
+      //   printf("Stash[%d].[0]: %d\n", index, Stash[index].dlabel[0]);
+      //   printf("Stash[%d].[1]: %d\n", index, Stash[index].dlabel[1]);
+      //   printf("##############################\n");
+      // }
       return;
-    }
+    // }
+  
   }
   
 
@@ -3889,10 +3960,11 @@ void freecursive_access(int addr, char type){
         {
           return;
         }
-      
 
+        // bool tag_from_tree = false;
         if (!stash_contain(tag)) // access oram tree iff block does not exist in the stash
         {
+          // tag_from_tree = true;
           unsigned long long int caddr = tag << ((unsigned long long int) log2(BLOCK_SIZE));
 
           if (LLC_DIRTY)
@@ -3950,15 +4022,34 @@ void freecursive_access(int addr, char type){
             wl_pos[i_saved]++;
           }
           
-          
+          target_dup_label = target_dup_label_tmp;  
+        }
+        else
+        {
+          for (int i = 0; i < DUP_MAX; i++)
+          {
+            if(PosMap[tag + DUP_BLK * i] != -1)
+            {
+              target_dup_label = PosMap[tag + DUP_BLK * i];
+              break;
+            }
+          }
         }
 
           int si;
           int victim = plb_fill(tag);
+          // if(tag == 3227765)
+          // {
+          //   printf("??????????????????????????????\n");
+          //   printf("Stash[2].addr: %d\n", Stash[2].addr);
+          //   printf("Stash[2].isReal: %d\n", Stash[2].isReal);
+          //   printf("??????????????????????????????\n");
+          // }
           if( victim != -1)
           {
 
             Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+
             
             
             if (stash_contain(s.addr) && !DUPACT_ENABLE)
@@ -3969,6 +4060,8 @@ void freecursive_access(int addr, char type){
             }
             else
             {
+              // printf("calling add from freecursive victim\n");
+              // printf("POSMAP\n");
               si = add_to_stash(s);
               if(si == -1){
                 printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
@@ -3985,15 +4078,20 @@ void freecursive_access(int addr, char type){
           // PLB[tag % PLB_SIZE] = tag;
           if (!STT_ENABLE || !stt_contain(tag)) 
           {
-            int index = get_stash(tag);
-            if (index == -1)
-            {
-              printf("ERROR: freecursive: block not found in stash!\n");
-              print_oram_stats();
-              exit(1);
-            }
-            
-            remove_from_stash(index);
+            // if (tag_from_tree)
+            // {
+              int index = get_stash(tag);
+              if (index == -1)
+              {
+                printf("ERROR: freecursive: block not found in stash!\n");
+                print_oram_stats();
+                exit(1);
+              }
+
+              // printf("calling remove from freecursive:\n");
+              // printf("POSMAP\n");
+              remove_from_stash(index);
+            // }
           } 
           else
           {
@@ -5452,6 +5550,9 @@ void ring_access(int addr){
 
   ring_early_reshuffle(label);
 
+  // printf("ended.\n");
+
+
 
   // to be removed
   // if (ring_round == 0)
@@ -6425,6 +6526,9 @@ void ring_read_path(int label, int addr){
   // pN->addr = label;
   // Enqueue(pathQ, pN);
 
+  // target_dup_label = label;
+
+  // printf("readPath(%d, %d)      @%lld\n", label, addr, tracectr);
   former_label = label;
 
   if (SIM_ENABLE_VAR)
@@ -6442,6 +6546,8 @@ void ring_read_path(int label, int addr){
   for (int i = LEVEL_VAR-1; i >= EMPTY_TOP_VAR; i--)
   {
     int index = calc_index(label, i);
+
+    // printf("Bucket(%d)\n", index);
 
     // if (GlobTree[index].allctr > 6)
     // {
@@ -6583,6 +6689,7 @@ void ring_read_path(int label, int addr){
           supreal[sind]++;
         }
         
+        // printf("calling add from ring readPath\n");
         int ats = add_to_stash(GlobTree[index].slot[offset]);
         if( ats != -1)
         {
@@ -6781,7 +6888,7 @@ int calc_overlap(int pathA, int pathB){
 
 
 void ring_evict_path(int label){
-  // printf("\nevict path trace %d\n", tracectr);
+  // printf("evictPath(%d)\n", label);
 
   lingered--;
 
@@ -7045,6 +7152,8 @@ bool is_super_level(int level){
 }
 
 int write_bucket(int index, int label, int level, char op_type, bool first_super){
+  // printf("writeBucket(%d) \n", index);
+
   wbuck++;
   int allocated = 0;
 
@@ -7223,6 +7332,13 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
         {
           GlobTree[index].slot[j].label = cand_dlabel[real];
           target_dup_label = cand_dlabel[real];
+          if(target_dup_label == -1)
+          {
+            printf("ERROR: write  bucket: target dup label %d for block %d \n", 
+            target_dup_label, GlobTree[index].slot[j].addr);
+            exit(1);
+          }
+
         }
         
       }
@@ -7239,6 +7355,7 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
       if(!stt_turn){
         count_level[level]++;
+        // printf("calling remove from write bucket:\n");
         remove_from_stash(candidate[real-1]);
       }
       else{
@@ -7518,35 +7635,34 @@ int count_bucket_real(int index, int i){
 
 
 void read_bucket(int index, int i, char op_type, int residue, bool first_super){
-    int reqmade = 0;
-    int dum_cand[Z] = {0};
-    int cand_ind = 0;
-    int passing_residue = 0;
-    int cur_to_read = 0;
-    // print_oram_stats();
-      // printf("trace %d\n", tracectr);
-      // printf("i %d\n", i);
-      // printf("index %d\n", index);
-      // printf("heloooooo\n");
-      // printf("flush ctr %d\n", stale_flush_ctr);
-    // if(CB_ENABLE && op_type == 'r'){
-    //   dram_to_serve_r_r = (LZ[i] - LS[i] - GlobTree[index].greenctr);
-    // }
-      
-      
-    
-    GlobTree[index].dumval = Z;
+  // printf("readBucket(%d) \n", index);
+  int reqmade = 0;
+  int dum_cand[Z] = {0};
+  int cand_ind = 0;
+  int passing_residue = 0;
+  int cur_to_read = 0;
+  // print_oram_stats();
+  // printf("trace %d\n", tracectr);
+  // printf("i %d\n", i);
+  // printf("index %d\n", index);
+  // printf("heloooooo\n");
+  // printf("flush ctr %d\n", stale_flush_ctr);
+  // if(CB_ENABLE && op_type == 'r'){
+  //   dram_to_serve_r_r = (LZ[i] - LS[i] - GlobTree[index].greenctr);
+  // }
 
-    int valnum = GlobTree[index].dumval;
-    dumval_dist[valnum]++;
-    dumval_range_dist[calc_range(i)][valnum]++;
-    if (op_type == 'r' && first_super)
-    {
-      shuff[i]++;
-      shuff_total++;
-      shuff_interval[i]++;
-      // shufcount++;
-      GlobTree[index].reshuffled++;
+  GlobTree[index].dumval = Z;
+
+  int valnum = GlobTree[index].dumval;
+  dumval_dist[valnum]++;
+  dumval_range_dist[calc_range(i)][valnum]++;
+  if (op_type == 'r' && first_super)
+  {
+    shuff[i]++;
+    shuff_total++;
+    shuff_interval[i]++;
+    // shufcount++;
+    GlobTree[index].reshuffled++;
     }
 
     int slotCount = (DYNAMIC_S && i >= GATHER_START) ? (LZ_VAR[i] + S_INC_ARR[i]) : LZ_VAR[i];  
@@ -7603,6 +7719,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
         // printf("level: %d\n", i);
         // printf("addr: %d\n", GlobTree[index].slot[j].addr);
         // printf("label: %d\n\n", GlobTree[index].slot[j].label);
+        // printf("calling add from readBucket\n");
         if(add_to_stash(GlobTree[index].slot[j]) != -1)
         {
           GlobTree[index].slot[j].isReal = false;
@@ -7772,7 +7889,7 @@ void read_bucket(int index, int i, char op_type, int residue, bool first_super){
 
 
 void ring_early_reshuffle(int label){
-  // printf("reshuffle trace %d\n", tracectr);
+  // printf("earlyReshuffle(%d)\n", label);
   // int shufcount = 0;
   // int stashb4 = stashctr;
   // for (int i = 0; i < LEVEL; i++)
