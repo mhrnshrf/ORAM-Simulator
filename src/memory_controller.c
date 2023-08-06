@@ -3336,12 +3336,12 @@ int add_to_stash(Slot s){
     int ind = get_stash(s.addr);
     if (ind != -1)
     {
-      printf("WARNING: add to stash: block %d  label %d already in the stash!\n", s.addr, s.label);
+      // printf("WARNING: add to stash: block %d  label %d already in the stash!\n", s.addr, s.label);
       Stash[ind].dup++;
       bool added = false;
       for (int i = 0; i < DUP_MAX; i++)
       {
-        printf("Stash[%d].dlabel[%d]: %d\n", ind, i, Stash[ind].dlabel[i]);
+        // printf("Stash[%d].dlabel[%d]: %d\n", ind, i, Stash[ind].dlabel[i]);
         if(Stash[ind].dlabel[i] == -1){
           Stash[ind].dlabel[i] = s.label;
           added = true;
@@ -4155,6 +4155,39 @@ void freecursive_access(int addr, char type){
           printf("@%lld data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
         }
         ring_access(addr);
+
+        // Refill dup
+        if(DUPACT_ENABLE)
+        {
+          int dup = 0;
+          for (int j = 0; j < DUP_MAX; j++)
+          {
+            if(PosMap[addr + DUP_BLK*j] != -1)
+            {
+              dup++;
+            }
+          }
+
+          if (dup == 1)
+          {
+            for (int j = 0; j < DUP_MAX; j++)
+            {
+              if(PosMap[addr + DUP_BLK*j] == -1)
+              {
+                int dup_label = rand() % PATH;
+                PosMap[addr + DUP_BLK*j] = dup_label;
+                Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
+                dup_refill++;
+                if(add_to_stash(s) == -1){
+                  printf("ERROR: freecursive: refill: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
+                  export_csv(pargv);
+                  print_oram_stats();
+                  exit(1);
+                }
+              }
+            }
+          }
+        }
       }
     }
     

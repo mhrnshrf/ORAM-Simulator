@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git config --global user.email mhrnshrf@gmail.com
+git config --global user.name mhrnshrf
 git config --local user.email mhrnshrf@gmail.com
 
 
@@ -12,4 +12,4 @@ git add -A;
 # Now commit the change
 git commit -m "$COMMENT";
 # Push the commit to master branch
-git push
+git push git@github.com:mhrnshrf/ORAM-Simulator.git
