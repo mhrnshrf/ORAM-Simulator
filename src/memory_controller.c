@@ -3187,7 +3187,7 @@ void remap_block(int addr){
       if(DUPACT_ENABLE){
         for (int i = 0; i < DUP_MAX; i++)
         {
-          if(PosMap[addr  + DUP_BLK * i] == -1){
+          if(PosMap[addr  + DUP_BLK * i] == former_label){
             PosMap[addr  + DUP_BLK * i] = label;
             break;
           }
@@ -3262,6 +3262,7 @@ void remap_block(int addr){
           }
           if(!found){
             printf("ERROR: remap: block %d former label %d not found @%lld\n", addr, former_label, tracectr);
+            printf("Stash[%d].addr: %d \n", index, Stash[index].addr);
             for (int i = 0; i < DUP_MAX; i++)
             {
               printf("Stash[%d].dlabel[%d]: %d \n", index, i, Stash[index].dlabel[i]);
@@ -3416,8 +3417,17 @@ int add_to_stash(Slot s){
         {
           // printf("INFO: add to stash: block %d label %d trying to be added to "
           // "Stash[%d].dlabel[%d]: %d  @%lld\n", s.addr, s.label, i, j, Stash[i].dlabel[j], tracectr);
-          if(Stash[i].dlabel[j] == -1){
-            // printf("ADD block %d Stash[%d].dlabel[%d]: %d \n", s.addr, i, j, s.label );
+          if(Stash[i].dlabel[j] == -1)
+          {
+            // if(s.addr == 98946)
+            // {
+            //   printf("ADD block %d Stash[%d].dlabel[%d]: %d \n", s.addr, i, j, s.label );
+            //   for (int j = 0; j < DUP_MAX; j++)
+            //   {
+            //     printf("PosMap[%d].DUP[%d]: %d \n", s.addr, j, PosMap[s.addr + DUP_BLK*j]);
+            //   }
+            // }
+
             Stash[i].dlabel[j] = s.label;
             Stash[i].dup = 1;
             added = true;
@@ -4157,37 +4167,38 @@ void freecursive_access(int addr, char type){
         ring_access(addr);
 
         // Refill dup
-        if(DUPACT_ENABLE)
-        {
-          int dup = 0;
-          for (int j = 0; j < DUP_MAX; j++)
-          {
-            if(PosMap[addr + DUP_BLK*j] != -1)
-            {
-              dup++;
-            }
-          }
+        // if(DUPACT_ENABLE)
+        // {
+        //   int dup = 0;
+        //   for (int j = 0; j < DUP_MAX; j++)
+        //   {
+        //     if(PosMap[addr + DUP_BLK*j] != -1)
+        //     {
+        //       dup++;
+        //     }
+        //   }
 
-          if (dup == 1)
-          {
-            for (int j = 0; j < DUP_MAX; j++)
-            {
-              if(PosMap[addr + DUP_BLK*j] == -1)
-              {
-                int dup_label = rand() % PATH;
-                PosMap[addr + DUP_BLK*j] = dup_label;
-                Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
-                dup_refill++;
-                if(add_to_stash(s) == -1){
-                  printf("ERROR: freecursive: refill: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
-                  export_csv(pargv);
-                  print_oram_stats();
-                  exit(1);
-                }
-              }
-            }
-          }
-        }
+        //   if (dup == 1)
+        //   {
+        //     for (int j = 0; j < DUP_MAX; j++)
+        //     {
+        //       if(PosMap[addr + DUP_BLK*j] == -1)
+        //       {
+        //         int dup_label = rand() % PATH;
+        //         PosMap[addr + DUP_BLK*j] = dup_label;
+        //         Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
+        //         dup_refill++;
+        //         if(add_to_stash(s) == -1){
+        //           printf("ERROR: freecursive: refill: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
+        //           export_csv(pargv);
+        //           print_oram_stats();
+        //           exit(1);
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
+      
       }
     }
     
@@ -5488,7 +5499,7 @@ void ring_access(int addr){
     {
       if(PosMap[addr  + DUP_BLK * i] != -1){
         label = PosMap[addr  + DUP_BLK * i];
-        PosMap[addr  + DUP_BLK * i] = -1;
+        // PosMap[addr  + DUP_BLK * i] = -1;
         break;
       }
     }
