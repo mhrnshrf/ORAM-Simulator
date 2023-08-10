@@ -3451,8 +3451,8 @@ int add_to_stash(Slot s){
   }
   if(!added)
   {
-    printf("ERROR: add to stash: unable to dlabel for block %d first time!\n", s.addr);
-    exit(1);
+    printf("ERROR: add to stash: unable to add to dlabel for block %d first time! @%lld\n", s.addr, tracectr);
+    // exit(1);
   }
   return -1;
 }
