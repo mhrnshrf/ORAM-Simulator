@@ -5497,14 +5497,20 @@ void ring_access(int addr){
   if(DUPACT_ENABLE){
     for (int i = 0; i < DUP_MAX; i++)
     {
-      if(PosMap[addr  + DUP_BLK * i] != -1){
+      if(PosMap[addr  + DUP_BLK * i] != -1)
+      {
         label = PosMap[addr  + DUP_BLK * i];
         // PosMap[addr  + DUP_BLK * i] = -1;
         break;
       }
     }
-    if(label == -1){
-      printf("ERROR: ring access: run out of valid dup!\n");
+    if(label == -1)
+    {
+      printf("ERROR: ring access: run out of valid dup @%lld\n", tracectr);
+      for (int i = 0; i < DUP_MAX; i++)
+      {
+        printf("PosMap[%d]: %d \n", addr  + DUP_BLK * i, PosMap[addr  + DUP_BLK * i]);
+      }
       export_csv(pargv);
       exit(1);
     }
@@ -5664,24 +5670,38 @@ void ring_access(int addr){
       {
         int dup = 0;
         int target = -1;
-        
+        int stash_dup = 0;
         for (int j = 0; j < DUP_MAX; j++)
         {
           int ind = Stash[i].addr + DUP_BLK * j;
+          if (Stash[i].dlabel[j] != -1)
+          {
+            target = ind;
+            stash_dup++;
+          }
           if (PosMap[ind] != -1)
           {
             dup++;
           }
-          if (PosMap[ind] == Stash[i].dlabel[j])
-          {
-            target = ind;
-          }
         }
         if(dup > 1)
         {
+          if(stash_dup == dup)
+          {
+              printf("WARNIN: ring access: all dups of block %d are in the stash! \n", Stash[i].addr);
+          }
           if(!pinFlag || i != intended)
           {
             dup_remove++;
+            printf("Remove Dup block %d dup %d\n", Stash[i].addr, dup);
+            for (int j = 0; j < DUP_MAX; j++)
+            {
+              printf("PosMap[%d]: %d \n", addr  + DUP_BLK * j, PosMap[addr  + DUP_BLK * j]);
+              if(PosMap[addr  + DUP_BLK * j] == -1) 
+              {
+                exit(1);
+              }
+            }
             target_dup_label = PosMap[target];
             PosMap[target] = -1;
             remove_from_stash(i);
