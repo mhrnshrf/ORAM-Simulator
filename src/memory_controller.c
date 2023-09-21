@@ -3163,10 +3163,11 @@ void background_eviction(){
 // assign the block a new label and update in posmap and stash 
 void remap_block(int addr){
 
-  // printf("remapBlock(%d)     former_label %d \n", addr, former_label);
 
  
   int label = rand() % PATH_VAR;
+
+  // printf("remapBlock(%d)     former %d    new %d\n", addr, former_label, label);
 
   int prevlabel = PosMap[addr];
 
@@ -3242,9 +3243,7 @@ void remap_block(int addr){
     {
       if (!LLC_DIRTY || pinFlag)
       {
-        if (LOG_ENABLE && tracectr >= LOG_TH){
-          printf("@%lld remap %d\n", tracectr, addr);
-        }
+
         Stash[index].label = label;
 
         if(DUPACT_ENABLE){
@@ -3279,9 +3278,6 @@ void remap_block(int addr){
       }
       else
       {
-        if (LOG_ENABLE && tracectr >= LOG_TH){
-          printf("@%lld remove %d\n", tracectr, addr);
-        }
         remove_from_stash(index);
       }
     }
@@ -3332,6 +3328,12 @@ int add_to_stash(Slot s){
   //     return -2;
   //   }
   // }
+
+  if(s.label == -1)
+  {
+    printf("ERROR: add to stash: block %d label %d\n", s.addr, s.label);
+    exit(1);
+  }
 
   if(DUPACT_ENABLE){
     int ind = get_stash(s.addr);
@@ -3544,6 +3546,13 @@ void remove_from_stash(int index){
         printf("ERROR: remove from stash: block %d label %d not found at Stash[%d]\n", Stash[index].addr, target_dup_label, index);
         printf("Stash[%d].[0]: %d\n", index, Stash[index].dlabel[0]);
         printf("Stash[%d].[1]: %d\n", index, Stash[index].dlabel[1]);
+        for (int j = 0; j < DUP_MAX; j++)
+        {
+          int sia = Stash[index].addr;
+          printf("PosMap[%d]: %d \n", sia  + DUP_BLK * j, PosMap[sia  + DUP_BLK * j]);
+        }
+        
+     
         exit(1);
       }
 
@@ -3999,12 +4008,12 @@ void freecursive_access(int addr, char type){
           // printf("cache invalidated block %d\n", tag);
           // reset_dirty_search();
           Dup[tag] = 1;
-          if(DUPACT_ENABLE){
-            for (int i = 1; i < DUP_MAX; i++)
-            {
-              PosMap[tag + DUP_BLK * i] = -1;
-            }
-          }
+          // if(DUPACT_ENABLE){
+          //   for (int i = 1; i < DUP_MAX; i++)
+          //   {
+          //     PosMap[tag + DUP_BLK * i] = -1;
+          //   }
+          // }
           pinOn();
           if (RING_ENABLE)
           {
@@ -4057,8 +4066,26 @@ void freecursive_access(int addr, char type){
           // }
           if( victim != -1)
           {
+            int victim_label = PosMap[victim];
+            if (DUPACT_ENABLE)
+            {
+              for (int p = 0; p < DUP_MAX; p++)
+              {
+                if( PosMap[victim  + DUP_BLK * p] != -1)
+                {
+                  victim_label = PosMap[victim + DUP_BLK * p];
+                  break;
+                }
+              }
+              if (victim_label == -1)
+              {
+                printf("ERROR: freecursive: victim %d has label %d\n", victim, victim_label);
+                exit(1);
+              }
+              
+            }
 
-            Slot s = {.addr = victim , .label = PosMap[victim], .isReal = true, .isData = false};
+            Slot s = {.addr = victim , .label = victim_label, .isReal = true, .isData = false};
 
             
             
@@ -4070,7 +4097,7 @@ void freecursive_access(int addr, char type){
             }
             else
             {
-              // printf("calling add from freecursive victim\n");
+              // printf("calling add from freecursive victim POSMAP\n");
               // printf("POSMAP\n");
               si = add_to_stash(s);
               if(si == -1){
@@ -4099,7 +4126,8 @@ void freecursive_access(int addr, char type){
               }
 
               // printf("calling remove from freecursive:\n");
-              // printf("POSMAP\n");
+              // if(Stash[index].addr == 1202030)
+              //   printf("POSMAP Stash[%d]: %d\n", index, Stash[index].addr);
               remove_from_stash(index);
             // }
           } 
@@ -5506,7 +5534,7 @@ void ring_access(int addr){
     }
     if(label == -1)
     {
-      printf("ERROR: ring access: run out of valid dup @%lld\n", tracectr);
+      printf("ERROR: ring access: run out of valid dup for %d @%lld\n", addr, tracectr);
       for (int i = 0; i < DUP_MAX; i++)
       {
         printf("PosMap[%d]: %d \n", addr  + DUP_BLK * i, PosMap[addr  + DUP_BLK * i]);
@@ -5670,41 +5698,60 @@ void ring_access(int addr){
       {
         int dup = 0;
         int target = -1;
+        int target_dlabel = -1;
         int stash_dup = 0;
         for (int j = 0; j < DUP_MAX; j++)
         {
-          int ind = Stash[i].addr + DUP_BLK * j;
           if (Stash[i].dlabel[j] != -1)
           {
-            target = ind;
+            target_dlabel = Stash[i].dlabel[j];
             stash_dup++;
           }
+        }
+        for (int j = 0; j < DUP_MAX; j++)
+        {
+          int ind = Stash[i].addr + DUP_BLK * j;
           if (PosMap[ind] != -1)
           {
             dup++;
           }
+          if (PosMap[ind] == target_dlabel)
+          {
+            target = ind;
+          }
         }
         if(dup > 1)
         {
+          if(target == -1)
+          {
+            printf("ERROR: Remove Dup: target %d\n", target);
+            exit(1);
+          }
+          if(target_dlabel == -1)
+          {
+            printf("ERROR: Remove Dup: target_dlabel %d\n", target_dlabel);
+            exit(1);
+          }
           if(stash_dup == dup)
           {
-              printf("WARNIN: ring access: all dups of block %d are in the stash! \n", Stash[i].addr);
+            printf("WARNIN: ring access: all dups of block %d are in the stash! \n", Stash[i].addr);
+            exit(1);
           }
           if(!pinFlag || i != intended)
           {
             dup_remove++;
-            printf("Remove Dup block %d dup %d\n", Stash[i].addr, dup);
-            for (int j = 0; j < DUP_MAX; j++)
-            {
-              printf("PosMap[%d]: %d \n", addr  + DUP_BLK * j, PosMap[addr  + DUP_BLK * j]);
-              if(PosMap[addr  + DUP_BLK * j] == -1) 
-              {
-                exit(1);
-              }
-            }
             target_dup_label = PosMap[target];
-            PosMap[target] = -1;
+            // if(Stash[i].addr == 1202030)
+            //   printf("Remove Dup block %d dup %d target_dup_label %d target %d\n", Stash[i].addr, dup, target_dup_label, target);
+            // if(Stash[i].addr == 1202030)
+            // {
+            //   for (int j = 0; j < DUP_MAX; j++)
+            //   {
+            //     printf("PosMap[%d]: %d \n", Stash[i].addr  + DUP_BLK * j, PosMap[Stash[i].addr  + DUP_BLK * j]);
+            //   }
+            // }
             remove_from_stash(i);
+            PosMap[target] = -1;
           }
         }
       }
@@ -6584,6 +6631,7 @@ int decide_which_super(int index, int i, int addr){
 
 
 void ring_read_path(int label, int addr){
+  // printf("ring_read_path(label %d, addr %d)\n", label, addr);
   // Element *pN = (Element*) malloc(sizeof (Element));
   // pN->addr = label;
   // Enqueue(pathQ, pN);
@@ -7417,7 +7465,8 @@ int write_bucket(int index, int label, int level, char op_type, bool first_super
 
       if(!stt_turn){
         count_level[level]++;
-        // printf("calling remove from write bucket:\n");
+        // if(GlobTree[index].slot[j].addr == 1202030)
+        //   printf("calling remove from write bucket:\n");
         remove_from_stash(candidate[real-1]);
       }
       else{
