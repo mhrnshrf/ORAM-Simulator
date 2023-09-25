@@ -274,6 +274,9 @@ unsigned long long int nvm_write_evict = 0;
 unsigned long long int nvm_write_shuf = 0;
 unsigned long long int dup_renewal = 0;
 
+unsigned long long int all_dup_in_stash = 0;
+unsigned long long int stash_reduced = 0;
+
 typedef struct Slot{
   bool isData;     // Data block 1  , PosMap block 0
   bool isReal;       // real 1 , dummy 0
@@ -5609,7 +5612,9 @@ void ring_access(int addr){
       }
     }
 
+    int stash_b4 = stashctr;
     ring_evict_path(label);
+    stash_reduced = stash_b4 - stashctr;
     stale_reduction += b4 - stalectr;
 
     dead_on_path += dead_b4 - deadctr;
@@ -5734,8 +5739,9 @@ void ring_access(int addr){
           }
           if(stash_dup == dup)
           {
-            printf("WARNIN: ring access: all dups of block %d are in the stash! \n", Stash[i].addr);
-            exit(1);
+            // printf("WARNIN: ring access: all dups of block %d are in the stash! \n", Stash[i].addr);
+            all_dup_in_stash++;
+            return;
           }
           if(!pinFlag || i != intended)
           {
@@ -9121,7 +9127,8 @@ void export_csv(char * argv[]){
   // {
   //   fprintf (fp, "flushed_avg[%d], %f\n", i, (double)flushed[i]/ring_evictctr);
   // }
-  
+
+  double stash_reduced_per_evict = (double)stash_reduced / ring_evictctr;
   fprintf (fp, "dup_renewal, %lld\n", dup_renewal);
   fprintf (fp, "dup_renew%%, %f%%\n", 100*(double)dup_renewal/ringctr);
   fprintf(fp, "path_per_acc,%f\n", (double)ringctr/invokectr);
@@ -9129,6 +9136,8 @@ void export_csv(char * argv[]){
   fprintf (fp, "dup_remove_per_evict, %f\n", (double)dup_remove/ring_evictctr);
   fprintf (fp, "dup_refill, %lld\n", dup_refill);
   fprintf (fp, "dup_refill_per_acc, %f\n", (double)dup_refill/invokectr);
+  fprintf (fp, "all_dup_in_stash, %lld\n", all_dup_in_stash);
+  fprintf (fp, "stash_reduced_per_evict, %f\n", stash_reduced_per_evict);
 
   
   fclose(fp);
