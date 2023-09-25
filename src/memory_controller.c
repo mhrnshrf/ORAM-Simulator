@@ -4194,38 +4194,38 @@ void freecursive_access(int addr, char type){
         }
         ring_access(addr);
 
-        // Refill dup
-        if(DUPACT_ENABLE)
-        {
-          int dup = 0;
-          for (int j = 0; j < DUP_MAX; j++)
-          {
-            if(PosMap[addr + DUP_BLK*j] != -1)
-            {
-              dup++;
-            }
-          }
+        // // Refill dup
+        // if(DUPACT_ENABLE)
+        // {
+        //   int dup = 0;
+        //   for (int j = 0; j < DUP_MAX; j++)
+        //   {
+        //     if(PosMap[addr + DUP_BLK*j] != -1)
+        //     {
+        //       dup++;
+        //     }
+        //   }
 
-          if (dup == 1)
-          {
-            for (int j = 0; j < DUP_MAX; j++)
-            {
-              if(PosMap[addr + DUP_BLK*j] == -1)
-              {
-                int dup_label = rand() % PATH;
-                PosMap[addr + DUP_BLK*j] = dup_label;
-                Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
-                dup_refill++;
-                if(add_to_stash(s) == -1){
-                  printf("ERROR: freecursive: refill: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
-                  export_csv(pargv);
-                  print_oram_stats();
-                  exit(1);
-                }
-              }
-            }
-          }
-        }
+        //   if (dup == 1)
+        //   {
+        //     for (int j = 0; j < DUP_MAX; j++)
+        //     {
+        //       if(PosMap[addr + DUP_BLK*j] == -1)
+        //       {
+        //         int dup_label = rand() % PATH;
+        //         PosMap[addr + DUP_BLK*j] = dup_label;
+        //         Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
+        //         dup_refill++;
+        //         if(add_to_stash(s) == -1){
+        //           printf("ERROR: freecursive: refill: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
+        //           export_csv(pargv);
+        //           print_oram_stats();
+        //           exit(1);
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
       
       }
     }
