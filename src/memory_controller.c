@@ -5615,7 +5615,7 @@ void ring_access(int addr){
 
     int stash_b4 = stashctr;
     ring_evict_path(label);
-    stash_reduced = stash_b4 - stashctr;
+    stash_reduced += stash_b4 - stashctr;
     stale_reduction += b4 - stalectr;
 
     dead_on_path += dead_b4 - deadctr;
@@ -9130,8 +9130,8 @@ void export_csv(char * argv[]){
   // }
 
   double stash_reduced_per_evict = (double)stash_reduced / ring_evictctr;
-  fprintf (fp, "dup_renewal, %lld\n", dup_renewal);
-  fprintf (fp, "dup_renew%%, %f%%\n", 100*(double)dup_renewal/ringctr);
+  // fprintf (fp, "dup_renewal, %lld\n", dup_renewal);
+  // fprintf (fp, "dup_renew%%, %f%%\n", 100*(double)dup_renewal/ringctr);
   fprintf(fp, "path_per_acc,%f\n", (double)ringctr/invokectr);
   fprintf (fp, "dup_remove, %lld\n", dup_remove);
   fprintf (fp, "dup_remove_per_evict, %f\n", (double)dup_remove/ring_evictctr);
