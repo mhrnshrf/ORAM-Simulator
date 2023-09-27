@@ -5615,7 +5615,7 @@ void ring_access(int addr){
 
     int stash_b4 = stashctr;
     ring_evict_path(label);
-    stash_reduced += stash_b4 - stashctr;
+    stash_reduced += (stash_b4 - stashctr);
     stale_reduction += b4 - stalectr;
 
     dead_on_path += dead_b4 - deadctr;
