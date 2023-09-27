@@ -5696,74 +5696,74 @@ void ring_access(int addr){
 
   // printf("@ end acc stash %d\n", stashctr);
 
-  if(DUPACT_ENABLE && ep_cond)
-  {
-    for (int i = 0; i < STASH_SIZE; i++)
-    {
-      if (Stash[i].isReal)
-      {
-        int dup = 0;
-        int target = -1;
-        int target_dlabel = -1;
-        int stash_dup = 0;
-        for (int j = 0; j < DUP_MAX; j++)
-        {
-          if (Stash[i].dlabel[j] != -1)
-          {
-            target_dlabel = Stash[i].dlabel[j];
-            stash_dup++;
-          }
-        }
-        for (int j = 0; j < DUP_MAX; j++)
-        {
-          int ind = Stash[i].addr + DUP_BLK * j;
-          if (PosMap[ind] != -1)
-          {
-            dup++;
-          }
-          if (PosMap[ind] == target_dlabel)
-          {
-            target = ind;
-          }
-        }
-        if(dup > 1)
-        {
-          if(target == -1)
-          {
-            printf("ERROR: Remove Dup: target %d\n", target);
-            exit(1);
-          }
-          if(target_dlabel == -1)
-          {
-            printf("ERROR: Remove Dup: target_dlabel %d\n", target_dlabel);
-            exit(1);
-          }
-          if(stash_dup == dup)
-          {
-            // printf("WARNIN: ring access: all dups of block %d are in the stash! \n", Stash[i].addr);
-            all_dup_in_stash++;
-            return;
-          }
-          if(!pinFlag || i != intended)
-          {
-            dup_remove++;
-            target_dup_label = PosMap[target];
-            // if(Stash[i].addr == 1202030)
-            //   printf("Remove Dup block %d dup %d target_dup_label %d target %d\n", Stash[i].addr, dup, target_dup_label, target);
-            // if(Stash[i].addr == 1202030)
-            // {
-            //   for (int j = 0; j < DUP_MAX; j++)
-            //   {
-            //     printf("PosMap[%d]: %d \n", Stash[i].addr  + DUP_BLK * j, PosMap[Stash[i].addr  + DUP_BLK * j]);
-            //   }
-            // }
-            remove_from_stash(i);
-            PosMap[target] = -1;
-          }
-        }
-      }
-    }
-  }
+  // if(DUPACT_ENABLE && ep_cond)
+  // {
+  //   for (int i = 0; i < STASH_SIZE; i++)
+  //   {
+  //     if (Stash[i].isReal)
+  //     {
+  //       int dup = 0;
+  //       int target = -1;
+  //       int target_dlabel = -1;
+  //       int stash_dup = 0;
+  //       for (int j = 0; j < DUP_MAX; j++)
+  //       {
+  //         if (Stash[i].dlabel[j] != -1)
+  //         {
+  //           target_dlabel = Stash[i].dlabel[j];
+  //           stash_dup++;
+  //         }
+  //       }
+  //       for (int j = 0; j < DUP_MAX; j++)
+  //       {
+  //         int ind = Stash[i].addr + DUP_BLK * j;
+  //         if (PosMap[ind] != -1)
+  //         {
+  //           dup++;
+  //         }
+  //         if (PosMap[ind] == target_dlabel)
+  //         {
+  //           target = ind;
+  //         }
+  //       }
+  //       if(dup > 1)
+  //       {
+  //         if(target == -1)
+  //         {
+  //           printf("ERROR: Remove Dup: target %d\n", target);
+  //           exit(1);
+  //         }
+  //         if(target_dlabel == -1)
+  //         {
+  //           printf("ERROR: Remove Dup: target_dlabel %d\n", target_dlabel);
+  //           exit(1);
+  //         }
+  //         if(stash_dup == dup)
+  //         {
+  //           // printf("WARNIN: ring access: all dups of block %d are in the stash! \n", Stash[i].addr);
+  //           all_dup_in_stash++;
+  //           return;
+  //         }
+  //         if(!pinFlag || i != intended)
+  //         {
+  //           dup_remove++;
+  //           target_dup_label = PosMap[target];
+  //           // if(Stash[i].addr == 1202030)
+  //           //   printf("Remove Dup block %d dup %d target_dup_label %d target %d\n", Stash[i].addr, dup, target_dup_label, target);
+  //           // if(Stash[i].addr == 1202030)
+  //           // {
+  //           //   for (int j = 0; j < DUP_MAX; j++)
+  //           //   {
+  //           //     printf("PosMap[%d]: %d \n", Stash[i].addr  + DUP_BLK * j, PosMap[Stash[i].addr  + DUP_BLK * j]);
+  //           //   }
+  //           // }
+  //           remove_from_stash(i);
+  //           PosMap[target] = -1;
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   // nonmemops_trace = 0;
 
