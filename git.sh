@@ -3,6 +3,7 @@
 git config --global user.name mhrnshrf
 git config --local user.email mhrnshrf@gmail.com
 
+git config --global --add safe.directory '/mnt/c/Users/mehrn/OneDrive/Pitt/Year 7/Fall 2023/ORAM-Simulator'
 
 COMMENT=$1
 # Disable gnome-ssh-askpass
