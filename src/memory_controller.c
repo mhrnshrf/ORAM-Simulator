@@ -230,7 +230,9 @@ long double accgap_overmean[LEVEL] = {0};
 unsigned long long int accgap_under_th[LEVEL] = {0};
 unsigned long long int flushed[LEVEL] = {0};
 
-
+#define ACCDIST 101
+int AccessCount[BLOCK] = {0}; 
+unsigned long long int access_dist[ACCDIST] = {0};
 
 
 // long long int CYCLE_VAL = 0;
@@ -4197,6 +4199,29 @@ void freecursive_access(int addr, char type){
           printf("@%lld data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
         }
         ring_access(addr);
+        AccessCount[addr]++;
+        if(AccessCount[addr] < ACCDIST)
+        {
+          access_dist[AccessCount[addr]]++;
+        }
+        else
+        {
+          access_dist[ACCDIST - 1]++;
+        }
+        
+
+        // if(DUPACT_ENABLE)
+        // {
+        //   int dup = 0;
+        //   for (int i = 0; i < DUP_MAX; i++)
+        //   {
+        //     if(PosMap[addr  + DUP_BLK * i] != -1)
+        //     {
+        //       dup++;
+        //     }
+        //   }
+        //   printf("%d \n", dup);
+        // }
 
         // // Refill dup
         // if(DUPACT_ENABLE)
@@ -5475,6 +5500,8 @@ int calc_path_length(){
 }
 
 void ring_access(int addr){
+
+
   // int before = stashctr;
   record_util_level();
   record_util_snap();
@@ -9139,7 +9166,7 @@ void export_csv(char * argv[]){
   fprintf (fp, "dup_refill_per_acc, %f\n", (double)dup_refill/invokectr);
   fprintf (fp, "all_dup_in_stash, %lld\n", all_dup_in_stash);
   fprintf (fp, "stash_reduced_per_evict, %f\n", stash_reduced_per_evict);
-
+  print_array(access_dist, ACCDIST, fp, "access_dist");
   
   fclose(fp);
 }
