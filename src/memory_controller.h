@@ -155,6 +155,8 @@
 
 #define DUPACT_ENABLE 1
 
+#define ACCDIST 101
+
 
 enum{
   // main tree

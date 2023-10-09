@@ -230,7 +230,6 @@ long double accgap_overmean[LEVEL] = {0};
 unsigned long long int accgap_under_th[LEVEL] = {0};
 unsigned long long int flushed[LEVEL] = {0};
 
-#define ACCDIST 101
 int AccessCount[BLOCK] = {0}; 
 unsigned long long int access_dist[ACCDIST] = {0};
 
@@ -4199,6 +4198,7 @@ void freecursive_access(int addr, char type){
           printf("@%lld data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
         }
         ring_access(addr);
+
         AccessCount[addr]++;
         if(AccessCount[addr] < ACCDIST)
         {
