@@ -233,6 +233,9 @@ unsigned long long int flushed[LEVEL] = {0};
 int AccessCount[BLOCK] = {0}; 
 unsigned long long int access_dist[ACCDIST] = {0};
 
+// int TraceCount[BLOCK] = {0};
+// unsigned long long int trace_dist[ACCDIST] = {0};
+
 
 // long long int CYCLE_VAL = 0;
 
@@ -9167,6 +9170,7 @@ void export_csv(char * argv[]){
   fprintf (fp, "all_dup_in_stash, %lld\n", all_dup_in_stash);
   fprintf (fp, "stash_reduced_per_evict, %f\n", stash_reduced_per_evict);
   print_array(access_dist, ACCDIST, fp, "access_dist");
+  // print_array(trace_dist, ACCDIST, fp, "trace_dist");
   
   fclose(fp);
 }

@@ -1876,6 +1876,15 @@ int main(int argc, char * argv[])
 								return -2;
 								}
 							}
+							// TraceCount[addr[numc]]++;
+							// if(TraceCount[addr[numc]] < ACCDIST)
+							// {
+							// 	trace_dist[TraceCount[addr[numc]]]++;
+							// }
+							// else
+							// {
+							// 	trace_dist[ACCDIST - 1]++;
+							// }
 							addr[numc] = byte_addr(addr[numc]);
 							if (DUPACT_ENABLE)
 							{

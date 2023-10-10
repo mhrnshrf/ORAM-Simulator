@@ -158,6 +158,8 @@
 #define ACCDIST 101
 
 
+
+
 enum{
   // main tree
   Z = (RING_ENABLE) ? RING_Z + RING_S + BIGBUCK : USUAL_Z,
@@ -443,7 +445,8 @@ extern int nvm_to_serve_r_w;
 extern unsigned long long int rctr;
 extern unsigned long long int wctr;
 
-
+// extern int TraceCount[BLOCK]; 
+// extern unsigned long long int trace_dist[ACCDIST];
 
 
 
