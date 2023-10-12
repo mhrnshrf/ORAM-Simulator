@@ -155,7 +155,7 @@
 
 #define DUPACT_ENABLE 1
 
-#define ACCDIST 1001
+#define ACCDIST 3001
 
 
 

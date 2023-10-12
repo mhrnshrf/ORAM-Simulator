@@ -595,6 +595,7 @@ int SKIP_L2_VAR;
 
 unsigned long long int dup_remove = 0;
 unsigned long long int dup_refill = 0;
+unsigned long long int pos_remove = 0;
 
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
@@ -5787,8 +5788,13 @@ void ring_access(int addr){
             //     printf("PosMap[%d]: %d \n", Stash[i].addr  + DUP_BLK * j, PosMap[Stash[i].addr  + DUP_BLK * j]);
             //   }
             // }
+            if(!Stash[i].isData)
+            {
+              pos_remove++;
+            }
             remove_from_stash(i);
             PosMap[target] = -1;
+
           }
         }
       }
@@ -9169,6 +9175,8 @@ void export_csv(char * argv[]){
   fprintf (fp, "dup_refill_per_acc, %f\n", (double)dup_refill/invokectr);
   fprintf (fp, "all_dup_in_stash, %lld\n", all_dup_in_stash);
   fprintf (fp, "stash_reduced_per_evict, %f\n", stash_reduced_per_evict);
+  fprintf (fp, "pos_remove, %lld\n", pos_remove);
+  fprintf (fp, "pos_remove%%, %f\n", 100*(double)pos_remove/dup_remove);
   print_array(access_dist, ACCDIST, fp, "access_dist");
   // print_array(trace_dist, ACCDIST, fp, "trace_dist");
   
