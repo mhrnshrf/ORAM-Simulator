@@ -155,7 +155,9 @@
 
 #define DUPACT_ENABLE 1
 
-#define ACCDIST 3001
+#define POS_SKIP 1
+
+#define ACCDIST 101
 
 
 

@@ -231,7 +231,10 @@ unsigned long long int accgap_under_th[LEVEL] = {0};
 unsigned long long int flushed[LEVEL] = {0};
 
 int AccessCount[BLOCK] = {0}; 
+int AllCount[BLOCK] = {0}; 
 unsigned long long int access_dist[ACCDIST] = {0};
+unsigned long long int all_dist[ACCDIST] = {0};
+unsigned long long int stash_snapshot[STASH_SIZE] = {0};
 
 // int TraceCount[BLOCK] = {0};
 // unsigned long long int trace_dist[ACCDIST] = {0};
@@ -295,6 +298,7 @@ typedef struct Slot{
   int dead_lifetime;
   int dup;
   int dlabel[DUP_MAX];
+  int pos;
 }Slot;
 
 // typedef struct Bucket{
@@ -595,7 +599,14 @@ int SKIP_L2_VAR;
 
 unsigned long long int dup_remove = 0;
 unsigned long long int dup_refill = 0;
-unsigned long long int pos_remove = 0;
+unsigned long long int pos_cannot_remove = 0;
+unsigned long long int stash_residue = 0;
+unsigned long long int dup_over_one = 0;
+unsigned long long int pos_victim = 0;
+unsigned long long int acc_below_one = 0;
+unsigned long long int pos_is_one = 0;
+unsigned long long int dup_acc0_remove = 0;
+unsigned long long int dup_acc2_stay = 0;
 
 // TreeType TREE_VAR = ORAM;
 // int LEVEL_VAR = LEVEL;
@@ -1965,6 +1976,28 @@ void oram_init(){
     RhoSubMap[i] = index_to_addr(i);
   }
   switch_tree_to(ORAM);
+
+  if(DUPACT_ENABLE)
+  {
+    for (int i = 0; i < DUP_BLK; i++)
+    {
+      int dup = 0;
+      for (int j = 0; j < DUP_MAX; j++)
+      {
+        if(PosMap[i + DUP_BLK*j] != -1)
+        {
+          dup++;
+        }
+      }
+      if(dup != 2)
+      {
+        printf("ERROR: oram init: dup %d is not %d for block %d \n", dup, DUP_MAX, i);
+        export_csv(pargv);
+        exit(1);
+      }
+    }
+    
+  }
   
 }
 
@@ -3227,10 +3260,9 @@ void remap_block(int addr){
         unsigned long long int caddr = addr << ((unsigned long long int) log2(BLOCK_SIZE));
         bool incache = cache_access(caddr, 'R');
         printf("it %s exist in cache\n", incache ? "does" : "does not");
-          
-
         // printf("remap:  PLB[%d]: %d\n", addr%PLB_SIZE, PLB[addr%PLB_SIZE]);
       }
+      export_csv(pargv);
       print_oram_stats();
       exit(1);
     }
@@ -3295,7 +3327,8 @@ void remap_block(int addr){
     // if(DUPACT_ENABLE){
     //   int dup = 0;
     //   for (int j = 0; j < DUP_MAX; j++){
-    //     if(PosMap[addr + DUP_BLK*j] != -1){
+    //     if(PosMap[addr + DUP_BLK*j] != -1)
+    //     {
     //       dup++;
     //     }
     //   }
@@ -3312,7 +3345,8 @@ void remap_block(int addr){
     //         PosMap[addr + DUP_BLK*j] = dup_label;
     //         Slot s = {.addr = addr, .label = dup_label, .isReal = true, .isData = true};
     //         dup_refill++;
-    //         if(add_to_stash(s) == -1){
+    //         if(add_to_stash(s) == -1)
+    //         {
     //           printf("ERROR: remap: dup label trace %lld stash overflow!  @ %d\n", tracectr, stashctr);
     //           export_csv(pargv);
     //           print_oram_stats();
@@ -3938,7 +3972,7 @@ void freecursive_access(int addr, char type){
       }
       
     }
-    else
+    else if(!POS_SKIP)
     {
       int i_saved = -1;  // STEP 1   PLB lookup 
       for (int i = 0; i <= H-2; i++)
@@ -4094,7 +4128,7 @@ void freecursive_access(int addr, char type){
               
             }
 
-            Slot s = {.addr = victim , .label = victim_label, .isReal = true, .isData = false};
+            Slot s = {.addr = victim , .label = victim_label, .isReal = true, .isData = false, .pos = 1};
 
             
             
@@ -4108,6 +4142,7 @@ void freecursive_access(int addr, char type){
             {
               // printf("calling add from freecursive victim POSMAP\n");
               // printf("POSMAP\n");
+              pos_victim++;
               si = add_to_stash(s);
               if(si == -1){
                 printf("ERROR: freecursive: stash overflow!   @ %d\n", stashctr); 
@@ -4201,6 +4236,29 @@ void freecursive_access(int addr, char type){
         {
           printf("@%lld data  %d  cycle %lld\n", tracectr, addr, CYCLE_VAL);
         }
+
+        if(DUPACT_ENABLE)
+        {
+          int dup = 0;
+          for (int j = 0; j < DUP_MAX; j++)
+          {
+            if(PosMap[addr + DUP_BLK*j] != -1)
+            {
+              dup++;
+            }
+          }
+          if(dup == 1)
+          {
+            if(AccessCount[addr] == 0)
+            {
+              // printf("ERROR: freecursive: AccessCount[%d]: %d but dup %d\n", addr, AccessCount[addr], dup);
+              // export_csv(pargv);
+              // exit(1);
+            }
+          }
+
+        }
+
         ring_access(addr);
 
         AccessCount[addr]++;
@@ -5504,7 +5562,17 @@ int calc_path_length(){
 }
 
 void ring_access(int addr){
+int stash_occu = stashctr;
 
+  AllCount[addr]++;
+  if(AllCount[addr] < ACCDIST)
+  {
+    all_dist[AllCount[addr]]++;
+  }
+  else
+  {
+    all_dist[ACCDIST - 1]++;
+  }
 
   // int before = stashctr;
   record_util_level();
@@ -5729,10 +5797,20 @@ void ring_access(int addr){
 
   if(DUPACT_ENABLE && ep_cond)
   {
+    stash_snapshot[stashctr]++;
     for (int i = 0; i < STASH_SIZE; i++)
     {
       if (Stash[i].isReal)
       {
+        stash_residue++;
+        if(!Stash[i].isData)
+        {
+          pos_cannot_remove++;
+        }
+        if(Stash[i].pos == 1)
+        {
+          pos_is_one++;
+        }
         int dup = 0;
         int target = -1;
         int target_dlabel = -1;
@@ -5759,6 +5837,7 @@ void ring_access(int addr){
         }
         if(dup > 1)
         {
+          dup_over_one++;
           if(target == -1)
           {
             printf("ERROR: Remove Dup: target %d\n", target);
@@ -5788,13 +5867,38 @@ void ring_access(int addr){
             //     printf("PosMap[%d]: %d \n", Stash[i].addr  + DUP_BLK * j, PosMap[Stash[i].addr  + DUP_BLK * j]);
             //   }
             // }
-            if(!Stash[i].isData)
+            if (AccessCount[Stash[i].addr] == 0)
             {
-              pos_remove++;
+              dup_acc0_remove++;
+              // printf("ERROR: ring access: AccessCount[%d]: %d but dup %d\n", Stash[i].addr, AccessCount[Stash[i].addr], dup);
+              // export_csv(pargv);
+              // exit(1);
             }
+
+            
             remove_from_stash(i);
             PosMap[target] = -1;
 
+          }
+        }
+        else
+        {
+          if (AllCount[Stash[i].addr] >= 2)
+          {
+            dup_acc2_stay++;
+            // printf("ERROR: ring access: AccessCount[%d]: %d but dup %d\n", Stash[i].addr, AccessCount[Stash[i].addr], dup);
+            // export_csv(pargv);
+            // exit(1);
+          }
+        }
+        if(dup == 1)
+        {
+          if(AccessCount[Stash[i].addr] == 0)
+          {
+            acc_below_one++;
+            // printf("ERROR AccessCount[%d]: %d mismatch  @%lld\n", Stash[i].addr, AccessCount[Stash[i].addr], tracectr);
+            // export_csv(pargv);
+            // exit(1);
           }
         }
       }
@@ -5802,6 +5906,13 @@ void ring_access(int addr){
   }
 
   // nonmemops_trace = 0;
+
+  if(stashctr > stash_occu + 1)
+  {
+   printf("ERROR: ring acess: stash was %d became %d after access @%lld \n", stash_occu, stashctr, tracectr);
+  //  export_csv(pargv);
+  //  exit(1);
+  }
 
 }
 
@@ -9175,9 +9286,18 @@ void export_csv(char * argv[]){
   fprintf (fp, "dup_refill_per_acc, %f\n", (double)dup_refill/invokectr);
   fprintf (fp, "all_dup_in_stash, %lld\n", all_dup_in_stash);
   fprintf (fp, "stash_reduced_per_evict, %f\n", stash_reduced_per_evict);
-  fprintf (fp, "pos_remove, %lld\n", pos_remove);
-  fprintf (fp, "pos_remove%%, %f\n", 100*(double)pos_remove/dup_remove);
+  fprintf (fp, "stash_residue, %lld\n", stash_residue);
+  fprintf (fp, "pos_cannot_remove, %lld\n", pos_cannot_remove);
+  fprintf (fp, "pos_cannot_remove%%, %f\n", 100*(double)pos_cannot_remove/stash_residue);
+  fprintf (fp, "dup_over_one, %lld\n", dup_over_one);
+  fprintf (fp, "pos_victim, %lld\n", pos_victim);
+  fprintf (fp, "acc_below_one, %lld\n", acc_below_one);
+  fprintf (fp, "pos_is_one, %lld\n", pos_is_one);
+  fprintf (fp, "dup_acc0_remove, %lld\n", dup_acc0_remove);
+  fprintf (fp, "dup_acc2_stay, %lld\n", dup_acc2_stay);
   print_array(access_dist, ACCDIST, fp, "access_dist");
+  print_array(all_dist, ACCDIST, fp, "all_dist");
+  print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
   // print_array(trace_dist, ACCDIST, fp, "trace_dist");
   
   fclose(fp);
