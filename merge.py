@@ -12,7 +12,7 @@ all_filenames = [i for i in glob.glob(pattern)]
 #export to csv
 combined_csv = pd.concat([pd.read_csv(f, index_col=0) for f in all_filenames ], sort=False, axis=1)
 df = pd.DataFrame(combined_csv)
-column_order = ['userid', 'hist_adgroup_id', 'adgroup_id']   
+column_order = ['userid', 'hist_adgroup_id', 'adgroup_id', 'rand846', 'seq', 'randonce']
 #column_order = ['black', 'comm1', 'comm2', 'face', 'freq', 'stream']   
 # column_order = ['gcc', 'mcf', 'omnetpp', 'xalancbmk', 'x264', 'deepsjeng', 'bwaves', 'lbm', 'wrf',	'cam4',	'imagick', 'fotonik3d',	'roms', 'cactu', 'leela', 'xz']
 # column_order = ['gcc', 'mcf', 'omnetpp', 'xalancbmk', 'x264', 'deepsjeng', 'bwaves', 'lbm', 'wrf',	'cam4',	'imagick', 'fotonik3d',	'roms', 'cactu', 'leela', 'nab', 'xz']

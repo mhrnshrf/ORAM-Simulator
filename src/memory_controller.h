@@ -153,9 +153,9 @@
 #define DUP_ENABLE 0
 #define DUP_MAX 2
 
-#define DUPACT_ENABLE 1
+#define DUPACT_ENABLE 0
 
-#define POS_SKIP 1
+#define POS_SKIP 0
 
 #define ACCDIST 101
 
