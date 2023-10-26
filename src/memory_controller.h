@@ -57,7 +57,7 @@
 // oram invariant
 #define H 4     // degree of recursion including data access
 #define X 16    // # label per posmap block
-#define LEVEL 20 // # levels
+#define LEVEL 25 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
