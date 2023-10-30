@@ -72,7 +72,7 @@
 // #define ROW_BUFF_SIZE 1024 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define ROW_BUFF_SIZE 8192 // size of row buffer in terms of bytes ~~~> used for subtree address translation
 #define NUM_CHANNELS_SUBTREE 4  // # memory channel used for subtree calculation
-#define CACHE_LINE_SIZE 64      // cache line size in bytes used for subtree calculation
+#define CACHE_LINE_SIZE 128      // cache line size in bytes used for subtree calculation
 
 // rho invariant
 #define RHO_STASH_SIZE 200  // size of rho stash
