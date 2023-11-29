@@ -2489,7 +2489,7 @@ int main(int argc, char * argv[])
 	// Mehrnoosh.
   }
 
-export_csv(argv);
+// export_csv(argv);
   /* Code to make sure that the write queue drain time is included in
      the execution time of the thread that finishes last. */
   maxtd = time_done[0];
@@ -2517,7 +2517,7 @@ export_csv(argv);
   	sit_count();
   }
   else{
-  	accgap_count();
+  	// accgap_count();
   }
   export_csv(argv);
 

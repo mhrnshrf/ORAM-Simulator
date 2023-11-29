@@ -4262,14 +4262,7 @@ void freecursive_access(int addr, char type){
         ring_access(addr);
 
         AccessCount[addr]++;
-        if(AccessCount[addr] < ACCDIST)
-        {
-          access_dist[AccessCount[addr]]++;
-        }
-        else
-        {
-          access_dist[ACCDIST - 1]++;
-        }
+        
         
 
         // if(DUPACT_ENABLE)
@@ -5565,14 +5558,7 @@ void ring_access(int addr){
 int stash_occu = stashctr;
 
   AllCount[addr]++;
-  if(AllCount[addr] < ACCDIST)
-  {
-    all_dist[AllCount[addr]]++;
-  }
-  else
-  {
-    all_dist[ACCDIST - 1]++;
-  }
+
 
   // int before = stashctr;
   record_util_level();
@@ -9295,9 +9281,35 @@ void export_csv(char * argv[]){
   fprintf (fp, "pos_is_one, %lld\n", pos_is_one);
   fprintf (fp, "dup_acc0_remove, %lld\n", dup_acc0_remove);
   fprintf (fp, "dup_acc2_stay, %lld\n", dup_acc2_stay);
+
+
+  int access_dist_total = 0;
+  for (int i = 0; i < BLOCK; i++)
+  {
+    access_dist_total += AccessCount[i]; 
+    if(AccessCount[i] < ACCDIST)
+    {
+      access_dist[AccessCount[i]]++;
+    }
+    else
+    {
+      access_dist[ACCDIST - 1]++;
+    }
+
+    if(AllCount[i] < ACCDIST)
+    {
+      all_dist[AllCount[i]]++;
+    }
+    else
+    {
+      all_dist[ACCDIST - 1]++;
+    }
+  }
+  
+  fprintf (fp, "access_dist_total, %d\n", access_dist_total);
   print_array(access_dist, ACCDIST, fp, "access_dist");
-  print_array(all_dist, ACCDIST, fp, "all_dist");
-  print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
+  // print_array(all_dist, ACCDIST, fp, "all_dist");
+  // print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
   // print_array(trace_dist, ACCDIST, fp, "trace_dist");
   
   fclose(fp);

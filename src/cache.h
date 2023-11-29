@@ -11,7 +11,7 @@
 // #define CACHE_SIZE 262144  // in bytes ~~~> 256 KB
 // #define NUM_WAY 16           //  ~~~> # way per set
 #define NUM_WAY 8           //  ~~~> # way per set
-#define BLOCK_SIZE 64       // bytes ~~~> cacheline size
+#define BLOCK_SIZE 128       // bytes ~~~> cacheline size
 #define ADDR_WIDTH 32       // bits
 
 enum reqType {CREAD = 'R', CWRITE = 'W'};

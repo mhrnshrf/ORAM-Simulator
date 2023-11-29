@@ -55,9 +55,9 @@
 // #define LLC_DIRTY       0     // 0/1 flag that indicates whether everything is dirty eviction from cache
 
 // oram invariant
-#define H 4     // degree of recursion including data access
+#define H 5     // degree of recursion including data access
 #define X 32    // # label per posmap block
-#define LEVEL 25 // # levels
+#define LEVEL 27 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
@@ -65,7 +65,7 @@
 // #define TOP_CACHE 10   // # top levels that are cached ---------- freecursive: 10, volcano: don't care
 #define L1 9   // upto L1 level buckts have specific Z1 number of slots   (inclusive)
 #define L2 15   // upto L2 level buckts have specific Z2 number of slots   (inclusive)  // l24 ->17  ds15 ~> 14
-#define L3 18   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22  ds15 ~> 22
+#define L3 17   // upto L3 level buckts have specific Z3 number of slots   (inclusive) //  l24 ->22  ds15 ~> 22
 #define CAP_LEVEL 20 // level where cap counter are maintaned
 
 // subtree invariant
@@ -176,7 +176,8 @@ enum{
   // BLOCK = (RING_ENABLE) ? (long long int)((RING_Z*SLOT*U)/Z):((long long int)floor(U*(Z1*((long long int)pow(2,L1+1)-1) + Z2*((long long int)pow(2,L2+1)-(long long int)pow(2,L1+1)) + Z3*((long long int)pow(2,L3+1)-(long long int)pow(2,L2+1)) + Z*((long long int)pow(2,LEVEL)-(long long int)pow(2,L3+1))))),  // # valid blocks in oram tree
   // BLOCK = (RING_ENABLE) ? 33260542*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
   // BLOCK = (RING_ENABLE) ? 41943037*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
-  BLOCK = (RING_ENABLE) ? 2621437*((long long int)pow(2,LEVEL-20)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
+  // BLOCK = (RING_ENABLE) ? 2621437*((long long int)pow(2,LEVEL-20)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
+  BLOCK = (RING_ENABLE) ? 1310718 : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
   // BLOCK = (unsigned long long int)pow(SIT_ARITY, SIT_LEVEL-1),
   // BLOCK = 33260542*((long long int)pow(2,LEVEL-24)),
   // BLOCK = 16777215, 
