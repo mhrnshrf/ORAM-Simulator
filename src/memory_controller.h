@@ -177,11 +177,12 @@ enum{
   // BLOCK = (RING_ENABLE) ? 33260542*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
   // BLOCK = (RING_ENABLE) ? 41943037*((long long int)pow(2,LEVEL-24)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
   // BLOCK = (RING_ENABLE) ? 2621437*((long long int)pow(2,LEVEL-20)) : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
-  BLOCK = (RING_ENABLE) ? 1310718 : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
+  // BLOCK = (RING_ENABLE) ? 1310718 : (long long int)NODE*((long long int)floor(USUAL_Z*U)),
   // BLOCK = (unsigned long long int)pow(SIT_ARITY, SIT_LEVEL-1),
   // BLOCK = 33260542*((long long int)pow(2,LEVEL-24)),
   // BLOCK = 16777215, 
   // BLOCK = 10485759, 
+  BLOCK = 335544316, 
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
   STASH_SIZE = (VOLCANO_ENABLE /*|| STT_ENABLE*/) ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,
   OV_THRESHOLD = STASH_SIZE - Z*(LEVEL+1),   // overflow threshold for background eviction; C - Z(L+1)

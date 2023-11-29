@@ -363,6 +363,14 @@ typedef struct IntegNode{
   unsigned long long int gapN;
 }IntegNode;
 
+
+typedef struct MerkleNode {
+    int major_counter;
+    int minor_counter;
+    int data[CACHE_LINE_SIZE/4];
+}MerkleNode;
+
+
 int revarr[RING_REV];
 
 bool last_read_served;
@@ -955,7 +963,7 @@ unsigned long long int byte_addr(long long int physical_addr){
     return addr;
   }
 
-  addr = (unsigned long long  int)(physical_addr & (0x7fffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
+  addr = (unsigned long long  int)(physical_addr & (0x7ffffffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
   // unsigned long long int addr = (unsigned long long  int)(physical_addr & (0xffffffff));  // 4/15/2021 for l=25, for l=24 go back to 0x7fffffff
   // unsigned long long int addr = physical_addr;  
   unsigned long long int max = ((unsigned long long int)(BLOCK-1)<<((unsigned long long int)log2(BLOCK_SIZE))) | (unsigned long long int)(BLOCK_SIZE-1);
