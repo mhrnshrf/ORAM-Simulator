@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 // other simulation invariant
 // #define TRACE_SIZE 300000000          // # addr read from trace file
@@ -55,8 +56,8 @@
 // #define LLC_DIRTY       0     // 0/1 flag that indicates whether everything is dirty eviction from cache
 
 // oram invariant
-#define H 5     // degree of recursion including data access
-#define X 32    // # label per posmap block
+#define H 4     // degree of recursion including data access
+#define X 127    // # label per posmap block
 #define LEVEL 27 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
@@ -158,6 +159,12 @@
 #define POS_SKIP 0
 
 #define ACCDIST 101
+
+#define POSBLK_BYTE 4
+
+#define IDCTR_MAX 1024
+
+#define RESETDIST 101
 
 
 

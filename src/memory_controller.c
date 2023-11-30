@@ -365,11 +365,15 @@ typedef struct IntegNode{
 
 
 typedef struct MerkleNode {
-    int major_counter;
-    int minor_counter;
-    int data[CACHE_LINE_SIZE/4];
+    uint16_t nounce;
+    uint16_t pathid_counter[CACHE_LINE_SIZE];
 }MerkleNode;
 
+
+MerkleNode MerkleTree[BLOCK];  
+
+unsigned long long int merkle_ctr_dist[CACHE_LINE_SIZE] = {0};
+unsigned long long int merkle_reset_dist[CACHE_LINE_SIZE] = {0};
 
 int revarr[RING_REV];
 
@@ -488,6 +492,7 @@ int earlyctr = 0;
 int evictctr = 0;	// # evictions caused after misses on llc
 int pos1_access = 0;
 int pos2_access = 0;
+int pos_access = 0;
 int ptr_fail = 0;
 int search_fail = 0;
 int precase = 0;
@@ -547,6 +552,41 @@ void printOff() {print_flag = false;}  // turn the pin flag off
 
 int TIMING_INTERVAL;
 
+
+uint32_t merkle_addr(int addr, int i)
+{
+  return addr/pow(CACHE_LINE_SIZE, i);
+}
+
+uint8_t merkle_offset(int addr, int i)
+{
+  return (uint8_t)(addr/pow(CACHE_LINE_SIZE, i-1)) % CACHE_LINE_SIZE;
+}
+
+bool merkle_overflow(uint32_t addr, uint8_t offset)
+{
+  if (MerkleTree[addr].pathid_counter[offset] == IDCTR_MAX )
+  {
+    return true;
+  }
+  return false;
+}
+
+void merkle_reset(uint32_t addr)
+{
+  uint8_t nonzero = 0;
+  for (int i = 0; i < CACHE_LINE_SIZE; i++)
+  {
+    if (MerkleTree[addr].pathid_counter[i] != 0)
+    {
+      nonzero++;
+    }
+    
+    MerkleTree[addr].pathid_counter[i] = 0;
+  }
+  MerkleTree[addr].nounce++;
+  merkle_ctr_dist[nonzero]++;
+}
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
 long long int plbaccess[H-1] = {0};   // # total plb access (hits + misses)
@@ -1972,6 +2012,12 @@ void oram_init(){
   for (int i = 0; i < NODE; i++)
   {
     SubMap[i] = index_to_addr(i);
+  }
+
+  for(int i = 0; i < BLOCK; i++)
+  {
+    // MerkleTree[i].reset_count = 0;
+    MerkleTree[i].nounce = 0;
   }
 
 
@@ -4071,6 +4117,17 @@ void freecursive_access(int addr, char type){
             if (LOG_ENABLE && tracectr >= LOG_TH){
               printf("@%lld posmap  %d  cycle %lld\n", tracectr, tag, CYCLE_VAL);
             }
+
+            // Merkle:
+            uint32_t maddr = merkle_addr(addr, i_saved);
+            uint8_t moff = merkle_offset(addr, i_saved);
+            MerkleTree[maddr].pathid_counter[moff]++;
+            if(merkle_overflow(maddr, moff))
+            {
+              merkle_reset(maddr);
+            }
+            // Merkle.
+
             ring_access(tag);
           }
           else
@@ -4078,7 +4135,8 @@ void freecursive_access(int addr, char type){
             oram_access(tag);
           }
           pinOff();
-
+          
+          pos_access++;
           if (i_saved == 1)
           {
             pos1_access++;
@@ -8750,8 +8808,9 @@ void export_csv(char * argv[]){
   fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
   fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
   fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
-  fprintf(fp, "posmap%%,%f%%\n", 100*(double)(pos1_access + pos2_access)/ringctr);
-  fprintf(fp, "data%%,%f%%\n", 100*(double)(ringctr - pos1_access - pos2_access)/ringctr);
+  fprintf(fp, "pos_access,%d\n", pos_access);
+  fprintf(fp, "posmap%%,%f%%\n", 100*(double)(pos_access)/ringctr);
+  fprintf(fp, "data%%,%f%%\n", 100*(double)(ringctr - pos_access)/ringctr);
 
   // fprintf(fp, "plb_hit0,%lld\n", plb_hit[0]);
   // fprintf(fp, "plb_hit1,%lld\n", plb_hit[1]);
@@ -9313,9 +9372,28 @@ void export_csv(char * argv[]){
       all_dist[ACCDIST - 1]++;
     }
   }
+
+  int merkle_reset_total = 0;
+  for (int i = 0; i < BLOCK; i++)
+  {
+    merkle_reset_total += MerkleTree[i].nounce; 
+    if(MerkleTree[i].nounce < RESETDIST)
+    {
+      merkle_reset_dist[MerkleTree[i].nounce]++;
+    }
+    else
+    {
+      merkle_reset_dist[RESETDIST - 1]++;
+    }
+  }
+
+
   
-  fprintf (fp, "access_dist_total, %d\n", access_dist_total);
-  print_array(access_dist, ACCDIST, fp, "access_dist");
+  // fprintf (fp, "access_dist_total, %d\n", access_dist_total);
+  // print_array(access_dist, ACCDIST, fp, "access_dist");
+  print_array(merkle_reset_dist, RESETDIST, fp, "merkle_reset_dist");
+  fprintf (fp, "merkle_reset_total, %d\n", merkle_reset_total);
+  print_array(merkle_ctr_dist, CACHE_LINE_SIZE, fp, "merkle_ctr_dist");
   // print_array(all_dist, ACCDIST, fp, "all_dist");
   // print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
   // print_array(trace_dist, ACCDIST, fp, "trace_dist");
