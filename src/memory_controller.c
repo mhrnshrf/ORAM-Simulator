@@ -8805,9 +8805,9 @@ void export_csv(char * argv[]){
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
   fprintf(fp, "pos1_access,%d\n", pos1_access);
   fprintf(fp, "pos2_access,%d\n", pos2_access);
-  fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
-  fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
-  fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
+  // fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
+  // fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
+  // fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
   fprintf(fp, "pos_access,%d\n", pos_access);
   fprintf(fp, "posmap%%,%f%%\n", 100*(double)(pos_access)/ringctr);
   fprintf(fp, "data%%,%f%%\n", 100*(double)(ringctr - pos_access)/ringctr);
@@ -9397,6 +9397,11 @@ void export_csv(char * argv[]){
   // print_array(all_dist, ACCDIST, fp, "all_dist");
   // print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
   // print_array(trace_dist, ACCDIST, fp, "trace_dist");
+  for (int i = 1; i < H-1; i++)
+  {
+    fprintf(fp, "plb_hit[%d],%f%%\n", i, 100*(double)plb_hit[i]/plbaccess[i]);
+  }
+  
   
   fclose(fp);
 }
