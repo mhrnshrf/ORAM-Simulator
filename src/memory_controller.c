@@ -9397,10 +9397,17 @@ void export_csv(char * argv[]){
   // print_array(all_dist, ACCDIST, fp, "all_dist");
   // print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
   // print_array(trace_dist, ACCDIST, fp, "trace_dist");
+  uint64_t plb_hit_total = 0;
+  uint64_t plb_acc_total = 0;
   for (int i = 1; i < H-1; i++)
   {
     fprintf(fp, "plb_hit[%d],%f%%\n", i, 100*(double)plb_hit[i]/plbaccess[i]);
+    plb_hit_total += plb_hit[i];
+    plb_acc_total += plbaccess[i];
   }
+
+  fprintf(fp, "plb_hit_total,%f%%\n", 100*(double)plb_hit_total/plb_acc_total);
+
   
   
   fclose(fp);
