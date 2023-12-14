@@ -50,7 +50,7 @@ uint32_t secureFunc(uint32_t nonce, uint32_t within_block_index, uint32_t per_pa
     }
 
     // Map the resulting pathID to fit within a 32-bit range (0 to 4,294,967,295)
-    pathID %= UINT32_MAX;
+    pathID %= PATH;
 
     return pathID;
 }
