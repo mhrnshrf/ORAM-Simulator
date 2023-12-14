@@ -30,6 +30,36 @@ extern long long int trace_clk;
 #include <unistd.h> 
 #include <time.h>
 
+#include <openssl/evp.h>
+#include <openssl/sha.h>
+
+// Function to generate the path ID using OpenSSL's EVP interface for SHA-256 hash
+uint32_t secureFunc(uint16_t nonce, uint16_t within_block_index, uint16_t per_path_counter) {
+    uint32_t counters[3] = { nonce, within_block_index, per_path_counter };
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+
+    EVP_MD_CTX *mdctx;
+    const EVP_MD *md = EVP_sha256();
+
+    mdctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(mdctx, md, NULL);
+    EVP_DigestUpdate(mdctx, counters, sizeof(counters));
+    EVP_DigestFinal_ex(mdctx, hash, NULL);
+    EVP_MD_CTX_free(mdctx);
+
+    // Convert the hash into a 32-bit integer (path ID) and map it within the 32-bit range
+    uint32_t pathID = 0;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+        pathID = (pathID << 8) | hash[i];
+    }
+
+    // Map the resulting pathID to fit within a 32-bit range (0 to 4,294,967,295)
+    pathID %= UINT32_MAX;
+
+    return pathID;
+}
+
+
 char bench[20];
 char exp_name[20] = "";
 
@@ -709,6 +739,8 @@ int target_dup_label = -1;
 int former_label = -1;
 
 int target_dup_label_tmp = -1;
+
+int merkle_level = 1;
 
 // void reset_util(){
 //   for (int i = 0; i < LEVEL; i++)
@@ -1987,6 +2019,26 @@ int calc_deadQ_size(){
 
 // initialize the oram tree by assigning a random path to each addr of address space
 void oram_init(){
+
+  if (MERKLE_ENABLE)
+  {
+    for(int addr = 0; addr < BLOCK; addr++)
+    {
+      for (int h = 0; h < H-1; h++)
+      {
+        int ai = addr/pow(X, h);
+        int tag = concat(h, ai);  // tag = i || ai  (bitwise concat)
+
+        int maddr = merkle_addr(ai, h+1);
+        int moff = merkle_offset(ai, h+1);
+        
+        PosMap[tag] = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
+      }
+      
+    }
+  }  
+
+
   if(DUPACT_ENABLE){
     for(int i = 0; i < BLOCK; i++){
       PosMap[i] =  assign_a_path(i % DUP_BLK);
@@ -2249,7 +2301,13 @@ void print_tree(){
 // assign a random path to a data block
 int assign_a_path(int addr){
   int label = label = rand() % PATH;
+
   
+  if (MERKLE_ENABLE)
+  {
+    label = PosMap[addr];
+  }
+
 
   while(true)
   {
@@ -3262,6 +3320,7 @@ void remap_block(int addr){
  
   int label = rand() % PATH_VAR;
 
+
   // printf("remapBlock(%d)     former %d    new %d\n", addr, former_label, label);
 
   int prevlabel = PosMap[addr];
@@ -4127,7 +4186,7 @@ void freecursive_access(int addr, char type){
               merkle_reset(maddr);
             }
             // Merkle.
-
+            merkle_level = i_saved + 1;
             ring_access(tag);
           }
           else
@@ -4325,6 +4384,7 @@ void freecursive_access(int addr, char type){
 
         }
 
+        merkle_level = 1;
         ring_access(addr);
 
         AccessCount[addr]++;
@@ -5658,6 +5718,13 @@ int stash_occu = stashctr;
     label = PosMap[addr];
   }
 
+  
+  if (MERKLE_ENABLE)
+  {
+    uint32_t maddr = merkle_addr(addr, merkle_level);
+    uint8_t moff = merkle_offset(addr, merkle_level);
+    label = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
+  }
   
   
 
