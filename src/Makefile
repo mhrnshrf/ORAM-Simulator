@@ -6,7 +6,7 @@ OBJS = $(OBJDIR)/main.o $(OBJDIR)/memory_controller.o $(OBJDIR)/scheduler.o $(OB
 CC = gcc
 DEBUG = -g
 CFLAGS = -std=c99 -mcmodel=medium -Wall -c $(DEBUG) -Wdeprecated-declarations
-LFLAGS = -Wall $(DEBUG) 
+LFLAGS = -Wall $(DEBUG) -lssl -lcrypto
 
 
 $(BINDIR)/$(OUT): $(OBJS)
