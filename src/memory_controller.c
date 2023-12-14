@@ -33,19 +33,15 @@ extern long long int trace_clk;
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
-// Function to generate the path ID using OpenSSL's EVP interface for SHA-256 hash
+// Function to generate the path ID using OpenSSL's SHA-256 hash function
 uint32_t secureFunc(uint32_t nonce, uint32_t within_block_index, uint32_t per_path_counter) {
     uint32_t counters[3] = { nonce, within_block_index, per_path_counter };
     unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256; // Using the SHA256_CTX directly
 
-    EVP_MD_CTX *mdctx;
-    const EVP_MD *md = EVP_sha256();
-
-    mdctx = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(mdctx, md, NULL);
-    EVP_DigestUpdate(mdctx, counters, sizeof(counters));
-    EVP_DigestFinal_ex(mdctx, hash, NULL);
-    EVP_MD_CTX_destroy(mdctx); // Use EVP_MD_CTX_destroy instead of EVP_MD_CTX_free
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, counters, sizeof(counters));
+    SHA256_Final(hash, &sha256);
 
     // Convert the hash into a 32-bit integer (path ID) and map it within the 32-bit range
     uint32_t pathID = 0;
