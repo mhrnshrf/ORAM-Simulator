@@ -4178,6 +4178,8 @@ void freecursive_access(int addr, char type){
               printf("@%lld posmap  %d  cycle %lld\n", tracectr, tag, CYCLE_VAL);
             }
 
+            merkle_level = i_saved + 1;
+            ring_access(tag);
             // Merkle:
             uint32_t maddr = merkle_addr(addr, i_saved);
             uint8_t moff = merkle_offset(addr, i_saved);
@@ -4187,8 +4189,6 @@ void freecursive_access(int addr, char type){
               merkle_reset(maddr);
             }
             // Merkle.
-            merkle_level = i_saved + 1;
-            ring_access(tag);
           }
           else
           {
