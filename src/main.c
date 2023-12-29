@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+#include <signal.h>
 
 
 #include "processor.h"
@@ -351,10 +352,27 @@ void print_oram_params(){
 }
 
 
+void signal_handler(int signum) {
+    // Handle the signal (e.g., print a message)
+    fprintf(stderr, "Program timed out. Possible infinite loop.\n");
+	 char* argv[4];
+	 *argv[3] = 'timeout';
+	export_csv(argv);
+    exit(1);
+}
 // Mehrnoosh.
+
+
 
 int main(int argc, char * argv[])
 {
+
+
+    // Set the signal handler for SIGALRM
+    signal(SIGALRM, signal_handler);
+
+    // Set the timer for 10 seconds (adjust as needed)
+    alarm(1800);
 
 	printf("SIT_ARITY	%d\n", SIT_ARITY);
 	printf("SIT_LEVEL	%d\n", SIT_LEVEL);

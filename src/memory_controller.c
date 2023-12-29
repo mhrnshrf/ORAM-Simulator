@@ -2016,6 +2016,8 @@ int calc_deadQ_size(){
 // initialize the oram tree by assigning a random path to each addr of address space
 void oram_init(){
 
+  printf("oram init starts\n");
+
   for(int addr = 0; addr < BLOCK; addr++)
   {
     MerkleTree[addr].nounce = rand() % UINT16_MAX;
