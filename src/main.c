@@ -2,7 +2,9 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+
 #include <signal.h>
+#include <time.h>
 
 
 #include "processor.h"
@@ -355,8 +357,30 @@ void print_oram_params(){
 void signal_handler(int signum) {
     // Handle the signal (e.g., print a message)
     fprintf(stderr, "Program timed out. Possible infinite loop.\n");
-	 char* argv[4];
-	 *argv[3] = 'timeout';
+	 char* argv[5] = {
+        NULL,    // Argument 0: Usually the program name itself
+        NULL,            // Argument 1
+        NULL,            // Argument 2
+        "timeout",            // Argument 3, and so on...
+        NULL               // NULL terminated to indicate the end of arguments
+    };
+
+
+    time_t current_time;
+    struct tm* time_info;
+    char time_str[20]; // Assuming timestamp can fit in 20 characters
+
+    // Get the current system time
+    time(&current_time);
+    time_info = localtime(&current_time);
+
+    // Format the timestamp as a string
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d_%H-%M-%S", time_info);
+
+	// Assign the formatted timestamp to argv[3]
+    argv[3] = time_str;
+
+
 	export_csv(argv);
     exit(1);
 }

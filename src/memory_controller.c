@@ -2058,7 +2058,7 @@ void oram_init(){
   }
   for(int i = 0; i < BLOCK; i++)
   {
-    // printf("i: %d\n", i);
+    printf("i: %d\n", i);
     PosMap[i] =  assign_a_path(i);
     Dup[i] = DUP_MAX;
   }
@@ -2069,11 +2069,11 @@ void oram_init(){
     SubMap[i] = index_to_addr(i);
   }
 
-  for(int i = 0; i < BLOCK; i++)
-  {
-    // MerkleTree[i].reset_count = 0;
-    MerkleTree[i].nounce = 0;
-  }
+  // for(int i = 0; i < BLOCK; i++)
+  // {
+  //   // MerkleTree[i].reset_count = 0;
+  //   MerkleTree[i].nounce = 0;
+  // }
 
 
   
