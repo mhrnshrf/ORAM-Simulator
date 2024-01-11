@@ -33,28 +33,117 @@ extern long long int trace_clk;
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
-// Function to generate the path ID using OpenSSL's SHA-256 hash function
-uint32_t secureFunc(uint32_t nonce, uint32_t within_block_index, uint32_t per_path_counter) {
-    uint32_t counters[3] = { nonce, within_block_index, per_path_counter };
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256; // Using the SHA256_CTX directly
+// // Function to generate the path ID using OpenSSL's SHA-256 hash function
+// uint32_t secureFunc(uint32_t nonce, uint32_t within_block_index, uint32_t per_path_counter) {
+//     uint32_t counters[3] = { nonce, within_block_index, per_path_counter };
+//     unsigned char hash[SHA256_DIGEST_LENGTH];
+//     SHA256_CTX sha256; // Using the SHA256_CTX directly
 
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, counters, sizeof(counters));
-    SHA256_Final(hash, &sha256);
+//     SHA256_Init(&sha256);
+//     SHA256_Update(&sha256, counters, sizeof(counters));
+//     SHA256_Final(hash, &sha256);
 
-    // Convert the hash into a 32-bit integer (path ID) and map it within the 32-bit range
-    uint32_t pathID = 0;
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
-        pathID = (pathID << 8) | hash[i];
+//     // Convert the hash into a 32-bit integer (path ID) and map it within the 32-bit range
+//     uint32_t pathID = 0;
+//     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+//         pathID = (pathID << 8) | hash[i];
+//     }
+
+//     // Map the resulting pathID to fit within a 32-bit range (0 to 4,294,967,295)
+//     pathID %= PATH;
+
+//     return pathID;
+// }
+
+uint32_t PathShuffled[PATH];
+uint32_t DATAPOS_RANGE[H] = {0};
+
+unsigned long long int pathid_rep[LEVEL*RING_Z+1] = {0};
+uint32_t pathid_touch[PATH] = {0};
+
+uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
+    // Check if the inputs exceed their respective bit limits
+    if (nounce > UINT15_MAX || within_block_index > UINT7_MAX || per_path_counter > UINT10_MAX) 
+    {
+      printf("Error: Input values exceed allowed bit limits nounce %d  within_block_index %d  per_path_counter %d  \n", nounce, within_block_index, per_path_counter);
+      export_csv(pargv);
+      exit(1);
+      return 0; // You may want to handle this error differently
     }
 
-    // Map the resulting pathID to fit within a 32-bit range (0 to 4,294,967,295)
-    pathID %= PATH;
+    // Combine the inputs as per the specified bit lengths
+    uint32_t pathID = 0;
 
-    return pathID;
+    pathID |= (nounce & 0x7FFF) << 17;                // 15 bits for nounce, shifted 17 positions to the left
+    pathID |= (within_block_index & 0x7F) << 10;     // 7 bits for within-block index, shifted 10 positions to the left
+    pathID |= (per_path_counter & 0x3FF);            // 10 bits for per-path counter
+
+    // pathID %= PATH;
+   
+    if (pathID >= PATH)
+    {
+      printf("ERROR: secureFunc: pathID %u\n", pathID);
+      printf("Error: Input values exceed allowed bit limits nounce %d  within_block_index %d  per_path_counter %d  \n", nounce, within_block_index, per_path_counter);
+      exit(1);
+    }
+
+    // uint32_t randomID = rand() % PATH;
+    // return randomID;
+
+    return PathShuffled[pathID];
 }
 
+
+void fisherYatesShuffle(uint32_t *array, int size) {
+    // Fixed seed for reproducibility
+    // srand(12345);
+
+    for (uint32_t i = size - 1; i > 0; i--) {
+        uint32_t j = rand() % (i + 1);
+
+        // Swap array[i] and array[j]
+        uint32_t temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+
+int calc_pos_level(uint32_t addr)
+{
+  for (int i = 0; i < H; i++)
+  {
+   if (addr < DATAPOS_RANGE[i])
+   {
+    return i + 1;
+   }
+  }
+  
+  printf("ERROR: calc pos level: addr %u beyond range!\n", addr);
+  export_csv(pargv);
+  exit(1);
+
+  // return -1;
+}
+
+int calc_posact_addr(uint32_t addr, int pl)
+{
+  uint32_t maddr = merkle_addr(addr, pl);
+  uint8_t moff = merkle_offset(addr, pl);
+
+  int posact_addr = BLOCK_ORG + maddr * X + moff;
+
+  int calc_pl = calc_pos_level(posact_addr);
+
+  if (calc_pl != pl)
+  {
+    printf("ERROR: calc posact addr: pl %d does not match given level %d\n", calc_pl , pl);
+    export_csv(pargv);
+    exit(1);
+  }
+
+  return posact_addr;
+}
 
 char bench[20];
 char exp_name[20] = "";
@@ -392,14 +481,16 @@ typedef struct IntegNode{
 
 typedef struct MerkleNode {
     uint16_t nounce;
-    uint16_t pathid_counter[CACHE_LINE_SIZE];
+    uint16_t pathid_counter[X];
 }MerkleNode;
 
 
 MerkleNode MerkleTree[BLOCK];  
+// uint32_t MerkleFlat[BLOCK];  
+// uint32_t MerkleFlatOff[BLOCK];  
 
-unsigned long long int merkle_ctr_dist[CACHE_LINE_SIZE] = {0};
-unsigned long long int merkle_reset_dist[CACHE_LINE_SIZE] = {0};
+unsigned long long int merkle_ctr_dist[X] = {0};
+unsigned long long int merkle_reset_dist[X] = {0};
 
 int revarr[RING_REV];
 
@@ -442,6 +533,7 @@ BucketShell SuperHoriz1[2097152];
 BucketShell SuperHoriz2[4194304];
 
 IntegNode SGXTree[SIT_NODE];
+
 
 
 void pinOn() {pinFlag = true;}    // turn the pin flag on
@@ -579,19 +671,21 @@ void printOff() {print_flag = false;}  // turn the pin flag off
 int TIMING_INTERVAL;
 
 
+
+
 uint32_t merkle_addr(int addr, int i)
 {
-  return addr/pow(CACHE_LINE_SIZE, i);
+  return addr/pow(X, i);
 }
 
 uint8_t merkle_offset(int addr, int i)
 {
-  return (uint8_t)(addr/pow(CACHE_LINE_SIZE, i-1)) % CACHE_LINE_SIZE;
+  return (uint8_t)(addr/pow(X, i-1)) % X;
 }
 
 bool merkle_overflow(uint32_t addr, uint8_t offset)
 {
-  if (MerkleTree[addr].pathid_counter[offset] == IDCTR_MAX )
+  if (MerkleTree[addr].pathid_counter[offset] == UINT10_MAX )
   {
     return true;
   }
@@ -601,7 +695,7 @@ bool merkle_overflow(uint32_t addr, uint8_t offset)
 void merkle_reset(uint32_t addr)
 {
   uint8_t nonzero = 0;
-  for (int i = 0; i < CACHE_LINE_SIZE; i++)
+  for (int i = 0; i < X; i++)
   {
     if (MerkleTree[addr].pathid_counter[i] != 0)
     {
@@ -2018,27 +2112,67 @@ void oram_init(){
 
   printf("oram init starts\n");
 
+  if(POSACT_ENABLE)
+  {
+    for (int i = 0; i < H; i++)
+    {
+      int sofar = (i == 0) ? 0 : DATAPOS_RANGE[i-1]; 
+      DATAPOS_RANGE[i] = sofar + BLOCK_ORG/pow(X, i);
+      printf("DATAPOS_RANGE[%d]: %u\n", i, DATAPOS_RANGE[i]);
+    }
+  }
+
+  if(MERKLE_ENABLE)
+  {
+    for (uint32_t i = 0; i < PATH; i++)
+    {
+      PathShuffled[i] = i;
+    }
+    fisherYatesShuffle(PathShuffled, PATH);
+  }
+
   for(int addr = 0; addr < BLOCK; addr++)
   {
-    MerkleTree[addr].nounce = rand() % UINT16_MAX;
+    MerkleTree[addr].nounce = rand() % (UINT15_MAX + 1);
+    for (int j = 0; j < UINT10_MAX + 1 ; j++)
+    {
+     MerkleTree[addr].pathid_counter[j] = rand() % UINT10_MAX; 
+    }
+    
   }
 
   if (MERKLE_ENABLE)
   {
+    FILE *filePointer;
+
+    // Open a file in write mode
+    filePointer = fopen("log/pathID-sha.txt", "w");
+
+    if (filePointer == NULL) {
+        printf("Unable to create file.\n");
+        exit(1);
+    }
+
     for(int addr = 0; addr < BLOCK; addr++)
     {
-      for (int h = 0; h < H-1; h++)
-      {
-        int ai = addr/pow(X, h);
-        int tag = concat(h, ai);  // tag = i || ai  (bitwise concat)
+      int pl = calc_pos_level(addr);
 
-        int maddr = merkle_addr(ai, h+1);
-        int moff = merkle_offset(ai, h+1);
-        
-        PosMap[tag] = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
-      }
+      uint32_t maddr = merkle_addr(addr, pl);
+      uint8_t moff = merkle_offset(addr, pl);
       
+      PosMap[addr] = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
+      // printf("PosMap[%u]: %u    nounce %u   offset %u   pathctr %u  \n", addr, PosMap[addr], MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
+      // MerkleFlat[tag] = maddr; 
+      // MerkleFlatOff[tag] = moff; 
+
+      pathid_touch[PosMap[addr]]++;
+
+      // Write user input to the file
+      fprintf(filePointer, "%d\n", PosMap[addr]);
+
     }
+    export_csv(pargv);
+    fclose(filePointer);
   }  
 
 
@@ -2056,11 +2190,26 @@ void oram_init(){
     
     return;
   }
+
+  // for(int i = 0; i < BLOCK; i++)
+  // {
+  //   uint32_t maddr = MerkleFlat[i];
+  //   uint8_t moff = MerkleFlatOff[i];
+  //   printf("i %u    nounce %u   offset %u   pathctr %u  ===> pathID = %u \n", i, MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff], PosMap[i]);
+  // }
+
   for(int i = 0; i < BLOCK; i++)
   {
-    printf("PosMap[%d]: %d\n", i, PosMap[i]);
     PosMap[i] =  assign_a_path(i);
     Dup[i] = DUP_MAX;
+
+    // printf("PosMap[%d] %u     \n", i, PosMap[i]);
+    
+    // uint32_t maddr = MerkleFlat[i];
+    // uint8_t moff = MerkleFlatOff[i];
+    
+    // printf("i %u    nounce %u   offset %u   pathctr %u  ===> pathID = %u \n", i, MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff], PosMap[i]);
+    // printf("PosMap[%d]: %d      MerkleFlat[%d].nounce: %d\n", i, PosMap[i], i, MerkleTree[maddr].nounce);
   }
 
   // initialize subtree addressing for oram tree
@@ -2114,6 +2263,7 @@ void oram_init(){
 void oram_init_path(){
   switch_sim_enable_to(false);
   SKIP_ENABLE_VAR = false;
+
 
   for(int i = 0; i < BLOCK; i++)
   {
@@ -3323,6 +3473,17 @@ void remap_block(int addr){
  
   int label = rand() % PATH_VAR;
 
+  if (MERKLE_ENABLE)
+  {
+    int pl = calc_pos_level(addr);
+
+    uint32_t maddr = merkle_addr(addr, pl);
+    uint8_t moff = merkle_offset(addr, pl);
+    
+    label = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
+  }
+  
+
 
   // printf("remapBlock(%d)     former %d    new %d\n", addr, former_label, label);
 
@@ -4130,11 +4291,16 @@ void freecursive_access(int addr, char type){
       while(i_saved >= 1)   // STEP 2  PosMap block access
       {
         // posneeded = true;
+        
         int ai = addr/pow(X,i_saved);
         int tag = concat(i_saved, ai);  // tag = i || ai  (bitwise concat)
 
+        if (POSACT_ENABLE)
+        {
+          tag = calc_posact_addr(addr, i_saved);
+        }
 
-        if (tag == addr)
+        if ((tag == addr) && !POSACT_ENABLE)
         {
           return;
         }
@@ -5722,12 +5888,12 @@ int stash_occu = stashctr;
   }
 
   
-  if (MERKLE_ENABLE)
-  {
-    uint32_t maddr = merkle_addr(addr, merkle_level);
-    uint8_t moff = merkle_offset(addr, merkle_level);
-    label = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
-  }
+  // if (MERKLE_ENABLE)
+  // {
+  //   uint32_t maddr = merkle_addr(addr, merkle_level);
+  //   uint8_t moff = merkle_offset(addr, merkle_level);
+  //   label = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
+  // }
   
   
 
@@ -8811,24 +8977,33 @@ void export_csv(char * argv[]){
   fprintf(fp,"Time,%f\n", exe_time);
   fprintf(fp,"Cycles,%lld\n", CYCLE_VAL);
 
-  fprintf(fp, "DEAD_ENABLE,%d\n",  DEAD_ENABLE);
-  fprintf(fp, "DYNAMIC_S,%d\n",  DYNAMIC_S);
-  fprintf(fp, "CB_ENABLE,%d\n",  CB_ENABLE);
+  fprintf(fp, "MERKLE_ENABLE,%d\n",  MERKLE_ENABLE);
+  fprintf(fp, "POS_SKIP,%d\n",  POS_SKIP);
+  fprintf(fp, "POSACT_ENABLE,%d\n",  POSACT_ENABLE);
 
-  fprintf(fp, "RSTL_ENABLE,%d\n",  RSTL_ENABLE);
-  fprintf(fp, "RING_ZSTL,%d\n",  RING_ZSTL); 
-  fprintf(fp, "SKIP_ENABLE,%d\n",  SKIP_ENABLE); 
+  fprintf(fp, "H,%d\n",  H);
+  fprintf(fp, "X,%d\n",  X);
+  fprintf(fp, "UINT10_MAX,%d\n",  UINT10_MAX);
+  fprintf(fp, "UINT15_MAX,%d\n",  UINT15_MAX);
+
+  // fprintf(fp, "DEAD_ENABLE,%d\n",  DEAD_ENABLE);
+  // fprintf(fp, "DYNAMIC_S,%d\n",  DYNAMIC_S);
+  // fprintf(fp, "CB_ENABLE,%d\n",  CB_ENABLE);
+
+  // fprintf(fp, "RSTL_ENABLE,%d\n",  RSTL_ENABLE);
+  // fprintf(fp, "RING_ZSTL,%d\n",  RING_ZSTL); 
+  // fprintf(fp, "SKIP_ENABLE,%d\n",  SKIP_ENABLE); 
 
   // printf("point 6\n");
   fprintf(fp, "TRACE_SIZE,%lld\n",  TRACE_SIZE);
   fprintf(fp, "WARMUP_TREE,%d\n",  WARMUP_TREE);
   fprintf(fp, "WARMUP_CACHE,%lld\n",  WARMUP_CACHE);
-  fprintf(fp, "DEADQ_SIZE,%d\n",  DEADQ_SIZE);
-  fprintf(fp, "GATHER_OFFSET,%d\n",  DEAD_GATHER_OFFSET);
-  fprintf(fp, "REMOTE_RATIO,%f\n",  REMOTE_ALLOC_RATIO);
-  fprintf(fp, "REMOTE_CAP,%d\n",  REMOTE_CAP);
-  fprintf(fp, "CB_MAX,%d\n",  CB_GREEN_MAX);
-  fprintf(fp, "S_INC,%d\n",  S_INC);
+  // fprintf(fp, "DEADQ_SIZE,%d\n",  DEADQ_SIZE);
+  // fprintf(fp, "GATHER_OFFSET,%d\n",  DEAD_GATHER_OFFSET);
+  // fprintf(fp, "REMOTE_RATIO,%f\n",  REMOTE_ALLOC_RATIO);
+  // fprintf(fp, "REMOTE_CAP,%d\n",  REMOTE_CAP);
+  // fprintf(fp, "CB_MAX,%d\n",  CB_GREEN_MAX);
+  // fprintf(fp, "S_INC,%d\n",  S_INC);
 
 
   fprintf(fp, "LEVEL,%d\n",  LEVEL);
@@ -8836,11 +9011,12 @@ void export_csv(char * argv[]){
 	fprintf(fp, "NODE ,%d\n", NODE);
 	fprintf(fp, "SLOT ,%d\n", SLOT);
 	fprintf(fp, "BLOCK,%d\n", BLOCK);
+	fprintf(fp, "BLOCK_ORG,%d\n", BLOCK_ORG);
 	fprintf(fp, "Z    ,%d\n", Z);
-	fprintf(fp, "SKIP_L1    ,%d\n", SKIP_L1);
-	fprintf(fp, "SKIP_L2    ,%d\n", SKIP_L2);
-	fprintf(fp, "SKIP_TURN    ,%d\n", SKIP_TURN);
-	fprintf(fp, "DUP_ENABLE    ,%d\n", DUP_ENABLE);
+	// fprintf(fp, "SKIP_L1    ,%d\n", SKIP_L1);
+	// fprintf(fp, "SKIP_L2    ,%d\n", SKIP_L2);
+	// fprintf(fp, "SKIP_TURN    ,%d\n", SKIP_TURN);
+	// fprintf(fp, "DUP_ENABLE    ,%d\n", DUP_ENABLE);
   // fprintf("L1,%d", L1);
 	// fprintf("L2,%d",L2);
 	// fprintf("L3,%d",L3);
@@ -8873,8 +9049,8 @@ void export_csv(char * argv[]){
   fprintf(fp, "dummy_ratio,%f%%\n", 100*(double)ringdumctr/(ringdumctr+ringctr));
   fprintf(fp, "ring_evictctr,%d\n", ring_evictctr);
   fprintf(fp, "shuff_tc+,%d\n", shuffctr_tc);
-  fprintf(fp, "pos1_access,%d\n", pos1_access);
-  fprintf(fp, "pos2_access,%d\n", pos2_access);
+  // fprintf(fp, "pos1_access,%d\n", pos1_access);
+  // fprintf(fp, "pos2_access,%d\n", pos2_access);
   // fprintf(fp, "plb_hit0,%f%%\n", 100*(double)plb_hit[0]/plbaccess[0]);
   // fprintf(fp, "plb_hit1,%f%%\n", 100*(double)plb_hit[1]/plbaccess[1]);
   // fprintf(fp, "plb_hit2,%f%%\n", 100*(double)plb_hit[2]/plbaccess[2]);
@@ -9403,21 +9579,21 @@ void export_csv(char * argv[]){
   // fprintf (fp, "dup_renewal, %lld\n", dup_renewal);
   // fprintf (fp, "dup_renew%%, %f%%\n", 100*(double)dup_renewal/ringctr);
   fprintf(fp, "path_per_acc,%f\n", (double)ringctr/invokectr);
-  fprintf (fp, "dup_remove, %lld\n", dup_remove);
-  fprintf (fp, "dup_remove_per_evict, %f\n", (double)dup_remove/ring_evictctr);
-  fprintf (fp, "dup_refill, %lld\n", dup_refill);
-  fprintf (fp, "dup_refill_per_acc, %f\n", (double)dup_refill/invokectr);
-  fprintf (fp, "all_dup_in_stash, %lld\n", all_dup_in_stash);
+  // fprintf (fp, "dup_remove, %lld\n", dup_remove);
+  // fprintf (fp, "dup_remove_per_evict, %f\n", (double)dup_remove/ring_evictctr);
+  // fprintf (fp, "dup_refill, %lld\n", dup_refill);
+  // fprintf (fp, "dup_refill_per_acc, %f\n", (double)dup_refill/invokectr);
+  // fprintf (fp, "all_dup_in_stash, %lld\n", all_dup_in_stash);
   fprintf (fp, "stash_reduced_per_evict, %f\n", stash_reduced_per_evict);
-  fprintf (fp, "stash_residue, %lld\n", stash_residue);
-  fprintf (fp, "pos_cannot_remove, %lld\n", pos_cannot_remove);
-  fprintf (fp, "pos_cannot_remove%%, %f\n", 100*(double)pos_cannot_remove/stash_residue);
-  fprintf (fp, "dup_over_one, %lld\n", dup_over_one);
-  fprintf (fp, "pos_victim, %lld\n", pos_victim);
-  fprintf (fp, "acc_below_one, %lld\n", acc_below_one);
-  fprintf (fp, "pos_is_one, %lld\n", pos_is_one);
-  fprintf (fp, "dup_acc0_remove, %lld\n", dup_acc0_remove);
-  fprintf (fp, "dup_acc2_stay, %lld\n", dup_acc2_stay);
+  // fprintf (fp, "stash_residue, %lld\n", stash_residue);
+  // fprintf (fp, "pos_cannot_remove, %lld\n", pos_cannot_remove);
+  // fprintf (fp, "pos_cannot_remove%%, %f\n", 100*(double)pos_cannot_remove/stash_residue);
+  // fprintf (fp, "dup_over_one, %lld\n", dup_over_one);
+  // fprintf (fp, "pos_victim, %lld\n", pos_victim);
+  // fprintf (fp, "acc_below_one, %lld\n", acc_below_one);
+  // fprintf (fp, "pos_is_one, %lld\n", pos_is_one);
+  // fprintf (fp, "dup_acc0_remove, %lld\n", dup_acc0_remove);
+  // fprintf (fp, "dup_acc2_stay, %lld\n", dup_acc2_stay);
 
 
   int access_dist_total = 0;
@@ -9458,12 +9634,30 @@ void export_csv(char * argv[]){
   }
 
 
+
+  for (int i = 0; i < PATH; i++)
+  {
+    int rep = pathid_touch[i];
+    // printf("pathid_touch[%d] : %d\n", i, pathid_touch[i]);
+    if( rep < LEVEL*RING_Z)
+    {
+      pathid_rep[rep]++;
+    }
+    else
+    {
+      pathid_rep[LEVEL*RING_Z]++;
+    }
+  }
+  
+
   
   // fprintf (fp, "access_dist_total, %d\n", access_dist_total);
   // print_array(access_dist, ACCDIST, fp, "access_dist");
-  print_array(merkle_reset_dist, RESETDIST, fp, "merkle_reset_dist");
-  fprintf (fp, "merkle_reset_total, %d\n", merkle_reset_total);
-  print_array(merkle_ctr_dist, CACHE_LINE_SIZE, fp, "merkle_ctr_dist");
+
+  // print_array(merkle_reset_dist, RESETDIST, fp, "merkle_reset_dist");
+  // fprintf (fp, "merkle_reset_total, %d\n", merkle_reset_totabl);
+  // print_array(merkle_ctr_dist, CACHE_LINE_SIZE, fp, "merkle_ctr_dist");
+
   // print_array(all_dist, ACCDIST, fp, "all_dist");
   // print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
   // print_array(trace_dist, ACCDIST, fp, "trace_dist");
@@ -9475,9 +9669,14 @@ void export_csv(char * argv[]){
     plb_hit_total += plb_hit[i];
     plb_acc_total += plbaccess[i];
   }
+  for (int i = 1; i < H-1; i++)
+  {
+    fprintf(fp, "plb_acc[%d],%lld\n", i, plbaccess[i]);
+  }
 
   fprintf(fp, "plb_hit_total,%f%%\n", 100*(double)plb_hit_total/plb_acc_total);
 
+  print_array(pathid_rep, LEVEL*RING_Z+1, fp, "pathid_rep");
   
   
   fclose(fp);

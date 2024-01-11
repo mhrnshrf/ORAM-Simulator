@@ -218,6 +218,7 @@ void print_oram_params(){
 	printf("Node            %d\n", NODE);
 	printf("Slot            %d\n", SLOT);
 	printf("Block           %d\n", BLOCK);
+	printf("Block ORG       %d\n", BLOCK_ORG);
 	printf("Z               %d\n", Z);
 	printf("U               %f\n", U);
 	printf("OV Threshold    %d\n", OV_THRESHOLD);
@@ -396,7 +397,7 @@ int main(int argc, char * argv[])
     signal(SIGALRM, signal_handler);
 
     // Set the timer for 10 seconds (adjust as needed)
-    alarm(1800);
+    alarm(600);
 
 	printf("SIT_ARITY	%d\n", SIT_ARITY);
 	printf("SIT_LEVEL	%d\n", SIT_LEVEL);
@@ -1930,7 +1931,7 @@ int main(int argc, char * argv[])
 							addr[numc] = byte_addr(addr[numc]);
 							if (DUPACT_ENABLE)
 							{
-								addr[numc] = addr[numc] % (DUP_BLK<<6) ;
+								addr[numc] = (addr[numc] % (DUP_BLK<<6)) ;
 							}
 							
 							// if (nonmemops[numc] == 10)
