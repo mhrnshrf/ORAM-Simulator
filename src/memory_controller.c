@@ -2168,10 +2168,10 @@ void oram_init(){
       pathid_touch[PosMap[addr]]++;
 
       // Write user input to the file
-      fprintf(filePointer, "%d\n", PosMap[addr]);
+      // fprintf(filePointer, "%d\n", PosMap[addr]);
 
     }
-    export_csv(pargv);
+    // export_csv(pargv);
     fclose(filePointer);
   }  
 
