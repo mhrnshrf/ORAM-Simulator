@@ -56,9 +56,9 @@
 // #define LLC_DIRTY       0     // 0/1 flag that indicates whether everything is dirty eviction from cache
 
 // oram invariant
-#define H 4     // degree of recursion including data access
+#define H 3     // degree of recursion including data access
 #define X 128    // # label per posmap block
-#define LEVEL 27 // # levels
+#define LEVEL 20 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
 #define RL 6     // # the reserved level
@@ -165,10 +165,10 @@
 
 #define RESETDIST 101
 
-#define UINT15_MAX 32767
+#define UINT15_MAX 3
+// #define UINT15_MAX 32767
 #define UINT7_MAX 127
 #define UINT10_MAX 1023
-// #define UINT15_MAX 3
 
 #define POSACT_ENABLE 1
 
@@ -195,7 +195,7 @@ enum{
   // BLOCK = 10485759, 
   // BLOCK = 335544316, 
   // BLOCK = 2621437, 
-  BLOCK_ORG = (long long int)(RING_Z*U*NODE),
+  BLOCK_ORG = (POSACT_ENABLE) ? (long long int)(USUAL_Z*U*NODE) :(long long int)(RING_Z*U*NODE),
   BLOCK = (POSACT_ENABLE) ? (long long int)(BLOCK_ORG * (1 - pow(1.0 / X, H)) / (1.0 - 1.0 / X)) : BLOCK_ORG, 
   CAP_NODE = (int)pow(2,CAP_LEVEL), // # nodes at first non-empty level of tree (L1+1) in oram tree
   STASH_SIZE = (VOLCANO_ENABLE /*|| STT_ENABLE*/) ? (int) (STASH_SIZE_ORG + (pow(2,EMPTY_TOP)-1)*Z) : STASH_SIZE_ORG,

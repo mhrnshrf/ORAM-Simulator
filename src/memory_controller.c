@@ -109,13 +109,13 @@ void fisherYatesShuffle(uint32_t *array, int size) {
 }
 
 
-int calc_pos_level(uint32_t addr)
+int calc_datapos_level(uint32_t addr)
 {
   for (int i = 0; i < H; i++)
   {
    if (addr < DATAPOS_RANGE[i])
    {
-    return i + 1;
+    return i;
    }
   }
   
@@ -129,21 +129,22 @@ int calc_pos_level(uint32_t addr)
 int calc_posact_addr(uint32_t addr, int pl)
 {
   uint32_t maddr = merkle_addr(addr, pl);
-  uint8_t moff = merkle_offset(addr, pl);
+  // uint8_t moff = merkle_offset(addr, pl);
 
-  int posact_addr = BLOCK_ORG + maddr * X + moff;
+  int posact_addr = BLOCK_ORG + maddr;
 
-  int calc_pl = calc_pos_level(posact_addr);
+  int calc_pl = calc_datapos_level(posact_addr);
 
   if (calc_pl != pl)
   {
-    printf("ERROR: calc posact addr: pl %d does not match given level %d\n", calc_pl , pl);
+    printf("ERROR: calc posact addr: calc_pl %d does not match given level %d for addr %u   posact_addr %u\n", calc_pl , pl, addr, posact_addr);
     export_csv(pargv);
     exit(1);
   }
 
   return posact_addr;
 }
+
 
 char bench[20];
 char exp_name[20] = "";
@@ -673,14 +674,20 @@ int TIMING_INTERVAL;
 
 
 
-uint32_t merkle_addr(int addr, int i)
+uint32_t merkle_addr(int addr, int pos_level)
 {
-  return addr/pow(X, i);
+  uint8_t level = calc_datapos_level(addr);
+  uint32_t index = (level == 0) ? addr : addr - DATAPOS_RANGE[level-1];
+  uint32_t pos_index = index/pow(X, pos_level - level);
+  return (DATAPOS_RANGE[pos_level - 1] - DATAPOS_RANGE[0] +  pos_index);
 }
 
-uint8_t merkle_offset(int addr, int i)
+uint8_t merkle_offset(int addr, int pos_level)
 {
-  return (uint8_t)(addr/pow(X, i-1)) % X;
+  uint8_t level = calc_datapos_level(addr);
+  uint32_t index = (level == 0) ? addr : addr - DATAPOS_RANGE[level-1];
+  uint32_t pos_index_prev = index/pow(X, pos_level - level - 1);
+  return pos_index_prev % X;
 }
 
 bool merkle_overflow(uint32_t addr, uint8_t offset)
@@ -2117,7 +2124,7 @@ void oram_init(){
     for (int i = 0; i < H; i++)
     {
       int sofar = (i == 0) ? 0 : DATAPOS_RANGE[i-1]; 
-      DATAPOS_RANGE[i] = sofar + BLOCK_ORG/pow(X, i);
+      DATAPOS_RANGE[i] = sofar + ceil(BLOCK_ORG/pow(X, i));
       printf("DATAPOS_RANGE[%d]: %u\n", i, DATAPOS_RANGE[i]);
     }
   }
@@ -2144,31 +2151,43 @@ void oram_init(){
   if (MERKLE_ENABLE)
   {
     FILE *filePointer;
-
+    char filename[100];
+    sprintf(filename, "log/%s-pathID.txt", pargv[3]);
     // Open a file in write mode
-    filePointer = fopen("log/pathID-sha.txt", "w");
+    filePointer = fopen(filename,  "w");
 
     if (filePointer == NULL) {
         printf("Unable to create file.\n");
         exit(1);
     }
 
-    for(int addr = 0; addr < BLOCK; addr++)
+    for(int addr = 0; addr < BLOCK_ORG; addr++)
     {
-      int pl = calc_pos_level(addr);
+      int pl = calc_datapos_level(addr);
+      if(pl != 0)
+      {
+        printf("ERROR: oram init pl %d is not 1 as expected!\n", pl);
+        exit(1);
+      }
 
-      uint32_t maddr = merkle_addr(addr, pl);
-      uint8_t moff = merkle_offset(addr, pl);
-      
+      uint32_t maddr = merkle_addr(addr, 1);
+      uint8_t moff = merkle_offset(addr, 1);
       PosMap[addr] = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
       // printf("PosMap[%u]: %u    nounce %u   offset %u   pathctr %u  \n", addr, PosMap[addr], MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
-      // MerkleFlat[tag] = maddr; 
-      // MerkleFlatOff[tag] = moff; 
 
-      pathid_touch[PosMap[addr]]++;
+      for (int h = 2; h < H; h++)
+      {
+        uint32_t pmaddr = merkle_addr(addr, h);
+        uint8_t pmoff = merkle_offset(addr, h);
+        uint32_t posact_addr = calc_posact_addr(addr, h-1);
+        PosMap[posact_addr] = secureFunc(MerkleTree[pmaddr].nounce, pmoff, MerkleTree[pmaddr].pathid_counter[pmoff]);
+        // printf("PosMap[%u]: %u    nounce %u   offset %u   pathctr %u  h %d pmaddr %u\n", posact_addr, PosMap[posact_addr], MerkleTree[pmaddr].nounce, pmoff, MerkleTree[pmaddr].pathid_counter[pmoff], h, pmaddr);
+      }
+      
 
-      // Write user input to the file
-      // fprintf(filePointer, "%d\n", PosMap[addr]);
+      // // Write user input to the file
+      // if(pl > 1)
+      //   fprintf(filePointer, "%d\n", PosMap[addr]);
 
     }
     // export_csv(pargv);
@@ -2198,8 +2217,11 @@ void oram_init(){
   //   printf("i %u    nounce %u   offset %u   pathctr %u  ===> pathID = %u \n", i, MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff], PosMap[i]);
   // }
 
-  for(int i = 0; i < BLOCK; i++)
+  for(int i = 0; i < DATAPOS_RANGE[H-2]; i++)
   {
+    // printf("PosMap[%u]: %u\n", i, PosMap[i]);
+    pathid_touch[PosMap[i]]++;
+
     PosMap[i] =  assign_a_path(i);
     Dup[i] = DUP_MAX;
 
@@ -3475,11 +3497,12 @@ void remap_block(int addr){
 
   if (MERKLE_ENABLE)
   {
-    int pl = calc_pos_level(addr);
+    int pl = calc_datapos_level(addr);
 
-    uint32_t maddr = merkle_addr(addr, pl);
-    uint8_t moff = merkle_offset(addr, pl);
-    
+    uint32_t maddr = merkle_addr(addr, pl+1);
+    uint8_t moff = merkle_offset(addr, pl+1);
+
+    printf("addr %u    maddr %u   moff %u \n", addr, maddr, moff);
     label = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
   }
   
