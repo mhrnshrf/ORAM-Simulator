@@ -397,7 +397,7 @@ int main(int argc, char * argv[])
     signal(SIGALRM, signal_handler);
 
     // Set the timer for in seconds 
-    alarm(1800);
+    alarm(900);
 
 	printf("SIT_ARITY	%d\n", SIT_ARITY);
 	printf("SIT_LEVEL	%d\n", SIT_LEVEL);
