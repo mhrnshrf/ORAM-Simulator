@@ -2153,13 +2153,13 @@ void oram_init(){
     FILE *filePointer;
     char filename[100];
     sprintf(filename, "log/%s-pathID.txt", pargv[3]);
-    // Open a file in write mode
-    filePointer = fopen(filename,  "w");
 
-    if (filePointer == NULL) {
-        printf("Unable to create file.\n");
-        exit(1);
-    }
+    // filePointer = fopen(filename,  "w");
+
+    // if (filePointer == NULL) {
+    //     printf("Unable to create file.\n");
+    //     exit(1);
+    // }
 
     for(int addr = 0; addr < DATAPOS_RANGE[H-2]; addr++)
     {
@@ -2191,7 +2191,7 @@ void oram_init(){
 
     }
     // export_csv(pargv);
-    fclose(filePointer);
+    // fclose(filePointer);
   }  
 
 
