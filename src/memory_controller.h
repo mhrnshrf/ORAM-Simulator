@@ -166,7 +166,8 @@
 #define RESETDIST 101
 
 // #define UINT15_MAX 3
-#define UINT15_MAX 32767
+// #define UINT15_MAX 32767
+#define UINT15_MAX 511 
 #define UINT7_MAX 127
 #define UINT10_MAX 1023
 
