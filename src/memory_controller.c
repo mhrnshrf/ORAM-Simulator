@@ -346,8 +346,8 @@ long double accgap_overmean[LEVEL] = {0};
 unsigned long long int accgap_under_th[LEVEL] = {0};
 unsigned long long int flushed[LEVEL] = {0};
 
-int AccessCount[BLOCK] = {0}; 
-int AllCount[BLOCK] = {0}; 
+// int AccessCount[BLOCK] = {0}; 
+// int AllCount[BLOCK] = {0}; 
 unsigned long long int access_dist[ACCDIST] = {0};
 unsigned long long int all_dist[ACCDIST] = {0};
 unsigned long long int stash_snapshot[STASH_SIZE] = {0};
@@ -541,7 +541,7 @@ void pinOn() {pinFlag = true;}    // turn the pin flag on
 void pinOff() {pinFlag = false;}  // turn the pin flag off
 
 
-int Dup[BLOCK];
+// int Dup[BLOCK];
 
 // rho
 typedef struct RhoBucket{
@@ -2150,9 +2150,9 @@ void oram_init(){
 
   if (MERKLE_ENABLE)
   {
-    FILE *filePointer;
-    char filename[100];
-    sprintf(filename, "log/%s-pathID.txt", pargv[3]);
+    // FILE *filePointer;
+    // char filename[100];
+    // sprintf(filename, "log/%s-pathID.txt", pargv[3]);
 
     // filePointer = fopen(filename,  "w");
 
@@ -2198,7 +2198,7 @@ void oram_init(){
   if(DUPACT_ENABLE){
     for(int i = 0; i < BLOCK; i++){
       PosMap[i] =  assign_a_path(i % DUP_BLK);
-      Dup[i] = DUP_MAX;
+      // Dup[i] = DUP_MAX;
     }
     for (int i = 0; i < STASH_SIZE; i++)
     {
@@ -2227,7 +2227,7 @@ void oram_init(){
     pathid_touch[PosMap[i]]++;
 
     PosMap[i] =  assign_a_path(i);
-    Dup[i] = DUP_MAX;
+    // Dup[i] = DUP_MAX;
 
     // printf("PosMap[%d] %u     \n", i, PosMap[i]);
     
@@ -4380,7 +4380,7 @@ void freecursive_access(int addr, char type){
           cache_invalidate(caddr);
           // printf("cache invalidated block %d\n", tag);
           // reset_dirty_search();
-          Dup[tag] = 1;
+          // Dup[tag] = 1;
           // if(DUPACT_ENABLE){
           //   for (int i = 1; i < DUP_MAX; i++)
           //   {
@@ -4598,12 +4598,12 @@ void freecursive_access(int addr, char type){
           }
           if(dup == 1)
           {
-            if(AccessCount[addr] == 0)
-            {
-              // printf("ERROR: freecursive: AccessCount[%d]: %d but dup %d\n", addr, AccessCount[addr], dup);
-              // export_csv(pargv);
-              // exit(1);
-            }
+            // if(AccessCount[addr] == 0)
+            // {
+            //   // printf("ERROR: freecursive: AccessCount[%d]: %d but dup %d\n", addr, AccessCount[addr], dup);
+            //   // export_csv(pargv);
+            //   // exit(1);
+            // }
           }
 
         }
@@ -4612,7 +4612,7 @@ void freecursive_access(int addr, char type){
         // printf("ring access data %d \n", addr);
         ring_access(addr);
 
-        AccessCount[addr]++;
+        // AccessCount[addr]++;
         
         
 
@@ -5908,7 +5908,7 @@ int calc_path_length(){
 void ring_access(int addr){
 int stash_occu = stashctr;
 
-  AllCount[addr]++;
+  // AllCount[addr]++;
 
 
   // int before = stashctr;
@@ -5992,12 +5992,12 @@ int stash_occu = stashctr;
   }
 
   bool dup_runout = false;
-  if(Dup[addr] > 1){
-    Dup[addr]--;
-  }
-  else{
-    dup_runout = true;
-  }
+  // if(Dup[addr] > 1){
+  //   Dup[addr]--;
+  // }
+  // else{
+  //   dup_runout = true;
+  // }
 
   // printf("\nb4 read stash %d  trace %d\n", stashctr, tracectr);
   greenturn_ctr = 0;
@@ -6014,7 +6014,7 @@ int stash_occu = stashctr;
   {
     if(!DUP_ENABLE || dup_runout){
       remap_block(addr);
-      Dup[addr] = DUP_MAX;
+      // Dup[addr] = DUP_MAX;
       dup_renewal++;
     }
   }
@@ -6211,13 +6211,13 @@ int stash_occu = stashctr;
             //     printf("PosMap[%d]: %d \n", Stash[i].addr  + DUP_BLK * j, PosMap[Stash[i].addr  + DUP_BLK * j]);
             //   }
             // }
-            if (AccessCount[Stash[i].addr] == 0)
-            {
-              dup_acc0_remove++;
-              // printf("ERROR: ring access: AccessCount[%d]: %d but dup %d\n", Stash[i].addr, AccessCount[Stash[i].addr], dup);
-              // export_csv(pargv);
-              // exit(1);
-            }
+            // if (AccessCount[Stash[i].addr] == 0)
+            // {
+            //   dup_acc0_remove++;
+            //   // printf("ERROR: ring access: AccessCount[%d]: %d but dup %d\n", Stash[i].addr, AccessCount[Stash[i].addr], dup);
+            //   // export_csv(pargv);
+            //   // exit(1);
+            // }
 
             
             remove_from_stash(i);
@@ -6227,23 +6227,23 @@ int stash_occu = stashctr;
         }
         else
         {
-          if (AllCount[Stash[i].addr] >= 2)
-          {
-            dup_acc2_stay++;
-            // printf("ERROR: ring access: AccessCount[%d]: %d but dup %d\n", Stash[i].addr, AccessCount[Stash[i].addr], dup);
-            // export_csv(pargv);
-            // exit(1);
-          }
+          // if (AllCount[Stash[i].addr] >= 2)
+          // {
+          //   dup_acc2_stay++;
+          //   // printf("ERROR: ring access: AccessCount[%d]: %d but dup %d\n", Stash[i].addr, AccessCount[Stash[i].addr], dup);
+          //   // export_csv(pargv);
+          //   // exit(1);
+          // }
         }
         if(dup == 1)
         {
-          if(AccessCount[Stash[i].addr] == 0)
-          {
-            acc_below_one++;
-            // printf("ERROR AccessCount[%d]: %d mismatch  @%lld\n", Stash[i].addr, AccessCount[Stash[i].addr], tracectr);
-            // export_csv(pargv);
-            // exit(1);
-          }
+          // if(AccessCount[Stash[i].addr] == 0)
+          // {
+          //   acc_below_one++;
+          //   // printf("ERROR AccessCount[%d]: %d mismatch  @%lld\n", Stash[i].addr, AccessCount[Stash[i].addr], tracectr);
+          //   // export_csv(pargv);
+          //   // exit(1);
+          // }
         }
       }
     }
@@ -7219,9 +7219,9 @@ void ring_read_path(int label, int addr){
 
     bool dup_dumread = false;
 
-    if(DUP_ENABLE && Dup[addr] > 1){
-      dup_dumread = true;
-    }
+    // if(DUP_ENABLE && Dup[addr] > 1){
+    //   dup_dumread = true;
+    // }
 
     if(!contain_intended || dup_dumread)
     {
@@ -9652,28 +9652,28 @@ void export_csv(char * argv[]){
   // fprintf (fp, "dup_acc2_stay, %lld\n", dup_acc2_stay);
 
 
-  int access_dist_total = 0;
-  for (int i = 0; i < BLOCK; i++)
-  {
-    access_dist_total += AccessCount[i]; 
-    if(AccessCount[i] < ACCDIST)
-    {
-      access_dist[AccessCount[i]]++;
-    }
-    else
-    {
-      access_dist[ACCDIST - 1]++;
-    }
+  // int access_dist_total = 0;
+  // for (int i = 0; i < BLOCK; i++)
+  // {
+  //   access_dist_total += AccessCount[i]; 
+  //   if(AccessCount[i] < ACCDIST)
+  //   {
+  //     access_dist[AccessCount[i]]++;
+  //   }
+  //   else
+  //   {
+  //     access_dist[ACCDIST - 1]++;
+  //   }
 
-    if(AllCount[i] < ACCDIST)
-    {
-      all_dist[AllCount[i]]++;
-    }
-    else
-    {
-      all_dist[ACCDIST - 1]++;
-    }
-  }
+  //   if(AllCount[i] < ACCDIST)
+  //   {
+  //     all_dist[AllCount[i]]++;
+  //   }
+  //   else
+  //   {
+  //     all_dist[ACCDIST - 1]++;
+  //   }
+  // }
 
   int merkle_reset_total = 0;
   for (int i = 0; i < BLOCK; i++)
