@@ -165,10 +165,12 @@
 
 #define RESETDIST 101
 
-// #define UINT15_MAX 3
-// #define UINT15_MAX 32767
-// #define UINT15_MAX 63 
-#define UINT15_MAX 511 
+#define UINT2_MAX 3
+#define UINT6_MAX 63 
+#define UINT9_MAX 511
+#define UINT12_MAX 4095
+
+#define UINT15_MAX 32767
 #define UINT7_MAX 127
 #define UINT10_MAX 1023
 
@@ -227,6 +229,12 @@ enum{
   SIT_NODE = (long long int)(pow(SIT_ARITY,SIT_LEVEL)-1)/(long long int)(pow(SIT_ARITY,1)-1),
   DUP_BLK = BLOCK/DUP_MAX, // number of unique blocks when dup feature is enabled
   // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
+  NOUNCE_MAX = UINT12_MAX,
+  WITHIN_CTR_MAX = X - 1,
+  PATHID_CTR_MAX = UINT7_MAX,
+  NOUNCE_WIDTH = (int) log2(NOUNCE_MAX) + 1,
+  WITHIN_CTR_WIDTH = (int) log2(WITHIN_CTR_MAX) + 1,
+  PATHID_CTR_WIDTH = (int) log2(PATHID_CTR_MAX) + 1,
 
 };
 

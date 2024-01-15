@@ -63,20 +63,19 @@ uint32_t pathid_touch[PATH] = {0};
 
 uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
     // Check if the inputs exceed their respective bit limits
-    if (nounce > UINT15_MAX || within_block_index > UINT7_MAX || per_path_counter > UINT10_MAX) 
+    if (nounce > NOUNCE_MAX || within_block_index > WITHIN_CTR_MAX || per_path_counter > PATHID_CTR_MAX) 
     {
       printf("Error: Input values exceed allowed bit limits nounce %d  within_block_index %d  per_path_counter %d  \n", nounce, within_block_index, per_path_counter);
       export_csv(pargv);
       exit(1);
-      return 0; // You may want to handle this error differently
     }
 
     // Combine the inputs as per the specified bit lengths
     uint32_t pathID = 0;
 
-    pathID |= (nounce & 0x7FFF) << 17;                // 15 bits for nounce, shifted 17 positions to the left
-    pathID |= (within_block_index & 0x7F) << 10;     // 7 bits for within-block index, shifted 10 positions to the left
-    pathID |= (per_path_counter & 0x3FF);            // 10 bits for per-path counter
+    pathID |= (nounce & NOUNCE_MAX) << (PATHID_CTR_WIDTH + WITHIN_CTR_WIDTH);                // 15 bits for nounce, shifted 17 positions to the left
+    pathID |= (within_block_index & WITHIN_CTR_MAX) << PATHID_CTR_WIDTH;     // 7 bits for within-block index, shifted 10 positions to the left
+    pathID |= (per_path_counter & PATHID_CTR_MAX);            // 10 bits for per-path counter
 
     // pathID %= PATH;
    
@@ -692,7 +691,7 @@ uint8_t merkle_offset(int addr, int pos_level)
 
 bool merkle_overflow(uint32_t addr, uint8_t offset)
 {
-  if (MerkleTree[addr].pathid_counter[offset] == UINT10_MAX )
+  if (MerkleTree[addr].pathid_counter[offset] == PATHID_CTR_MAX)
   {
     return true;
   }
@@ -2131,6 +2130,16 @@ void oram_init(){
 
   if(MERKLE_ENABLE)
   {
+    printf("NOUNCE_MAX: %u\n", NOUNCE_MAX);
+    printf("NOUNCE_WIDTH: %u\n", NOUNCE_WIDTH);
+
+    printf("WITHIN_CTR_MAX: %u\n", WITHIN_CTR_MAX);
+    printf("WITHIN_CTR_WIDTH: %u\n", WITHIN_CTR_WIDTH);
+
+    printf("PATHID_CTR_MAX: %u\n", PATHID_CTR_MAX);
+    printf("PATHID_CTR_WIDTH: %u\n", PATHID_CTR_WIDTH);
+    
+
     for (uint32_t i = 0; i < PATH; i++)
     {
       PathShuffled[i] = i;
@@ -2140,10 +2149,10 @@ void oram_init(){
 
   for(int addr = 0; addr < BLOCK; addr++)
   {
-    MerkleTree[addr].nounce = rand() % (UINT15_MAX + 1);
-    for (int j = 0; j < UINT10_MAX + 1 ; j++)
+    MerkleTree[addr].nounce = rand() % NOUNCE_MAX;
+    for (int j = 0; j <= WITHIN_CTR_MAX; j++)
     {
-     MerkleTree[addr].pathid_counter[j] = rand() % UINT10_MAX; 
+     MerkleTree[addr].pathid_counter[j] = rand() % PATHID_CTR_MAX; 
     }
     
   }
