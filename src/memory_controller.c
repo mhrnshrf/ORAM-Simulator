@@ -2161,28 +2161,28 @@ void oram_init(){
         exit(1);
     }
 
-    for(int addr = 0; addr < BLOCK_ORG; addr++)
+    for(int addr = 0; addr < DATAPOS_RANGE[H-2]; addr++)
     {
       int pl = calc_datapos_level(addr);
-      if(pl != 0)
-      {
-        printf("ERROR: oram init pl %d is not 1 as expected!\n", pl);
-        exit(1);
-      }
+      // if(pl != 0)
+      // {
+      //   printf("ERROR: oram init pl %d is not 1 as expected!\n", pl);
+      //   exit(1);
+      // }
 
-      uint32_t maddr = merkle_addr(addr, 1);
-      uint8_t moff = merkle_offset(addr, 1);
+      uint32_t maddr = merkle_addr(addr, pl + 1);
+      uint8_t moff = merkle_offset(addr, pl + 1);
       PosMap[addr] = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
       // printf("PosMap[%u]: %u    nounce %u   offset %u   pathctr %u  \n", addr, PosMap[addr], MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
 
-      for (int h = 2; h < H; h++)
-      {
-        uint32_t pmaddr = merkle_addr(addr, h);
-        uint8_t pmoff = merkle_offset(addr, h);
-        uint32_t posact_addr = calc_posact_addr(addr, h-1);
-        PosMap[posact_addr] = secureFunc(MerkleTree[pmaddr].nounce, pmoff, MerkleTree[pmaddr].pathid_counter[pmoff]);
-        // printf("PosMap[%u]: %u    nounce %u   offset %u   pathctr %u  h %d pmaddr %u\n", posact_addr, PosMap[posact_addr], MerkleTree[pmaddr].nounce, pmoff, MerkleTree[pmaddr].pathid_counter[pmoff], h, pmaddr);
-      }
+      // for (int h = 2; h < H; h++)
+      // {
+      //   uint32_t pmaddr = merkle_addr(addr, h);
+      //   uint8_t pmoff = merkle_offset(addr, h);
+      //   uint32_t posact_addr = calc_posact_addr(addr, h-1);
+      //   PosMap[posact_addr] = secureFunc(MerkleTree[pmaddr].nounce, pmoff, MerkleTree[pmaddr].pathid_counter[pmoff]);
+      //   // printf("PosMap[%u]: %u    nounce %u   offset %u   pathctr %u  h %d pmaddr %u\n", posact_addr, PosMap[posact_addr], MerkleTree[pmaddr].nounce, pmoff, MerkleTree[pmaddr].pathid_counter[pmoff], h, pmaddr);
+      // }
       
 
       // // Write user input to the file
@@ -2219,7 +2219,11 @@ void oram_init(){
 
   for(int i = 0; i < DATAPOS_RANGE[H-2]; i++)
   {
-    // printf("PosMap[%u]: %u\n", i, PosMap[i]);
+    // if (i == 2099944)
+    // {
+    //   printf("Mapped ==============================> PosMap[%u]: %u\n", i, PosMap[i]);
+    // }
+    
     pathid_touch[PosMap[i]]++;
 
     PosMap[i] =  assign_a_path(i);
@@ -3502,13 +3506,15 @@ void remap_block(int addr){
     uint32_t maddr = merkle_addr(addr, pl+1);
     uint8_t moff = merkle_offset(addr, pl+1);
 
-    printf("addr %u    maddr %u   moff %u \n", addr, maddr, moff);
+    MerkleTree[maddr].pathid_counter[moff]++;
+
+    // printf("addr %u    maddr %u   moff %u \n", addr, maddr, moff);
     label = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
   }
   
-
-
   // printf("remapBlock(%d)     former %d    new %d\n", addr, former_label, label);
+
+
 
   int prevlabel = PosMap[addr];
 
@@ -3663,6 +3669,7 @@ void remap_block(int addr){
 int add_to_stash(Slot s){
 
   // printf("INFO: add to stash: block %d label %d will be added @%lld\n", s.addr, s.label, tracectr);
+  // printf("addStash(%d) label %d   @%lld\n", s.addr, s.label, tracectr);
 
   // if (STT_ENABLE && TREE_VAR == ORAM)
   // {
@@ -3782,6 +3789,7 @@ int add_to_stash(Slot s){
 
         
         stashctr++;
+        // printf("+stashctr %d\n", stashctr);
 
         if (!s.isReal)
         {
@@ -3905,6 +3913,7 @@ void remove_from_stash(int index){
         stashctr--;
         Stash[index].isReal = false;
       }
+
       
       // if(Stash[index].addr == 3227765)
       // {
@@ -3930,6 +3939,14 @@ void remove_from_stash(int index){
   {
     stashctr--;
     Stash[index].isReal = false;
+
+    // printf("-stashctr %d\n", stashctr);
+
+    // if (Stash[index].addr == 2099944)
+    // {
+    //   printf("removing %d from stash\n", Stash[index].addr);
+    // }
+    
   }  
 
 }
@@ -4282,11 +4299,19 @@ void freecursive_access(int addr, char type){
         unsigned long long int ai = addr/pow(X,i);
         unsigned long long int tag = concat(i, ai);  // tag = i || ai  (bitwise concat)
 
+        if (POSACT_ENABLE)
+        {
+          // printf("addr %d  i_saved %d   @%lld \n", addr, i, tracectr);
+          tag = calc_posact_addr(addr, i);
+        }
+
         // printf("@ trace %d  i: %d   ai: %x    tag: %x\n", tracectr, i, ai, tag);
 
+        // printf("plbAccess(%lld) ? \n", tag);
         
         if (plb_access(tag) || buffer_contain(tag))  // PLB hit
         {
+          // printf("plbAccess(%lld): hit \n", tag);
           
             plb_hit[i]++;
           
@@ -4370,11 +4395,13 @@ void freecursive_access(int addr, char type){
             }
 
             merkle_level = i_saved + 1;
+            // printf("ring access %d i_saved %d\n", tag, i_saved);
             ring_access(tag);
             // Merkle:
             uint32_t maddr = merkle_addr(addr, i_saved);
             uint8_t moff = merkle_offset(addr, i_saved);
-            MerkleTree[maddr].pathid_counter[moff]++;
+            // printf("tag %d addr %d     maddr %d moff %d\n", tag, addr, maddr, moff);
+            // MerkleTree[maddr].pathid_counter[moff]++;
             if(merkle_overflow(maddr, moff))
             {
               merkle_reset(maddr);
@@ -4417,6 +4444,11 @@ void freecursive_access(int addr, char type){
 
           int si;
           int victim = plb_fill(tag);
+          // if (tag == 2099944)
+          // {
+          //   printf("plbFill(%d)   vic %d\n", tag, victim);
+          // }
+          
           // if(tag == 3227765)
           // {
           //   printf("??????????????????????????????\n");
@@ -4577,6 +4609,7 @@ void freecursive_access(int addr, char type){
         }
 
         merkle_level = 1;
+        // printf("ring access data %d \n", addr);
         ring_access(addr);
 
         AccessCount[addr]++;
@@ -9677,9 +9710,9 @@ void export_csv(char * argv[]){
   // fprintf (fp, "access_dist_total, %d\n", access_dist_total);
   // print_array(access_dist, ACCDIST, fp, "access_dist");
 
-  // print_array(merkle_reset_dist, RESETDIST, fp, "merkle_reset_dist");
-  // fprintf (fp, "merkle_reset_total, %d\n", merkle_reset_totabl);
-  // print_array(merkle_ctr_dist, CACHE_LINE_SIZE, fp, "merkle_ctr_dist");
+  print_array(merkle_reset_dist, RESETDIST, fp, "merkle_reset_dist");
+  fprintf (fp, "merkle_reset_total, %d\n", merkle_reset_total);
+  print_array(merkle_ctr_dist, CACHE_LINE_SIZE, fp, "merkle_ctr_dist");
 
   // print_array(all_dist, ACCDIST, fp, "all_dist");
   // print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
