@@ -393,11 +393,11 @@ int main(int argc, char * argv[])
 {
 
 
-    // // Set the signal handler for SIGALRM
-    // signal(SIGALRM, signal_handler);
+    // Set the signal handler for SIGALRM
+    signal(SIGALRM, signal_handler);
 
-    // // Set the timer for 10 seconds (adjust as needed)
-    // alarm(600);
+    // Set the timer for in seconds 
+    alarm(1800);
 
 	printf("SIT_ARITY	%d\n", SIT_ARITY);
 	printf("SIT_LEVEL	%d\n", SIT_LEVEL);
