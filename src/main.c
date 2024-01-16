@@ -393,11 +393,11 @@ int main(int argc, char * argv[])
 {
 
 
-    // Set the signal handler for SIGALRM
-    signal(SIGALRM, signal_handler);
+    // // Set the signal handler for SIGALRM
+    // signal(SIGALRM, signal_handler);
 
-    // Set the timer for in seconds 
-    alarm(900);
+    // // Set the timer for in seconds 
+    // alarm(900);
 
 	printf("SIT_ARITY	%d\n", SIT_ARITY);
 	printf("SIT_LEVEL	%d\n", SIT_LEVEL);
@@ -1780,7 +1780,7 @@ int main(int argc, char * argv[])
 				// printf("cache enable if: @ trace %d\n", tracectr);
 				while ((no_miss_occured && !expt_done) || (!SIM_ENABLE_VAR && tracectr < TRACE_SIZE-3) ) //  && tracectr <= endpoint
 				{
-					if (tracectr % 10 == 0)
+					if (tracectr % 1000000 == 0)
 					{
 						printf("@%lld \n", tracectr);
 					}
