@@ -3518,6 +3518,11 @@ void remap_block(int addr){
 
     MerkleTree[maddr].pathid_counter[moff]++;
 
+    if(merkle_overflow(maddr, moff))
+    {
+      merkle_reset(maddr);
+    }
+
     // printf("addr %u    maddr %u   moff %u \n", addr, maddr, moff);
     label = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
   }
@@ -4408,14 +4413,14 @@ void freecursive_access(int addr, char type){
             // printf("ring access %d i_saved %d\n", tag, i_saved);
             ring_access(tag);
             // Merkle:
-            uint32_t maddr = merkle_addr(addr, i_saved);
-            uint8_t moff = merkle_offset(addr, i_saved);
+            // uint32_t maddr = merkle_addr(addr, i_saved);
+            // uint8_t moff = merkle_offset(addr, i_saved);
             // printf("tag %d addr %d     maddr %d moff %d\n", tag, addr, maddr, moff);
             // MerkleTree[maddr].pathid_counter[moff]++;
-            if(merkle_overflow(maddr, moff))
-            {
-              merkle_reset(maddr);
-            }
+            // if(merkle_overflow(maddr, moff))
+            // {
+            //   merkle_reset(maddr);
+            // }
             // Merkle.
           }
           else
