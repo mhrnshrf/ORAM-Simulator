@@ -9722,7 +9722,8 @@ void export_csv(char * argv[]){
   unsigned long long int merkle_minor_ov = 0;
   for (int i = 0; i < X; i++)
   {
-    merkle_minor_ov += merkle_ctr_dist[i];
+    
+    merkle_minor_ov += (i*merkle_ctr_dist[i]);
   }
   
 
