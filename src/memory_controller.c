@@ -492,6 +492,8 @@ MerkleNode MerkleTree[BLOCK];
 unsigned long long int merkle_ctr_dist[X] = {0};
 unsigned long long int merkle_reset_dist[X] = {0};
 
+unsigned long long int merkle_major_ov = 0;
+
 int revarr[RING_REV];
 
 bool last_read_served;
@@ -691,6 +693,7 @@ uint8_t merkle_offset(int addr, int pos_level)
 
 bool merkle_overflow(uint32_t addr, uint8_t offset)
 {
+  // Minor counter overflow
   if (MerkleTree[addr].pathid_counter[offset] == PATHID_CTR_MAX)
   {
     return true;
@@ -701,17 +704,29 @@ bool merkle_overflow(uint32_t addr, uint8_t offset)
 void merkle_reset(uint32_t addr)
 {
   uint8_t nonzero = 0;
+  MerkleTree[addr].nounce++;
+  // Major counter overflow
+  if (MerkleTree[addr].nounce == NOUNCE_MAX)
+  {
+    merkle_major_ov++;
+    MerkleTree[addr].nounce = 0;
+  }
+  else
+  {
+    for (int i = 0; i < X; i++)
+    {
+      if (MerkleTree[addr].pathid_counter[i] != 0)
+      {
+        nonzero++;
+      }
+    }
+    merkle_ctr_dist[nonzero]++;
+  }
+
   for (int i = 0; i < X; i++)
   {
-    if (MerkleTree[addr].pathid_counter[i] != 0)
-    {
-      nonzero++;
-    }
-    
     MerkleTree[addr].pathid_counter[i] = 0;
   }
-  MerkleTree[addr].nounce++;
-  merkle_ctr_dist[nonzero]++;
 }
 
 long long int plb_hit[H-1] = {0};   // # hits on a0, a1, a2, ...
@@ -9704,6 +9719,12 @@ void export_csv(char * argv[]){
     }
   }
 
+  unsigned long long int merkle_minor_ov = 0;
+  for (int i = 0; i < X; i++)
+  {
+    merkle_minor_ov += merkle_ctr_dist[i];
+  }
+  
 
 
   for (int i = 0; i < PATH; i++)
@@ -9725,9 +9746,11 @@ void export_csv(char * argv[]){
   // fprintf (fp, "access_dist_total, %d\n", access_dist_total);
   // print_array(access_dist, ACCDIST, fp, "access_dist");
 
-  print_array(merkle_reset_dist, RESETDIST, fp, "merkle_reset_dist");
-  fprintf (fp, "merkle_reset_total, %d\n", merkle_reset_total);
+  // print_array(merkle_reset_dist, RESETDIST, fp, "merkle_reset_dist");
+  // fprintf (fp, "merkle_reset_total, %d\n", merkle_reset_total);
   print_array(merkle_ctr_dist, CACHE_LINE_SIZE, fp, "merkle_ctr_dist");
+  fprintf (fp, "merkle_minor_ov, %lld\n", merkle_minor_ov);
+  fprintf (fp, "merkle_major_ov, %lld\n", merkle_major_ov);
 
   // print_array(all_dist, ACCDIST, fp, "all_dist");
   // print_array(stash_snapshot, STASH_SIZE, fp, "stash_snapshot");
