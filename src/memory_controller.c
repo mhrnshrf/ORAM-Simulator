@@ -2167,8 +2167,8 @@ void oram_init(){
     MerkleTree[addr].nounce = rand() % NOUNCE_MAX;
     for (int j = 0; j <= WITHIN_CTR_MAX; j++)
     {
-      // MerkleTree[addr].pathid_counter[j] = rand() % PATHID_CTR_MAX; 
-      MerkleTree[addr].pathid_counter[j] = 0; 
+      MerkleTree[addr].pathid_counter[j] = rand() % PATHID_CTR_MAX; 
+      // MerkleTree[addr].pathid_counter[j] = 0; 
     }
     
   }
@@ -2217,6 +2217,7 @@ void oram_init(){
     }
     // export_csv(pargv);
     fclose(filePointer);
+    exit(0);
   }  
 
 

@@ -230,9 +230,9 @@ enum{
   SIT_NODE = (long long int)(pow(SIT_ARITY,SIT_LEVEL)-1)/(long long int)(pow(SIT_ARITY,1)-1),
   DUP_BLK = BLOCK/DUP_MAX, // number of unique blocks when dup feature is enabled
   // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
-  NOUNCE_MAX = UINT15_MAX,
+  NOUNCE_MAX = UINT12_MAX,
   WITHIN_CTR_MAX = X - 1,
-  PATHID_CTR_MAX = UINT4_MAX,
+  PATHID_CTR_MAX = UINT7_MAX,
   NOUNCE_WIDTH = (int) log2(NOUNCE_MAX) + 1,
   WITHIN_CTR_WIDTH = (int) log2(WITHIN_CTR_MAX) + 1,
   PATHID_CTR_WIDTH = (int) log2(PATHID_CTR_MAX) + 1,
