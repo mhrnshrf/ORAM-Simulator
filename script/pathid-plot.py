@@ -21,8 +21,7 @@ def plot_data(file_path):
     plt.savefig(output_file)
     plt.show()
 
-# List all files in the directory with the pattern 'pathID-*.txt'
-file_list = [file for file in os.listdir() if file.startswith('pathID-') and file.endswith('.txt')]
+file_list = [file for file in os.listdir() if 'pathID' in file and file.endswith('.txt')]
 
 # Plot each file and save the plot as XX.png
 for file_path in file_list:

@@ -77,7 +77,7 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
     pathID |= (within_block_index & WITHIN_CTR_MAX) << PATHID_CTR_WIDTH;     // 7 bits for within-block index, shifted 10 positions to the left
     pathID |= (per_path_counter & PATHID_CTR_MAX);            // 10 bits for per-path counter
 
-    // pathID %= PATH;
+    pathID %= PATH;
    
     if (pathID >= PATH)
     {
@@ -2177,7 +2177,7 @@ void oram_init(){
   {
     FILE *filePointer;
     char filename[100];
-    sprintf(filename, "%s-pathID.txt", pargv[3]);
+    sprintf(filename, "log/%s-pathID.txt", pargv[3]);
 
     filePointer = fopen(filename,  "w");
 
@@ -9070,8 +9070,13 @@ void export_csv(char * argv[]){
 
   fprintf(fp, "H,%d\n",  H);
   fprintf(fp, "X,%d\n",  X);
-  fprintf(fp, "UINT10_MAX,%d\n",  UINT10_MAX);
-  fprintf(fp, "UINT15_MAX,%d\n",  UINT15_MAX);
+
+  fprintf(fp, "NOUNCE_MAX,%u\n", NOUNCE_MAX);
+  fprintf(fp, "WITHIN_CTR_MAX,%u\n", WITHIN_CTR_MAX);
+  fprintf(fp, "PATHID_CTR_MAX,%u\n", PATHID_CTR_MAX);
+  fprintf(fp, "NOUNCE_WIDTH,%u\n", NOUNCE_WIDTH);
+  fprintf(fp, "WITHIN_CTR_WIDTH,%u\n", WITHIN_CTR_WIDTH);
+  fprintf(fp, "PATHID_CTR_WIDTH,%u\n", PATHID_CTR_WIDTH);
 
   // fprintf(fp, "DEAD_ENABLE,%d\n",  DEAD_ENABLE);
   // fprintf(fp, "DYNAMIC_S,%d\n",  DYNAMIC_S);
