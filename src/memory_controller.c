@@ -2167,24 +2167,24 @@ void oram_init(){
     MerkleTree[addr].nounce = rand() % NOUNCE_MAX;
     for (int j = 0; j <= WITHIN_CTR_MAX; j++)
     {
-      MerkleTree[addr].pathid_counter[j] = rand() % PATHID_CTR_MAX; 
-      // MerkleTree[addr].pathid_counter[j] = 0; 
+      // MerkleTree[addr].pathid_counter[j] = rand() % PATHID_CTR_MAX; 
+      MerkleTree[addr].pathid_counter[j] = 0; 
     }
     
   }
 
   if (MERKLE_ENABLE)
   {
-    // FILE *filePointer;
-    // char filename[100];
-    // sprintf(filename, "log/%s-pathID.txt", pargv[3]);
+    FILE *filePointer;
+    char filename[100];
+    sprintf(filename, "%s-pathID.txt", pargv[3]);
 
-    // filePointer = fopen(filename,  "w");
+    filePointer = fopen(filename,  "w");
 
-    // if (filePointer == NULL) {
-    //     printf("Unable to create file.\n");
-    //     exit(1);
-    // }
+    if (filePointer == NULL) {
+        printf("Unable to create file.\n");
+        exit(1);
+    }
 
     for(int addr = 0; addr < DATAPOS_RANGE[H-2]; addr++)
     {
@@ -2212,11 +2212,11 @@ void oram_init(){
 
       // // Write user input to the file
       // if(pl > 1)
-      //   fprintf(filePointer, "%d\n", PosMap[addr]);
+      fprintf(filePointer, "%d\n", PosMap[addr]);
 
     }
     // export_csv(pargv);
-    // fclose(filePointer);
+    fclose(filePointer);
   }  
 
 
