@@ -77,24 +77,23 @@ uint32_t pathid_touch[PATH] = {0};
 // }
 
 
-uint32_t jenkins_hash(uint32_t input) 
-{
-  uint32_t hash = 0;
+// uint32_t jenkins_hash(uint32_t input) 
+// {
+//   uint32_t hash = 0;
 
-  // Loop over the specified PATH_WIDTH bits
-  for (size_t i = 0; i < PATH_WIDTH; ++i) {
-      hash += (input & (1U << i)) ? (1U << i) : 0;
-      hash ^= (hash << 17) | (hash >> 15);  // Mix with prime numbers
-      hash *= 0xed5ad4bb;  // A prime constant for additional mixing
-  }
+//   // Loop over the specified PATH_WIDTH bits
+//   for (size_t i = 0; i < PATH_WIDTH; ++i) {
+//       hash += (input & (1U << i)) ? (1U << i) : 0;
+//       hash += (hash << 10);
+//       hash ^= (hash >> 6);
+//   }
 
-  hash ^= (hash << 13);
-  hash ^= (hash >> 17);
-  hash ^= (hash << 5);
+//   hash += (hash << 3);
+//   hash ^= (hash >> 11);
+//   hash += (hash << 15);
 
-  return hash;
-}
-
+//   return hash;
+// }
 
 
 uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
@@ -116,10 +115,10 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
     // pathID %= PATH;
 
     // pathID = hash_func(pathID);
-    pathID = jenkins_hash(pathID);
+    // pathID = jenkins_hash(pathID);
 
     // Limit the result to path width bits
-    pathID &= ((1 << PATH_WIDTH) - 1);
+    // pathID &= ((1 << PATH_WIDTH) - 1);
    
     if (pathID >= PATH)
     {
@@ -131,10 +130,10 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
     // uint32_t randomID = rand() % PATH;
     // return randomID;
 
-    // return PathShuffled[pathID];
+    return PathShuffled[pathID];
 
 
-    return pathID;
+    // return pathID;
 }
 
 
