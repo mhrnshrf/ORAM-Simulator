@@ -73,11 +73,6 @@ uint32_t hash_func(uint32_t input) {
     uint32_t result;
     memcpy(&result, hash, sizeof(uint32_t));
 
-    uint16_t RESULT_WIDTH = NOUNCE_MAX + WITHIN_CTR_WIDTH + PATHID_CTR_MAX;
-
-    // Limit the result to path width bits
-    result &= (1 << RESULT_WIDTH) - 1;
-
     return result;
 }
 
@@ -100,6 +95,11 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
     // pathID %= PATH;
 
     pathID = hash_func(pathID);
+
+    uint32_t PATH_WIDTH = NOUNCE_WIDTH + WITHIN_CTR_WIDTH + PATHID_CTR_WIDTH;
+
+    // Limit the result to path width bits
+   pathID &= ((1 << PATH_WIDTH) - 1);
    
     if (pathID >= PATH)
     {
