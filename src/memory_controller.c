@@ -61,6 +61,26 @@ uint32_t DATAPOS_RANGE[H] = {0};
 unsigned long long int pathid_rep[LEVEL*RING_Z+1] = {0};
 uint32_t pathid_touch[PATH] = {0};
 
+uint32_t hash_func(uint32_t input) {
+    // Use SHA-256 as a cryptographic hash function
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, &input, sizeof(uint32_t));
+    SHA256_Final(hash, &sha256);
+
+    // Convert the first 4 bytes of the hash to uint32_t
+    uint32_t result;
+    memcpy(&result, hash, sizeof(uint32_t));
+
+    uint16_t RESULT_WIDTH = NOUNCE_MAX + WITHIN_CTR_WIDTH + PATHID_CTR_MAX;
+
+    // Limit the result to path width bits
+    result &= (1 << RESULT_WIDTH) - 1;
+
+    return result;
+}
+
 uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
     // Check if the inputs exceed their respective bit limits
     if (nounce > NOUNCE_MAX || within_block_index > WITHIN_CTR_MAX || per_path_counter > PATHID_CTR_MAX) 
@@ -73,11 +93,13 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
     // Combine the inputs as per the specified bit lengths
     uint32_t pathID = 0;
 
-    pathID |= (nounce & NOUNCE_MAX) << (PATHID_CTR_WIDTH + WITHIN_CTR_WIDTH);                // 15 bits for nounce, shifted 17 positions to the left
-    pathID |= (within_block_index & WITHIN_CTR_MAX) << PATHID_CTR_WIDTH;     // 7 bits for within-block index, shifted 10 positions to the left
-    pathID |= (per_path_counter & PATHID_CTR_MAX);            // 10 bits for per-path counter
+    pathID |= (nounce & NOUNCE_MAX) << (PATHID_CTR_WIDTH + WITHIN_CTR_WIDTH);                
+    pathID |= (within_block_index & WITHIN_CTR_MAX) << PATHID_CTR_WIDTH;     
+    pathID |= (per_path_counter & PATHID_CTR_MAX);           
 
-    pathID %= PATH;
+    // pathID %= PATH;
+
+    pathID = hash_func(pathID);
    
     if (pathID >= PATH)
     {
@@ -89,7 +111,10 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
     // uint32_t randomID = rand() % PATH;
     // return randomID;
 
-    return PathShuffled[pathID];
+    // return PathShuffled[pathID];
+
+
+    return pathID;
 }
 
 
