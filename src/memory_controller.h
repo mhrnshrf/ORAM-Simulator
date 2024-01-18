@@ -173,6 +173,8 @@
 #define UINT11_MAX 2047
 // #define UINT8_MAX 255
 #define UINT5_MAX 31
+#define UINT13_MAX 8191
+#define UINT14_MAX 16383
 
 #define UINT15_MAX 32767
 #define UINT7_MAX 127
