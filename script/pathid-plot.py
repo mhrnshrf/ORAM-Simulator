@@ -4,7 +4,7 @@ import os
 # Function to plot data from a file
 def plot_data(file_path):
     with open(file_path, 'r') as file:
-        data = file.readlines()[:200000]  # Limit to the first 100,000 lines
+        data = file.readlines()[:10000]  # Limit to the first 100,000 lines
         # data = file.readlines()
         data = [int(line.strip()) for line in data]
 

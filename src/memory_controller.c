@@ -61,19 +61,36 @@ uint32_t DATAPOS_RANGE[H] = {0};
 unsigned long long int pathid_rep[LEVEL*RING_Z+1] = {0};
 uint32_t pathid_touch[PATH] = {0};
 
-uint32_t hash_func(uint32_t input) {
-    // Use SHA-256 as a cryptographic hash function
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, &input, sizeof(uint32_t));
-    SHA256_Final(hash, &sha256);
+// uint32_t hash_func(uint32_t input) {
+//     // Use SHA-256 as a cryptographic hash function
+//     unsigned char hash[SHA256_DIGEST_LENGTH];
+//     SHA256_CTX sha256;
+//     SHA256_Init(&sha256);
+//     SHA256_Update(&sha256, &input, sizeof(uint32_t));
+//     SHA256_Final(hash, &sha256);
 
-    // Convert the first 4 bytes of the hash to uint32_t
-    uint32_t result;
-    memcpy(&result, hash, sizeof(uint32_t));
+//     // Convert the first 4 bytes of the hash to uint32_t
+//     uint32_t result;
+//     memcpy(&result, hash, sizeof(uint32_t));
 
-    return result;
+//     return result;
+// }
+
+
+uint32_t jenkins_hash(uint32_t input) {
+    uint32_t hash = 0;
+
+    for (size_t i = 0; i < sizeof(uint32_t); ++i) {
+        hash += ((unsigned char*)&input)[i];
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
+
+    return hash;
 }
 
 uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
@@ -94,12 +111,13 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
 
     // pathID %= PATH;
 
-    pathID = hash_func(pathID);
+    // pathID = hash_func(pathID);
+    pathID = jenkins_hash(pathID);
 
     uint32_t PATH_WIDTH = NOUNCE_WIDTH + WITHIN_CTR_WIDTH + PATHID_CTR_WIDTH;
 
     // Limit the result to path width bits
-   pathID &= ((1 << PATH_WIDTH) - 1);
+    pathID &= ((1 << PATH_WIDTH) - 1);
    
     if (pathID >= PATH)
     {
