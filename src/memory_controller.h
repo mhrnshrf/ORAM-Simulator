@@ -56,8 +56,8 @@
 // #define LLC_DIRTY       0     // 0/1 flag that indicates whether everything is dirty eviction from cache
 
 // oram invariant
-#define H 5     // degree of recursion including data access
-#define X 32    // # label per posmap block
+#define H 4     // degree of recursion including data access
+#define X 128    // # label per posmap block
 #define LEVEL 27 // # levels
 #define USUAL_Z 4     // # slots per bucket in usual cases like path oram baseline and ir-oram
 #define U 0.50 // utilization
@@ -230,7 +230,7 @@ enum{
   SIT_NODE = (long long int)(pow(SIT_ARITY,SIT_LEVEL)-1)/(long long int)(pow(SIT_ARITY,1)-1),
   DUP_BLK = BLOCK/DUP_MAX, // number of unique blocks when dup feature is enabled
   // STALE_TH = STALE_BUF_SIZE - (GL_COUNT*STALE_CAP+1),
-  NOUNCE_MAX = UINT15_MAX,
+  NOUNCE_MAX = UINT9_MAX,
   WITHIN_CTR_MAX = X - 1,
   PATHID_CTR_MAX = UINT10_MAX,
   NOUNCE_WIDTH = (int) log2(NOUNCE_MAX) + 1,
