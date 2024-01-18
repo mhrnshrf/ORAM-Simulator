@@ -12,7 +12,7 @@ def count_repeated_values(file_path):
     return repeated_values
 
 # List all files in the directory with the pattern 'pathID-*.txt'
-file_list = [file for file in os.listdir() if file.startswith('pathID-') and file.endswith('.txt')]
+file_list = [file for file in os.listdir() if 'pathID' in file and file.endswith('.txt')]
 
 # Count repeated values in each file
 for file_path in file_list:

@@ -77,21 +77,25 @@ uint32_t pathid_touch[PATH] = {0};
 // }
 
 
-uint32_t jenkins_hash(uint32_t input) {
-    uint32_t hash = 0;
+uint32_t jenkins_hash(uint32_t input) 
+{
+  uint32_t hash = 0;
 
-    for (size_t i = 0; i < sizeof(uint32_t); ++i) {
-        hash += ((unsigned char*)&input)[i];
-        hash += (hash << 10);
-        hash ^= (hash >> 6);
-    }
+  // Loop over the specified PATH_WIDTH bits
+  for (size_t i = 0; i < PATH_WIDTH; ++i) {
+      hash += (input & (1U << i)) ? (1U << i) : 0;
+      hash ^= (hash << 17) | (hash >> 15);  // Mix with prime numbers
+      hash *= 0xed5ad4bb;  // A prime constant for additional mixing
+  }
 
-    hash += (hash << 3);
-    hash ^= (hash >> 11);
-    hash += (hash << 15);
+  hash ^= (hash << 13);
+  hash ^= (hash >> 17);
+  hash ^= (hash << 5);
 
-    return hash;
+  return hash;
 }
+
+
 
 uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
     // Check if the inputs exceed their respective bit limits
@@ -113,8 +117,6 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
 
     // pathID = hash_func(pathID);
     pathID = jenkins_hash(pathID);
-
-    uint32_t PATH_WIDTH = NOUNCE_WIDTH + WITHIN_CTR_WIDTH + PATHID_CTR_WIDTH;
 
     // Limit the result to path width bits
     pathID &= ((1 << PATH_WIDTH) - 1);
@@ -2184,6 +2186,11 @@ void oram_init(){
       DATAPOS_RANGE[i] = sofar + ceil(BLOCK_ORG/pow(X, i));
       printf("DATAPOS_RANGE[%d]: %u\n", i, DATAPOS_RANGE[i]);
     }
+    if(PATH_WIDTH != LEVEL - 1)
+    {
+      printf("ERROR: PATH_WIDTH %d does not match LEVEL %d\n", PATH_WIDTH, LEVEL);
+      exit(1);
+    }
   }
 
   if(MERKLE_ENABLE)
@@ -2256,10 +2263,11 @@ void oram_init(){
       // // Write user input to the file
       // if(pl > 1)
       // fprintf(filePointer, "%d\n", PosMap[addr]);
+      // pathid_touch[PosMap[addr]]++;
 
     }
-    // export_csv(pargv);
     // fclose(filePointer);
+    // export_csv(pargv);
     // exit(0);
   }  
 
@@ -9120,6 +9128,7 @@ void export_csv(char * argv[]){
   fprintf(fp, "NOUNCE_WIDTH,%u\n", NOUNCE_WIDTH);
   fprintf(fp, "WITHIN_CTR_WIDTH,%u\n", WITHIN_CTR_WIDTH);
   fprintf(fp, "PATHID_CTR_WIDTH,%u\n", PATHID_CTR_WIDTH);
+  fprintf(fp, "PATH_WIDTH,%u\n", PATH_WIDTH);
 
   // fprintf(fp, "DEAD_ENABLE,%d\n",  DEAD_ENABLE);
   // fprintf(fp, "DYNAMIC_S,%d\n",  DYNAMIC_S);
