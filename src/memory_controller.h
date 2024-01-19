@@ -182,6 +182,8 @@
 
 #define POSACT_ENABLE 1
 
+#define MICRORAND_ENABLE 1
+
 
 enum{
   // main tree

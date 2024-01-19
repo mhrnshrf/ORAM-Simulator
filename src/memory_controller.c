@@ -3582,12 +3582,20 @@ void remap_block(int addr){
     uint32_t maddr = merkle_addr(addr, pl+1);
     uint8_t moff = merkle_offset(addr, pl+1);
 
-    MerkleTree[maddr].pathid_counter[moff]++;
-
-    if(merkle_overflow(maddr, moff))
+    if (MICRORAND_ENABLE)
     {
-      merkle_reset(maddr);
+      MerkleTree[maddr].pathid_counter[moff] = rand() % (PATHID_CTR_MAX + 1); 
     }
+    else
+    {
+      MerkleTree[maddr].pathid_counter[moff]++;
+
+      if(merkle_overflow(maddr, moff))
+      {
+        merkle_reset(maddr);
+      }
+    }
+
 
     // printf("addr %u    maddr %u   moff %u \n", addr, maddr, moff);
     label = secureFunc(MerkleTree[maddr].nounce, moff, MerkleTree[maddr].pathid_counter[moff]);
