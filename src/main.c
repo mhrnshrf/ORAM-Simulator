@@ -717,6 +717,22 @@ int main(int argc, char * argv[])
   	}
 
 
+	// ############################################################################################
+    // Print each value with its corresponding log_base2
+    printf("NUM_CHANNELS: %d, log_base2: %lf\n", NUM_CHANNELS, log_base2(NUM_CHANNELS));
+    printf("NUM_RANKS: %d, log_base2: %lf\n", NUM_RANKS, log_base2(NUM_RANKS));
+    printf("NUM_BANKS: %d, log_base2: %lf\n", NUM_BANKS, log_base2(NUM_BANKS));
+    printf("NUM_ROWS: %d, log_base2: %lf\n", NUM_ROWS, log_base2(NUM_ROWS));
+    printf("NUM_COLUMNS: %d, log_base2: %lf\n", NUM_COLUMNS, log_base2(NUM_COLUMNS));
+    printf("CACHE_LINE_SIZE: %d, log_base2: %lf\n", CACHE_LINE_SIZE, log_base2(CACHE_LINE_SIZE));
+    
+    // Sum of logarithmic values
+    double sum_logs = log_base2(NUM_CHANNELS) + log_base2(NUM_RANKS) + log_base2(NUM_BANKS) +
+                      log_base2(NUM_ROWS) + log_base2(NUM_COLUMNS) + log_base2(CACHE_LINE_SIZE);
+    
+    printf("Sum of logs: %lf\n", sum_logs);
+    printf("ADDRESS_BITS: %d\n", ADDRESS_BITS);
+	// ############################################################################################
 
   assert((log_base2(NUM_CHANNELS) + log_base2(NUM_RANKS) + log_base2(NUM_BANKS) + log_base2(NUM_ROWS) + log_base2(NUM_COLUMNS) + log_base2(CACHE_LINE_SIZE)) == ADDRESS_BITS );
   /* Increase the address space and rows per bank depending on the number of input traces. */
