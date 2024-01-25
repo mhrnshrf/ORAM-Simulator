@@ -2185,7 +2185,7 @@ void oram_init(){
       DATAPOS_RANGE[i] = sofar + ceil(BLOCK_ORG/pow(X, i));
       printf("DATAPOS_RANGE[%d]: %u\n", i, DATAPOS_RANGE[i]);
     }
-    if(PATH_WIDTH != LEVEL - 1)
+    if(MERKLE_ENABLE && (PATH_WIDTH != LEVEL - 1))
     {
       printf("ERROR: PATH_WIDTH %d does not match LEVEL %d\n", PATH_WIDTH, LEVEL);
       exit(1);
