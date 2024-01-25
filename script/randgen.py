@@ -1,8 +1,8 @@
 import random
 
-with open("randl26", "w") as file:
+with open("randl24", "w") as file:
     for i in range(40000000):
-        num = random.randint(1, 83885980*2)
+        num = random.randint(1, 33554431)
         num = num<<6
         hex_string = hex(num)[2:]
         nonmemops = random.randint(1, 300)
