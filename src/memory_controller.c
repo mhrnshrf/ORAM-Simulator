@@ -108,9 +108,13 @@ uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_pa
     // Combine the inputs as per the specified bit lengths
     uint32_t pathID = 0;
 
-    pathID |= (nounce & NOUNCE_MAX) << (PATHID_CTR_WIDTH + WITHIN_CTR_WIDTH);                
-    pathID |= (within_block_index & WITHIN_CTR_MAX) << PATHID_CTR_WIDTH;     
-    pathID |= (per_path_counter & PATHID_CTR_MAX);           
+    // pathID |= (nounce & NOUNCE_MAX) << (PATHID_CTR_WIDTH + WITHIN_CTR_WIDTH);                
+    // pathID |= (within_block_index & WITHIN_CTR_MAX) << PATHID_CTR_WIDTH;     
+    // pathID |= (per_path_counter & PATHID_CTR_MAX);           
+
+    pathID |= (nounce & NOUNCE_MAX);                
+    pathID ^= ((within_block_index & WITHIN_CTR_MAX) << (NOUNCE_WIDTH - WITHIN_CTR_WIDTH));     
+    pathID ^= (per_path_counter & PATHID_CTR_MAX);           
 
     // pathID %= PATH;
 
@@ -2185,11 +2189,6 @@ void oram_init(){
       DATAPOS_RANGE[i] = sofar + ceil(BLOCK_ORG/pow(X, i));
       printf("DATAPOS_RANGE[%d]: %u\n", i, DATAPOS_RANGE[i]);
     }
-    if(MERKLE_ENABLE && (PATH_WIDTH != LEVEL - 1))
-    {
-      printf("ERROR: PATH_WIDTH %d does not match LEVEL %d\n", PATH_WIDTH, LEVEL);
-      exit(1);
-    }
   }
 
   if(MERKLE_ENABLE)
@@ -2203,12 +2202,17 @@ void oram_init(){
     printf("PATHID_CTR_MAX: %u\n", PATHID_CTR_MAX);
     printf("PATHID_CTR_WIDTH: %u\n", PATHID_CTR_WIDTH);
     
+    // if((PATH_WIDTH != LEVEL - 1))
+    // {
+    //   printf("ERROR: PATH_WIDTH %d does not match LEVEL %d\n", PATH_WIDTH, LEVEL);
+    //   exit(1);
+    // }
 
     for (uint32_t i = 0; i < PATH; i++)
     {
       PathShuffled[i] = i;
     }
-    fisherYatesShuffle(PathShuffled, PATH);
+    // fisherYatesShuffle(PathShuffled, PATH);
   }
 
   for(int addr = 0; addr < BLOCK; addr++)
@@ -2216,8 +2220,8 @@ void oram_init(){
     MerkleTree[addr].nounce = rand() % NOUNCE_MAX;
     for (int j = 0; j <= WITHIN_CTR_MAX; j++)
     {
-      MerkleTree[addr].pathid_counter[j] = rand() % PATHID_CTR_MAX; 
-      // MerkleTree[addr].pathid_counter[j] = 0; 
+      // MerkleTree[addr].pathid_counter[j] = rand() % PATHID_CTR_MAX; 
+      MerkleTree[addr].pathid_counter[j] = 0; 
     }
     
   }
