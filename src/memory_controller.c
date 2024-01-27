@@ -96,7 +96,7 @@ uint32_t pathid_touch[PATH] = {0};
 // }
 
 
-uint32_t secureFunc(uint16_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
+uint32_t secureFunc(uint32_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
     // Check if the inputs exceed their respective bit limits
     if (nounce > NOUNCE_MAX || within_block_index > WITHIN_CTR_MAX || per_path_counter > PATHID_CTR_MAX) 
     {
@@ -528,7 +528,7 @@ typedef struct IntegNode{
 
 
 typedef struct MerkleNode {
-    uint16_t nounce;
+    uint32_t nounce;
     uint16_t pathid_counter[X];
 }MerkleNode;
 
