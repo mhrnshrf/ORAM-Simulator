@@ -1628,8 +1628,8 @@ int main(int argc, char * argv[])
 				// }
 
 				
-				
-				insert_read(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], reqid[numc]);
+				uint64_t addr_masked = addr[numc] & UINT35_MAX;
+				insert_read(addr_masked, CYCLE_VAL, numc, ROB[numc].tail, instrpc[numc], oramid[numc], tree[numc], last_read[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], reqid[numc]);
 			// }
 			
 			
@@ -1698,8 +1698,8 @@ int main(int argc, char * argv[])
 				// 	last_read_deleted = true;
 				// }
 
-
-				insert_write(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], last_read[numc], reqid[numc]);
+				uint64_t addr_masked = addr[numc] & UINT35_MAX;
+				insert_write(addr_masked, CYCLE_VAL, numc, ROB[numc].tail, oramid[numc], tree[numc], nvm_access[numc], op_type[numc], beginning[numc], ending[numc], last_req[numc], last_read[numc], reqid[numc]);
 
 				// invoke_oram(addr[numc], CYCLE_VAL, numc, ROB[numc].tail, 0, 'W');
 
