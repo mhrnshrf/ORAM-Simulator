@@ -33,6 +33,8 @@ extern long long int trace_clk;
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
+#include <openssl/aes.h>
+
 // // Function to generate the path ID using OpenSSL's SHA-256 hash function
 // uint32_t secureFunc(uint32_t nonce, uint32_t within_block_index, uint32_t per_path_counter) {
 //     uint32_t counters[3] = { nonce, within_block_index, per_path_counter };
@@ -131,13 +133,32 @@ uint32_t secureFunc(uint32_t nounce, uint8_t within_block_index, uint16_t per_pa
       exit(1);
     }
 
+    // ::::::::::::::::::::::::::::::::: AES ::::::::::::::::::::::::::::::::::::::
+     // Encrypt pathID using AES
+    uint8_t key[16] = "YourSecretKey123";
+    AES_KEY aesKey;
+    if (AES_set_encrypt_key(key, 128, &aesKey) != 0)
+    {
+        // handleErrors();
+      printf("ERROR: secureFunc: AES set encrypt key failed!\n");
+      exit(1);
+    }
+
+    AES_encrypt((const unsigned char *)&pathID, (unsigned char *)&pathID, &aesKey);
+
+    // Truncate the output to PATH_WIDTH_BIT bits
+    pathID &= ((1 << PATH_WIDTH) - 1);
+
+
+    return pathID;
+    // ::::::::::::::::::::::::::::::::: AES ::::::::::::::::::::::::::::::::::::::
+
     // uint32_t randomID = rand() % PATH;
     // return randomID;
 
-    return PathShuffled[pathID];
+    // return PathShuffled[pathID];
 
 
-    // return pathID;
 }
 
 
