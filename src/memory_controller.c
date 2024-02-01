@@ -97,6 +97,11 @@ uint32_t pathid_touch[PATH] = {0};
 //   return hash;
 // }
 
+// void handleErrors(void)
+// {
+//     printf("Encryption error\n");
+//     exit(1);
+// }
 
 uint32_t secureFunc(uint32_t nounce, uint8_t within_block_index, uint16_t per_path_counter) {
     // Check if the inputs exceed their respective bit limits
@@ -140,21 +145,33 @@ uint32_t secureFunc(uint32_t nounce, uint8_t within_block_index, uint16_t per_pa
     // Encrypt pathID using AES with EVP interface
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
-        handleErrors();
+    {
+        printf("Encryption error1\n");
+        exit(1);
+    }
 
     if (EVP_EncryptInit_ex(ctx, EVP_aes_128_ecb(), NULL, key, NULL) != 1)
-        handleErrors();
+    {
+        printf("Encryption error2\n");
+        exit(1);
+    }
 
     int ciphertext_len;
 
     if (EVP_EncryptUpdate(ctx, (unsigned char *)&pathID, &ciphertext_len, (const unsigned char *)&pathID, sizeof(pathID)) != 1)
-        handleErrors();
+    {
+        printf("Encryption error3\n");
+        exit(1);
+    }
 
     if (EVP_EncryptFinal_ex(ctx, (unsigned char *)&pathID + ciphertext_len, &ciphertext_len) != 1)
-        handleErrors();
+    {
+        printf("Encryption error4\n");
+        exit(1);
+    }
 
     EVP_CIPHER_CTX_free(ctx);
-    
+
     // Truncate the output to PATH_WIDTH_BIT bits
     pathID &= ((1 << PATH_WIDTH) - 1);
 
