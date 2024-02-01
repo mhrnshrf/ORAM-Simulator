@@ -134,18 +134,27 @@ uint32_t secureFunc(uint32_t nounce, uint8_t within_block_index, uint16_t per_pa
     }
 
     // ::::::::::::::::::::::::::::::::: AES ::::::::::::::::::::::::::::::::::::::
-     // Encrypt pathID using AES
-    uint8_t key[16] = "YourSecretKey123";
-    AES_KEY aesKey;
-    if (AES_set_encrypt_key(key, 128, &aesKey) != 0)
-    {
-        // handleErrors();
-      printf("ERROR: secureFunc: AES set encrypt key failed!\n");
-      exit(1);
-    }
+    // Ensure proper initialization of the key
+    unsigned char key[16] = "YourSecretKey123";
 
-    AES_encrypt((const unsigned char *)&pathID, (unsigned char *)&pathID, &aesKey);
+    // Encrypt pathID using AES with EVP interface
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+        handleErrors();
 
+    if (EVP_EncryptInit_ex(ctx, EVP_aes_128_ecb(), NULL, key, NULL) != 1)
+        handleErrors();
+
+    int ciphertext_len;
+
+    if (EVP_EncryptUpdate(ctx, (unsigned char *)&pathID, &ciphertext_len, (const unsigned char *)&pathID, sizeof(pathID)) != 1)
+        handleErrors();
+
+    if (EVP_EncryptFinal_ex(ctx, (unsigned char *)&pathID + ciphertext_len, &ciphertext_len) != 1)
+        handleErrors();
+
+    EVP_CIPHER_CTX_free(ctx);
+    
     // Truncate the output to PATH_WIDTH_BIT bits
     pathID &= ((1 << PATH_WIDTH) - 1);
 
