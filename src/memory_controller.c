@@ -138,51 +138,51 @@ uint32_t secureFunc(uint32_t nounce, uint8_t within_block_index, uint16_t per_pa
       exit(1);
     }
 
-    // ::::::::::::::::::::::::::::::::: AES ::::::::::::::::::::::::::::::::::::::
-    // Ensure proper initialization of the key
-    unsigned char key[16] = "YourSecretKey123";
+    // // ::::::::::::::::::::::::::::::::: AES ::::::::::::::::::::::::::::::::::::::
+    // // Ensure proper initialization of the key
+    // unsigned char key[16] = "YourSecretKey123";
 
-    // Encrypt pathID using AES with EVP interface
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    if (!ctx)
-    {
-        printf("Encryption error1\n");
-        exit(1);
-    }
+    // // Encrypt pathID using AES with EVP interface
+    // EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    // if (!ctx)
+    // {
+    //     printf("Encryption error1\n");
+    //     exit(1);
+    // }
 
-    if (EVP_EncryptInit_ex(ctx, EVP_aes_128_ecb(), NULL, key, NULL) != 1)
-    {
-        printf("Encryption error2\n");
-        exit(1);
-    }
+    // if (EVP_EncryptInit_ex(ctx, EVP_aes_128_ecb(), NULL, key, NULL) != 1)
+    // {
+    //     printf("Encryption error2\n");
+    //     exit(1);
+    // }
 
-    int ciphertext_len;
+    // int ciphertext_len;
 
-    if (EVP_EncryptUpdate(ctx, (unsigned char *)&pathID, &ciphertext_len, (const unsigned char *)&pathID, sizeof(pathID)) != 1)
-    {
-        printf("Encryption error3\n");
-        exit(1);
-    }
+    // if (EVP_EncryptUpdate(ctx, (unsigned char *)&pathID, &ciphertext_len, (const unsigned char *)&pathID, sizeof(pathID)) != 1)
+    // {
+    //     printf("Encryption error3\n");
+    //     exit(1);
+    // }
 
-    if (EVP_EncryptFinal_ex(ctx, (unsigned char *)&pathID + ciphertext_len, &ciphertext_len) != 1)
-    {
-        printf("Encryption error4\n");
-        exit(1);
-    }
+    // if (EVP_EncryptFinal_ex(ctx, (unsigned char *)&pathID + ciphertext_len, &ciphertext_len) != 1)
+    // {
+    //     printf("Encryption error4\n");
+    //     exit(1);
+    // }
 
-    EVP_CIPHER_CTX_free(ctx);
+    // EVP_CIPHER_CTX_free(ctx);
 
-    // Truncate the output to PATH_WIDTH_BIT bits
-    pathID &= ((1 << PATH_WIDTH) - 1);
+    // // Truncate the output to PATH_WIDTH_BIT bits
+    // pathID &= ((1 << PATH_WIDTH) - 1);
 
 
-    return pathID;
-    // ::::::::::::::::::::::::::::::::: AES ::::::::::::::::::::::::::::::::::::::
+    // return pathID;
+    // // ::::::::::::::::::::::::::::::::: AES ::::::::::::::::::::::::::::::::::::::
 
     // uint32_t randomID = rand() % PATH;
     // return randomID;
 
-    // return PathShuffled[pathID];
+    return PathShuffled[pathID];
 
 
 }
