@@ -7,7 +7,7 @@ ORAM simulator implements a baseline ORAM that [Freecursive ORAM ](https://dl.ac
 <!-- ### MIR-ORAM Feautres
 * __Volcano__     
 * __Write Bypass__ 
-* __Prefetch__     -->
+* __Prefetch__     
 ### Baseline Feautres
 * __Cache__   a set associative last level cache
 * __Subtree__ an efficient address mapping introduced by [Design space exploration and optimization of path oblivious RAM in secure processors](https://dl.acm.org/doi/10.1145/2508148.2485971) paper.
