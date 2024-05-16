@@ -2,9 +2,10 @@
 ORAM Simulator is written in C programming language. It simulates the behaviour of path **O**blivious **RAM**. For the DRAM operations simulation, it is integrated with [USIMM](http://utaharch.blogspot.com/2012/02/usimm.html) (the Utah SImulated Memory Module). 
 <!-- reference shoud be added--> 
 
+<!--
 ## Simulator Features
 ORAM simulator implements a baseline ORAM that [Freecursive ORAM ](https://dl.acm.org/doi/10.1145/2775054.2694353) paper introduced. In this baseline, position map blocks and data blocks are stored in a unified full binary tree and one can not tell data access and position map access apart. 
-<!-- ### MIR-ORAM Feautres
+ ### MIR-ORAM Feautres
 * __Volcano__     
 * __Write Bypass__ 
 * __Prefetch__     
